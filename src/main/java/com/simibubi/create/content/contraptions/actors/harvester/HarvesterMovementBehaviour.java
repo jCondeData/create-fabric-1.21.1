@@ -2,6 +2,8 @@ package com.simibubi.create.content.contraptions.actors.harvester;
 
 import com.simibubi.create.AllTags.AllBlockTags;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.farmersdelight.FarmersDelightCompat;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import com.simibubi.create.content.contraptions.render.ActorVisual;
 import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
@@ -27,6 +29,7 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.GrowingPlantBlock;
+import net.minecraft.world.level.block.MushroomBlock;
 import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -93,7 +96,7 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
                         seedSubtracted.setTrue();
                     }
                     if (!stack.isEmpty()) // fabric: guard shrinking above
-                    dropItem(context, stack);
+                    collectOrDropItem(context, stack);
                 });
 
         BlockState cutCrop = cutCrop(world, pos, stateVisited);
@@ -142,6 +145,10 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
                 if (!(property instanceof IntegerProperty)) continue;
                 if (!property.getName().equals(BlockStateProperties.AGE_1.getName())) continue;
                 return false;
+            }
+
+            if (state.getBlock() instanceof MushroomBlock && Mods.FARMERSDELIGHT.isLoaded()) {
+                return FarmersDelightCompat.shouldHarvestMushroom(world, pos, state);
             }
 
             // TODO: 1.21.5-rc1+ change to VegetationBlock

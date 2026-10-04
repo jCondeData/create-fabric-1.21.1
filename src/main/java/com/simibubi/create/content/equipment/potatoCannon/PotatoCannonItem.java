@@ -54,11 +54,15 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 public class PotatoCannonItem extends ProjectileWeaponItem
         implements CustomArmPoseItem, EntitySwingListenerItem, ReequipAnimationItem {
+    private static final Predicate<ItemStack> AMMO_PREDICATE =
+            s ->
+                    PotatoCannonProjectileType.getTypeForItem(
+                                    GlobalRegistryAccess.getOrThrow(), s.getItem())
+                            .isPresent();
 
     public PotatoCannonItem(Properties properties) {
         super(properties);
@@ -71,14 +75,10 @@ public class PotatoCannonItem extends ProjectileWeaponItem
             return null;
         }
 
-        Optional<Holder.Reference<PotatoCannonProjectileType>> optionalType =
-                PotatoCannonProjectileType.getTypeForItem(
-                        player.level().registryAccess(), ammoStack.getItem());
-        if (optionalType.isEmpty()) {
-            return null;
-        }
-
-        return new Ammo(ammoStack, optionalType.get().value());
+        return PotatoCannonProjectileType.getTypeForItem(
+                        player.level().registryAccess(), ammoStack.getItem())
+                .map(r -> new Ammo(ammoStack, r.value()))
+                .orElse(null);
     }
 
     @Override
@@ -280,10 +280,7 @@ public class PotatoCannonItem extends ProjectileWeaponItem
 
     @Override
     public Predicate<ItemStack> getAllSupportedProjectiles() {
-        return stack ->
-                PotatoCannonProjectileType.getTypeForItem(
-                                GlobalRegistryAccess.getOrThrow(), stack.getItem())
-                        .isPresent();
+        return AMMO_PREDICATE;
     }
 
     @Override

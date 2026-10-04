@@ -1596,7 +1596,7 @@ public class KineticsScenes {
         scene.overlay()
                 .showText(120)
                 .text(
-                        "Comparators can emit analog Restone Signals relative to the "
+                        "Comparators can emit analog Redstone Signals relative to the "
                                 + component
                                 + "'s measurements")
                 .attachKeyFrame()

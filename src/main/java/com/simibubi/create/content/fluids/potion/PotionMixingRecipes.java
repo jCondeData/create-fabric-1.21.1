@@ -12,6 +12,7 @@ import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack;
 import io.github.fabricators_of_create.porting_lib.brewing.BrewingRecipe;
 import io.github.fabricators_of_create.porting_lib.brewing.IBrewingRecipe;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.Holder.Reference;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -84,10 +85,10 @@ public class PotionMixingRecipes {
                     ((PotionBrewingAccessor) potionBrewing).create$getPotionMixes()) {
                 FluidStack fromFluid =
                         PotionFluidHandler.getFluidFromPotion(
-                                new PotionContents(mix.from()), bottleType, 1000);
+                                new PotionContents(mix.from()), bottleType, FluidConstants.BUCKET);
                 FluidStack toFluid =
                         PotionFluidHandler.getFluidFromPotion(
-                                new PotionContents(mix.to()), bottleType, 1000);
+                                new PotionContents(mix.to()), bottleType, FluidConstants.BUCKET);
 
                 mixingRecipes.add(
                         createRecipe(
@@ -118,10 +119,10 @@ public class PotionMixingRecipes {
             for (Reference<Potion> potion : potions) {
                 FluidStack fromFluid =
                         PotionFluidHandler.getFluidFromPotion(
-                                new PotionContents(potion), fromBottleType, 1000);
+                                new PotionContents(potion), fromBottleType, FluidConstants.BUCKET);
                 FluidStack toFluid =
                         PotionFluidHandler.getFluidFromPotion(
-                                new PotionContents(potion), toBottleType, 1000);
+                                new PotionContents(potion), toBottleType, FluidConstants.BUCKET);
 
                 mixingRecipes.add(
                         createRecipe(
@@ -151,11 +152,11 @@ public class PotionMixingRecipes {
                         }
                         FluidStack inputFluid =
                                 PotionFluidHandler.getFluidFromPotionItem(stacks[0]);
-                        inputFluid.setAmount(1000);
+                        inputFluid.setAmount(FluidConstants.BUCKET);
                         if (outputFluid == null) {
                             outputFluid = PotionFluidHandler.getFluidFromPotionItem(output);
                         }
-                        outputFluid.setAmount(1000);
+                        outputFluid.setAmount(FluidConstants.BUCKET);
                         mixingRecipes.add(
                                 createRecipe(
                                         "potion_mixing_modded_" + recipeIndex++,

@@ -16,9 +16,10 @@ public class SpecialModels {
                     it ->
                             new BakedModelBuilder(it.partial.get())
                                     .materialFunc(
-                                            (renderType, shaded) -> {
+                                            (renderType, shaded, ao) -> {
                                                 var material =
-                                                        ModelUtil.getMaterial(renderType, shaded);
+                                                        ModelUtil.getMaterial(
+                                                                renderType, shaded, ao);
                                                 if (material == null) {
                                                     return null;
                                                 }

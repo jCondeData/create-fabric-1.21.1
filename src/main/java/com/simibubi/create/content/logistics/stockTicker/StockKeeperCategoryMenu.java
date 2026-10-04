@@ -12,19 +12,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.NotNull;
 
 public class StockKeeperCategoryMenu extends MenuBase<StockTickerBlockEntity> {
-
     public boolean slotsActive = true;
     public ItemStackHandler proxyInventory;
 
@@ -77,14 +74,10 @@ public class StockKeeperCategoryMenu extends MenuBase<StockTickerBlockEntity> {
     @Override
     public boolean stillValid(Player player) {
         return !contentHolder.isRemoved()
-                && player.position()
-                        .closerThan(
-                                Vec3.atCenterOf(contentHolder.getBlockPos()),
-                                player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE) + 4);
+                && player.canInteractWithBlock(contentHolder.getBlockPos(), 4);
     }
 
     class InactiveSlot extends Slot {
-
         public InactiveSlot(Container pContainer, int pIndex, int pX, int pY) {
             super(pContainer, pIndex, pX, pY);
         }
@@ -96,7 +89,6 @@ public class StockKeeperCategoryMenu extends MenuBase<StockTickerBlockEntity> {
     }
 
     class InactiveItemHandlerSlot extends SlotItemHandler {
-
         public InactiveItemHandlerSlot(
                 SlottedStackStorage storage, int index, int xPosition, int yPosition) {
             super(storage, index, xPosition, yPosition);

@@ -80,7 +80,11 @@ public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
 
         NonNullList<ItemStack> consumedItems = NonNullList.create();
 
-        try (Transaction t = Transaction.openOuter()) {
+        // fabric: nest into a caller's transaction instead of crashing on openOuter()
+        Transaction.Lifecycle lifecycle = Transaction.getLifecycle();
+        if (lifecycle != Transaction.Lifecycle.NONE && lifecycle != Transaction.Lifecycle.OPEN)
+            return false;
+        try (Transaction t = Transaction.openNested(Transaction.getCurrentUnsafe())) {
             Ingredients:
             for (Ingredient ingredient : ingredients) {
                 for (StorageView<ItemVariant> view : availableItems.nonEmptyViews()) {

@@ -29,6 +29,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,8 +40,7 @@ import net.minecraft.world.ticks.TickPriority;
 import java.util.List;
 import java.util.Objects;
 
-public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
-
+public class ThresholdSwitchBlockEntity extends SmartBlockEntity implements Clearable {
     public int onWhenAbove;
     public int offWhenBelow;
 
@@ -312,6 +312,11 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
         super.lazyTick();
         if (level.isClientSide) return;
         updateCurrentLevel();
+    }
+
+    @Override
+    public void clearContent() {
+        filtering.setFilter(ItemStack.EMPTY);
     }
 
     @Override

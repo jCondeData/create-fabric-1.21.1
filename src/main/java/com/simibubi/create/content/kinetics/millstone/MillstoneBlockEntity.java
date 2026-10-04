@@ -32,6 +32,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
@@ -46,8 +47,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class MillstoneBlockEntity extends KineticBlockEntity implements SidedStorageBlockEntity {
-
+public class MillstoneBlockEntity extends KineticBlockEntity
+        implements SidedStorageBlockEntity, Clearable {
     public ItemStackHandler inputInv;
     public ItemStackHandler outputInv;
     public MillstoneInventoryHandler capability;
@@ -126,6 +127,13 @@ public class MillstoneBlockEntity extends KineticBlockEntity implements SidedSto
     }
 
     @Override
+    public void clearContent() {
+        for (int i = 0; i < inputInv.getSlotCount(); i++) {
+            inputInv.setStackInSlot(i, ItemStack.EMPTY);
+        }
+    }
+
+    @Override
     public void destroy() {
         super.destroy();
         ItemHelper.dropContents(level, worldPosition, inputInv);
@@ -138,7 +146,7 @@ public class MillstoneBlockEntity extends KineticBlockEntity implements SidedSto
         if (lastRecipe == null || !lastRecipe.matches(inventoryIn, level)) {
             Optional<RecipeHolder<MillingRecipe>> recipe =
                     AllRecipeTypes.MILLING.find(inventoryIn, level);
-            if (!recipe.isPresent()) return;
+            if (recipe.isEmpty()) return;
             lastRecipe = recipe.get().value();
         }
 

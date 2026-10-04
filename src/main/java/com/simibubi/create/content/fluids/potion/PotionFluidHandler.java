@@ -71,13 +71,15 @@ public class PotionFluidHandler {
         if (potion.is(Potions.WATER)
                 && potion.customEffects().isEmpty()
                 && bottleTypeFromItem == BottleType.REGULAR)
-            return new FluidStack(Fluids.WATER, 250);
-        return getFluidFromPotion(potion, bottleTypeFromItem, 250)
+            return new FluidStack(Fluids.WATER, FluidConstants.BOTTLE);
+        // fabric: a bottle is FluidConstants.BOTTLE droplets (upstream's 250 mB); the fork passed
+        // 250 droplets here, so draining a potion produced almost no fluid
+        return getFluidFromPotion(potion, bottleTypeFromItem, FluidConstants.BOTTLE)
                 .with(AllDataComponents.POTION_FLUID_BOTTLE_TYPE, bottleTypeFromItem);
     }
 
     public static FluidStack getFluidFromPotion(
-            PotionContents potionContents, BottleType bottleType, int amount) {
+            PotionContents potionContents, BottleType bottleType, long amount) {
         if (potionContents.is(Potions.WATER) && bottleType == BottleType.REGULAR)
             return new FluidStack(Fluids.WATER, amount);
         return PotionFluid.of(amount, potionContents, bottleType);

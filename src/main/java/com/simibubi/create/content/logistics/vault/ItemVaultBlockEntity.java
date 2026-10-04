@@ -25,6 +25,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -39,7 +40,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public class ItemVaultBlockEntity extends SmartBlockEntity
-        implements IMultiBlockEntityContainer.Inventory, SidedStorageBlockEntity {
+        implements IMultiBlockEntityContainer.Inventory, SidedStorageBlockEntity, Clearable {
     protected Storage<ItemVariant> itemCapability;
     protected InventoryIdentifier invId;
 
@@ -319,6 +320,12 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
             compound.putString("StorageType", "CombinedInv");
             compound.put("Inventory", inventory.serializeNBT(registries));
         }
+    }
+
+    @Override
+    public void clearContent() {
+        // fabric: clears all slots without triggering change callbacks
+        inventory.setSize(inventory.getSlotCount());
     }
 
     public ItemStackHandler getInventoryOfBlock() {

@@ -17,6 +17,7 @@ import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,8 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class SmartFluidPipeBlockEntity extends SmartBlockEntity
-        implements PipeAttachmentBlockEntity {
-
+        implements PipeAttachmentBlockEntity, Clearable {
     private FilteringBehaviour filter;
 
     public SmartFluidPipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -48,6 +48,11 @@ public class SmartFluidPipeBlockEntity extends SmartBlockEntity
         registerAwardables(behaviours, FluidPropagator.getSharedTriggers());
     }
 
+    @Override
+    public void clearContent() {
+        filter.setFilter(ItemStack.EMPTY);
+    }
+
     private void onFilterChanged(ItemStack newFilter) {
         if (!level.isClientSide)
             FluidPropagator.propagateChangedPipe(level, worldPosition, getBlockState());
@@ -60,7 +65,6 @@ public class SmartFluidPipeBlockEntity extends SmartBlockEntity
     }
 
     class SmartPipeBehaviour extends StraightPipeFluidTransportBehaviour {
-
         public SmartPipeBehaviour(SmartBlockEntity be) {
             super(be);
         }
@@ -79,8 +83,7 @@ public class SmartFluidPipeBlockEntity extends SmartBlockEntity
         }
     }
 
-    class SmartPipeFilterSlot extends ValueBoxTransform {
-
+    static class SmartPipeFilterSlot extends ValueBoxTransform {
         @Override
         public Vec3 getLocalOffset(LevelAccessor level, BlockPos pos, BlockState state) {
             AttachFace face = state.getValue(SmartFluidPipeBlock.FACE);

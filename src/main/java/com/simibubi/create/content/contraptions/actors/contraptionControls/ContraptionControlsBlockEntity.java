@@ -22,6 +22,7 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -32,8 +33,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class ContraptionControlsBlockEntity extends SmartBlockEntity {
-
+public class ContraptionControlsBlockEntity extends SmartBlockEntity implements Clearable {
     public FilteringBehaviour filtering;
     public boolean disabled;
     public boolean powered;
@@ -83,6 +83,11 @@ public class ContraptionControlsBlockEntity extends SmartBlockEntity {
         indicator.updateChaseTarget(value);
     }
 
+    @Override
+    public void clearContent() {
+        filtering.setFilter(ItemStack.EMPTY);
+    }
+
     public void tickAnimations() {
         button.tickChaser();
         indicator.tickChaser();
@@ -124,7 +129,6 @@ public class ContraptionControlsBlockEntity extends SmartBlockEntity {
     }
 
     public static class ControlsSlot extends ValueBoxTransform.Sided {
-
         @Override
         public Vec3 getLocalOffset(LevelAccessor level, BlockPos pos, BlockState state) {
             Direction facing = state.getValue(ControlsBlock.FACING);

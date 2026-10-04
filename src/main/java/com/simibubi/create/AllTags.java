@@ -123,6 +123,8 @@ public class AllTags {
         SUGAR_CANE_VARIANTS,
         NON_HARVESTABLE,
         SINGLE_BLOCK_INVENTORIES,
+        PLOUGH_WHITELIST,
+        PLOUGH_BLACKLIST,
         CARDBOARD_STORAGE_BLOCKS(COMMON, "storage_blocks/cardboard"),
         ANDESITE_ALLOY_STORAGE_BLOCKS(COMMON, "storage_blocks/andesite_alloy"),
 
@@ -247,8 +249,9 @@ public class AllTags {
         FLOURS(COMMON),
         WHEAT_FLOURS(COMMON, "flours/wheat"),
 
-        DOUGHS(COMMON),
-        WHEAT_DOUGHS(COMMON, "doughs/wheat"),
+        // fabric: NeoForge has Tags.Items.FOODS_DOUGH; Fabric API 0.115 has no dough convention tag
+        FOODS_DOUGH(COMMON, "foods/dough"),
+        FOODS_DOUGH_WHEAT(COMMON, "foods/dough/wheat"),
 
         UA_CORAL(MOD, "upgrade_aquatic/coral"),
         // fabric: Trinkets compat is used instead

@@ -19,6 +19,7 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -33,8 +34,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class TrackObserverBlockEntity extends SmartBlockEntity implements TransformableBlockEntity {
-
+public class TrackObserverBlockEntity extends SmartBlockEntity
+        implements TransformableBlockEntity, Clearable {
     public TrackTargetingBehaviour<TrackObserver> edgePoint;
 
     private FilteringBehaviour filtering;
@@ -133,5 +134,10 @@ public class TrackObserverBlockEntity extends SmartBlockEntity implements Transf
                         return new Vec3(0.5, 15.5 / 16d, 0.5);
                     }
                 });
+    }
+
+    @Override
+    public void clearContent() {
+        filtering.setFilter(ItemStack.EMPTY);
     }
 }

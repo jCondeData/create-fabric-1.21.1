@@ -27,11 +27,17 @@ public final class CreatePressingRecipeGen extends PressingRecipeGen {
                             b ->
                                     b.require(
                                                     Ingredient.of(
-                                                            Items.GRASS_BLOCK,
                                                             Items.DIRT,
                                                             Items.COARSE_DIRT,
-                                                            Items.ROOTED_DIRT))
-                                            .output(Items.DIRT_PATH)),
+                                                            Items.ROOTED_DIRT,
+                                                            Items.MYCELIUM,
+                                                            Items.PODZOL))
+                                            .output(Items.DIRT_PATH)
+                                            .whenModMissing(Mods.ENV.getId())),
+            GRASS_PATH =
+                    create(
+                            "path_from_grass",
+                            b -> b.require(Items.GRASS_BLOCK).output(Items.DIRT_PATH)),
             IRON =
                     create(
                             "iron_ingot",
@@ -94,10 +100,28 @@ public final class CreatePressingRecipeGen extends PressingRecipeGen {
                                     b.require(Blocks.PODZOL)
                                             .output(Mods.ENV, "podzol_path")
                                             .whenModLoaded(Mods.ENV.getId())),
+            ENV_DIRT =
+                    create(
+                            "compat/environmental/dirt_path",
+                            b ->
+                                    b.require(
+                                                    Ingredient.of(
+                                                            Items.DIRT,
+                                                            Items.COARSE_DIRT,
+                                                            Items.ROOTED_DIRT))
+                                            .output(Mods.ENV, "dirt_path")
+                                            .whenModLoaded(Mods.ENV.getId())),
 
             // Oh The Biomes We've Gone
 
-            BWG = moddedPaths(Mods.BWG, "lush_grass"),
+            BWG = moddedPaths(Mods.BWG, "lush_dirt", "sandy_dirt"),
+            BWG_GRASS_PATH =
+                    create(
+                            Mods.BWG.recipeId("lush_grass_path"),
+                            b ->
+                                    b.require(Mods.BWG, "lush_grass_block")
+                                            .output(Mods.BWG, "lush_dirt_path")
+                                            .whenModLoaded(Mods.BWG.getId())),
 
             // Infernal Expansion
             IX_CRIMSON_PATH =

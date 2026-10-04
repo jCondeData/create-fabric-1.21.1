@@ -288,12 +288,12 @@ public class OrientedContraptionEntity extends AbstractContraptionEntity {
         if (!rotating || !pauseWhileRotating) tickActors();
         boolean isStalled = isStalled();
 
-        MinecartController capability = null;
+        MinecartController controller = null;
         if (riding instanceof AbstractMinecart minecart)
-            capability = minecart.create$getController();
+            controller = minecart.create$getController();
 
-        if (capability != null) {
-            if (!level().isClientSide()) capability.setStalledExternally(isStalled);
+        if (controller != null && controller.isPresent()) {
+            if (!level().isClientSide()) controller.setStalledExternally(isStalled);
         } else {
             if (isStalled) {
                 if (!wasStalled) motionBeforeStall = riding.getDeltaMovement();

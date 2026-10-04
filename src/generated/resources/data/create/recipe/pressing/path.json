@@ -1,10 +1,18 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "environmental"
+        ]
+      }
+    }
+  ],
   "type": "create:pressing",
   "ingredients": [
     [
-      {
-        "item": "minecraft:grass_block"
-      },
       {
         "item": "minecraft:dirt"
       },
@@ -13,6 +21,12 @@
       },
       {
         "item": "minecraft:rooted_dirt"
+      },
+      {
+        "item": "minecraft:mycelium"
+      },
+      {
+        "item": "minecraft:podzol"
       }
     ]
   ],

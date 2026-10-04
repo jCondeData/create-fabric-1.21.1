@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,8 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class DepotBlockEntity extends SmartBlockEntity implements SidedStorageBlockEntity {
-
+public class DepotBlockEntity extends SmartBlockEntity
+        implements SidedStorageBlockEntity, Clearable {
     DepotBehaviour depotBehaviour;
 
     public DepotBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -35,6 +36,11 @@ public class DepotBlockEntity extends SmartBlockEntity implements SidedStorageBl
     @Override
     public Storage<ItemVariant> getItemStorage(@Nullable Direction direction) {
         return depotBehaviour.itemHandler;
+    }
+
+    @Override
+    public void clearContent() {
+        depotBehaviour.clearContent();
     }
 
     public ItemStack getHeldItem() {

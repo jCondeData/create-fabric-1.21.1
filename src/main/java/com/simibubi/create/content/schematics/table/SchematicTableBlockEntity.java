@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,8 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public class SchematicTableBlockEntity extends SmartBlockEntity
-        implements MenuProvider, IInteractionChecker {
-
+        implements MenuProvider, IInteractionChecker, Clearable {
     public SchematicTableInventory inventory;
     public boolean isUploading;
     public String uploadingSchematic;
@@ -75,6 +75,13 @@ public class SchematicTableBlockEntity extends SmartBlockEntity
             compound.putString("Schematic", uploadingSchematic);
             compound.putFloat("Progress", uploadingProgress);
         }
+    }
+
+    @Override
+    public void clearContent() {
+        // fabric: no ItemStackHandlerAccessor; empty every slot of the fork's ItemStackHandler
+        for (int slot = 0; slot < inventory.getSlotCount(); slot++)
+            inventory.setStackInSlot(slot, ItemStack.EMPTY);
     }
 
     @Override

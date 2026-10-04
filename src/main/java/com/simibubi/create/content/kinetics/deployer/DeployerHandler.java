@@ -196,8 +196,8 @@ public class DeployerHandler {
                                 villager.setTradingPlayer(null);
                         }
                         success = true;
-                    } else if (entity instanceof LivingEntity
-                            && stack.interactLivingEntity(player, (LivingEntity) entity, hand)
+                    } else if (entity instanceof LivingEntity livingEntity
+                            && stack.interactLivingEntity(player, livingEntity, hand)
                                     .consumesAction()) success = true;
                 }
                 if (!success && entity instanceof Player playerEntity) {

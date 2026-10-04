@@ -45,9 +45,9 @@ public class CurvedTrackDestroyPacket extends BlockEntityConfigurationPacket<Tra
     @Override
     protected void applySettings(ServerPlayer player, TrackBlockEntity be) {
         int verifyDistance = AllConfigs.server().trains.maxTrackPlacementLength.get() * 4;
-        if (!be.getBlockPos().closerThan(player.blockPosition(), verifyDistance)) {
+        if (!player.canInteractWithBlock(be.getBlockPos(), verifyDistance)) {
             Create.LOGGER.warn(
-                    player.getScoreboardName() + " too far away from destroyed Curve track");
+                    "{} too far away from destroyed Curve track", player.getScoreboardName());
             return;
         }
 
@@ -63,7 +63,7 @@ public class CurvedTrackDestroyPacket extends BlockEntityConfigurationPacket<Tra
 
         if (wrench) {
             AllSoundEvents.WRENCH_REMOVE.playOnServer(
-                    player.level(), soundSource, 1, Create.RANDOM.nextFloat() * .5f + .5f);
+                    player.level(), soundSource, 1, level.random.nextFloat() * .5f + .5f);
             if (!player.isCreative() && bezierConnection != null)
                 bezierConnection.addItemsToPlayer(player);
         } else if (!player.isCreative() && bezierConnection != null)

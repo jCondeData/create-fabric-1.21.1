@@ -92,13 +92,13 @@ public class RedstoneLinkBlock extends WrenchableDirectionalBlock
         IBE.onRemove(pState, pLevel, pPos, pNewState);
     }
 
-    public void updateTransmittedSignal(BlockState state, Level worldIn, BlockPos pos) {
-        if (worldIn.isClientSide) return;
+    public void updateTransmittedSignal(BlockState state, Level level, BlockPos pos) {
+        if (level.isClientSide) return;
         if (state.getValue(RECEIVER)) return;
 
-        int power = getPower(worldIn, pos);
+        int power = getPower(level, state, pos);
         int powerFromPanels =
-                getBlockEntityOptional(worldIn, pos)
+                getBlockEntityOptional(level, pos)
                         .map(
                                 be -> {
                                     if (be.panelSupport == null) return 0;
@@ -115,18 +115,20 @@ public class RedstoneLinkBlock extends WrenchableDirectionalBlock
 
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered != power > 0)
-            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
+            level.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
 
         int transmit = power;
-        withBlockEntityDo(worldIn, pos, be -> be.transmit(transmit));
+        withBlockEntityDo(level, pos, be -> be.transmit(transmit));
     }
 
-    private int getPower(Level worldIn, BlockPos pos) {
+    private static int getPower(Level level, BlockState state, BlockPos pos) {
         int power = 0;
         for (Direction direction : Iterate.directions)
-            power = Math.max(worldIn.getSignal(pos.relative(direction), direction), power);
-        for (Direction direction : Iterate.directions)
-            power = Math.max(worldIn.getSignal(pos.relative(direction), Direction.UP), power);
+            power = Math.max(level.getSignal(pos.relative(direction), direction), power);
+        for (Direction direction : Iterate.directions) {
+            if (state.getValue(FACING).getOpposite() != direction)
+                power = Math.max(level.getSignal(pos.relative(direction), Direction.UP), power);
+        }
         return power;
     }
 
@@ -168,20 +170,20 @@ public class RedstoneLinkBlock extends WrenchableDirectionalBlock
         return InteractionResult.PASS;
     }
 
-    public InteractionResult toggleMode(BlockState state, Level worldIn, BlockPos pos) {
-        if (worldIn.isClientSide) return InteractionResult.SUCCESS;
+    public InteractionResult toggleMode(BlockState state, Level level, BlockPos pos) {
+        if (level.isClientSide) return InteractionResult.SUCCESS;
 
         return onBlockEntityUse(
-                worldIn,
+                level,
                 pos,
                 be -> {
                     Boolean wasReceiver = state.getValue(RECEIVER);
-                    boolean blockPowered = worldIn.hasNeighborSignal(pos);
-                    worldIn.setBlock(
+                    boolean blockPowered = level.hasNeighborSignal(pos);
+                    level.setBlock(
                             pos,
                             state.cycle(RECEIVER).setValue(POWERED, blockPowered),
                             Block.UPDATE_ALL);
-                    be.transmit(wasReceiver ? 0 : getPower(worldIn, pos));
+                    be.transmit(wasReceiver ? 0 : getPower(level, state, pos));
                     return InteractionResult.SUCCESS;
                 });
     }

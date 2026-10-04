@@ -1,21 +1,24 @@
 package com.simibubi.create.foundation;
 
 import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.content.equipment.clipboard.ClipboardContent;
+import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 
+import net.createmod.catnip.codecs.CatnipCodecUtils;
 import net.createmod.catnip.nbt.NBTProcessors;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.Filterable;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-import org.jetbrains.annotations.Nullable;
+import java.util.List;
 
 public class CreateNBTProcessors {
     public static void register() {
@@ -32,15 +35,14 @@ public class CreateNBTProcessors {
                             && book.getString("id").equals(writableBookResource.toString()))
                         return data;
 
-                    if (!book.contains("tag", Tag.TAG_COMPOUND)) return data;
-                    CompoundTag tag = book.getCompound("tag");
+                    WrittenBookContent bookContent =
+                            CatnipCodecUtils.decodeOrNull(WrittenBookContent.CODEC, book);
+                    if (bookContent == null) return data;
 
-                    if (!tag.contains("pages", Tag.TAG_LIST)) return data;
-                    ListTag pages = tag.getList("pages", Tag.TAG_STRING);
-
-                    for (Tag inbt : pages) {
-                        if (hasClickEvent(inbt.getAsString())) return null;
+                    for (Filterable<Component> page : bookContent.pages()) {
+                        if (NBTProcessors.textComponentHasClickEvent(page.get(false))) return null;
                     }
+
                     return data;
                 });
 
@@ -52,51 +54,20 @@ public class CreateNBTProcessors {
     }
 
     public static CompoundTag clipboardProcessor(CompoundTag data) {
-        if (!data.contains("Item", Tag.TAG_COMPOUND)) return data;
-        CompoundTag item = data.getCompound("Item");
+        DataComponentMap components =
+                CatnipCodecUtils.decodeOrNull(
+                        DataComponentMap.CODEC, data.getCompound("components"));
+        if (components == null) return data;
 
-        if (!item.contains("components", Tag.TAG_COMPOUND)) return data;
-        CompoundTag itemComponents = item.getCompound("components");
+        ClipboardContent content = components.get(AllDataComponents.CLIPBOARD_CONTENT);
+        if (content == null) return data;
 
-        if (!itemComponents.contains("create:clipboard_pages", Tag.TAG_LIST)) return data;
-        ListTag pages = itemComponents.getList("create:clipboard_pages", Tag.TAG_LIST);
-
-        for (Tag page : pages) {
-            if (!(page instanceof ListTag entries)) return data;
-
-            for (int i = 0; i < entries.size(); i++) {
-                CompoundTag entry = entries.getCompound(i);
-
-                // fabric: Catnip checks a Component, so decode the entry's text tag directly
-                if (hasClickEvent(entry.get("text"))) return null;
+        for (List<ClipboardEntry> entries : content.pages()) {
+            for (ClipboardEntry entry : entries) {
+                if (NBTProcessors.textComponentHasClickEvent(entry.text)) return null;
             }
         }
 
         return data;
-    }
-
-    private static boolean hasClickEvent(@Nullable Tag componentTag) {
-        if (componentTag == null) return false;
-        return ComponentSerialization.CODEC
-                .parse(
-                        RegistryAccess.EMPTY.createSerializationContext(NbtOps.INSTANCE),
-                        componentTag)
-                .result()
-                .map(NBTProcessors::textComponentHasClickEvent)
-                .orElse(false);
-    }
-
-    /**
-     * Catnip 0.8 принимает Component; строки из NBT — JSON-компоненты. Нечитаемый JSON считаем
-     * безопасным.
-     */
-    private static boolean hasClickEvent(String json) {
-        if (json == null || json.isEmpty()) return false;
-        try {
-            Component component = Component.Serializer.fromJson(json, RegistryAccess.EMPTY);
-            return component != null && NBTProcessors.textComponentHasClickEvent(component);
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

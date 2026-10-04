@@ -121,6 +121,14 @@ public class FluidTankBlock extends Block
                         ? FluidTankBlockEntity::queueConnectivityUpdate
                         : FluidTankBlockEntity::updateConnectivity;
         withBlockEntityDo(world, pos, consumer);
+
+        // updateConnectivity may have changed the in-world block state, which prevents the
+        // notification step of the Level#setBlock call that placed this block from doing anything
+        BlockState newState = world.getBlockState(pos);
+        if (state != newState && newState.getBlock() == this) {
+            world.port_lib$markAndNotifyBlock(
+                    pos, world.getChunkAt(pos), oldState, newState, UPDATE_ALL_IMMEDIATE, 512);
+        }
     }
 
     @Override

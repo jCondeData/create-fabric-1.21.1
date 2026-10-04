@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class SequencedAssemblyRecipe implements Recipe<RecipeInput> {
     protected SequencedAssemblyRecipeSerializer serializer;
@@ -68,9 +67,14 @@ public class SequencedAssemblyRecipe implements Recipe<RecipeInput> {
                     RecipeType<R> type,
                     Class<R> recipeClass,
                     Predicate<? super RecipeHolder<R>> recipeFilter) {
-        return getRecipes(world, inv.getItem(0), type, recipeClass)
-                .filter(recipeFilter)
-                .findFirst();
+        List<RecipeHolder<R>> list =
+                getRecipes(world, inv.getItem(0), type, recipeClass, recipeFilter);
+
+        if (!list.isEmpty()) {
+            return Optional.of(list.getFirst());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public static <R extends ProcessingRecipe<?, ?>> Optional<RecipeHolder<R>> getRecipe(
@@ -95,8 +99,12 @@ public class SequencedAssemblyRecipe implements Recipe<RecipeInput> {
         return Optional.empty();
     }
 
-    public static <R extends ProcessingRecipe<?, ?>> Stream<RecipeHolder<R>> getRecipes(
-            Level level, ItemStack item, RecipeType<R> type, Class<R> recipeClass) {
+    public static <R extends ProcessingRecipe<?, ?>> List<RecipeHolder<R>> getRecipes(
+            Level level,
+            ItemStack item,
+            RecipeType<R> type,
+            Class<R> recipeClass,
+            Predicate<? super RecipeHolder<R>> recipeFilter) {
         List<RecipeHolder<SequencedAssemblyRecipe>> all =
                 level.getRecipeManager()
                         .getAllRecipesFor(AllRecipeTypes.SEQUENCED_ASSEMBLY.getType());
@@ -111,12 +119,13 @@ public class SequencedAssemblyRecipe implements Recipe<RecipeInput> {
                     recipe.enforceNextResult(
                             () -> holder.value().advance(holder.id(), item, level.random));
                     R castedRecipe = recipeClass.cast(recipe);
-                    result.add(new RecipeHolder<>(holder.id(), castedRecipe));
+                    RecipeHolder<R> h = new RecipeHolder<>(holder.id(), castedRecipe);
+                    if (recipeFilter.test(h)) result.add(h);
                 }
             }
         }
 
-        return result.stream();
+        return result;
     }
 
     private ItemStack advance(ResourceLocation id, ItemStack input, RandomSource random) {

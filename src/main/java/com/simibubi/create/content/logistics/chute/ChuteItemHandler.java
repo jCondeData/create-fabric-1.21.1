@@ -5,6 +5,7 @@ import com.simibubi.create.foundation.item.ItemHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.core.component.DataComponents;
 
 public class ChuteItemHandler extends SingleVariantStorage<ItemVariant> {
 
@@ -34,7 +35,7 @@ public class ChuteItemHandler extends SingleVariantStorage<ItemVariant> {
 
     @Override
     protected long getCapacity(ItemVariant variant) {
-        return Math.min(64, variant.getItem().getDefaultMaxStackSize());
+        return variant.getComponentMap().getOrDefault(DataComponents.MAX_STACK_SIZE, 64);
     }
 
     @Override

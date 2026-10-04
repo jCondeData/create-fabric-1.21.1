@@ -94,7 +94,7 @@ public class SignalBlock extends Block
         Optional<SignalBlockEntity> ste = getBlockEntityOptional(pLevel, pPos);
         boolean neighborPowered = false;
         if (ste.isEmpty() || !ste.get().computerBehaviour.hasAttachedComputer()) {
-            powered = pLevel.hasNeighborSignal(pPos);
+            neighborPowered = pLevel.hasNeighborSignal(pPos);
         }
         if (powered == neighborPowered) return;
         if (powered) {

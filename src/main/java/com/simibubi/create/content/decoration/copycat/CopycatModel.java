@@ -27,6 +27,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -39,7 +40,7 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
     }
 
     private void gatherOcclusionData(
-            BlockAndTintGetter world,
+            BlockAndTintGetter level,
             BlockPos pos,
             BlockState state,
             BlockState material,
@@ -49,7 +50,7 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
         for (Direction face : Iterate.directions) {
             if (!copycatBlock.canFaceBeOccluded(state, face)) continue;
             MutableBlockPos neighbourPos = mutablePos.setWithOffset(pos, face);
-            if (!Block.shouldRenderFace(material, world, pos, face, neighbourPos))
+            if (!Block.shouldRenderFace(material, level, pos, face, neighbourPos))
                 occlusionData.occlude(face);
         }
     }
@@ -93,8 +94,13 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
         // GhostBlockRenderer
         boolean shouldTransform = material != AllBlocks.COPYCAT_BASE.getDefaultState();
 
-        // fabric: need to change the default render material
-        if (shouldTransform) context.pushTransform(MaterialFixer.create(material));
+        // fabric: need to change the default render material. This also carries the material's
+        // emissivity (NeoForge: QuadTransformers.settingMaxEmissivity). Currently, it seems like
+        // there's no way to have different levels of emissivity in vanilla, if that changes, then
+        // this will need to as well
+        if (shouldTransform)
+            context.pushTransform(
+                    MaterialFixer.create(material, material.emissiveRendering(blockView, pos)));
 
         emitBlockQuadsInner(
                 blockView,
@@ -137,7 +143,7 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
         return model.getParticleIcon();
     }
 
-    @Nullable
+    @NotNull
     public static BlockState getMaterial(BlockState material) {
         return material == null ? AllBlocks.COPYCAT_BASE.getDefaultState() : material;
     }
@@ -158,7 +164,7 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
         }
 
         public boolean isOccluded(Direction face) {
-            return face == null ? false : occluded[face.get3DDataValue()];
+            return face != null && occluded[face.get3DDataValue()];
         }
     }
 
@@ -178,24 +184,30 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
         }
     }
 
-    private record MaterialFixer(RenderMaterial materialDefault) implements QuadTransform {
+    private record MaterialFixer(RenderMaterial materialDefault, boolean emissive)
+            implements QuadTransform {
         @Override
         public boolean transform(MutableQuadView quad) {
             if (quad.material().blendMode() == BlendMode.DEFAULT) {
                 // default needs to be changed from the Copycat's default (cutout) to the wrapped
                 // material's default.
                 quad.material(materialDefault);
+            } else if (emissive && !quad.material().emissive()) {
+                quad.material(finder().copyFrom(quad.material()).emissive(true).find());
             }
             return true;
         }
 
-        public static MaterialFixer create(BlockState materialState) {
+        public static MaterialFixer create(BlockState materialState, boolean emissive) {
             RenderType type = ItemBlockRenderTypes.getChunkRenderType(materialState);
             BlendMode blendMode = BlendMode.fromRenderLayer(type);
-            MaterialFinder finder =
-                    Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).materialFinder();
-            RenderMaterial renderMaterial = finder.blendMode(0, blendMode).find();
-            return new MaterialFixer(renderMaterial);
+            RenderMaterial renderMaterial =
+                    finder().blendMode(0, blendMode).emissive(emissive).find();
+            return new MaterialFixer(renderMaterial, emissive);
+        }
+
+        private static MaterialFinder finder() {
+            return Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).materialFinder();
         }
     }
 }

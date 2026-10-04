@@ -47,19 +47,21 @@ public class FlapDisplayLayout {
         return tag;
     }
 
-    public void read(CompoundTag tag) {
+    public void read(CompoundTag tag, HolderLookup.Provider registries) {
         String prevKey = layoutKey;
         layoutKey = tag.getString("Key");
         ListTag sectionsTag = tag.getList("Sections", Tag.TAG_COMPOUND);
 
         if (!prevKey.equals(layoutKey)) {
-            sections = NBTHelper.readCompoundList(sectionsTag, FlapDisplaySection::load);
+            sections =
+                    NBTHelper.readCompoundList(
+                            sectionsTag, i -> FlapDisplaySection.load(i, registries));
             return;
         }
 
         MutableInt index = new MutableInt(0);
         NBTHelper.iterateCompoundList(
-                sectionsTag, nbt -> sections.get(index.getAndIncrement()).update(nbt));
+                sectionsTag, nbt -> sections.get(index.getAndIncrement()).update(nbt, registries));
     }
 
     public List<FlapDisplaySection> getSections() {

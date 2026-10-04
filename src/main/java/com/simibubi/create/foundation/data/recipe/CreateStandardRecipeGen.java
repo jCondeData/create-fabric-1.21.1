@@ -180,7 +180,7 @@ public final class CreateStandardRecipeGen extends BaseRecipeProvider {
                             .viaShapeless(
                                     b ->
                                             b.requires(AllBlocks.CARDBOARD_BLOCK.get())
-                                                    .requires(Items.STRING)),
+                                                    .requires(Tags.Items.STRINGS)),
             CARDBOARD_FROM_BLOCK =
                     create(AllItems.CARDBOARD)
                             .withSuffix("_from_block")
@@ -309,12 +309,12 @@ public final class CreateStandardRecipeGen extends BaseRecipeProvider {
                                                     .pattern("P")),
             CAKE =
                     create(() -> Items.CAKE)
-                            .unlockedByTag(() -> AllItemTags.DOUGHS.tag)
+                            .unlockedByTag(() -> AllItemTags.FOODS_DOUGH.tag)
                             .viaShaped(
                                     b ->
                                             b.define('E', Tags.Items.EGGS)
                                                     .define('S', Items.SUGAR)
-                                                    .define('P', AllItemTags.DOUGHS.tag)
+                                                    .define('P', AllItemTags.FOODS_DOUGH.tag)
                                                     .define('M', () -> Items.MILK_BUCKET)
                                                     .pattern(" M ")
                                                     .pattern("SES")

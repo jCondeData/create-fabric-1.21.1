@@ -48,6 +48,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -78,8 +79,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class SchematicannonBlockEntity extends SmartBlockEntity
-        implements MenuProvider, CustomRenderBoundingBoxBlockEntity {
-
+        implements MenuProvider, CustomRenderBoundingBoxBlockEntity, Clearable {
     public static final int NEIGHBOUR_CHECKING = 100;
     public static final int MAX_ANCHOR_DISTANCE = 256;
 
@@ -161,6 +161,13 @@ public class SchematicannonBlockEntity extends SmartBlockEntity
     }
 
     @Override
+    public void clearContent() {
+        // fabric: no ItemStackHandlerAccessor; empty every slot of the fork's ItemStackHandler
+        for (int slot = 0; slot < inventory.getSlotCount(); slot++)
+            inventory.setStackInSlot(slot, ItemStack.EMPTY);
+    }
+
+    @Override
     protected void read(
             CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         if (!clientPacket) {
@@ -189,7 +196,7 @@ public class SchematicannonBlockEntity extends SmartBlockEntity
                                 SchematicannonOptions.CODEC,
                                 registries,
                                 compound.getCompound("Options"))
-                        .orElse(new SchematicannonOptions(2, true, false));
+                        .orElse(new SchematicannonOptions(2, false, false));
         replaceMode = options.replaceMode;
         skipMissing = options.skipMissing;
         replaceBlockEntities = options.replaceBlockEntities;

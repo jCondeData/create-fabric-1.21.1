@@ -32,6 +32,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -272,6 +273,7 @@ public class MountedStorageManager {
             HolderLookup.Provider registries,
             boolean clientPacket,
             @Nullable Contraption contraption) {
+        final RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
         this.reset();
 
         try {
@@ -282,7 +284,7 @@ public class MountedStorageManager {
                         CompoundTag data = tag.getCompound("storage");
                         // TODO - Use CatnipCodecUtils
                         MountedItemStorage.CODEC
-                                .decode(NbtOps.INSTANCE, data)
+                                .decode(registryOps, data)
                                 .resultOrPartial(
                                         err ->
                                                 Create.LOGGER.error(
@@ -300,7 +302,7 @@ public class MountedStorageManager {
                         CompoundTag data = tag.getCompound("storage");
                         // TODO - Use CatnipCodecUtils
                         MountedFluidStorage.CODEC
-                                .decode(NbtOps.INSTANCE, data)
+                                .decode(registryOps, data)
                                 .resultOrPartial(
                                         err ->
                                                 Create.LOGGER.error(
@@ -351,6 +353,7 @@ public class MountedStorageManager {
     }
 
     public void write(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
+        final RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
         ListTag items = new ListTag();
         this.getAllItemStorages()
                 .forEach(
@@ -358,7 +361,7 @@ public class MountedStorageManager {
                             if (!clientPacket || storage instanceof SyncedMountedStorage) {
                                 // TODO - Use CatnipCodecUtils
                                 MountedItemStorage.CODEC
-                                        .encodeStart(NbtOps.INSTANCE, storage)
+                                        .encodeStart(registryOps, storage)
                                         .resultOrPartial(
                                                 err ->
                                                         Create.LOGGER.error(
@@ -386,7 +389,7 @@ public class MountedStorageManager {
                             if (!clientPacket || storage instanceof SyncedMountedStorage) {
                                 // TODO - Use CatnipCodecUtils
                                 MountedFluidStorage.CODEC
-                                        .encodeStart(NbtOps.INSTANCE, storage)
+                                        .encodeStart(registryOps, storage)
                                         .resultOrPartial(
                                                 err ->
                                                         Create.LOGGER.error(

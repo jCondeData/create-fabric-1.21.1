@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -15,6 +16,7 @@ import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -38,7 +40,7 @@ public final class FluidStack implements DataComponentHolder {
 
     public static final FluidStack EMPTY = new FluidStack(FluidVariant.blank(), 0);
 
-    public static final Codec<FluidStack> CODEC =
+    private static final Codec<FluidStack> FABRIC_CODEC =
             RecordCodecBuilder.create(
                     i ->
                             i.group(
@@ -49,6 +51,45 @@ public final class FluidStack implements DataComponentHolder {
                                                     .fieldOf("amount")
                                                     .forGetter(FluidStack::getAmount))
                                     .apply(i, FluidStack::new));
+
+    /**
+     * Read-only fallback for NeoForge's FluidStack format ({@code {"id", "amount" (mB),
+     * "components"}}), as found in upstream Create's gametest structures and in schematics saved on
+     * NeoForge. Amounts are converted from millibuckets to droplets.
+     */
+    private static final Codec<FluidStack> NEOFORGE_CODEC =
+            RecordCodecBuilder.create(
+                    i ->
+                            i.group(
+                                            BuiltInRegistries.FLUID
+                                                    .byNameCodec()
+                                                    .fieldOf("id")
+                                                    .forGetter(s -> s.getVariant().getFluid()),
+                                            Codec.INT
+                                                    .fieldOf("amount")
+                                                    .forGetter(
+                                                            s ->
+                                                                    (int)
+                                                                            (s.getAmount()
+                                                                                    / (FluidConstants
+                                                                                                    .BUCKET
+                                                                                            / 1000))),
+                                            DataComponentPatch.CODEC
+                                                    .optionalFieldOf(
+                                                            "components", DataComponentPatch.EMPTY)
+                                                    .forGetter(s -> s.getVariant().getComponents()))
+                                    .apply(
+                                            i,
+                                            (fluid, amount, components) ->
+                                                    new FluidStack(
+                                                            FluidVariant.of(fluid, components),
+                                                            amount
+                                                                    * (FluidConstants.BUCKET
+                                                                            / 1000))));
+
+    /** Writes the Fabric format; also reads NeoForge's. */
+    public static final Codec<FluidStack> CODEC =
+            Codec.withAlternative(FABRIC_CODEC, NEOFORGE_CODEC);
 
     /**
      * An empty compound tag decodes to {@link #EMPTY}, mirroring {@code ItemStack.OPTIONAL_CODEC}.

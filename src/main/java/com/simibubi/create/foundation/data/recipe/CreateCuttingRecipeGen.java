@@ -51,6 +51,8 @@ public final class CreateCuttingRecipeGen extends CuttingRecipeGen {
             ARS_N_6 =
                     stripAndMakePlanks(
                             Mods.ARS_N, null, "stripped_red_archwood_wood", "archwood_planks"),
+
+            // Ars Elemental
             ARS_E_1 =
                     stripAndMakePlanksDiffPlanksModId(
                             Mods.ARS_E,
@@ -106,7 +108,23 @@ public final class CreateCuttingRecipeGen extends CuttingRecipeGen {
             ATM_1 = stripAndMakePlanks(Mods.ATM, "watchful_aspen_log", "aspen_log", null),
             ATM_2 = stripAndMakePlanks(Mods.ATM, "watchful_aspen_wood", "aspen_wood", null),
             ATM_3 = stripAndMakePlanks(Mods.ATM, "crustose_log", "aspen_log", null),
-            ATM_4 = stripAndMakePlanks(Mods.ATM, "crustose_wood", "aspen_wood", null);
+            ATM_4 = stripAndMakePlanks(Mods.ATM, "crustose_wood", "aspen_wood", null),
+
+            // Oh The Biomes We've Gone
+            BWG_1 =
+                    stripAndMakePlanksDiffPlanksModId(
+                            Mods.BWG,
+                            null,
+                            "stripped_palo_verde_log",
+                            Mods.VANILLA,
+                            "birch_planks"),
+            BWG_2 =
+                    stripAndMakePlanksDiffPlanksModId(
+                            Mods.BWG,
+                            null,
+                            "stripped_palo_verde_wood",
+                            Mods.VANILLA,
+                            "birch_planks");
 
     public CreateCuttingRecipeGen(FabricDataOutput output, CompletableFuture<Provider> registries) {
         super(output, registries, Create.ID);

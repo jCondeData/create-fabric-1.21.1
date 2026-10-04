@@ -135,8 +135,7 @@ public class SoundScapes {
     protected static BlockPos getCameraPos() {
         Entity renderViewEntity = Minecraft.getInstance().cameraEntity;
         if (renderViewEntity == null) return BlockPos.ZERO;
-        BlockPos playerLocation = renderViewEntity.blockPosition();
-        return playerLocation;
+        return renderViewEntity.blockPosition();
     }
 
     public static int getSoundCount(AmbienceGroup group, PitchGroup pitchGroup) {

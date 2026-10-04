@@ -15,7 +15,7 @@ import xaero.map.gui.GuiMap;
 
 @Mixin(GuiMap.class)
 public abstract class XaeroFullscreenMapMixin {
-    @Unique boolean create$failedToRenderTrainMap = false;
+    @Unique private boolean create$failedToRenderTrainMap = false;
 
     @Inject(
             method = "render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V",
@@ -25,12 +25,21 @@ public abstract class XaeroFullscreenMapMixin {
                             target =
                                     "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"),
             require = 0)
-    public void create$xaeroMapFullscreenRender(
-            GuiGraphics graphics, int mouseX, int mouseY, float pt, CallbackInfo ci) {
+    private void create$xaeroMapFullscreenRender(
+            GuiGraphics guiGraphics,
+            int scaledMouseX,
+            int scaledMouseY,
+            float partialTicks,
+            CallbackInfo ci) {
         try {
             if (!create$failedToRenderTrainMap)
-                XaeroTrainMap.onRender(graphics, (GuiMap) (Object) this, mouseX, mouseY, pt);
-        } catch (Exception e) {
+                XaeroTrainMap.onRender(
+                        guiGraphics,
+                        (GuiMap) (Object) this,
+                        scaledMouseX,
+                        scaledMouseY,
+                        partialTicks);
+        } catch (Throwable e) {
             Create.LOGGER.error("Failed to render Xaero's World Map train map integration:", e);
             create$failedToRenderTrainMap = true;
         }

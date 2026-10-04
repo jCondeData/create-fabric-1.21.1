@@ -13,8 +13,8 @@
             "id": "minecraft:poison",
             "porting_lib:cures": [
               "milk",
-              "honey",
-              "protected_by_totem"
+              "protected_by_totem",
+              "honey"
             ],
             "show_icon": true
           }

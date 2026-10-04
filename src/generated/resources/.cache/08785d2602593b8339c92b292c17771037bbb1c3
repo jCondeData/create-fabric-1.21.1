@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-04T00:25:52.088330274	Create/Create's Standard Recipes
+// 1.21.1	2026-10-04T00:54:56.481613649	Create/Create's Standard Recipes
 40c78a8e87c4cfd0a2f5a5c1b2b73cd88312b186 data/create/advancement/recipes/misc/crafting/appliances/cardboard_boots.json
 2bda4851d4016b82caca75ef807cbcf5cd196497 data/create/advancement/recipes/misc/crafting/appliances/crafting_blueprint.json
 7ab2cd643122e25051c9fe5680557a0cd1c178c1 data/create/advancement/recipes/misc/crafting/kinetics/encased_fan.json
@@ -104,7 +104,7 @@ dfe42416c6aee803c28cfccb39101b0960fa0fad data/create/recipe/crafting/appliances/
 0cbb3c4124e0203484fc5156d67fd62384c3e0a3 data/create/recipe/crafting/kinetics/large_cogwheel_from_little.json
 2a3fa9743a03c9cb0e549a65541612aa3e0f639e data/create/recipe/smelting/silver_ingot_compat_galosphere.json
 7ac19c9016845ae72271a2ec9e93b97fe8545e18 data/create/advancement/recipes/misc/crafting/appliances/cardboard_sword.json
-fa9c3955620e074844d1af5f537c51a07c74781b data/create/advancement/recipes/misc/crafting/curiosities/cake.json
+4a76070bd6556729d96910c4430b979b0fa33559 data/create/advancement/recipes/misc/crafting/curiosities/cake.json
 5289b3e7cec2bf02ce84ada347e5effd19ab117e data/create/recipe/crafting/kinetics/gearbox_from_conversion.json
 0a5b5aedf18ce5d1cc0bc1620d6b537ce89593fa data/create/advancement/recipes/misc/crafting/logistics/redstone_requester.json
 9cb6360bc11f5ad740299434251e8fc67fab7989 data/create/advancement/recipes/misc/crafting/kinetics/nozzle.json
@@ -171,7 +171,7 @@ b5ec5717524302a37c86e4ef8477afcdcbd9e487 data/create/recipe/blasting/zinc_ingot_
 e27585868586db7f740ab021884465856232ca2e data/create/advancement/recipes/misc/crafting/logistics/stock_ticker_clear.json
 8c17ab50bba4cee939af1fb6e45b3af9885dd00d data/create/recipe/smelting/scoria.json
 577730fcd7a4725102a18c31e80a9d633a7bf8ff data/create/advancement/recipes/misc/blasting/iron_ingot_from_crushed.json
-72d826d64a65796e2d4806f756bd7a1f7513164e data/create/recipe/crafting/materials/bound_cardboard_block.json
+20f9ea9b3eea2ad83b946548d9643525a9f9505c data/create/recipe/crafting/materials/bound_cardboard_block.json
 39576d9a6fd5969529e11b9bca85eac03c52c38e data/create/advancement/recipes/misc/crafting/kinetics/controls.json
 e773fe1a3baf579257c0871cd5d73a9d7dcb5534 data/create/recipe/crafting/logistics/pulse_repeater.json
 4a0e13f4fb9970f8d567c579d56e8e1d8d7160d8 data/create/recipe/crafting/logistics/stockpile_switch.json
@@ -240,7 +240,7 @@ e96b68412d303c00f2546b791ec8f78492b4c5fb data/create/recipe/blasting/tin_ingot_c
 a3a8bb68ecf21680e1e48b9320e42ef8f62bbb54 data/create/recipe/smelting/ingot_osmium_compat_mekanism.json
 7daaea0748c5b0a266ffd897c65b399b4f87465c data/create/advancement/recipes/misc/crafting/materials/electron_tube.json
 98d901bdb0e21b8148831e05cd44761d1b4578c9 data/create/advancement/recipes/misc/crafting/kinetics/elevator_pulley.json
-881bf0e571b3d1cd1c44f3fb134c6f8a1b05b8ad data/create/recipe/crafting/curiosities/cake.json
+12a19f3976fd1b6b81e7d64586ce8fd8b8882fbe data/create/recipe/crafting/curiosities/cake.json
 56fd3d2acb1ff9bd0c340f94bdf935d21c65738f data/create/recipe/crafting/kinetics/train_door.json
 25e03ff49ed40fba2a521b7c559a6556bc9ffe21 data/create/recipe/smelting/glass_from_tiled_glass.json
 813ff9a9946d06b17d08afdd6172061bc75568f3 data/create/advancement/recipes/misc/blasting/silver_ingot_compat_techreborn.json

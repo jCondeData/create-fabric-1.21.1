@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.ApiStatus.ScheduledForRemoval;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -65,7 +66,18 @@ public interface MovementBehaviour {
         return false;
     }
 
+    /**
+     * @deprecated since 6.0.9 - use {@link MovementBehaviour#collectOrDropItem(MovementContext,
+     *     ItemStack)} instead. No behaviours altered, simply a rename to reflect that we do collect
+     *     items when applicable before considering dropping the remainder into the world.
+     */
+    @ScheduledForRemoval(inVersion = "1.21.1+ Port")
+    @Deprecated(since = "6.0.9", forRemoval = true)
     default void dropItem(MovementContext context, ItemStack stack) {
+        collectOrDropItem(context, stack);
+    }
+
+    default void collectOrDropItem(MovementContext context, ItemStack stack) {
         ItemStack remainder;
         if (AllConfigs.server().kinetics.moveItemsToStorage.get()) {
             try (Transaction t = Transaction.openOuter()) {

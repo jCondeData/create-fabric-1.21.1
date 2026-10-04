@@ -74,6 +74,7 @@ import com.simibubi.create.foundation.sound.SoundScapes;
 import com.simibubi.create.foundation.utility.CameraAngleAnimationService;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
 import com.simibubi.create.foundation.utility.TickBasedCache;
+import com.simibubi.create.infrastructure.command.AllCommands;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.fabric.RenderItemDecorationsCallback;
 import com.simibubi.create.infrastructure.gui.OpenCreateMenuButton;
@@ -98,6 +99,7 @@ import net.createmod.catnip.platform.CatnipServices;
 import net.createmod.catnip.render.DefaultSuperRenderTypeBuffer;
 import net.createmod.catnip.render.StitchedSprite;
 import net.createmod.catnip.render.SuperRenderTypeBuffer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -116,6 +118,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -291,9 +294,9 @@ public class ClientEvents {
         SequencedAssemblyRecipe.addToTooltip(stack, itemTooltip);
     }
 
-    public static void onRenderTick() {
+    public static void onRenderTick(DeltaTracker deltaTracker) {
         if (!isGameActive()) return;
-        TurntableHandler.gameRenderFrame();
+        TurntableHandler.gameRenderFrame(deltaTracker);
     }
 
     public static boolean onMount(Entity vehicle, Entity passenger) {
@@ -422,12 +425,14 @@ public class ClientEvents {
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register(CommonEvents::onLoadWorld);
         ClientChunkEvents.CHUNK_UNLOAD.register(CommonEvents::onChunkUnloaded);
         ClientPlayConnectionEvents.JOIN.register(ClientEvents::onJoin);
+        ClientCommandRegistrationCallback.EVENT.register(
+                (dispatcher, buildContext) -> AllCommands.registerClient(dispatcher));
         ClientEntityEvents.ENTITY_LOAD.register(CommonEvents::onEntityAdded);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(ClientEvents::onRenderWorld);
         ItemTooltipCallback.EVENT.register(ClientEvents::addToItemTooltip);
         FogEvents.RENDER_FOG.register(ClientEvents::getFogDensity);
         FogEvents.SET_COLOR.register(ClientEvents::getFogColor);
-        RenderFrameEvent.PRE.register(deltaTracker -> onRenderTick());
+        RenderFrameEvent.PRE.register(ClientEvents::onRenderTick);
         ClientPreAttackCallback.EVENT.register(
                 (client, player, clickCount) -> {
                     if (client.hitResult == null

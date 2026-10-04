@@ -40,6 +40,7 @@ public enum Mods {
     FTBLIBRARY,
     SODIUM,
     INVENTORYSORTER,
+    FARMERSDELIGHT,
 
     // fabric mods
     SANDWICHABLE,

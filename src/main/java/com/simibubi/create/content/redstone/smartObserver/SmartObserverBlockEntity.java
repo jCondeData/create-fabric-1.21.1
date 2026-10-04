@@ -22,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,8 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
-public class SmartObserverBlockEntity extends SmartBlockEntity {
-
+public class SmartObserverBlockEntity extends SmartBlockEntity implements Clearable {
     private static final int DEFAULT_DELAY = 6;
     private FilteringBehaviour filtering;
     private InvManipulationBehaviour observedInventory;
@@ -179,5 +179,10 @@ public class SmartObserverBlockEntity extends SmartBlockEntity {
             CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(compound, registries, clientPacket);
         turnOffTicks = compound.getInt("TurnOff");
+    }
+
+    @Override
+    public void clearContent() {
+        filtering.setFilter(ItemStack.EMPTY);
     }
 }

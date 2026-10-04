@@ -34,6 +34,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +57,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class BeltBlockEntity extends KineticBlockEntity
-        implements SidedStorageBlockEntity, RenderDataBlockEntity {
+        implements SidedStorageBlockEntity, RenderDataBlockEntity, Clearable {
     public Map<Entity, TransportedEntityInfo> passengers;
     public Optional<DyeColor> color;
     public int beltLength;
@@ -172,6 +173,13 @@ public class BeltBlockEntity extends KineticBlockEntity
         if (!BeltBlock.canTransportObjects(getBlockState())) return null;
         if (!isRemoved() && itemHandler == null) initializeItemHandler();
         return itemHandler;
+    }
+
+    @Override
+    public void clearContent() {
+        if (inventory != null) {
+            inventory.getTransportedItems().clear();
+        }
     }
 
     @Override

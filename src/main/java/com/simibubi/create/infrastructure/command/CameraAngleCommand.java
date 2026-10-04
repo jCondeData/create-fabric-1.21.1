@@ -1,165 +1,154 @@
 package com.simibubi.create.infrastructure.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.simibubi.create.foundation.utility.CameraAngleAnimationService;
+import com.simibubi.create.foundation.utility.CameraAngleAnimationService.Mode;
 
-import net.createmod.catnip.platform.CatnipServices;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
+import java.util.Locale;
 
 public class CameraAngleCommand {
+    private static final DynamicCommandExceptionType UNKNOWN_MODE =
+            new DynamicCommandExceptionType(
+                    mode ->
+                            Component.literal(
+                                    "Unknown camera animation mode '"
+                                            + mode
+                                            + "', expected one of: "
+                                            + String.join(", ", modeNames())));
 
-    public static ArgumentBuilder<CommandSourceStack, ?> register() {
-        return Commands.literal("angle")
+    public static ArgumentBuilder<FabricClientCommandSource, ?> register() {
+        return ClientCommandManager.literal("angle")
                 .requires(cs -> cs.hasPermission(2))
                 .then(
-                        Commands.argument("players", EntityArgument.players())
+                        ClientCommandManager.argument("players", EntityArgument.players())
                                 .then(
-                                        Commands.literal("yaw")
+                                        ClientCommandManager.literal("yaw")
                                                 .then(
-                                                        Commands.argument(
+                                                        ClientCommandManager.argument(
                                                                         "degrees",
                                                                         FloatArgumentType
                                                                                 .floatArg())
                                                                 .executes(
-                                                                        context ->
-                                                                                updateCameraAngle(
-                                                                                        context,
-                                                                                        true))))
+                                                                        ctx -> {
+                                                                            float angleTarget =
+                                                                                    FloatArgumentType
+                                                                                            .getFloat(
+                                                                                                    ctx,
+                                                                                                    "degrees");
+                                                                            CameraAngleAnimationService
+                                                                                    .setYawTarget(
+                                                                                            angleTarget);
+
+                                                                            return Command
+                                                                                    .SINGLE_SUCCESS;
+                                                                        })))
                                 .then(
-                                        Commands.literal("pitch")
+                                        ClientCommandManager.literal("pitch")
                                                 .then(
-                                                        Commands.argument(
+                                                        ClientCommandManager.argument(
                                                                         "degrees",
                                                                         FloatArgumentType
                                                                                 .floatArg())
                                                                 .executes(
-                                                                        context ->
-                                                                                updateCameraAngle(
-                                                                                        context,
-                                                                                        false))))
+                                                                        ctx -> {
+                                                                            float angleTarget =
+                                                                                    FloatArgumentType
+                                                                                            .getFloat(
+                                                                                                    ctx,
+                                                                                                    "degrees");
+                                                                            CameraAngleAnimationService
+                                                                                    .setPitchTarget(
+                                                                                            angleTarget);
+
+                                                                            return Command
+                                                                                    .SINGLE_SUCCESS;
+                                                                        })))
                                 .then(
-                                        Commands.literal("mode")
+                                        ClientCommandManager.literal("mode")
                                                 .then(
-                                                        Commands.literal("linear")
+                                                        // fabric: NeoForge's EnumArgument has no
+                                                        // Fabric equivalent; a word argument with
+                                                        // suggestions needs no argument type
+                                                        // registration
+                                                        ClientCommandManager.argument(
+                                                                        "mode",
+                                                                        StringArgumentType.word())
+                                                                .suggests(
+                                                                        (ctx, builder) ->
+                                                                                SharedSuggestionProvider
+                                                                                        .suggest(
+                                                                                                modeNames(),
+                                                                                                builder))
                                                                 .executes(
-                                                                        context ->
-                                                                                updateCameraAnimationMode(
-                                                                                        context,
-                                                                                        CameraAngleAnimationService
-                                                                                                .Mode
-                                                                                                .LINEAR
-                                                                                                .name()))
+                                                                        ctx -> {
+                                                                            Mode mode =
+                                                                                    getMode(ctx);
+
+                                                                            CameraAngleAnimationService
+                                                                                    .setAnimationMode(
+                                                                                            mode);
+
+                                                                            return Command
+                                                                                    .SINGLE_SUCCESS;
+                                                                        })
                                                                 .then(
-                                                                        Commands.argument(
+                                                                        ClientCommandManager
+                                                                                .argument(
                                                                                         "speed",
                                                                                         FloatArgumentType
                                                                                                 .floatArg(
                                                                                                         0))
                                                                                 .executes(
-                                                                                        context ->
-                                                                                                updateCameraAnimationMode(
-                                                                                                        context,
-                                                                                                        CameraAngleAnimationService
-                                                                                                                .Mode
-                                                                                                                .LINEAR
-                                                                                                                .name(),
-                                                                                                        FloatArgumentType
-                                                                                                                .getFloat(
-                                                                                                                        context,
-                                                                                                                        "speed")))))
-                                                .then(
-                                                        Commands.literal("exponential")
-                                                                .executes(
-                                                                        context ->
-                                                                                updateCameraAnimationMode(
-                                                                                        context,
-                                                                                        CameraAngleAnimationService
-                                                                                                .Mode
-                                                                                                .EXPONENTIAL
-                                                                                                .name()))
-                                                                .then(
-                                                                        Commands.argument(
-                                                                                        "speed",
-                                                                                        FloatArgumentType
-                                                                                                .floatArg(
-                                                                                                        0))
-                                                                                .executes(
-                                                                                        context ->
-                                                                                                updateCameraAnimationMode(
-                                                                                                        context,
-                                                                                                        CameraAngleAnimationService
-                                                                                                                .Mode
-                                                                                                                .EXPONENTIAL
-                                                                                                                .name(),
-                                                                                                        FloatArgumentType
-                                                                                                                .getFloat(
-                                                                                                                        context,
-                                                                                                                        "speed")))))));
+                                                                                        ctx -> {
+                                                                                            Mode
+                                                                                                    mode =
+                                                                                                            getMode(
+                                                                                                                    ctx);
+                                                                                            float
+                                                                                                    speed =
+                                                                                                            FloatArgumentType
+                                                                                                                    .getFloat(
+                                                                                                                            ctx,
+                                                                                                                            "speed");
+
+                                                                                            CameraAngleAnimationService
+                                                                                                    .setAnimationMode(
+                                                                                                            mode);
+                                                                                            CameraAngleAnimationService
+                                                                                                    .setAnimationSpeed(
+                                                                                                            speed);
+
+                                                                                            return Command
+                                                                                                    .SINGLE_SUCCESS;
+                                                                                        })))));
     }
 
-    private static int updateCameraAngle(CommandContext<CommandSourceStack> ctx, boolean yaw)
+    private static Mode getMode(CommandContext<FabricClientCommandSource> ctx)
             throws CommandSyntaxException {
-        AtomicInteger targets = new AtomicInteger(0);
-
-        float angleTarget = FloatArgumentType.getFloat(ctx, "degrees");
-        String optionName = yaw ? "camAngleYawTarget" : "camAnglePitchTarget";
-
-        getPlayersFromContext(ctx)
-                .forEach(
-                        player -> {
-                            CatnipServices.NETWORK.simpleActionToClient(
-                                    player, optionName, String.valueOf(angleTarget));
-
-                            targets.incrementAndGet();
-                        });
-
-        return targets.get();
+        String name = StringArgumentType.getString(ctx, "mode");
+        try {
+            return Mode.valueOf(name.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw UNKNOWN_MODE.create(name);
+        }
     }
 
-    private static int updateCameraAnimationMode(
-            CommandContext<CommandSourceStack> ctx, String value) throws CommandSyntaxException {
-        AtomicInteger targets = new AtomicInteger(0);
-
-        getPlayersFromContext(ctx)
-                .forEach(
-                        player -> {
-                            CatnipServices.NETWORK.simpleActionToClient(
-                                    player, "camAngleFunction", value);
-
-                            targets.incrementAndGet();
-                        });
-
-        return targets.get();
-    }
-
-    private static int updateCameraAnimationMode(
-            CommandContext<CommandSourceStack> ctx, String value, float speed)
-            throws CommandSyntaxException {
-        AtomicInteger targets = new AtomicInteger(0);
-
-        getPlayersFromContext(ctx)
-                .forEach(
-                        player -> {
-                            CatnipServices.NETWORK.simpleActionToClient(
-                                    player, "camAngleFunction", value + ":" + speed);
-
-                            targets.incrementAndGet();
-                        });
-
-        return targets.get();
-    }
-
-    private static Collection<ServerPlayer> getPlayersFromContext(
-            CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return EntityArgument.getPlayers(ctx, "players");
+    private static String[] modeNames() {
+        return Arrays.stream(Mode.values())
+                .map(mode -> mode.name().toLowerCase(Locale.ROOT))
+                .toArray(String[]::new);
     }
 }

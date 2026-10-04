@@ -69,7 +69,8 @@ public class ClipboardBlockEntity extends SmartBlockEntity {
 
         if (clientPacket) {
             DataComponentMap.CODEC
-                    .encodeStart(NbtOps.INSTANCE, components())
+                    .encodeStart(
+                            registries.createSerializationContext(NbtOps.INSTANCE), components())
                     .result()
                     .ifPresent(encoded -> tag.put("components", encoded));
 
@@ -84,7 +85,9 @@ public class ClipboardBlockEntity extends SmartBlockEntity {
         if (clientPacket) {
             if (tag.contains("components"))
                 DataComponentMap.CODEC
-                        .decode(NbtOps.INSTANCE, tag.getCompound("components"))
+                        .decode(
+                                registries.createSerializationContext(NbtOps.INSTANCE),
+                                tag.getCompound("components"))
                         .result()
                         .map(Pair::getFirst)
                         .ifPresent(this::setComponents);

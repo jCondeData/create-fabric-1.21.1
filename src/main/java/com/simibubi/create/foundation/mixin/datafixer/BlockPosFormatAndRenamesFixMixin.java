@@ -21,7 +21,7 @@ import java.util.Map;
 
 @Mixin(BlockPosFormatAndRenamesFix.class)
 public abstract class BlockPosFormatAndRenamesFixMixin extends DataFix {
-    public BlockPosFormatAndRenamesFixMixin(Schema outputSchema, boolean changesType) {
+    private BlockPosFormatAndRenamesFixMixin(Schema outputSchema, boolean changesType) {
         super(outputSchema, changesType);
     }
 

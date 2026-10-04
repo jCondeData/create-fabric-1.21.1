@@ -32,6 +32,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -52,8 +53,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CrushingWheelControllerBlockEntity extends SmartBlockEntity
-        implements SidedStorageBlockEntity {
-
+        implements SidedStorageBlockEntity, Clearable {
     public Entity processingEntity;
     private UUID entityUUID;
     protected boolean searchForEntity;
@@ -244,14 +244,13 @@ public class CrushingWheelControllerBlockEntity extends SmartBlockEntity
                             facing.getAxis() == Axis.Z ? .5f * offset : 0f);
             int crusherDamage = AllConfigs.server().kinetics.crushingDamage.get();
 
-            if (processingEntity instanceof LivingEntity) {
-                if ((((LivingEntity) processingEntity).getHealth() - crusherDamage
-                                <= 0) // Takes LivingEntity instances
+            if (processingEntity instanceof LivingEntity livingEntity) {
+                if (livingEntity.getHealth() - crusherDamage <= 0 // Takes LivingEntity instances
                         // as exception, so it can
                         // move them before it would
                         // kill them.
-                        && (((LivingEntity) processingEntity).hurtTime
-                                <= 0)) { // This way it can actually output the items
+                        && livingEntity.hurtTime
+                                <= 0) { // This way it can actually output the items
                     // to the right spot.
                     processingEntity.setPos(entityOutPos.x, entityOutPos.y, entityOutPos.z);
                 }
@@ -369,6 +368,11 @@ public class CrushingWheelControllerBlockEntity extends SmartBlockEntity
         }
         crushingspeed = compound.getFloat("Speed");
         inventory.deserializeNBT(registries, compound.getCompound("Inventory"));
+    }
+
+    @Override
+    public void clearContent() {
+        inventory.clear();
     }
 
     public void startCrushing(Entity entity) {

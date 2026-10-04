@@ -9,9 +9,7 @@ import net.createmod.catnip.net.base.ServerboundPacketPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Set;
 
@@ -27,8 +25,7 @@ public record SuperGlueSelectionPacket(BlockPos from, BlockPos to)
 
     @Override
     public void handle(ServerPlayer player) {
-        double range = player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE) + 2;
-        if (player.distanceToSqr(Vec3.atCenterOf(to)) > range * range) return;
+        if (!player.canInteractWithBlock(to, 2)) return;
         if (!to.closerThan(from, 25)) return;
 
         Set<BlockPos> group =

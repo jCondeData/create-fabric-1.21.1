@@ -5,6 +5,7 @@ import com.simibubi.create.infrastructure.fabric.item.ItemUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemHandlerBeltSegment implements SingleSlotStorage<ItemVariant> {
@@ -62,7 +63,7 @@ public class ItemHandlerBeltSegment implements SingleSlotStorage<ItemVariant> {
 
     @Override
     public long getCapacity() {
-        return getStack().getMaxStackSize();
+        return getStack().getOrDefault(DataComponents.MAX_STACK_SIZE, 64);
     }
 
     public ItemStack getStack() {

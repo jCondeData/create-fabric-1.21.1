@@ -35,7 +35,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -298,7 +297,7 @@ public class FrogAndConveyorScenes {
             BakedModel bakedmodel =
                     Minecraft.getInstance()
                             .getItemRenderer()
-                            .getModel(wrench.getItem(), world, (LivingEntity) null, 0);
+                            .getModel(wrench.getItem(), world, null, 0);
             Minecraft.getInstance()
                     .getItemRenderer()
                     .render(

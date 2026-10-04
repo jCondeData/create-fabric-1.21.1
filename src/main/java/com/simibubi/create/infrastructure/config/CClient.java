@@ -1,5 +1,6 @@
 package com.simibubi.create.infrastructure.config;
 
+import com.simibubi.create.content.logistics.stockTicker.StockKeeperRequestScreen.SearchSyncMode;
 import com.simibubi.create.infrastructure.fabric.util.FluidUnit;
 
 import net.createmod.catnip.config.ConfigBase;
@@ -99,8 +100,10 @@ public class CClient extends ConfigBase {
             f(.1f, 0, 1, "ambientVolumeCap", Comments.ambientVolumeCap);
 
     // integration
-    public final ConfigGroup integration = group(1, "jeiIntegration", Comments.integration);
-    public final ConfigBool syncJeiSearch = b(true, "syncJeiSearch", Comments.syncJeiSearch);
+    public final ConfigGroup integration =
+            group(1, "recipeViewerIntegration", Comments.integration);
+    public final ConfigEnum<SearchSyncMode> syncRecipeViewerSearch =
+            e(SearchSyncMode.SYNC_BOTH, "syncRecipeViewerSearch", Comments.syncRecipeViewerSearch);
 
     // train group
     public final ConfigGroup trains = group(1, "trains", Comments.trains);
@@ -232,8 +235,8 @@ public class CClient extends ConfigBase {
                 "The vision range through honey will be multiplied by this factor";
         static String chocolateTransparencyMultiplier =
                 "The vision range though chocolate will be multiplied by this factor";
-        static String integration = "Mod Integration and JEI";
-        static String syncJeiSearch =
-                "Whether to auto-update the JEI search when searching in the stock keeper UI";
+        static String integration = "Mod Integration and Recipe Viewer";
+        static String syncRecipeViewerSearch =
+                "How Recipe Viewer search should interact with Stock Keepers";
     }
 }

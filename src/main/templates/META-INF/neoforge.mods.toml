@@ -9,6 +9,7 @@ modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/create"
+updateJSONURL = "https://api.modrinth.com/updates/create/forge_updates.json?neoforge=only"
 logoFile = "icon.png"
 authors = "${mod_author}"
 description = '''${mod_description}'''
@@ -68,6 +69,14 @@ modId = "journeymap"
 type = "optional"
 reason = "Versions before 1.21.1-6.0.0-beta.46 do not contain the APIs Create requires to work with JourneyMap."
 versionRange = "[1.21.1-6.0.0-beta.46,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies."${mod_id}"]]
+modId = "xaeroworldmap"
+type = "optional"
+reason = "Versions before 1.40.2 do not contain the classes Create requires to work with Xaero's World Map."
+versionRange = "[1.40.2,)"
 ordering = "NONE"
 side = "CLIENT"
 

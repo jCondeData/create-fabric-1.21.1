@@ -94,9 +94,7 @@ public class InvManipulationBehaviour
         if (inventory == null) return ItemStack.EMPTY;
 
         Predicate<ItemStack> test = getFilterTest(filter);
-        ItemStack simulatedItems = ItemHelper.extract(inventory, test, mode, amount, true);
-        if (shouldSimulate || simulatedItems.isEmpty()) return simulatedItems;
-        return ItemHelper.extract(inventory, test, mode, amount, false);
+        return ItemHelper.extract(inventory, test, mode, amount, shouldSimulate);
     }
 
     public ItemStack insert(ItemStack stack) {

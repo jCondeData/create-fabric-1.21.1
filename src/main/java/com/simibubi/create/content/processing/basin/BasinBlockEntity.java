@@ -61,6 +61,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -81,7 +82,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BasinBlockEntity extends SmartBlockEntity
-        implements IHaveGoggleInformation, SidedStorageBlockEntity {
+        implements IHaveGoggleInformation, SidedStorageBlockEntity, Clearable {
 
     private boolean
             needsUpdate; // fabric: need to delay to avoid doing stuff mid-transaction, causing a
@@ -287,6 +288,21 @@ public class BasinBlockEntity extends SmartBlockEntity
                         ia -> (CompoundTag) ia.getValue().saveOptional(registries)));
         visualizedOutputItems.clear();
         visualizedOutputFluids.clear();
+    }
+
+    @Override
+    public void clearContent() {
+        spoutputBuffer.clear();
+        clearInventory(inputInventory);
+        clearInventory(outputInventory);
+        filtering.setFilter(ItemStack.EMPTY);
+    }
+
+    // fabric: SmartInventory is not a Container here, so it has no clearContent()
+    private static void clearInventory(SmartInventory inventory) {
+        for (int i = 0; i < inventory.getSlotCount(); i++) {
+            inventory.setStackInSlot(i, ItemStack.EMPTY);
+        }
     }
 
     @Override

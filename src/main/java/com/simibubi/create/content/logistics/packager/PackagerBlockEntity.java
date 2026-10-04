@@ -53,6 +53,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -70,8 +71,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorageBlockEntity {
-
+public class PackagerBlockEntity extends SmartBlockEntity
+        implements SidedStorageBlockEntity, Clearable {
     public boolean redstonePowered;
     public int buttonCooldown;
     public String signBasedAddress;
@@ -579,11 +580,10 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
                                         .orElseThrow());
         if (compound.contains("LastSummary"))
             availableItems =
-                    CatnipCodecUtils.decode(
-                                    InventorySummary.CODEC,
-                                    registries,
-                                    compound.getCompound("LastSummary"))
-                            .orElse(null);
+                    CatnipCodecUtils.decodeOrNull(
+                            InventorySummary.CODEC,
+                            registries,
+                            compound.getCompound("LastSummary"));
     }
 
     @Override
@@ -614,6 +614,13 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
                     "LastSummary",
                     CatnipCodecUtils.encode(InventorySummary.CODEC, registries, availableItems)
                             .orElseThrow());
+    }
+
+    @Override
+    public void clearContent() {
+        // fabric: the packager's storage has no slot setter, clear the held box directly
+        heldBox = ItemStack.EMPTY;
+        queuedExitingPackages.clear();
     }
 
     @Override

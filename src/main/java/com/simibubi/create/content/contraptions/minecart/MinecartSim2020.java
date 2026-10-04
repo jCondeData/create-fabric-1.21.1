@@ -2,6 +2,7 @@ package com.simibubi.create.content.contraptions.minecart;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import com.simibubi.create.content.contraptions.minecart.capability.MinecartController;
 
 import io.github.fabricators_of_create.porting_lib.blocks.util.MinecartAndRailUtil;
 
@@ -48,10 +49,11 @@ public class MinecartSim2020 {
     }
 
     public static boolean canAddMotion(AbstractMinecart c) {
-        if (c instanceof MinecartFurnace)
-            return Mth.equal(((MinecartFurnace) c).xPush, 0)
-                    && Mth.equal(((MinecartFurnace) c).zPush, 0);
-        if (c.create$getController().isStalled()) return false;
+        if (c instanceof MinecartFurnace furnace)
+            return Mth.equal(furnace.xPush, 0) && Mth.equal(furnace.zPush, 0);
+
+        MinecartController controller = c.create$getController();
+        if (controller != null && controller.isPresent()) return !controller.isStalled();
         return true;
     }
 

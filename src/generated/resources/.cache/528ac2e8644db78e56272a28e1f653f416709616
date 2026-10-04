@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-04T00:25:52.085451317	Create/Create's Generated Registry Entries
+// 1.21.1	2026-10-04T00:54:56.479938327	Create/Create's Generated Registry Entries
 583b75978a4f920c2969473e5353fcc89886b612 data/create/create/potato_projectile/type/honeyed_apple.json
 9d927ec9c8b76a093e7ff8ff8f81be3a438d4aba data/create/create/potato_projectile/type/blaze_cake.json
 43cfce97a9326a1a7ce95f91a052586610b9686c data/create/damage_type/mechanical_saw.json
@@ -20,9 +20,9 @@ eefc270acd718dc889a9a15e350cee5b9c673dfa data/create/enchantment/capacity.json
 c6234751ccad5111857b0ae9e297e42f529ad32a data/create/create/potato_projectile/type/golden_carrot.json
 8cb4811601d46db5fdc0291edce3ec2f3a64e902 data/create/create/potato_projectile/type/chorus_fruit.json
 38116c664c63ca9da0ea043edc16a3ce9264c706 data/create/create/potato_projectile/type/potato.json
+050c9333d41efd2577e1e597c7c68b00436b0963 data/create/create/potato_projectile/type/glow_berry.json
 63e2df2c83982204bc92479b1df26561922e795d data/create/create/potato_projectile/type/pumpkin_block.json
 cbfd3028ad878bddbdaeb0eec0cd5a1c50d4c901 data/create/create/potato_projectile/type/poison_potato.json
-050c9333d41efd2577e1e597c7c68b00436b0963 data/create/create/potato_projectile/type/glow_berry.json
 176a1226e308874605a73ab7a627b8d0ef87f3ed data/create/worldgen/placed_feature/striated_ores_nether.json
 afe4e7cc87110d6f045f6672fb312a09290ca04a data/create/create/potato_projectile/type/glistering_melon.json
 58ab7a8eed0841f05b4b1373ba159e3e6503b7c3 data/create/damage_type/potato_cannon.json
@@ -37,7 +37,7 @@ d6f22959336e7dd19fc8593c5bad134462f51616 data/create/damage_type/fan_lava.json
 4dae2c0fc9fe6749649ef06dd3b7baaa9bd5e807 data/create/damage_type/run_over.json
 46ccaf468caaa4faaca4f1494f60e99cd00785c9 data/create/create/potato_projectile/type/cake.json
 1a20cb4e64dc07918a28fbccc73102bca3560f16 data/create/create/potato_projectile/type/baked_potato.json
-8d9a2bcab6098600fb4a559880fb60a69376ced4 data/create/create/potato_projectile/type/pufferfish.json
+b6d12e53a3fd4fd220ed3694a065c27103e0c765 data/create/create/potato_projectile/type/pufferfish.json
 8450576952f7723d22250da6f554dd0fda4e9fce data/create/create/potato_projectile/type/beetroot.json
 abb9dd2c98388abb430343d4ac02d460e5edc086 data/create/create/potato_projectile/type/apple.json
 af17d72549ee9421d2643a215ffc2291874fff93 data/create/create/potato_projectile/type/chocolate_berry.json

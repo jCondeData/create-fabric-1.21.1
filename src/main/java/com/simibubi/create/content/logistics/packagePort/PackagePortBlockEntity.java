@@ -24,6 +24,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -40,8 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class PackagePortBlockEntity extends SmartBlockEntity
-        implements MenuProvider, SidedStorageBlockEntity {
-
+        implements MenuProvider, SidedStorageBlockEntity, Clearable {
     public boolean acceptsPackages;
     public String addressFilter;
     public PackagePortTarget target;
@@ -101,9 +101,8 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         PackagePortTarget prevTarget = target;
         target =
-                CatnipCodecUtils.decode(
-                                PackagePortTarget.CODEC, registries, tag.getCompound("Target"))
-                        .orElse(null);
+                CatnipCodecUtils.decodeOrNull(
+                        PackagePortTarget.CODEC, registries, tag.getCompound("Target"));
         addressFilter = tag.getString("AddressFilter");
         acceptsPackages = tag.getBoolean("AcceptsPackages");
         if (clientPacket && prevTarget != target) invalidateRenderBoundingBox();
@@ -112,6 +111,12 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity
     @Override
     public Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
         return this.exposedInventory;
+    }
+
+    @Override
+    public void clearContent() {
+        // fabric: clears all slots without triggering change callbacks
+        inventory.setSize(inventory.getSlotCount());
     }
 
     @Override

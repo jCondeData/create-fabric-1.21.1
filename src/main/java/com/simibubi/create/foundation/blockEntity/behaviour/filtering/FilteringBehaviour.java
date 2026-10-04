@@ -156,7 +156,7 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
         ItemStack filter = stack.copy();
         if (!filter.isEmpty() && !predicate.test(filter)) return false;
         this.filter = FilterItemStack.of(filter);
-        if (!upTo) count = Math.min(count, stack.getMaxStackSize());
+        if (!upTo && !stack.isEmpty()) count = Math.min(count, stack.getMaxStackSize());
         callback.accept(filter);
         blockEntity.setChanged();
         blockEntity.sendData();

@@ -24,7 +24,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
@@ -35,6 +34,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
@@ -45,8 +45,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class MechanicalMixerBlockEntity extends BasinOperatingBlockEntity {
 
@@ -140,6 +142,11 @@ public class MechanicalMixerBlockEntity extends BasinOperatingBlockEntity {
         if (running && level != null) {
             if (level.isClientSide && runningTicks == 20) renderParticles();
 
+            if (getSpeed() == 0 || !isSpeedRequirementFulfilled()) {
+                if (runningTicks < 20) runningTicks = 40 - runningTicks;
+                else if (runningTicks == 20) runningTicks++;
+            }
+
             if ((!level.isClientSide || isVirtual()) && runningTicks == 20) {
                 if (processingTicks < 0) {
                     float recipeSpeed = 1;
@@ -151,11 +158,10 @@ public class MechanicalMixerBlockEntity extends BasinOperatingBlockEntity {
                     }
 
                     processingTicks =
-                            Mth.clamp(
+                            Math.max(
                                     (Mth.log2((int) (512 / speed))) * Mth.ceil(recipeSpeed * 15)
                                             + 1,
-                                    1,
-                                    512);
+                                    1);
 
                     Optional<BasinBlockEntity> basin = getBasin();
                     if (basin.isPresent()) {
@@ -232,15 +238,17 @@ public class MechanicalMixerBlockEntity extends BasinOperatingBlockEntity {
         Storage<ItemVariant> availableItems = basinBlockEntity.getItemStorage(null);
         if (availableItems == null) return matchingRecipes;
 
-        try (Transaction t = Transaction.openOuter()) {
-            for (StorageView<ItemVariant> view : availableItems.nonEmptyViews()) {
-                List<MixingRecipe> list =
-                        PotionMixingRecipes.sortRecipesByItem(level)
-                                .get(view.getResource().getItem());
-                if (list == null) continue;
-                for (MixingRecipe mixingRecipe : list)
-                    if (matchBasinRecipe(mixingRecipe)) matchingRecipes.add(mixingRecipe);
-            }
+        // fabric: collect the items first, then match. matchBasinRecipe simulates inside its own
+        // transaction, so no transaction may be open here (opening one crashed the server with
+        // "An outer transaction is already active" as soon as a brewing ingredient was present).
+        Set<Item> presentItems = new LinkedHashSet<>();
+        for (StorageView<ItemVariant> view : availableItems.nonEmptyViews())
+            presentItems.add(view.getResource().getItem());
+        for (Item item : presentItems) {
+            List<MixingRecipe> list = PotionMixingRecipes.sortRecipesByItem(level).get(item);
+            if (list == null) continue;
+            for (MixingRecipe mixingRecipe : list)
+                if (matchBasinRecipe(mixingRecipe)) matchingRecipes.add(mixingRecipe);
         }
 
         return matchingRecipes;

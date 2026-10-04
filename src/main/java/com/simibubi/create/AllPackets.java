@@ -108,12 +108,10 @@ import com.simibubi.create.foundation.networking.ISyncPersistentData;
 import com.simibubi.create.foundation.networking.LeftClickPacket;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
 import com.simibubi.create.infrastructure.command.HighlightPacket;
-import com.simibubi.create.infrastructure.command.SimpleCreateActions;
 import com.simibubi.create.infrastructure.debugInfo.ServerDebugInfoPacket;
 
 import net.createmod.catnip.net.base.BasePacketPayload;
 import net.createmod.catnip.net.base.CatnipPacketRegistry;
-import net.createmod.catnip.net.packets.ClientboundSimpleActionPacket;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -298,27 +296,6 @@ public enum AllPackets implements BasePacketPayload.PacketTypeProvider {
             ClientboundChainConveyorRidingPacket.STREAM_CODEC),
     SHOP_UPDATE(ShopUpdatePacket.class, ShopUpdatePacket.STREAM_CODEC),
     ;
-
-    static {
-        ClientboundSimpleActionPacket.addAction(
-                "rainbowDebug", () -> SimpleCreateActions::rainbowDebug);
-        ClientboundSimpleActionPacket.addAction(
-                "overlayReset", () -> SimpleCreateActions::overlayReset);
-        ClientboundSimpleActionPacket.addAction(
-                "overlayScreen", () -> SimpleCreateActions::overlayScreen);
-        ClientboundSimpleActionPacket.addAction(
-                "fabulousWarning", () -> SimpleCreateActions::fabulousWarning);
-        ClientboundSimpleActionPacket.addAction(
-                "zoomMultiplier", () -> SimpleCreateActions::zoomMultiplier);
-        ClientboundSimpleActionPacket.addAction(
-                "camAngleYawTarget",
-                () -> value -> SimpleCreateActions.camAngleTarget(value, true));
-        ClientboundSimpleActionPacket.addAction(
-                "camAnglePitchTarget",
-                () -> value -> SimpleCreateActions.camAngleTarget(value, false));
-        ClientboundSimpleActionPacket.addAction(
-                "camAngleFunction", () -> SimpleCreateActions::camAngleFunction);
-    }
 
     private final CatnipPacketRegistry.PacketType<?> type;
 

@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -207,7 +208,7 @@ public class DeployerItemHandler extends SnapshotParticipant<Unit> implements St
 
         @Override
         public long getCapacity() {
-            return getStack().getMaxStackSize();
+            return getStack().getOrDefault(DataComponents.MAX_STACK_SIZE, 64);
         }
 
         public ItemStack getStack() {
