@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>local.milklib</groupId>
+  <artifactId>milk-lib</artifactId>
+  <version>1.1.0-patch+1.21.1</version>
+  <packaging>jar</packaging>
+  <description>Milk Lib 1.1.0 for 1.21.1 (Blockfield's Loom-1.10-compatible copy), served from this repo so Loom can jar-in-jar it.</description>
+</project>

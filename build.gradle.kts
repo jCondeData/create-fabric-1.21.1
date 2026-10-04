@@ -60,6 +60,7 @@ group = "com.simibubi.create"
 base.archivesName = "create-fabric"
 
 repositories {
+    maven(uri("libs/maven")) { content { includeGroup("local.milklib") } } // patched Milk Lib
     maven("https://maven.parchmentmc.org") // Parchment
     maven("https://maven.fabricmc.net") // FAPI, Loader
     maven("https://maven.createmod.net") // Ponder, Flywheel
@@ -116,7 +117,8 @@ dependencies {
     // impl Flywheel клиентский, API нужен и серверу (визуалы регистрируются в AllBlocks)
     modApi(include("dev.engine-room.flywheel:flywheel-fabric-api-$minecraftVersion:$flywheelVersion")!!)
     // Milk Lib с maven Create заканчивается 1.18; сборка под 1.21.1 живёт на Modrinth (Tu5LjQoE), лежит в libs/
-    modApi(include("maven.modrinth:milk-lib:jIenyzWe")!!) // Milk Lib 1.1.0-patch+1.21.1, bundled so friends install one jar
+    // Modrinth build of Milk Lib needs Loom 1.13+, so use the patched copy served from libs/maven; bundled so friends install one jar
+    modApi(include("local.milklib:milk-lib:1.1.0-patch+1.21.1")!!)
     api(include("com.google.code.findbugs:jsr305:$jsr305Version")!!)
 
     if (ponder.exists()) {
