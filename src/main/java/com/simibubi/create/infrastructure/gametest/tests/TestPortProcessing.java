@@ -131,4 +131,83 @@ public class TestPortProcessing {
                     helper.succeed();
                 });
     }
+
+    /**
+     * Blaze burner fuels come from Porting Lib data maps on Fabric (6.0.7 #8911): a blaze cake
+     * makes a burner seething, plain coal (Fabric FuelRegistry) makes it kindled. Fed through
+     * BlazeBurnerBlock.tryInsert, the path players, deployers and arms use.
+     */
+    @GameTest(template = "flat_7x6x7", timeoutTicks = CreateGameTestHelper.TEN_SECONDS)
+    public static void blazeBurnerFuelsFromDataMapAndFuelRegistry(CreateGameTestHelper helper) {
+        BlockPos cake = new BlockPos(1, 2, 2);
+        BlockPos coal = new BlockPos(4, 2, 2);
+        helper.setBlock(
+                cake,
+                AllBlocks.BLAZE_BURNER
+                        .getDefaultState()
+                        .setValue(
+                                com.simibubi.create.content.processing.burner.BlazeBurnerBlock
+                                        .HEAT_LEVEL,
+                                com.simibubi.create.content.processing.burner.BlazeBurnerBlock
+                                        .HeatLevel.SMOULDERING));
+        helper.setBlock(
+                coal,
+                AllBlocks.BLAZE_BURNER
+                        .getDefaultState()
+                        .setValue(
+                                com.simibubi.create.content.processing.burner.BlazeBurnerBlock
+                                        .HEAT_LEVEL,
+                                com.simibubi.create.content.processing.burner.BlazeBurnerBlock
+                                        .HeatLevel.SMOULDERING));
+        helper.runAfterDelay(
+                2,
+                () -> {
+                    var holder =
+                            com.simibubi.create.AllItems.BLAZE_CAKE.get().builtInRegistryHolder();
+                    var fuel =
+                            holder.getData(
+                                    com.simibubi.create.api.registry.CreateDataMaps
+                                            .SUPERHEATED_BLAZE_BURNER_FUELS);
+                    helper.assertTrue(
+                            fuel != null && fuel.burnTime() > 0,
+                            "blaze cake missing from create:superheated_blaze_burner_fuels");
+                    feed(
+                            helper,
+                            cake,
+                            new ItemStack(com.simibubi.create.AllItems.BLAZE_CAKE.get()));
+                    feed(helper, coal, new ItemStack(Items.COAL));
+                });
+        helper.succeedWhen(
+                () -> {
+                    var heat =
+                            com.simibubi.create.content.processing.burner.BlazeBurnerBlock
+                                    .HEAT_LEVEL;
+                    helper.assertBlockProperty(
+                            cake,
+                            heat,
+                            com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel
+                                    .SEETHING);
+                    helper.assertBlockProperty(
+                            coal,
+                            heat,
+                            com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel
+                                    .KINDLED);
+                });
+    }
+
+    static void feed(CreateGameTestHelper helper, BlockPos pos, ItemStack stack) {
+        try (Transaction t = Transaction.openOuter()) {
+            var result =
+                    com.simibubi.create.content.processing.burner.BlazeBurnerBlock.tryInsert(
+                            helper.getBlockState(pos),
+                            helper.getLevel(),
+                            helper.absolutePos(pos),
+                            stack,
+                            false,
+                            false,
+                            t);
+            helper.assertTrue(result.getResult().consumesAction(), "blaze burner refused " + stack);
+            t.commit();
+        }
+    }
 }
