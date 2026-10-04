@@ -1,7 +1,5 @@
 package com.simibubi.create.content.redstone.link;
 
-import java.util.Arrays;
-
 import com.simibubi.create.AllItems;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.RaycastHelper;
@@ -23,55 +21,54 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
+import java.util.Arrays;
+
 @EventBusSubscriber
 public class LinkHandler {
 
-	@SubscribeEvent
-	public static void onBlockActivated(PlayerInteractEvent.RightClickBlock event) {
-		Level world = event.getLevel();
-		BlockPos pos = event.getPos();
-		Player player = event.getEntity();
-		InteractionHand hand = event.getHand();
+    @SubscribeEvent
+    public static void onBlockActivated(PlayerInteractEvent.RightClickBlock event) {
+        Level world = event.getLevel();
+        BlockPos pos = event.getPos();
+        Player player = event.getEntity();
+        InteractionHand hand = event.getHand();
 
-		if (player.isShiftKeyDown() || player.isSpectator())
-			return;
+        if (player.isShiftKeyDown() || player.isSpectator()) return;
 
-		LinkBehaviour behaviour = BlockEntityBehaviour.get(world, pos, LinkBehaviour.TYPE);
-		if (behaviour == null)
-			return;
+        LinkBehaviour behaviour = BlockEntityBehaviour.get(world, pos, LinkBehaviour.TYPE);
+        if (behaviour == null) return;
 
-		ItemStack heldItem = player.getItemInHand(hand);
-		BlockHitResult ray = RaycastHelper.rayTraceRange(world, player, 10);
-		if (ray == null)
-			return;
-		if (AllItems.LINKED_CONTROLLER.isIn(heldItem))
-			return;
-		if (AllItems.WRENCH.isIn(heldItem))
-			return;
+        ItemStack heldItem = player.getItemInHand(hand);
+        BlockHitResult ray = RaycastHelper.rayTraceRange(world, player, 10);
+        if (ray == null) return;
+        if (AllItems.LINKED_CONTROLLER.isIn(heldItem)) return;
+        if (AllItems.WRENCH.isIn(heldItem)) return;
 
-		boolean fakePlayer = player instanceof FakePlayer;
-		boolean fakePlayerChoice = false;
+        boolean fakePlayer = player instanceof FakePlayer;
+        boolean fakePlayerChoice = false;
 
-		if (fakePlayer) {
-			BlockState blockState = world.getBlockState(pos);
-			Vec3 localHit = ray.getLocation()
-				.subtract(Vec3.atLowerCornerOf(pos))
-				.add(Vec3.atLowerCornerOf(ray.getDirection()
-					.getNormal())
-					.scale(.25f));
-			fakePlayerChoice = localHit.distanceToSqr(behaviour.firstSlot.getLocalOffset(world, pos, blockState)) > localHit
-				.distanceToSqr(behaviour.secondSlot.getLocalOffset(world, pos, blockState));
-		}
+        if (fakePlayer) {
+            BlockState blockState = world.getBlockState(pos);
+            Vec3 localHit =
+                    ray.getLocation()
+                            .subtract(Vec3.atLowerCornerOf(pos))
+                            .add(Vec3.atLowerCornerOf(ray.getDirection().getNormal()).scale(.25f));
+            fakePlayerChoice =
+                    localHit.distanceToSqr(
+                                    behaviour.firstSlot.getLocalOffset(world, pos, blockState))
+                            > localHit.distanceToSqr(
+                                    behaviour.secondSlot.getLocalOffset(world, pos, blockState));
+        }
 
-		for (boolean first : Arrays.asList(false, true)) {
-			if (behaviour.testHit(first, ray.getLocation()) || fakePlayer && fakePlayerChoice == first) {
-				if (event.getSide() != LogicalSide.CLIENT)
-					behaviour.setFrequency(first, heldItem);
-				event.setCanceled(true);
-				event.setCancellationResult(InteractionResult.SUCCESS);
-				world.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, .25f, .1f);
-			}
-		}
-	}
-
+        for (boolean first : Arrays.asList(false, true)) {
+            if (behaviour.testHit(first, ray.getLocation())
+                    || fakePlayer && fakePlayerChoice == first) {
+                if (event.getSide() != LogicalSide.CLIENT) behaviour.setFrequency(first, heldItem);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                world.playSound(
+                        null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, .25f, .1f);
+            }
+        }
+    }
 }

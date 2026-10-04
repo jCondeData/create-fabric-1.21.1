@@ -1,7 +1,5 @@
 package com.simibubi.create.content.redstone.displayLink.source;
 
-import java.util.stream.Stream;
-
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 
@@ -16,50 +14,63 @@ import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
-
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.stream.Stream;
+
 public abstract class StatTrackingDisplaySource extends ScoreboardDisplaySource {
 
-	@Override
-	protected Stream<IntAttached<MutableComponent>> provideEntries(DisplayLinkContext context, int maxRows) {
-		Level level = context.blockEntity()
-			.getLevel();
-		if (!(level instanceof ServerLevel sLevel))
-			return Stream.empty();
+    @Override
+    protected Stream<IntAttached<MutableComponent>> provideEntries(
+            DisplayLinkContext context, int maxRows) {
+        Level level = context.blockEntity().getLevel();
+        if (!(level instanceof ServerLevel sLevel)) return Stream.empty();
 
-		String name = "create_auto_" + getObjectiveName();
-		Scoreboard scoreboard = level.getScoreboard();
-		if (scoreboard.getObjective(name) == null)
-			scoreboard.addObjective(name, ObjectiveCriteria.DUMMY, getObjectiveDisplayName(), RenderType.INTEGER, false, null);
-		Objective objective = scoreboard.getObjective(name);
+        String name = "create_auto_" + getObjectiveName();
+        Scoreboard scoreboard = level.getScoreboard();
+        if (scoreboard.getObjective(name) == null)
+            scoreboard.addObjective(
+                    name,
+                    ObjectiveCriteria.DUMMY,
+                    getObjectiveDisplayName(),
+                    RenderType.INTEGER,
+                    false,
+                    null);
+        Objective objective = scoreboard.getObjective(name);
 
-		sLevel.getServer().getPlayerList().getPlayers()
-			.forEach(s -> scoreboard.getOrCreatePlayerScore(ScoreHolder.forNameOnly(s.getScoreboardName()), objective)
-				.set(updatedScoreOf(s)));
+        sLevel.getServer()
+                .getPlayerList()
+                .getPlayers()
+                .forEach(
+                        s ->
+                                scoreboard
+                                        .getOrCreatePlayerScore(
+                                                ScoreHolder.forNameOnly(s.getScoreboardName()),
+                                                objective)
+                                        .set(updatedScoreOf(s)));
 
-		return showScoreboard(sLevel, name, maxRows);
-	}
+        return showScoreboard(sLevel, name, maxRows);
+    }
 
-	protected abstract String getObjectiveName();
+    protected abstract String getObjectiveName();
 
-	protected abstract Component getObjectiveDisplayName();
+    protected abstract Component getObjectiveDisplayName();
 
-	protected abstract int updatedScoreOf(ServerPlayer player);
+    protected abstract int updatedScoreOf(ServerPlayer player);
 
-	@Override
-	protected boolean valueFirst() {
-		return false;
-	}
+    @Override
+    protected boolean valueFirst() {
+        return false;
+    }
 
-	@Override
-	protected boolean shortenNumbers(DisplayLinkContext context) {
-		return false;
-	}
+    @Override
+    protected boolean shortenNumbers(DisplayLinkContext context) {
+        return false;
+    }
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public void initConfigurationWidgets(DisplayLinkContext context, ModularGuiLineBuilder builder, boolean isFirstLine) {}
-
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void initConfigurationWidgets(
+            DisplayLinkContext context, ModularGuiLineBuilder builder, boolean isFirstLine) {}
 }

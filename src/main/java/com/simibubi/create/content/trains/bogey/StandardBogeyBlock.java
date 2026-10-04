@@ -18,52 +18,53 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class StandardBogeyBlock extends AbstractBogeyBlock<StandardBogeyBlockEntity>
-	implements IBE<StandardBogeyBlockEntity>, ProperWaterloggedBlock, SpecialBlockItemRequirement {
+        implements IBE<StandardBogeyBlockEntity>,
+                ProperWaterloggedBlock,
+                SpecialBlockItemRequirement {
 
-	public StandardBogeyBlock(Properties props, BogeySizes.BogeySize size) {
-		super(props, size);
-		registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
-	}
+    public StandardBogeyBlock(Properties props, BogeySizes.BogeySize size) {
+        super(props, size);
+        registerDefaultState(defaultBlockState().setValue(WATERLOGGED, false));
+    }
 
-	@Override
-	public TrackMaterial.TrackType getTrackType(BogeyStyle style) {
-		return TrackMaterial.TrackType.STANDARD;
-	}
+    @Override
+    public TrackMaterial.TrackType getTrackType(BogeyStyle style) {
+        return TrackMaterial.TrackType.STANDARD;
+    }
 
-	@Override
-	public double getWheelPointSpacing() {
-		return 2;
-	}
+    @Override
+    public double getWheelPointSpacing() {
+        return 2;
+    }
 
-	@Override
-	public double getWheelRadius() {
-		return (size == BogeySizes.LARGE ? 12.5 : 6.5) / 16d;
-	}
+    @Override
+    public double getWheelRadius() {
+        return (size == BogeySizes.LARGE ? 12.5 : 6.5) / 16d;
+    }
 
-	@Override
-	public Vec3 getConnectorAnchorOffset() {
-		return new Vec3(0, 7 / 32f, 1);
-	}
+    @Override
+    public Vec3 getConnectorAnchorOffset() {
+        return new Vec3(0, 7 / 32f, 1);
+    }
 
-	@Override
-	public BogeyStyle getDefaultStyle() {
-		return AllBogeyStyles.STANDARD;
-	}
+    @Override
+    public BogeyStyle getDefaultStyle() {
+        return AllBogeyStyles.STANDARD;
+    }
 
-	@Override
-	public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos,
-									   Player player) {
-		return AllBlocks.RAILWAY_CASING.asStack();
-	}
+    @Override
+    public ItemStack getCloneItemStack(
+            BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+        return AllBlocks.RAILWAY_CASING.asStack();
+    }
 
-	@Override
-	public Class<StandardBogeyBlockEntity> getBlockEntityClass() {
-		return StandardBogeyBlockEntity.class;
-	}
+    @Override
+    public Class<StandardBogeyBlockEntity> getBlockEntityClass() {
+        return StandardBogeyBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends StandardBogeyBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.BOGEY.get();
-	}
-
+    @Override
+    public BlockEntityType<? extends StandardBogeyBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.BOGEY.get();
+    }
 }

@@ -1,7 +1,5 @@
 package com.simibubi.create.content.redstone.smartObserver;
 
-import java.util.List;
-
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
 import com.simibubi.create.content.fluids.PipeConnection.Flow;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
@@ -18,8 +16,8 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipul
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.TankManipulationBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryTrackerBehaviour;
 
-import net.createmod.catnip.math.BlockFace;
 import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.BlockFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -29,156 +27,157 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
+
 public class SmartObserverBlockEntity extends SmartBlockEntity {
 
-	private static final int DEFAULT_DELAY = 6;
-	private FilteringBehaviour filtering;
-	private InvManipulationBehaviour observedInventory;
-	private TankManipulationBehaviour observedTank;
+    private static final int DEFAULT_DELAY = 6;
+    private FilteringBehaviour filtering;
+    private InvManipulationBehaviour observedInventory;
+    private TankManipulationBehaviour observedTank;
 
-	private VersionedInventoryTrackerBehaviour invVersionTracker;
-	private boolean sustainSignal;
+    private VersionedInventoryTrackerBehaviour invVersionTracker;
+    private boolean sustainSignal;
 
-	public int turnOffTicks = 0;
+    public int turnOffTicks = 0;
 
-	public SmartObserverBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-		setLazyTickRate(20);
-	}
+    public SmartObserverBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        setLazyTickRate(20);
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-		behaviours.add(filtering = new FilteringBehaviour(this, new FilteredDetectorFilterSlot(false))
-			.withCallback($ -> invVersionTracker.reset()));
-		behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        behaviours.add(
+                filtering =
+                        new FilteringBehaviour(this, new FilteredDetectorFilterSlot(false))
+                                .withCallback($ -> invVersionTracker.reset()));
+        behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
 
-		InterfaceProvider towardBlockFacing =
-			(w, p, s) -> new BlockFace(p, DirectedDirectionalBlock.getTargetDirection(s));
+        InterfaceProvider towardBlockFacing =
+                (w, p, s) -> new BlockFace(p, DirectedDirectionalBlock.getTargetDirection(s));
 
-		behaviours.add(observedInventory = new InvManipulationBehaviour(this, towardBlockFacing).bypassSidedness());
-		behaviours.add(observedTank = new TankManipulationBehaviour(this, towardBlockFacing).bypassSidedness());
-	}
+        behaviours.add(
+                observedInventory =
+                        new InvManipulationBehaviour(this, towardBlockFacing).bypassSidedness());
+        behaviours.add(
+                observedTank =
+                        new TankManipulationBehaviour(this, towardBlockFacing).bypassSidedness());
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
+    @Override
+    public void tick() {
+        super.tick();
 
-		if (level.isClientSide())
-			return;
+        if (level.isClientSide()) return;
 
-		BlockState state = getBlockState();
-		if (turnOffTicks > 0) {
-			turnOffTicks--;
-			if (turnOffTicks == 0)
-				level.scheduleTick(worldPosition, state.getBlock(), 1);
-		}
+        BlockState state = getBlockState();
+        if (turnOffTicks > 0) {
+            turnOffTicks--;
+            if (turnOffTicks == 0) level.scheduleTick(worldPosition, state.getBlock(), 1);
+        }
 
-		if (!isActive())
-			return;
+        if (!isActive()) return;
 
-		BlockPos targetPos = worldPosition.relative(SmartObserverBlock.getTargetDirection(state));
-		Block block = level.getBlockState(targetPos)
-			.getBlock();
+        BlockPos targetPos = worldPosition.relative(SmartObserverBlock.getTargetDirection(state));
+        Block block = level.getBlockState(targetPos).getBlock();
 
-		if (!filtering.getFilter()
-			.isEmpty() && block.asItem() != null && filtering.test(new ItemStack(block))) {
-			activate(3);
-			return;
-		}
+        if (!filtering.getFilter().isEmpty()
+                && block.asItem() != null
+                && filtering.test(new ItemStack(block))) {
+            activate(3);
+            return;
+        }
 
-		// Detect items on belt
-		TransportedItemStackHandlerBehaviour behaviour =
-			BlockEntityBehaviour.get(level, targetPos, TransportedItemStackHandlerBehaviour.TYPE);
-		if (behaviour != null) {
-			behaviour.handleCenteredProcessingOnAllItems(.45f, stack -> {
-				if (!filtering.test(stack.stack) || turnOffTicks == 6)
-					return TransportedResult.doNothing();
-				activate();
-				return TransportedResult.doNothing();
-			});
-			return;
-		}
+        // Detect items on belt
+        TransportedItemStackHandlerBehaviour behaviour =
+                BlockEntityBehaviour.get(
+                        level, targetPos, TransportedItemStackHandlerBehaviour.TYPE);
+        if (behaviour != null) {
+            behaviour.handleCenteredProcessingOnAllItems(
+                    .45f,
+                    stack -> {
+                        if (!filtering.test(stack.stack) || turnOffTicks == 6)
+                            return TransportedResult.doNothing();
+                        activate();
+                        return TransportedResult.doNothing();
+                    });
+            return;
+        }
 
-		// Detect fluids in pipe
-		FluidTransportBehaviour fluidBehaviour =
-			BlockEntityBehaviour.get(level, targetPos, FluidTransportBehaviour.TYPE);
-		if (fluidBehaviour != null) {
-			for (Direction side : Iterate.directions) {
-				Flow flow = fluidBehaviour.getFlow(side);
-				if (flow == null || !flow.inbound || !flow.complete)
-					continue;
-				if (!filtering.test(flow.fluid))
-					continue;
-				activate();
-				return;
-			}
-			return;
-		}
-		
-		// Detect packages looping on a chain conveyor
-		if (level.getBlockEntity(targetPos) instanceof ChainConveyorBlockEntity ccbe) {
-			for (ChainConveyorPackage box : ccbe.getLoopingPackages())
-				if (filtering.test(box.item)) {
-					activate();
-					return;
-				}
-			return;
-		}
+        // Detect fluids in pipe
+        FluidTransportBehaviour fluidBehaviour =
+                BlockEntityBehaviour.get(level, targetPos, FluidTransportBehaviour.TYPE);
+        if (fluidBehaviour != null) {
+            for (Direction side : Iterate.directions) {
+                Flow flow = fluidBehaviour.getFlow(side);
+                if (flow == null || !flow.inbound || !flow.complete) continue;
+                if (!filtering.test(flow.fluid)) continue;
+                activate();
+                return;
+            }
+            return;
+        }
 
-		if (observedInventory.hasInventory()) {
-			boolean skipInv = invVersionTracker.stillWaiting(observedInventory);
-			invVersionTracker.awaitNewVersion(observedInventory);
+        // Detect packages looping on a chain conveyor
+        if (level.getBlockEntity(targetPos) instanceof ChainConveyorBlockEntity ccbe) {
+            for (ChainConveyorPackage box : ccbe.getLoopingPackages())
+                if (filtering.test(box.item)) {
+                    activate();
+                    return;
+                }
+            return;
+        }
 
-			if (skipInv && sustainSignal)
-				turnOffTicks = DEFAULT_DELAY;
+        if (observedInventory.hasInventory()) {
+            boolean skipInv = invVersionTracker.stillWaiting(observedInventory);
+            invVersionTracker.awaitNewVersion(observedInventory);
 
-			if (!skipInv) {
-				sustainSignal = false;
-				if (!observedInventory.simulate()
-					.extract()
-					.isEmpty()) {
-					sustainSignal = true;
-					activate();
-					return;
-				}
-			}
-		}
+            if (skipInv && sustainSignal) turnOffTicks = DEFAULT_DELAY;
 
-		if (!observedTank.simulate()
-			.extractAny()
-			.isEmpty()) {
-			activate();
-			return;
-		}
-	}
+            if (!skipInv) {
+                sustainSignal = false;
+                if (!observedInventory.simulate().extract().isEmpty()) {
+                    sustainSignal = true;
+                    activate();
+                    return;
+                }
+            }
+        }
 
-	public void activate() {
-		activate(DEFAULT_DELAY);
-	}
+        if (!observedTank.simulate().extractAny().isEmpty()) {
+            activate();
+            return;
+        }
+    }
 
-	public void activate(int ticks) {
-		BlockState state = getBlockState();
-		turnOffTicks = ticks;
-		if (state.getValue(SmartObserverBlock.POWERED))
-			return;
-		level.setBlockAndUpdate(worldPosition, state.setValue(SmartObserverBlock.POWERED, true));
-		level.updateNeighborsAt(worldPosition, state.getBlock());
-	}
+    public void activate() {
+        activate(DEFAULT_DELAY);
+    }
 
-	private boolean isActive() {
-		return true;
-	}
+    public void activate(int ticks) {
+        BlockState state = getBlockState();
+        turnOffTicks = ticks;
+        if (state.getValue(SmartObserverBlock.POWERED)) return;
+        level.setBlockAndUpdate(worldPosition, state.setValue(SmartObserverBlock.POWERED, true));
+        level.updateNeighborsAt(worldPosition, state.getBlock());
+    }
 
-	@Override
-	public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		compound.putInt("TurnOff", turnOffTicks);
-		super.write(compound, registries, clientPacket);
-	}
+    private boolean isActive() {
+        return true;
+    }
 
-	@Override
-	protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(compound, registries, clientPacket);
-		turnOffTicks = compound.getInt("TurnOff");
-	}
+    @Override
+    public void write(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        compound.putInt("TurnOff", turnOffTicks);
+        super.write(compound, registries, clientPacket);
+    }
 
+    @Override
+    protected void read(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(compound, registries, clientPacket);
+        turnOffTicks = compound.getInt("TurnOff");
+    }
 }

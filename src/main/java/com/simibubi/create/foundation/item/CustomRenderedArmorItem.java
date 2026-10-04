@@ -12,6 +12,14 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 public interface CustomRenderedArmorItem {
-	@OnlyIn(Dist.CLIENT)
-	void renderArmorPiece(HumanoidArmorLayer<?, ?, ?> layer, PoseStack poseStack, MultiBufferSource bufferSource, LivingEntity entity, EquipmentSlot slot, int light, HumanoidModel<?> originalModel, ItemStack stack);
+    @OnlyIn(Dist.CLIENT)
+    void renderArmorPiece(
+            HumanoidArmorLayer<?, ?, ?> layer,
+            PoseStack poseStack,
+            MultiBufferSource bufferSource,
+            LivingEntity entity,
+            EquipmentSlot slot,
+            int light,
+            HumanoidModel<?> originalModel,
+            ItemStack stack);
 }

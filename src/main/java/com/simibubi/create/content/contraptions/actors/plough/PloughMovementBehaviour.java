@@ -37,112 +37,102 @@ import net.minecraft.world.phys.Vec3;
 
 public class PloughMovementBehaviour extends BlockBreakingMovementBehaviour {
 
-	@Override
-	public boolean isActive(MovementContext context) {
-		return super.isActive(context)
-			&& !VecHelper.isVecPointingTowards(context.relativeMotion, context.state.getValue(PloughBlock.FACING)
-			.getOpposite());
-	}
+    @Override
+    public boolean isActive(MovementContext context) {
+        return super.isActive(context)
+                && !VecHelper.isVecPointingTowards(
+                        context.relativeMotion,
+                        context.state.getValue(PloughBlock.FACING).getOpposite());
+    }
 
-	@Override
-	public void visitNewPosition(MovementContext context, BlockPos pos) {
-		super.visitNewPosition(context, pos);
-		Level world = context.world;
-		if (world.isClientSide)
-			return;
-		BlockPos below = pos.below();
-		if (!world.isLoaded(below))
-			return;
+    @Override
+    public void visitNewPosition(MovementContext context, BlockPos pos) {
+        super.visitNewPosition(context, pos);
+        Level world = context.world;
+        if (world.isClientSide) return;
+        BlockPos below = pos.below();
+        if (!world.isLoaded(below)) return;
 
-		Vec3 vec = VecHelper.getCenterOf(pos);
-		PloughFakePlayer player = getPlayer(context);
+        Vec3 vec = VecHelper.getCenterOf(pos);
+        PloughFakePlayer player = getPlayer(context);
 
-		if (player == null)
-			return;
+        if (player == null) return;
 
-		BlockHitResult ray = world.clip(new ClipContext(vec, vec.add(0, -1, 0), Block.OUTLINE, Fluid.NONE, player));
-		if (ray.getType() != Type.BLOCK)
-			return;
+        BlockHitResult ray =
+                world.clip(
+                        new ClipContext(vec, vec.add(0, -1, 0), Block.OUTLINE, Fluid.NONE, player));
+        if (ray.getType() != Type.BLOCK) return;
 
-		UseOnContext ctx = new UseOnContext(player, InteractionHand.MAIN_HAND, ray);
-		new ItemStack(Items.DIAMOND_HOE).useOn(ctx);
-	}
+        UseOnContext ctx = new UseOnContext(player, InteractionHand.MAIN_HAND, ray);
+        new ItemStack(Items.DIAMOND_HOE).useOn(ctx);
+    }
 
-	@Override
-	protected void throwEntity(MovementContext context, Entity entity) {
-		super.throwEntity(context, entity);
-		if (!(entity instanceof FallingBlockEntity fbe))
-			return;
-		if (!(fbe.getBlockState()
-			.getBlock() instanceof AnvilBlock))
-			return;
-		if (entity.getDeltaMovement()
-			.length() < 0.25f)
-			return;
-		entity.level().getEntitiesOfClass(Player.class, new AABB(entity.blockPosition()).inflate(32))
-			.forEach(AllAdvancements.ANVIL_PLOUGH::awardTo);
-	}
+    @Override
+    protected void throwEntity(MovementContext context, Entity entity) {
+        super.throwEntity(context, entity);
+        if (!(entity instanceof FallingBlockEntity fbe)) return;
+        if (!(fbe.getBlockState().getBlock() instanceof AnvilBlock)) return;
+        if (entity.getDeltaMovement().length() < 0.25f) return;
+        entity.level()
+                .getEntitiesOfClass(Player.class, new AABB(entity.blockPosition()).inflate(32))
+                .forEach(AllAdvancements.ANVIL_PLOUGH::awardTo);
+    }
 
-	@Override
-	public Vec3 getActiveAreaOffset(MovementContext context) {
-		return Vec3.atLowerCornerOf(context.state.getValue(PloughBlock.FACING)
-				.getNormal())
-			.scale(.45);
-	}
+    @Override
+    public Vec3 getActiveAreaOffset(MovementContext context) {
+        return Vec3.atLowerCornerOf(context.state.getValue(PloughBlock.FACING).getNormal())
+                .scale(.45);
+    }
 
-	@Override
-	protected boolean throwsEntities(Level level) {
-		return true;
-	}
+    @Override
+    protected boolean throwsEntities(Level level) {
+        return true;
+    }
 
-	@Override
-	public boolean canBreak(Level world, BlockPos breakingPos, BlockState state) {
-		if (state.isAir())
-			return false;
-		if (world.getBlockState(breakingPos.below())
-			.getBlock() instanceof FarmBlock)
-			return false;
-		if (state.getBlock() instanceof LiquidBlock)
-			return false;
-		if (state.getBlock() instanceof BubbleColumnBlock)
-			return false;
-		if (state.getBlock() instanceof NetherPortalBlock)
-			return false;
-		if (state.getBlock() instanceof ITrackBlock)
-			return true;
-		if (state.getBlock() instanceof FakeTrackBlock)
-			return false;
-		return state.getCollisionShape(world, breakingPos)
-			.isEmpty();
-	}
+    @Override
+    public boolean canBreak(Level world, BlockPos breakingPos, BlockState state) {
+        if (state.isAir()) return false;
+        if (world.getBlockState(breakingPos.below()).getBlock() instanceof FarmBlock) return false;
+        if (state.getBlock() instanceof LiquidBlock) return false;
+        if (state.getBlock() instanceof BubbleColumnBlock) return false;
+        if (state.getBlock() instanceof NetherPortalBlock) return false;
+        if (state.getBlock() instanceof ITrackBlock) return true;
+        if (state.getBlock() instanceof FakeTrackBlock) return false;
+        return state.getCollisionShape(world, breakingPos).isEmpty();
+    }
 
-	@Override
-	protected void onBlockBroken(MovementContext context, BlockPos pos, BlockState brokenState) {
-		super.onBlockBroken(context, pos, brokenState);
+    @Override
+    protected void onBlockBroken(MovementContext context, BlockPos pos, BlockState brokenState) {
+        super.onBlockBroken(context, pos, brokenState);
 
-		if (brokenState.getBlock() == Blocks.SNOW && context.world instanceof ServerLevel world) {
-			brokenState.getDrops(new LootParams.Builder(world).withParameter(LootContextParams.BLOCK_STATE, brokenState)
-					.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
-					.withParameter(LootContextParams.THIS_ENTITY, getPlayer(context))
-					.withParameter(LootContextParams.TOOL, new ItemStack(Items.IRON_SHOVEL)))
-				.forEach(s -> dropItem(context, s));
-		}
-	}
+        if (brokenState.getBlock() == Blocks.SNOW && context.world instanceof ServerLevel world) {
+            brokenState
+                    .getDrops(
+                            new LootParams.Builder(world)
+                                    .withParameter(LootContextParams.BLOCK_STATE, brokenState)
+                                    .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+                                    .withParameter(
+                                            LootContextParams.THIS_ENTITY, getPlayer(context))
+                                    .withParameter(
+                                            LootContextParams.TOOL,
+                                            new ItemStack(Items.IRON_SHOVEL)))
+                    .forEach(s -> dropItem(context, s));
+        }
+    }
 
-	@Override
-	public void stopMoving(MovementContext context) {
-		super.stopMoving(context);
-		if (context.temporaryData instanceof PloughFakePlayer)
-			((PloughFakePlayer) context.temporaryData).discard();
-	}
+    @Override
+    public void stopMoving(MovementContext context) {
+        super.stopMoving(context);
+        if (context.temporaryData instanceof PloughFakePlayer)
+            ((PloughFakePlayer) context.temporaryData).discard();
+    }
 
-	private PloughFakePlayer getPlayer(MovementContext context) {
-		if (!(context.temporaryData instanceof PloughFakePlayer) && context.world != null) {
-			PloughFakePlayer player = new PloughFakePlayer((ServerLevel) context.world);
-			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_HOE));
-			context.temporaryData = player;
-		}
-		return (PloughFakePlayer) context.temporaryData;
-	}
-
+    private PloughFakePlayer getPlayer(MovementContext context) {
+        if (!(context.temporaryData instanceof PloughFakePlayer) && context.world != null) {
+            PloughFakePlayer player = new PloughFakePlayer((ServerLevel) context.world);
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_HOE));
+            context.temporaryData = player;
+        }
+        return (PloughFakePlayer) context.temporaryData;
+    }
 }

@@ -1,11 +1,5 @@
 package com.simibubi.create.foundation.data.recipe;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllTags;
@@ -22,186 +16,192 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.Tags;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 public abstract class CreateRecipeProvider extends RecipeProvider {
 
-	protected final List<GeneratedRecipe> all = new ArrayList<>();
+    protected final List<GeneratedRecipe> all = new ArrayList<>();
 
-	public CreateRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-		super(output, registries);
-	}
+    public CreateRecipeProvider(
+            PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+        super(output, registries);
+    }
 
-	@Override
-	protected void buildRecipes(@NotNull RecipeOutput pRecipeOutput) {
-		all.forEach(c -> c.register(pRecipeOutput));
-		Create.LOGGER.info("{} registered {} recipe{}", getName(), all.size(), all.size() == 1 ? "" : "s");
-	}
+    @Override
+    protected void buildRecipes(@NotNull RecipeOutput pRecipeOutput) {
+        all.forEach(c -> c.register(pRecipeOutput));
+        Create.LOGGER.info(
+                "{} registered {} recipe{}", getName(), all.size(), all.size() == 1 ? "" : "s");
+    }
 
-	protected GeneratedRecipe register(GeneratedRecipe recipe) {
-		all.add(recipe);
-		return recipe;
-	}
+    protected GeneratedRecipe register(GeneratedRecipe recipe) {
+        all.add(recipe);
+        return recipe;
+    }
 
-	@FunctionalInterface
-	public interface GeneratedRecipe {
-		void register(RecipeOutput output);
-	}
+    @FunctionalInterface
+    public interface GeneratedRecipe {
+        void register(RecipeOutput output);
+    }
 
-	protected static class Marker {
-	}
+    protected static class Marker {}
 
-	protected static class I {
+    protected static class I {
 
-		static TagKey<Item> redstone() {
-			return Tags.Items.DUSTS_REDSTONE;
-		}
+        static TagKey<Item> redstone() {
+            return Tags.Items.DUSTS_REDSTONE;
+        }
 
-		static TagKey<Item> planks() {
-			return ItemTags.PLANKS;
-		}
+        static TagKey<Item> planks() {
+            return ItemTags.PLANKS;
+        }
 
-		static TagKey<Item> woodSlab() {
-			return ItemTags.WOODEN_SLABS;
-		}
+        static TagKey<Item> woodSlab() {
+            return ItemTags.WOODEN_SLABS;
+        }
 
-		static TagKey<Item> gold() {
-			return Tags.Items.INGOTS_GOLD;
-		}
+        static TagKey<Item> gold() {
+            return Tags.Items.INGOTS_GOLD;
+        }
 
-		static TagKey<Item> goldSheet() {
-			return AllTags.commonItemTag("plates/gold");
-		}
+        static TagKey<Item> goldSheet() {
+            return AllTags.commonItemTag("plates/gold");
+        }
 
-		static TagKey<Item> stone() {
-			return Tags.Items.STONES;
-		}
+        static TagKey<Item> stone() {
+            return Tags.Items.STONES;
+        }
 
-		static ItemLike andesiteAlloy() {
-			return AllItems.ANDESITE_ALLOY.get();
-		}
+        static ItemLike andesiteAlloy() {
+            return AllItems.ANDESITE_ALLOY.get();
+        }
 
-		static ItemLike shaft() {
-			return AllBlocks.SHAFT.get();
-		}
+        static ItemLike shaft() {
+            return AllBlocks.SHAFT.get();
+        }
 
-		static ItemLike cog() {
-			return AllBlocks.COGWHEEL.get();
-		}
+        static ItemLike cog() {
+            return AllBlocks.COGWHEEL.get();
+        }
 
-		static ItemLike largeCog() {
-			return AllBlocks.LARGE_COGWHEEL.get();
-		}
+        static ItemLike largeCog() {
+            return AllBlocks.LARGE_COGWHEEL.get();
+        }
 
-		static ItemLike andesiteCasing() {
-			return AllBlocks.ANDESITE_CASING.get();
-		}
-		
-		static ItemLike vault() {
-			return AllBlocks.ITEM_VAULT.get();
-		}
-		
-		static ItemLike stockLink() {
-			return AllBlocks.STOCK_LINK.get();
-		}
+        static ItemLike andesiteCasing() {
+            return AllBlocks.ANDESITE_CASING.get();
+        }
 
-		static TagKey<Item> brass() {
-			return AllTags.commonItemTag("ingots/brass");
-		}
+        static ItemLike vault() {
+            return AllBlocks.ITEM_VAULT.get();
+        }
 
-		static TagKey<Item> brassSheet() {
-			return AllTags.commonItemTag("plates/brass");
-		}
+        static ItemLike stockLink() {
+            return AllBlocks.STOCK_LINK.get();
+        }
 
-		static TagKey<Item> iron() {
-			return Tags.Items.INGOTS_IRON;
-		}
+        static TagKey<Item> brass() {
+            return AllTags.commonItemTag("ingots/brass");
+        }
 
-		static TagKey<Item> ironNugget() {
-			return Tags.Items.NUGGETS_IRON;
-		}
+        static TagKey<Item> brassSheet() {
+            return AllTags.commonItemTag("plates/brass");
+        }
 
-		static TagKey<Item> zinc() {
-			return AllTags.commonItemTag("ingots/zinc");
-		}
+        static TagKey<Item> iron() {
+            return Tags.Items.INGOTS_IRON;
+        }
 
-		static TagKey<Item> ironSheet() {
-			return AllTags.commonItemTag("plates/iron");
-		}
+        static TagKey<Item> ironNugget() {
+            return Tags.Items.NUGGETS_IRON;
+        }
 
-		static TagKey<Item> sturdySheet() {
-			return AllTags.commonItemTag("plates/obsidian");
-		}
+        static TagKey<Item> zinc() {
+            return AllTags.commonItemTag("ingots/zinc");
+        }
 
-		static ItemLike brassCasing() {
-			return AllBlocks.BRASS_CASING.get();
-		}
-		
-		static ItemLike cardboard() {
-			return AllItems.CARDBOARD.get();
-		}
+        static TagKey<Item> ironSheet() {
+            return AllTags.commonItemTag("plates/iron");
+        }
 
-		static ItemLike railwayCasing() {
-			return AllBlocks.RAILWAY_CASING.get();
-		}
+        static TagKey<Item> sturdySheet() {
+            return AllTags.commonItemTag("plates/obsidian");
+        }
 
-		static ItemLike electronTube() {
-			return AllItems.ELECTRON_TUBE.get();
-		}
+        static ItemLike brassCasing() {
+            return AllBlocks.BRASS_CASING.get();
+        }
 
-		static ItemLike precisionMechanism() {
-			return AllItems.PRECISION_MECHANISM.get();
-		}
+        static ItemLike cardboard() {
+            return AllItems.CARDBOARD.get();
+        }
 
-		static TagKey<Item> brassBlock() {
-			return AllTags.commonItemTag("storage_blocks/brass");
-		}
+        static ItemLike railwayCasing() {
+            return AllBlocks.RAILWAY_CASING.get();
+        }
 
-		static TagKey<Item> zincBlock() {
-			return AllTags.commonItemTag("storage_blocks/zinc");
-		}
+        static ItemLike electronTube() {
+            return AllItems.ELECTRON_TUBE.get();
+        }
 
-		static TagKey<Item> wheatFlour() {
-			return AllTags.commonItemTag("flours/wheat");
-		}
+        static ItemLike precisionMechanism() {
+            return AllItems.PRECISION_MECHANISM.get();
+        }
 
-		static TagKey<Item> copper() {
-			return Tags.Items.INGOTS_COPPER;
-		}
+        static TagKey<Item> brassBlock() {
+            return AllTags.commonItemTag("storage_blocks/brass");
+        }
 
-		static TagKey<Item> copperNugget() {
-			return AllTags.commonItemTag("nuggets/copper");
-		}
+        static TagKey<Item> zincBlock() {
+            return AllTags.commonItemTag("storage_blocks/zinc");
+        }
 
-		static TagKey<Item> copperBlock() {
-			return Tags.Items.STORAGE_BLOCKS_COPPER;
-		}
+        static TagKey<Item> wheatFlour() {
+            return AllTags.commonItemTag("flours/wheat");
+        }
 
-		static TagKey<Item> copperSheet() {
-			return AllTags.commonItemTag("plates/copper");
-		}
+        static TagKey<Item> copper() {
+            return Tags.Items.INGOTS_COPPER;
+        }
 
-		static TagKey<Item> brassNugget() {
-			return AllTags.commonItemTag("nuggets/brass");
-		}
+        static TagKey<Item> copperNugget() {
+            return AllTags.commonItemTag("nuggets/copper");
+        }
 
-		static TagKey<Item> zincNugget() {
-			return AllTags.commonItemTag("nuggets/zinc");
-		}
+        static TagKey<Item> copperBlock() {
+            return Tags.Items.STORAGE_BLOCKS_COPPER;
+        }
 
-		static ItemLike copperCasing() {
-			return AllBlocks.COPPER_CASING.get();
-		}
+        static TagKey<Item> copperSheet() {
+            return AllTags.commonItemTag("plates/copper");
+        }
 
-		static ItemLike refinedRadiance() {
-			return AllItems.REFINED_RADIANCE.get();
-		}
+        static TagKey<Item> brassNugget() {
+            return AllTags.commonItemTag("nuggets/brass");
+        }
 
-		static ItemLike shadowSteel() {
-			return AllItems.SHADOW_STEEL.get();
-		}
+        static TagKey<Item> zincNugget() {
+            return AllTags.commonItemTag("nuggets/zinc");
+        }
 
-		static Ingredient netherite() {
-			return Ingredient.of(Tags.Items.INGOTS_NETHERITE);
-		}
+        static ItemLike copperCasing() {
+            return AllBlocks.COPPER_CASING.get();
+        }
 
-	}
+        static ItemLike refinedRadiance() {
+            return AllItems.REFINED_RADIANCE.get();
+        }
+
+        static ItemLike shadowSteel() {
+            return AllItems.SHADOW_STEEL.get();
+        }
+
+        static Ingredient netherite() {
+            return Ingredient.of(Tags.Items.INGOTS_NETHERITE);
+        }
+    }
 }

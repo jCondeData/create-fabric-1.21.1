@@ -1,14 +1,5 @@
 package com.simibubi.create.content.contraptions.chassis;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.mojang.datafixers.util.Pair;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllKeys;
@@ -23,181 +14,175 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class ChassisRangeDisplay {
 
-	private static final int DISPLAY_TIME = 200;
-	private static GroupEntry lastHoveredGroup = null;
+    private static final int DISPLAY_TIME = 200;
+    private static GroupEntry lastHoveredGroup = null;
 
-	private static class Entry {
-		ChassisBlockEntity be;
-		int timer;
+    private static class Entry {
+        ChassisBlockEntity be;
+        int timer;
 
-		public Entry(ChassisBlockEntity be) {
-			this.be = be;
-			timer = DISPLAY_TIME;
-			Outliner.getInstance().showCluster(getOutlineKey(), createSelection(be))
-				.colored(0xFFFFFF)
-				.disableLineNormals()
-				.lineWidth(1 / 16f)
-				.withFaceTexture(AllSpecialTextures.HIGHLIGHT_CHECKERED);
-		}
+        public Entry(ChassisBlockEntity be) {
+            this.be = be;
+            timer = DISPLAY_TIME;
+            Outliner.getInstance()
+                    .showCluster(getOutlineKey(), createSelection(be))
+                    .colored(0xFFFFFF)
+                    .disableLineNormals()
+                    .lineWidth(1 / 16f)
+                    .withFaceTexture(AllSpecialTextures.HIGHLIGHT_CHECKERED);
+        }
 
-		protected Object getOutlineKey() {
-			return Pair.of(be.getBlockPos(), 1);
-		}
+        protected Object getOutlineKey() {
+            return Pair.of(be.getBlockPos(), 1);
+        }
 
-		protected Set<BlockPos> createSelection(ChassisBlockEntity chassis) {
-			Set<BlockPos> positions = new HashSet<>();
-			List<BlockPos> includedBlockPositions = chassis.getIncludedBlockPositions(null, true);
-			if (includedBlockPositions == null)
-				return Collections.emptySet();
-			positions.addAll(includedBlockPositions);
-			return positions;
-		}
+        protected Set<BlockPos> createSelection(ChassisBlockEntity chassis) {
+            Set<BlockPos> positions = new HashSet<>();
+            List<BlockPos> includedBlockPositions = chassis.getIncludedBlockPositions(null, true);
+            if (includedBlockPositions == null) return Collections.emptySet();
+            positions.addAll(includedBlockPositions);
+            return positions;
+        }
+    }
 
-	}
+    private static class GroupEntry extends Entry {
 
-	private static class GroupEntry extends Entry {
+        List<ChassisBlockEntity> includedBEs;
 
-		List<ChassisBlockEntity> includedBEs;
+        public GroupEntry(ChassisBlockEntity be) {
+            super(be);
+        }
 
-		public GroupEntry(ChassisBlockEntity be) {
-			super(be);
-		}
+        @Override
+        protected Object getOutlineKey() {
+            return this;
+        }
 
-		@Override
-		protected Object getOutlineKey() {
-			return this;
-		}
+        @Override
+        protected Set<BlockPos> createSelection(ChassisBlockEntity chassis) {
+            Set<BlockPos> list = new HashSet<>();
+            includedBEs = be.collectChassisGroup();
+            if (includedBEs == null) return list;
+            for (ChassisBlockEntity chassisBlockEntity : includedBEs)
+                list.addAll(super.createSelection(chassisBlockEntity));
+            return list;
+        }
+    }
 
-		@Override
-		protected Set<BlockPos> createSelection(ChassisBlockEntity chassis) {
-			Set<BlockPos> list = new HashSet<>();
-			includedBEs = be.collectChassisGroup();
-			if (includedBEs == null)
-				return list;
-			for (ChassisBlockEntity chassisBlockEntity : includedBEs)
-				list.addAll(super.createSelection(chassisBlockEntity));
-			return list;
-		}
+    static Map<BlockPos, Entry> entries = new HashMap<>();
+    static List<GroupEntry> groupEntries = new ArrayList<>();
 
-	}
+    public static void tick() {
+        Player player = Minecraft.getInstance().player;
+        Level world = Minecraft.getInstance().level;
+        boolean hasWrench = AllItems.WRENCH.isIn(player.getMainHandItem());
 
-	static Map<BlockPos, Entry> entries = new HashMap<>();
-	static List<GroupEntry> groupEntries = new ArrayList<>();
+        for (Iterator<BlockPos> iterator = entries.keySet().iterator(); iterator.hasNext(); ) {
+            BlockPos pos = iterator.next();
+            Entry entry = entries.get(pos);
+            if (tickEntry(entry, hasWrench)) iterator.remove();
+            Outliner.getInstance().keep(entry.getOutlineKey());
+        }
 
-	public static void tick() {
-		Player player = Minecraft.getInstance().player;
-		Level world = Minecraft.getInstance().level;
-		boolean hasWrench = AllItems.WRENCH.isIn(player.getMainHandItem());
+        for (Iterator<GroupEntry> iterator = groupEntries.iterator(); iterator.hasNext(); ) {
+            GroupEntry group = iterator.next();
+            if (tickEntry(group, hasWrench)) {
+                iterator.remove();
+                if (group == lastHoveredGroup) lastHoveredGroup = null;
+            }
+            Outliner.getInstance().keep(group.getOutlineKey());
+        }
 
-		for (Iterator<BlockPos> iterator = entries.keySet()
-			.iterator(); iterator.hasNext(); ) {
-			BlockPos pos = iterator.next();
-			Entry entry = entries.get(pos);
-			if (tickEntry(entry, hasWrench))
-				iterator.remove();
-			Outliner.getInstance().keep(entry.getOutlineKey());
-		}
+        if (!hasWrench) return;
 
-		for (Iterator<GroupEntry> iterator = groupEntries.iterator(); iterator.hasNext(); ) {
-			GroupEntry group = iterator.next();
-			if (tickEntry(group, hasWrench)) {
-				iterator.remove();
-				if (group == lastHoveredGroup)
-					lastHoveredGroup = null;
-			}
-			Outliner.getInstance().keep(group.getOutlineKey());
-		}
+        HitResult over = Minecraft.getInstance().hitResult;
+        if (!(over instanceof BlockHitResult ray)) return;
+        BlockPos pos = ray.getBlockPos();
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity == null || blockEntity.isRemoved()) return;
+        if (!(blockEntity instanceof ChassisBlockEntity chassisBlockEntity)) return;
 
-		if (!hasWrench)
-			return;
+        boolean ctrl = AllKeys.ctrlDown();
 
-		HitResult over = Minecraft.getInstance().hitResult;
-		if (!(over instanceof BlockHitResult ray))
-			return;
-		BlockPos pos = ray.getBlockPos();
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity == null || blockEntity.isRemoved())
-			return;
-		if (!(blockEntity instanceof ChassisBlockEntity chassisBlockEntity))
-			return;
+        if (ctrl) {
+            GroupEntry existingGroupForPos = getExistingGroupForPos(pos);
+            if (existingGroupForPos != null) {
+                for (ChassisBlockEntity included : existingGroupForPos.includedBEs)
+                    entries.remove(included.getBlockPos());
+                existingGroupForPos.timer = DISPLAY_TIME;
+                return;
+            }
+        }
 
-		boolean ctrl = AllKeys.ctrlDown();
+        if (!entries.containsKey(pos) || ctrl) display(chassisBlockEntity);
+        else {
+            if (!ctrl) entries.get(pos).timer = DISPLAY_TIME;
+        }
+    }
 
-		if (ctrl) {
-			GroupEntry existingGroupForPos = getExistingGroupForPos(pos);
-			if (existingGroupForPos != null) {
-				for (ChassisBlockEntity included : existingGroupForPos.includedBEs)
-					entries.remove(included.getBlockPos());
-				existingGroupForPos.timer = DISPLAY_TIME;
-				return;
-			}
-		}
+    private static boolean tickEntry(Entry entry, boolean hasWrench) {
+        ChassisBlockEntity chassisBlockEntity = entry.be;
+        Level beWorld = chassisBlockEntity.getLevel();
+        Level world = Minecraft.getInstance().level;
 
-		if (!entries.containsKey(pos) || ctrl)
-			display(chassisBlockEntity);
-		else {
-			if (!ctrl)
-				entries.get(pos).timer = DISPLAY_TIME;
-		}
-	}
+        if (chassisBlockEntity.isRemoved()
+                || beWorld == null
+                || beWorld != world
+                || !world.isLoaded(chassisBlockEntity.getBlockPos())) {
+            return true;
+        }
 
-	private static boolean tickEntry(Entry entry, boolean hasWrench) {
-		ChassisBlockEntity chassisBlockEntity = entry.be;
-		Level beWorld = chassisBlockEntity.getLevel();
-		Level world = Minecraft.getInstance().level;
+        if (!hasWrench && entry.timer > 20) {
+            entry.timer = 20;
+            return false;
+        }
 
-		if (chassisBlockEntity.isRemoved() || beWorld == null || beWorld != world
-			|| !world.isLoaded(chassisBlockEntity.getBlockPos())) {
-			return true;
-		}
+        entry.timer--;
+        if (entry.timer == 0) return true;
+        return false;
+    }
 
-		if (!hasWrench && entry.timer > 20) {
-			entry.timer = 20;
-			return false;
-		}
+    public static void display(ChassisBlockEntity chassis) {
 
-		entry.timer--;
-		if (entry.timer == 0)
-			return true;
-		return false;
-	}
+        // Display a group and kill any selections of its contained chassis blocks
+        if (AllKeys.ctrlDown()) {
+            GroupEntry hoveredGroup = new GroupEntry(chassis);
 
-	public static void display(ChassisBlockEntity chassis) {
+            for (ChassisBlockEntity included : hoveredGroup.includedBEs)
+                Outliner.getInstance().remove(Pair.of(included.getBlockPos(), 1));
 
-		// Display a group and kill any selections of its contained chassis blocks
-		if (AllKeys.ctrlDown()) {
-			GroupEntry hoveredGroup = new GroupEntry(chassis);
+            groupEntries.forEach(entry -> Outliner.getInstance().remove(entry.getOutlineKey()));
+            groupEntries.clear();
+            entries.clear();
+            groupEntries.add(hoveredGroup);
+            return;
+        }
 
-			for (ChassisBlockEntity included : hoveredGroup.includedBEs)
-				Outliner.getInstance().remove(Pair.of(included.getBlockPos(), 1));
+        // Display an individual chassis and kill any group selections that contained it
+        BlockPos pos = chassis.getBlockPos();
+        GroupEntry entry = getExistingGroupForPos(pos);
+        if (entry != null) Outliner.getInstance().remove(entry.getOutlineKey());
 
-			groupEntries.forEach(entry -> Outliner.getInstance().remove(entry.getOutlineKey()));
-			groupEntries.clear();
-			entries.clear();
-			groupEntries.add(hoveredGroup);
-			return;
-		}
+        groupEntries.clear();
+        entries.clear();
+        entries.put(pos, new Entry(chassis));
+    }
 
-		// Display an individual chassis and kill any group selections that contained it
-		BlockPos pos = chassis.getBlockPos();
-		GroupEntry entry = getExistingGroupForPos(pos);
-		if (entry != null)
-			Outliner.getInstance().remove(entry.getOutlineKey());
-
-		groupEntries.clear();
-		entries.clear();
-		entries.put(pos, new Entry(chassis));
-
-	}
-
-	private static GroupEntry getExistingGroupForPos(BlockPos pos) {
-		for (GroupEntry groupEntry : groupEntries)
-			for (ChassisBlockEntity chassis : groupEntry.includedBEs)
-				if (pos.equals(chassis.getBlockPos()))
-					return groupEntry;
-		return null;
-	}
-
+    private static GroupEntry getExistingGroupForPos(BlockPos pos) {
+        for (GroupEntry groupEntry : groupEntries)
+            for (ChassisBlockEntity chassis : groupEntry.includedBEs)
+                if (pos.equals(chassis.getBlockPos())) return groupEntry;
+        return null;
+    }
 }

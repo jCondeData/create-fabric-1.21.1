@@ -11,24 +11,24 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 public class NixieTubeGenerator extends SpecialBlockStateGen {
 
-	@Override
-	protected int getXRotation(BlockState state) {
-		return state.getValue(NixieTubeBlock.FACE)
-			.xRot();
-	}
+    @Override
+    protected int getXRotation(BlockState state) {
+        return state.getValue(NixieTubeBlock.FACE).xRot();
+    }
 
-	@Override
-	protected int getYRotation(BlockState state) {
-		DoubleAttachFace face = state.getValue(NixieTubeBlock.FACE);
-		return horizontalAngle(state.getValue(NixieTubeBlock.FACING))
-			+ (face == DoubleAttachFace.WALL || face == DoubleAttachFace.WALL_REVERSED ? 180 : 0);
-	}
+    @Override
+    protected int getYRotation(BlockState state) {
+        DoubleAttachFace face = state.getValue(NixieTubeBlock.FACE);
+        return horizontalAngle(state.getValue(NixieTubeBlock.FACING))
+                + (face == DoubleAttachFace.WALL || face == DoubleAttachFace.WALL_REVERSED
+                        ? 180
+                        : 0);
+    }
 
-	@Override
-	public <T extends Block> ModelFile getModel(DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov,
-		BlockState state) {
-		return prov.models()
-			.withExistingParent(ctx.getName(), prov.modLoc("block/nixie_tube/block"));
-	}
-
+    @Override
+    public <T extends Block> ModelFile getModel(
+            DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov, BlockState state) {
+        return prov.models()
+                .withExistingParent(ctx.getName(), prov.modLoc("block/nixie_tube/block"));
+    }
 }

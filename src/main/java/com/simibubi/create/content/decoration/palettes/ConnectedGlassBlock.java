@@ -11,18 +11,20 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 public class ConnectedGlassBlock extends TransparentBlock {
 
-	public ConnectedGlassBlock(Properties p_i48392_1_) {
-		super(p_i48392_1_);
-	}
+    public ConnectedGlassBlock(Properties p_i48392_1_) {
+        super(p_i48392_1_);
+    }
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
-		return adjacentBlockState.getBlock() instanceof ConnectedGlassBlock || super.skipRendering(state, adjacentBlockState, side);
-	}
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
+        return adjacentBlockState.getBlock() instanceof ConnectedGlassBlock
+                || super.skipRendering(state, adjacentBlockState, side);
+    }
 
-	@Override
-	public boolean shouldDisplayFluidOverlay(BlockState state, BlockAndTintGetter world, BlockPos pos, FluidState fluidState) {
-		return true;
-	}
+    @Override
+    public boolean shouldDisplayFluidOverlay(
+            BlockState state, BlockAndTintGetter world, BlockPos pos, FluidState fluidState) {
+        return true;
+    }
 }

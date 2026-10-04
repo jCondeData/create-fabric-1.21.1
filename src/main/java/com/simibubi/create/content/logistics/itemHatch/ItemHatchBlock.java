@@ -1,8 +1,5 @@
 package com.simibubi.create.content.logistics.itemHatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllShapes;
@@ -46,152 +43,158 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemHatchBlock extends HorizontalDirectionalBlock
-	implements IBE<ItemHatchBlockEntity>, IWrenchable, ProperWaterloggedBlock {
-	public static final MapCodec<ItemHatchBlock> CODEC = simpleCodec(ItemHatchBlock::new);
+        implements IBE<ItemHatchBlockEntity>, IWrenchable, ProperWaterloggedBlock {
+    public static final MapCodec<ItemHatchBlock> CODEC = simpleCodec(ItemHatchBlock::new);
 
-	public static final BooleanProperty OPEN = BooleanProperty.create("open");
+    public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
-	public ItemHatchBlock(Properties pProperties) {
-		super(pProperties);
-		registerDefaultState(defaultBlockState().setValue(OPEN, false)
-			.setValue(WATERLOGGED, false));
-	}
+    public ItemHatchBlock(Properties pProperties) {
+        super(pProperties);
+        registerDefaultState(
+                defaultBlockState().setValue(OPEN, false).setValue(WATERLOGGED, false));
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(OPEN, FACING, WATERLOGGED));
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder.add(OPEN, FACING, WATERLOGGED));
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		BlockState state = super.getStateForPlacement(pContext);
-		if (state == null)
-			return state;
-		if (pContext.getClickedFace()
-			.getAxis()
-			.isVertical())
-			return null;
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState state = super.getStateForPlacement(pContext);
+        if (state == null) return state;
+        if (pContext.getClickedFace().getAxis().isVertical()) return null;
 
-		return withWater(state.setValue(FACING, pContext.getClickedFace()
-			.getOpposite())
-			.setValue(OPEN, false), pContext);
-	}
+        return withWater(
+                state.setValue(FACING, pContext.getClickedFace().getOpposite())
+                        .setValue(OPEN, false),
+                pContext);
+    }
 
-	@Override
-	public FluidState getFluidState(BlockState pState) {
-		return fluidState(pState);
-	}
+    @Override
+    public FluidState getFluidState(BlockState pState) {
+        return fluidState(pState);
+    }
 
-	@Override
-	public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-		LevelAccessor pLevel, BlockPos pPos, BlockPos pNeighborPos) {
-		updateWater(pLevel, pState, pPos);
-		return pState;
-	}
+    @Override
+    public BlockState updateShape(
+            BlockState pState,
+            Direction pDirection,
+            BlockState pNeighborState,
+            LevelAccessor pLevel,
+            BlockPos pPos,
+            BlockPos pNeighborPos) {
+        updateWater(pLevel, pState, pPos);
+        return pState;
+    }
 
-	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		if (level.isClientSide())
-			return ItemInteractionResult.SUCCESS;
-		if (player instanceof FakePlayer)
-			return ItemInteractionResult.SUCCESS;
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult) {
+        if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
+        if (player instanceof FakePlayer) return ItemInteractionResult.SUCCESS;
 
-		BlockEntity blockEntity = level.getBlockEntity(pos.relative(state.getValue(FACING)));
-		if (blockEntity == null)
-			return ItemInteractionResult.FAIL;
-		IItemHandler targetInv = level.getCapability(ItemHandler.BLOCK, blockEntity.getBlockPos(), null);
-		if (targetInv == null)
-			return ItemInteractionResult.FAIL;
+        BlockEntity blockEntity = level.getBlockEntity(pos.relative(state.getValue(FACING)));
+        if (blockEntity == null) return ItemInteractionResult.FAIL;
+        IItemHandler targetInv =
+                level.getCapability(ItemHandler.BLOCK, blockEntity.getBlockPos(), null);
+        if (targetInv == null) return ItemInteractionResult.FAIL;
 
-		FilteringBehaviour filter = BlockEntityBehaviour.get(level, pos, FilteringBehaviour.TYPE);
-		if (filter == null)
-			return ItemInteractionResult.FAIL;
+        FilteringBehaviour filter = BlockEntityBehaviour.get(level, pos, FilteringBehaviour.TYPE);
+        if (filter == null) return ItemInteractionResult.FAIL;
 
-		Inventory inventory = player.getInventory();
-		List<ItemStack> failedInsertions = new ArrayList<>();
-		boolean anyInserted = false;
-		boolean depositItemInHand = !player.isShiftKeyDown();
+        Inventory inventory = player.getInventory();
+        List<ItemStack> failedInsertions = new ArrayList<>();
+        boolean anyInserted = false;
+        boolean depositItemInHand = !player.isShiftKeyDown();
 
-		if (!depositItemInHand && AllItemTags.WRENCH.matches(stack))
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (!depositItemInHand && AllItemTags.WRENCH.matches(stack))
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
-		for (int i = 0; i < inventory.items.size(); i++) {
-			if (Inventory.isHotbarSlot(i) != depositItemInHand)
-				continue;
-			if (depositItemInHand && i != inventory.selected)
-				continue;
-			ItemStack item = inventory.getItem(i);
-			if (item.isEmpty())
-				continue;
-			if (!item.getItem()
-				.canFitInsideContainerItems() && !PackageItem.isPackage(item))
-				continue;
-			if (!filter.getFilter()
-				.isEmpty() && !filter.test(item))
-				continue;
+        for (int i = 0; i < inventory.items.size(); i++) {
+            if (Inventory.isHotbarSlot(i) != depositItemInHand) continue;
+            if (depositItemInHand && i != inventory.selected) continue;
+            ItemStack item = inventory.getItem(i);
+            if (item.isEmpty()) continue;
+            if (!item.getItem().canFitInsideContainerItems() && !PackageItem.isPackage(item))
+                continue;
+            if (!filter.getFilter().isEmpty() && !filter.test(item)) continue;
 
-			ItemStack remainder = ItemHandlerHelper.insertItemStacked(targetInv, item, true);
-			if (remainder.getCount() == item.getCount())
-				continue;
+            ItemStack remainder = ItemHandlerHelper.insertItemStacked(targetInv, item, true);
+            if (remainder.getCount() == item.getCount()) continue;
 
-			ItemStack extracted = inventory.removeItem(i, item.getCount() - remainder.getCount());
-			remainder = ItemHandlerHelper.insertItemStacked(targetInv, extracted, false);
-			anyInserted = true;
+            ItemStack extracted = inventory.removeItem(i, item.getCount() - remainder.getCount());
+            remainder = ItemHandlerHelper.insertItemStacked(targetInv, extracted, false);
+            anyInserted = true;
 
-			// remainder might not be empty in itemhandler edge cases
-			if (!remainder.isEmpty())
-				failedInsertions.add(remainder);
-		}
+            // remainder might not be empty in itemhandler edge cases
+            if (!remainder.isEmpty()) failedInsertions.add(remainder);
+        }
 
-		failedInsertions.forEach(inventory::placeItemBackInInventory);
+        failedInsertions.forEach(inventory::placeItemBackInInventory);
 
-		if (!anyInserted)
-			return ItemInteractionResult.SUCCESS;
+        if (!anyInserted) return ItemInteractionResult.SUCCESS;
 
-		AllSoundEvents.ITEM_HATCH.playOnServer(level, pos);
-		level.setBlockAndUpdate(pos, state.setValue(OPEN, true));
-		level.scheduleTick(pos, this, 10);
+        AllSoundEvents.ITEM_HATCH.playOnServer(level, pos);
+        level.setBlockAndUpdate(pos, state.setValue(OPEN, true));
+        level.scheduleTick(pos, this, 10);
 
-		CreateLang.translate(depositItemInHand ? "item_hatch.deposit_item" : "item_hatch.deposit_inventory")
-			.sendStatus(player);
-		return ItemInteractionResult.SUCCESS;
-	}
+        CreateLang.translate(
+                        depositItemInHand
+                                ? "item_hatch.deposit_item"
+                                : "item_hatch.deposit_inventory")
+                .sendStatus(player);
+        return ItemInteractionResult.SUCCESS;
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-		return AllShapes.ITEM_HATCH.get(pState.getValue(FACING)
-			.getOpposite());
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AllShapes.ITEM_HATCH.get(pState.getValue(FACING).getOpposite());
+    }
 
-	@Override
-	public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
-		if (pState.getValue(OPEN))
-			pLevel.setBlockAndUpdate(pPos, pState.setValue(OPEN, false));
-	}
+    @Override
+    public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        if (pState.getValue(OPEN)) pLevel.setBlockAndUpdate(pPos, pState.setValue(OPEN, false));
+    }
 
-	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-		IBE.onRemove(state, level, pos, newState);
-	}
+    @Override
+    public void onRemove(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            BlockState newState,
+            boolean movedByPiston) {
+        IBE.onRemove(state, level, pos, newState);
+    }
 
-	@Override
-	public Class<ItemHatchBlockEntity> getBlockEntityClass() {
-		return ItemHatchBlockEntity.class;
-	}
+    @Override
+    public Class<ItemHatchBlockEntity> getBlockEntityClass() {
+        return ItemHatchBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends ItemHatchBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.ITEM_HATCH.get();
-	}
+    @Override
+    public BlockEntityType<? extends ItemHatchBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.ITEM_HATCH.get();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-		return CODEC;
-	}
+    @Override
+    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
 }

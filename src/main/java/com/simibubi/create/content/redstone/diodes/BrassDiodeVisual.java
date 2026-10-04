@@ -1,7 +1,5 @@
 package com.simibubi.create.content.redstone.diodes;
 
-import java.util.function.Consumer;
-
 import com.simibubi.create.AllPartialModels;
 
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -12,23 +10,34 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
+
 import net.createmod.catnip.theme.Color;
 
-public class BrassDiodeVisual extends AbstractBlockEntityVisual<BrassDiodeBlockEntity> implements SimpleTickableVisual {
+import java.util.function.Consumer;
+
+public class BrassDiodeVisual extends AbstractBlockEntityVisual<BrassDiodeBlockEntity>
+        implements SimpleTickableVisual {
 
     protected final TransformedInstance indicator;
 
     protected int previousState;
 
-    public BrassDiodeVisual(VisualizationContext context, BrassDiodeBlockEntity blockEntity, float partialTick) {
+    public BrassDiodeVisual(
+            VisualizationContext context, BrassDiodeBlockEntity blockEntity, float partialTick) {
         super(context, blockEntity, partialTick);
 
-        indicator = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FLEXPEATER_INDICATOR)).createInstance();
+        indicator =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.FLEXPEATER_INDICATOR))
+                        .createInstance();
 
-        indicator.setIdentityTransform()
-				.translate(getVisualPosition())
-				.colorRgb(getColor())
-				.setChanged();
+        indicator
+                .setIdentityTransform()
+                .translate(getVisualPosition())
+                .colorRgb(getColor())
+                .setChanged();
 
         previousState = blockEntity.state;
     }
@@ -38,7 +47,7 @@ public class BrassDiodeVisual extends AbstractBlockEntityVisual<BrassDiodeBlockE
         if (previousState == blockEntity.state) return;
 
         indicator.colorRgb(getColor());
-		indicator.setChanged();
+        indicator.setChanged();
 
         previousState = blockEntity.state;
     }
@@ -57,8 +66,8 @@ public class BrassDiodeVisual extends AbstractBlockEntityVisual<BrassDiodeBlockE
         return Color.mixColors(0x2c0300, 0xcd0000, blockEntity.getProgress());
     }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		consumer.accept(indicator);
-	}
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        consumer.accept(indicator);
+    }
 }

@@ -7,12 +7,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class AbstractDiodeBlock extends DiodeBlock implements IWrenchable {
 
-	public AbstractDiodeBlock(Properties builder) {
-		super(builder);
-	}
+    public AbstractDiodeBlock(Properties builder) {
+        super(builder);
+    }
 
-	@Override
-	public boolean isSignalSource(BlockState state) {
-		return true;
-	}
+    @Override
+    public boolean isSignalSource(BlockState state) {
+        return true;
+    }
 }

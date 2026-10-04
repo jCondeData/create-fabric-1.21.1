@@ -1,7 +1,5 @@
 package com.simibubi.create.content.contraptions.gantry;
 
-import java.util.function.Consumer;
-
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.simibubi.create.content.kinetics.base.ShaftVisual;
@@ -13,104 +11,114 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 
-public class GantryCarriageVisual extends ShaftVisual<GantryCarriageBlockEntity> implements SimpleDynamicVisual {
+import java.util.function.Consumer;
 
-	private final TransformedInstance gantryCogs;
+public class GantryCarriageVisual extends ShaftVisual<GantryCarriageBlockEntity>
+        implements SimpleDynamicVisual {
 
-	final Direction facing;
-	final Boolean alongFirst;
-	final Direction.Axis rotationAxis;
-	final float rotationMult;
-	final BlockPos visualPos;
+    private final TransformedInstance gantryCogs;
 
-	private float lastAngle = Float.NaN;
+    final Direction facing;
+    final Boolean alongFirst;
+    final Direction.Axis rotationAxis;
+    final float rotationMult;
+    final BlockPos visualPos;
 
-	public GantryCarriageVisual(VisualizationContext context, GantryCarriageBlockEntity blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick);
+    private float lastAngle = Float.NaN;
 
-		gantryCogs = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.GANTRY_COGS))
-								 .createInstance();
+    public GantryCarriageVisual(
+            VisualizationContext context,
+            GantryCarriageBlockEntity blockEntity,
+            float partialTick) {
+        super(context, blockEntity, partialTick);
 
-		facing = blockState.getValue(GantryCarriageBlock.FACING);
-		alongFirst = blockState.getValue(GantryCarriageBlock.AXIS_ALONG_FIRST_COORDINATE);
-		rotationAxis = KineticBlockEntityRenderer.getRotationAxisOf(blockEntity);
+        gantryCogs =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.GANTRY_COGS))
+                        .createInstance();
 
-		rotationMult = getRotationMultiplier(getGantryAxis(), facing);
+        facing = blockState.getValue(GantryCarriageBlock.FACING);
+        alongFirst = blockState.getValue(GantryCarriageBlock.AXIS_ALONG_FIRST_COORDINATE);
+        rotationAxis = KineticBlockEntityRenderer.getRotationAxisOf(blockEntity);
 
-		visualPos = facing.getAxisDirection() == Direction.AxisDirection.POSITIVE ? blockEntity.getBlockPos()
-				: blockEntity.getBlockPos()
-					  .relative(facing.getOpposite());
+        rotationMult = getRotationMultiplier(getGantryAxis(), facing);
 
-		animateCogs(getCogAngle());
-	}
+        visualPos =
+                facing.getAxisDirection() == Direction.AxisDirection.POSITIVE
+                        ? blockEntity.getBlockPos()
+                        : blockEntity.getBlockPos().relative(facing.getOpposite());
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		float cogAngle = getCogAngle();
+        animateCogs(getCogAngle());
+    }
 
-		if (Mth.equal(cogAngle, lastAngle)) return;
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        float cogAngle = getCogAngle();
 
-		animateCogs(cogAngle);
-	}
+        if (Mth.equal(cogAngle, lastAngle)) return;
 
-	private float getCogAngle() {
-		return GantryCarriageRenderer.getAngleForBE(blockEntity, visualPos, rotationAxis) * rotationMult;
-	}
+        animateCogs(cogAngle);
+    }
 
-	private void animateCogs(float cogAngle) {
-		gantryCogs.setIdentityTransform()
-				.translate(getVisualPosition())
-				.center()
-				.rotateYDegrees(AngleHelper.horizontalAngle(facing))
-				.rotateXDegrees(facing == Direction.UP ? 0 : facing == Direction.DOWN ? 180 : 90)
-				.rotateYDegrees(alongFirst ^ facing.getAxis() == Direction.Axis.X ? 0 : 90)
-				.translate(0, -9 / 16f, 0)
-				.rotateXDegrees(-cogAngle)
-				.translate(0, 9 / 16f, 0)
-				.uncenter()
-				.setChanged();
-	}
+    private float getCogAngle() {
+        return GantryCarriageRenderer.getAngleForBE(blockEntity, visualPos, rotationAxis)
+                * rotationMult;
+    }
 
-	static float getRotationMultiplier(Direction.Axis gantryAxis, Direction facing) {
-		float multiplier = 1;
-		if (gantryAxis == Direction.Axis.X)
-			if (facing == Direction.UP)
-				multiplier *= -1;
-		if (gantryAxis == Direction.Axis.Y)
-			if (facing == Direction.NORTH || facing == Direction.EAST)
-				multiplier *= -1;
+    private void animateCogs(float cogAngle) {
+        gantryCogs
+                .setIdentityTransform()
+                .translate(getVisualPosition())
+                .center()
+                .rotateYDegrees(AngleHelper.horizontalAngle(facing))
+                .rotateXDegrees(facing == Direction.UP ? 0 : facing == Direction.DOWN ? 180 : 90)
+                .rotateYDegrees(alongFirst ^ facing.getAxis() == Direction.Axis.X ? 0 : 90)
+                .translate(0, -9 / 16f, 0)
+                .rotateXDegrees(-cogAngle)
+                .translate(0, 9 / 16f, 0)
+                .uncenter()
+                .setChanged();
+    }
 
-		return multiplier;
-	}
+    static float getRotationMultiplier(Direction.Axis gantryAxis, Direction facing) {
+        float multiplier = 1;
+        if (gantryAxis == Direction.Axis.X) if (facing == Direction.UP) multiplier *= -1;
+        if (gantryAxis == Direction.Axis.Y)
+            if (facing == Direction.NORTH || facing == Direction.EAST) multiplier *= -1;
 
-	private Direction.Axis getGantryAxis() {
-		Direction.Axis gantryAxis = Direction.Axis.X;
-		for (Direction.Axis axis : Iterate.axes)
-			if (axis != rotationAxis && axis != facing.getAxis())
-				gantryAxis = axis;
-		return gantryAxis;
-	}
+        return multiplier;
+    }
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(gantryCogs, rotatingModel);
-	}
+    private Direction.Axis getGantryAxis() {
+        Direction.Axis gantryAxis = Direction.Axis.X;
+        for (Direction.Axis axis : Iterate.axes)
+            if (axis != rotationAxis && axis != facing.getAxis()) gantryAxis = axis;
+        return gantryAxis;
+    }
 
-	@Override
+    @Override
+    public void updateLight(float partialTick) {
+        relight(gantryCogs, rotatingModel);
+    }
+
+    @Override
     protected void _delete() {
-		super._delete();
-		gantryCogs.delete();
-	}
+        super._delete();
+        gantryCogs.delete();
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		super.collectCrumblingInstances(consumer);
-		consumer.accept(gantryCogs);
-	}
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        super.collectCrumblingInstances(consumer);
+        consumer.accept(gantryCogs);
+    }
 }

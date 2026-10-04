@@ -6,6 +6,7 @@ import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.math.AngleHelper;
@@ -22,62 +23,61 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class GantryCarriageRenderer extends KineticBlockEntityRenderer<GantryCarriageBlockEntity> {
 
-	public GantryCarriageRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public GantryCarriageRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected void renderSafe(GantryCarriageBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
-		int light, int overlay) {
-		super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
+    @Override
+    protected void renderSafe(
+            GantryCarriageBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
 
-		if (VisualizationManager.supportsVisualization(be.getLevel())) return;
+        if (VisualizationManager.supportsVisualization(be.getLevel())) return;
 
-		BlockState state = be.getBlockState();
-		Direction facing = state.getValue(GantryCarriageBlock.FACING);
-		Boolean alongFirst = state.getValue(GantryCarriageBlock.AXIS_ALONG_FIRST_COORDINATE);
-		Axis rotationAxis = getRotationAxisOf(be);
-		BlockPos visualPos = facing.getAxisDirection() == AxisDirection.POSITIVE ? be.getBlockPos()
-				: be.getBlockPos()
-				.relative(facing.getOpposite());
-		float angleForBE = getAngleForBE(be, visualPos, rotationAxis);
+        BlockState state = be.getBlockState();
+        Direction facing = state.getValue(GantryCarriageBlock.FACING);
+        Boolean alongFirst = state.getValue(GantryCarriageBlock.AXIS_ALONG_FIRST_COORDINATE);
+        Axis rotationAxis = getRotationAxisOf(be);
+        BlockPos visualPos =
+                facing.getAxisDirection() == AxisDirection.POSITIVE
+                        ? be.getBlockPos()
+                        : be.getBlockPos().relative(facing.getOpposite());
+        float angleForBE = getAngleForBE(be, visualPos, rotationAxis);
 
-		Axis gantryAxis = Axis.X;
-		for (Axis axis : Iterate.axes)
-			if (axis != rotationAxis && axis != facing.getAxis())
-				gantryAxis = axis;
+        Axis gantryAxis = Axis.X;
+        for (Axis axis : Iterate.axes)
+            if (axis != rotationAxis && axis != facing.getAxis()) gantryAxis = axis;
 
-		if (gantryAxis == Axis.X)
-			if (facing == Direction.UP)
-				angleForBE *= -1;
-		if (gantryAxis == Axis.Y)
-			if (facing == Direction.NORTH || facing == Direction.EAST)
-				angleForBE *= -1;
+        if (gantryAxis == Axis.X) if (facing == Direction.UP) angleForBE *= -1;
+        if (gantryAxis == Axis.Y)
+            if (facing == Direction.NORTH || facing == Direction.EAST) angleForBE *= -1;
 
-		SuperByteBuffer cogs = CachedBuffers.partial(AllPartialModels.GANTRY_COGS, state);
-		cogs.center()
-				.rotateYDegrees(AngleHelper.horizontalAngle(facing))
-				.rotateXDegrees(facing == Direction.UP ? 0 : facing == Direction.DOWN ? 180 : 90)
-				.rotateYDegrees(alongFirst ^ facing.getAxis() == Axis.X ? 0 : 90)
-				.translate(0, -9 / 16f, 0)
-				.rotateXDegrees(-angleForBE)
-				.translate(0, 9 / 16f, 0)
-				.uncenter();
+        SuperByteBuffer cogs = CachedBuffers.partial(AllPartialModels.GANTRY_COGS, state);
+        cogs.center()
+                .rotateYDegrees(AngleHelper.horizontalAngle(facing))
+                .rotateXDegrees(facing == Direction.UP ? 0 : facing == Direction.DOWN ? 180 : 90)
+                .rotateYDegrees(alongFirst ^ facing.getAxis() == Axis.X ? 0 : 90)
+                .translate(0, -9 / 16f, 0)
+                .rotateXDegrees(-angleForBE)
+                .translate(0, 9 / 16f, 0)
+                .uncenter();
 
-		cogs.light(light)
-			.renderInto(ms, buffer.getBuffer(RenderType.solid()));
+        cogs.light(light).renderInto(ms, buffer.getBuffer(RenderType.solid()));
+    }
 
-	}
+    public static float getAngleForBE(KineticBlockEntity be, final BlockPos pos, Axis axis) {
+        float time = AnimationTickHolder.getRenderTime(be.getLevel());
+        float offset = getRotationOffsetForPosition(be, pos, axis);
+        return (time * be.getSpeed() * 3f / 20 + offset) % 360;
+    }
 
-	public static float getAngleForBE(KineticBlockEntity be, final BlockPos pos, Axis axis) {
-		float time = AnimationTickHolder.getRenderTime(be.getLevel());
-		float offset = getRotationOffsetForPosition(be, pos, axis);
-		return (time * be.getSpeed() * 3f / 20 + offset) % 360;
-	}
-
-	@Override
-	protected BlockState getRenderedBlockState(GantryCarriageBlockEntity be) {
-		return shaft(getRotationAxisOf(be));
-	}
-
+    @Override
+    protected BlockState getRenderedBlockState(GantryCarriageBlockEntity be) {
+        return shaft(getRotationAxisOf(be));
+    }
 }

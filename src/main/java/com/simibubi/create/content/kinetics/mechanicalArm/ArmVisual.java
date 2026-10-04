@@ -1,8 +1,5 @@
 package com.simibubi.create.content.kinetics.mechanicalArm;
 
-import java.util.ArrayList;
-import java.util.function.Consumer;
-
 import com.google.common.collect.Lists;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.SingleAxisRotatingVisual;
@@ -18,6 +15,7 @@ import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.util.RecyclingPoseStack;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.theme.Color;
@@ -27,179 +25,214 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 
-public class ArmVisual extends SingleAxisRotatingVisual<ArmBlockEntity> implements SimpleDynamicVisual {
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
-	final TransformedInstance base;
-	final TransformedInstance lowerBody;
-	final TransformedInstance upperBody;
-	final TransformedInstance claw;
+public class ArmVisual extends SingleAxisRotatingVisual<ArmBlockEntity>
+        implements SimpleDynamicVisual {
 
-	private final ArrayList<TransformedInstance> clawGrips;
-	private final ArrayList<TransformedInstance> models;
-	private final boolean ceiling;
+    final TransformedInstance base;
+    final TransformedInstance lowerBody;
+    final TransformedInstance upperBody;
+    final TransformedInstance claw;
 
-	private final RecyclingPoseStack poseStack = new RecyclingPoseStack();
+    private final ArrayList<TransformedInstance> clawGrips;
+    private final ArrayList<TransformedInstance> models;
+    private final boolean ceiling;
 
-	private boolean wasDancing = false;
-	private float baseAngle = Float.NaN;
-	private float lowerArmAngle = Float.NaN;
-	private float upperArmAngle = Float.NaN;
-	private float headAngle = Float.NaN;
+    private final RecyclingPoseStack poseStack = new RecyclingPoseStack();
 
-	public ArmVisual(VisualizationContext context, ArmBlockEntity blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick, Models.partial(AllPartialModels.ARM_COG));
+    private boolean wasDancing = false;
+    private float baseAngle = Float.NaN;
+    private float lowerArmAngle = Float.NaN;
+    private float upperArmAngle = Float.NaN;
+    private float headAngle = Float.NaN;
 
-		base = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.ARM_BASE))
-			.createInstance();
-		lowerBody = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.ARM_LOWER_BODY))
-			.createInstance();
-		upperBody = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.ARM_UPPER_BODY))
-			.createInstance();
-		claw = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(blockEntity.goggles ? AllPartialModels.ARM_CLAW_BASE_GOGGLES : AllPartialModels.ARM_CLAW_BASE))
-			.createInstance();
+    public ArmVisual(VisualizationContext context, ArmBlockEntity blockEntity, float partialTick) {
+        super(context, blockEntity, partialTick, Models.partial(AllPartialModels.ARM_COG));
 
-		TransformedInstance clawGrip1 = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.ARM_CLAW_GRIP_UPPER))
-			.createInstance();
-		TransformedInstance clawGrip2 = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.ARM_CLAW_GRIP_LOWER))
-			.createInstance();
+        base =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.ARM_BASE))
+                        .createInstance();
+        lowerBody =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.ARM_LOWER_BODY))
+                        .createInstance();
+        upperBody =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.ARM_UPPER_BODY))
+                        .createInstance();
+        claw =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(
+                                        blockEntity.goggles
+                                                ? AllPartialModels.ARM_CLAW_BASE_GOGGLES
+                                                : AllPartialModels.ARM_CLAW_BASE))
+                        .createInstance();
 
-		clawGrips = Lists.newArrayList(clawGrip1, clawGrip2);
-		models = Lists.newArrayList(base, lowerBody, upperBody, claw, clawGrip1, clawGrip2);
-		ceiling = blockState.getValue(ArmBlock.CEILING);
+        TransformedInstance clawGrip1 =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.ARM_CLAW_GRIP_UPPER))
+                        .createInstance();
+        TransformedInstance clawGrip2 =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.ARM_CLAW_GRIP_LOWER))
+                        .createInstance();
 
-		var msr = TransformStack.of(poseStack);
-		msr.translate(getVisualPosition());
-		msr.center();
+        clawGrips = Lists.newArrayList(clawGrip1, clawGrip2);
+        models = Lists.newArrayList(base, lowerBody, upperBody, claw, clawGrip1, clawGrip2);
+        ceiling = blockState.getValue(ArmBlock.CEILING);
 
-		if (ceiling)
-			msr.rotateXDegrees(180);
+        var msr = TransformStack.of(poseStack);
+        msr.translate(getVisualPosition());
+        msr.center();
 
-		animate(partialTick);
-	}
+        if (ceiling) msr.rotateXDegrees(180);
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		animate(ctx.partialTick());
-	}
+        animate(partialTick);
+    }
 
-	private void animate(float pt) {
-		if (blockEntity.phase == ArmBlockEntity.Phase.DANCING && blockEntity.getSpeed() != 0) {
-			animateRave(pt);
-			wasDancing = true;
-			return;
-		}
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        animate(ctx.partialTick());
+    }
 
-		float baseAngleNow = blockEntity.baseAngle.getValue(pt);
-		float lowerArmAngleNow = blockEntity.lowerArmAngle.getValue(pt);
-		float upperArmAngleNow = blockEntity.upperArmAngle.getValue(pt);
-		float headAngleNow = blockEntity.headAngle.getValue(pt);
+    private void animate(float pt) {
+        if (blockEntity.phase == ArmBlockEntity.Phase.DANCING && blockEntity.getSpeed() != 0) {
+            animateRave(pt);
+            wasDancing = true;
+            return;
+        }
 
-		boolean settled = Mth.equal(baseAngle, baseAngleNow) && Mth.equal(lowerArmAngle, lowerArmAngleNow)
-			&& Mth.equal(upperArmAngle, upperArmAngleNow) && Mth.equal(headAngle, headAngleNow);
+        float baseAngleNow = blockEntity.baseAngle.getValue(pt);
+        float lowerArmAngleNow = blockEntity.lowerArmAngle.getValue(pt);
+        float upperArmAngleNow = blockEntity.upperArmAngle.getValue(pt);
+        float headAngleNow = blockEntity.headAngle.getValue(pt);
 
-		this.baseAngle = baseAngleNow;
-		this.lowerArmAngle = lowerArmAngleNow;
-		this.upperArmAngle = upperArmAngleNow;
-		this.headAngle = headAngleNow;
+        boolean settled =
+                Mth.equal(baseAngle, baseAngleNow)
+                        && Mth.equal(lowerArmAngle, lowerArmAngleNow)
+                        && Mth.equal(upperArmAngle, upperArmAngleNow)
+                        && Mth.equal(headAngle, headAngleNow);
 
-		// Need to reset the animation if the arm is dancing. We'd very likely be settled
-		if (!settled || wasDancing)
-			animateArm();
+        this.baseAngle = baseAngleNow;
+        this.lowerArmAngle = lowerArmAngleNow;
+        this.upperArmAngle = upperArmAngleNow;
+        this.headAngle = headAngleNow;
 
-		wasDancing = false;
-	}
+        // Need to reset the animation if the arm is dancing. We'd very likely be settled
+        if (!settled || wasDancing) animateArm();
 
-	private void animateRave(float partialTick) {
-		var ticks = AnimationTickHolder.getTicks(blockEntity.getLevel());
-		float renderTick = ticks + partialTick + (blockEntity.hashCode() % 64);
+        wasDancing = false;
+    }
 
-		float baseAngle = (renderTick * 10) % 360;
-		float lowerArmAngle = Mth.lerp((Mth.sin(renderTick / 4) + 1) / 2, -45, 15);
-		float upperArmAngle = Mth.lerp((Mth.sin(renderTick / 8) + 1) / 4, -45, 95);
-		float headAngle = -lowerArmAngle;
-		int color = Color.rainbowColor(ticks * 100)
-			.getRGB();
-		updateAngles(baseAngle, lowerArmAngle, upperArmAngle, headAngle, color);
-	}
+    private void animateRave(float partialTick) {
+        var ticks = AnimationTickHolder.getTicks(blockEntity.getLevel());
+        float renderTick = ticks + partialTick + (blockEntity.hashCode() % 64);
 
-	private void animateArm() {
-		updateAngles(this.baseAngle, this.lowerArmAngle - 135, this.upperArmAngle - 90, this.headAngle, 0xFFFFFF);
-	}
+        float baseAngle = (renderTick * 10) % 360;
+        float lowerArmAngle = Mth.lerp((Mth.sin(renderTick / 4) + 1) / 2, -45, 15);
+        float upperArmAngle = Mth.lerp((Mth.sin(renderTick / 8) + 1) / 4, -45, 95);
+        float headAngle = -lowerArmAngle;
+        int color = Color.rainbowColor(ticks * 100).getRGB();
+        updateAngles(baseAngle, lowerArmAngle, upperArmAngle, headAngle, color);
+    }
 
-	private void updateAngles(float baseAngle, float lowerArmAngle, float upperArmAngle, float headAngle, int color) {
-		poseStack.pushPose();
+    private void animateArm() {
+        updateAngles(
+                this.baseAngle,
+                this.lowerArmAngle - 135,
+                this.upperArmAngle - 90,
+                this.headAngle,
+                0xFFFFFF);
+    }
 
-		var msr = TransformStack.of(poseStack);
+    private void updateAngles(
+            float baseAngle, float lowerArmAngle, float upperArmAngle, float headAngle, int color) {
+        poseStack.pushPose();
 
-		ArmRenderer.transformBase(msr, baseAngle);
-		base.setTransform(poseStack)
-			.setChanged();
+        var msr = TransformStack.of(poseStack);
 
-		ArmRenderer.transformLowerArm(msr, lowerArmAngle);
-		lowerBody.setTransform(poseStack)
-			.colorRgb(color)
-			.setChanged();
+        ArmRenderer.transformBase(msr, baseAngle);
+        base.setTransform(poseStack).setChanged();
 
-		ArmRenderer.transformUpperArm(msr, upperArmAngle);
-		upperBody.setTransform(poseStack)
-			.colorRgb(color)
-			.setChanged();
+        ArmRenderer.transformLowerArm(msr, lowerArmAngle);
+        lowerBody.setTransform(poseStack).colorRgb(color).setChanged();
 
-		ArmRenderer.transformHead(msr, headAngle);
+        ArmRenderer.transformUpperArm(msr, upperArmAngle);
+        upperBody.setTransform(poseStack).colorRgb(color).setChanged();
 
-		if (ceiling && blockEntity.goggles)
-			msr.rotateZDegrees(180);
+        ArmRenderer.transformHead(msr, headAngle);
 
-		claw.setTransform(poseStack)
-			.setChanged();
+        if (ceiling && blockEntity.goggles) msr.rotateZDegrees(180);
 
-		if (ceiling && blockEntity.goggles)
-			msr.rotateZDegrees(180);
+        claw.setTransform(poseStack).setChanged();
 
-		ItemStack item = blockEntity.heldItem;
-		ItemRenderer itemRenderer = Minecraft.getInstance()
-			.getItemRenderer();
-		boolean hasItem = !item.isEmpty();
-		boolean isBlockItem = hasItem && (item.getItem() instanceof BlockItem)
-			&& itemRenderer.getModel(item, Minecraft.getInstance().level, null, 0)
-			.isGui3d();
+        if (ceiling && blockEntity.goggles) msr.rotateZDegrees(180);
 
-		for (int index : Iterate.zeroAndOne) {
-			poseStack.pushPose();
-			int flip = index * 2 - 1;
-			ArmRenderer.transformClawHalf(msr, hasItem, isBlockItem, flip);
-			clawGrips.get(index)
-				.setTransform(poseStack)
-				.setChanged();
-			poseStack.popPose();
-		}
+        ItemStack item = blockEntity.heldItem;
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+        boolean hasItem = !item.isEmpty();
+        boolean isBlockItem =
+                hasItem
+                        && (item.getItem() instanceof BlockItem)
+                        && itemRenderer
+                                .getModel(item, Minecraft.getInstance().level, null, 0)
+                                .isGui3d();
 
-		poseStack.popPose();
-	}
+        for (int index : Iterate.zeroAndOne) {
+            poseStack.pushPose();
+            int flip = index * 2 - 1;
+            ArmRenderer.transformClawHalf(msr, hasItem, isBlockItem, flip);
+            clawGrips.get(index).setTransform(poseStack).setChanged();
+            poseStack.popPose();
+        }
 
-	@Override
-	public void update(float pt) {
-		super.update(pt);
-		instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(blockEntity.goggles ? AllPartialModels.ARM_CLAW_BASE_GOGGLES : AllPartialModels.ARM_CLAW_BASE))
-			.stealInstance(claw);
-	}
+        poseStack.popPose();
+    }
 
-	@Override
-	public void updateLight(float partialTick) {
-		super.updateLight(partialTick);
+    @Override
+    public void update(float pt) {
+        super.update(pt);
+        instancerProvider()
+                .instancer(
+                        InstanceTypes.TRANSFORMED,
+                        Models.partial(
+                                blockEntity.goggles
+                                        ? AllPartialModels.ARM_CLAW_BASE_GOGGLES
+                                        : AllPartialModels.ARM_CLAW_BASE))
+                .stealInstance(claw);
+    }
 
-		relight(models.toArray(FlatLit[]::new));
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        super.updateLight(partialTick);
 
-	@Override
-	protected void _delete() {
-		super._delete();
-		models.forEach(AbstractInstance::delete);
-	}
+        relight(models.toArray(FlatLit[]::new));
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		super.collectCrumblingInstances(consumer);
-		models.forEach(consumer);
-	}
+    @Override
+    protected void _delete() {
+        super._delete();
+        models.forEach(AbstractInstance::delete);
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        super.collectCrumblingInstances(consumer);
+        models.forEach(consumer);
+    }
 }

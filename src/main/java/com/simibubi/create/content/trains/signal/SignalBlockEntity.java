@@ -1,9 +1,5 @@
 package com.simibubi.create.content.trains.signal;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
 import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.trains.graph.EdgePointType;
@@ -22,149 +18,163 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 public class SignalBlockEntity extends SmartBlockEntity implements TransformableBlockEntity {
 
-	public static enum OverlayState {
-		RENDER, SKIP, DUAL
-	}
+    public static enum OverlayState {
+        RENDER,
+        SKIP,
+        DUAL
+    }
 
-	public static enum SignalState {
-		RED, YELLOW, GREEN, INVALID;
+    public static enum SignalState {
+        RED,
+        YELLOW,
+        GREEN,
+        INVALID;
 
-		public boolean isRedLight(float renderTime) {
-			return this == RED || this == INVALID && renderTime % 40 < 3;
-		}
+        public boolean isRedLight(float renderTime) {
+            return this == RED || this == INVALID && renderTime % 40 < 3;
+        }
 
-		public boolean isYellowLight(float renderTime) {
-			return this == YELLOW;
-		}
+        public boolean isYellowLight(float renderTime) {
+            return this == YELLOW;
+        }
 
-		public boolean isGreenLight(float renderTime) {
-			return this == GREEN;
-		}
-	}
+        public boolean isGreenLight(float renderTime) {
+            return this == GREEN;
+        }
+    }
 
-	public TrackTargetingBehaviour<SignalBoundary> edgePoint;
+    public TrackTargetingBehaviour<SignalBoundary> edgePoint;
 
-	private SignalState state;
-	private OverlayState overlay;
-	private int switchToRedAfterTrainEntered;
-	private boolean lastReportedPower;
+    private SignalState state;
+    private OverlayState overlay;
+    private int switchToRedAfterTrainEntered;
+    private boolean lastReportedPower;
 
-	public SignalBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-		this.state = SignalState.INVALID;
-		this.overlay = OverlayState.SKIP;
-		this.lastReportedPower = false;
-	}
+    public SignalBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        this.state = SignalState.INVALID;
+        this.overlay = OverlayState.SKIP;
+        this.lastReportedPower = false;
+    }
 
-	@Override
-	protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-		super.write(tag, registries, clientPacket);
-		NBTHelper.writeEnum(tag, "State", state);
-		NBTHelper.writeEnum(tag, "Overlay", overlay);
-		tag.putBoolean("Power", lastReportedPower);
-	}
+    @Override
+    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
+        NBTHelper.writeEnum(tag, "State", state);
+        NBTHelper.writeEnum(tag, "Overlay", overlay);
+        tag.putBoolean("Power", lastReportedPower);
+    }
 
-	@Override
-	protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(tag, registries, clientPacket);
-		state = NBTHelper.readEnum(tag, "State", SignalState.class);
-		overlay = NBTHelper.readEnum(tag, "Overlay", OverlayState.class);
-		lastReportedPower = tag.getBoolean("Power");
-		invalidateRenderBoundingBox();
-	}
+    @Override
+    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
+        state = NBTHelper.readEnum(tag, "State", SignalState.class);
+        overlay = NBTHelper.readEnum(tag, "Overlay", OverlayState.class);
+        lastReportedPower = tag.getBoolean("Power");
+        invalidateRenderBoundingBox();
+    }
 
-	@Nullable
-	public SignalBoundary getSignal() {
-		return edgePoint.getEdgePoint();
-	}
+    @Nullable
+    public SignalBoundary getSignal() {
+        return edgePoint.getEdgePoint();
+    }
 
-	public boolean isPowered() {
-		return state == SignalState.RED;
-	}
+    public boolean isPowered() {
+        return state == SignalState.RED;
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-		edgePoint = new TrackTargetingBehaviour<>(this, EdgePointType.SIGNAL);
-		behaviours.add(edgePoint);
-	}
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        edgePoint = new TrackTargetingBehaviour<>(this, EdgePointType.SIGNAL);
+        behaviours.add(edgePoint);
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
-		if (level.isClientSide)
-			return;
+    @Override
+    public void tick() {
+        super.tick();
+        if (level.isClientSide) return;
 
-		SignalBoundary boundary = getSignal();
-		if (boundary == null) {
-			enterState(SignalState.INVALID);
-			setOverlay(OverlayState.RENDER);
-			return;
-		}
+        SignalBoundary boundary = getSignal();
+        if (boundary == null) {
+            enterState(SignalState.INVALID);
+            setOverlay(OverlayState.RENDER);
+            return;
+        }
 
-		BlockState blockState = getBlockState();
+        BlockState blockState = getBlockState();
 
-		blockState.getOptionalValue(SignalBlock.POWERED).ifPresent(powered -> {
-			if (lastReportedPower == powered)
-				return;
-			lastReportedPower = powered;
-			boundary.updateBlockEntityPower(this);
-			notifyUpdate();
-		});
+        blockState
+                .getOptionalValue(SignalBlock.POWERED)
+                .ifPresent(
+                        powered -> {
+                            if (lastReportedPower == powered) return;
+                            lastReportedPower = powered;
+                            boundary.updateBlockEntityPower(this);
+                            notifyUpdate();
+                        });
 
-		blockState.getOptionalValue(SignalBlock.TYPE)
-			.ifPresent(stateType -> {
-				SignalType targetType = boundary.getTypeFor(worldPosition);
-				if (stateType != targetType) {
-					level.setBlock(worldPosition, blockState.setValue(SignalBlock.TYPE, targetType), 3);
-					refreshBlockState();
-				}
-			});
+        blockState
+                .getOptionalValue(SignalBlock.TYPE)
+                .ifPresent(
+                        stateType -> {
+                            SignalType targetType = boundary.getTypeFor(worldPosition);
+                            if (stateType != targetType) {
+                                level.setBlock(
+                                        worldPosition,
+                                        blockState.setValue(SignalBlock.TYPE, targetType),
+                                        3);
+                                refreshBlockState();
+                            }
+                        });
 
-		enterState(boundary.getStateFor(worldPosition));
-		setOverlay(boundary.getOverlayFor(worldPosition));
-	}
+        enterState(boundary.getStateFor(worldPosition));
+        setOverlay(boundary.getOverlayFor(worldPosition));
+    }
 
-	public boolean getReportedPower() {
-		return lastReportedPower;
-	}
+    public boolean getReportedPower() {
+        return lastReportedPower;
+    }
 
-	public SignalState getState() {
-		return state;
-	}
+    public SignalState getState() {
+        return state;
+    }
 
-	public OverlayState getOverlay() {
-		return overlay;
-	}
+    public OverlayState getOverlay() {
+        return overlay;
+    }
 
-	public void setOverlay(OverlayState state) {
-		if (this.overlay == state)
-			return;
-		this.overlay = state;
-		notifyUpdate();
-	}
+    public void setOverlay(OverlayState state) {
+        if (this.overlay == state) return;
+        this.overlay = state;
+        notifyUpdate();
+    }
 
-	public void enterState(SignalState state) {
-		if (switchToRedAfterTrainEntered > 0)
-			switchToRedAfterTrainEntered--;
-		if (this.state == state)
-			return;
-		if (state == SignalState.RED && switchToRedAfterTrainEntered > 0)
-			return;
-		this.state = state;
-		switchToRedAfterTrainEntered = state == SignalState.GREEN || state == SignalState.YELLOW ? 15 : 0;
-		notifyUpdate();
-	}
+    public void enterState(SignalState state) {
+        if (switchToRedAfterTrainEntered > 0) switchToRedAfterTrainEntered--;
+        if (this.state == state) return;
+        if (state == SignalState.RED && switchToRedAfterTrainEntered > 0) return;
+        this.state = state;
+        switchToRedAfterTrainEntered =
+                state == SignalState.GREEN || state == SignalState.YELLOW ? 15 : 0;
+        notifyUpdate();
+    }
 
-	@Override
-	protected AABB createRenderBoundingBox() {
-		return new AABB(Vec3.atLowerCornerOf(worldPosition), Vec3.atLowerCornerOf(edgePoint.getGlobalPosition())).inflate(2);
-	}
+    @Override
+    protected AABB createRenderBoundingBox() {
+        return new AABB(
+                        Vec3.atLowerCornerOf(worldPosition),
+                        Vec3.atLowerCornerOf(edgePoint.getGlobalPosition()))
+                .inflate(2);
+    }
 
-	@Override
-	public void transform(BlockEntity be, StructureTransform transform) {
-		edgePoint.transform(be, transform);
-	}
-
+    @Override
+    public void transform(BlockEntity be, StructureTransform transform) {
+        edgePoint.transform(be, transform);
+    }
 }

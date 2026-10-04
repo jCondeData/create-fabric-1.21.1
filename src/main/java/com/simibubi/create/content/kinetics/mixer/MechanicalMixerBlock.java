@@ -20,64 +20,66 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class MechanicalMixerBlock extends KineticBlock implements IBE<MechanicalMixerBlockEntity>, ICogWheel {
+public class MechanicalMixerBlock extends KineticBlock
+        implements IBE<MechanicalMixerBlockEntity>, ICogWheel {
 
-	public MechanicalMixerBlock(Properties properties) {
-		super(properties);
-	}
+    public MechanicalMixerBlock(Properties properties) {
+        super(properties);
+    }
 
-	@Override
-	public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
-		return !BasinBlock.isBasin(worldIn, pos.below());
-	}
+    @Override
+    public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
+        return !BasinBlock.isBasin(worldIn, pos.below());
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		if (context instanceof EntityCollisionContext
-			&& ((EntityCollisionContext) context).getEntity() instanceof Player)
-			return AllShapes.CASING_14PX.get(Direction.DOWN);
+    @Override
+    public VoxelShape getShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        if (context instanceof EntityCollisionContext
+                && ((EntityCollisionContext) context).getEntity() instanceof Player)
+            return AllShapes.CASING_14PX.get(Direction.DOWN);
 
-		return AllShapes.MECHANICAL_PROCESSOR_SHAPE;
-	}
+        return AllShapes.MECHANICAL_PROCESSOR_SHAPE;
+    }
 
-	@Override
-	public Axis getRotationAxis(BlockState state) {
-		return Axis.Y;
-	}
+    @Override
+    public Axis getRotationAxis(BlockState state) {
+        return Axis.Y;
+    }
 
-	@Override
-	public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-		return false;
-	}
+    @Override
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return false;
+    }
 
-	@Override
-	public float getParticleTargetRadius() {
-		return .85f;
-	}
+    @Override
+    public float getParticleTargetRadius() {
+        return .85f;
+    }
 
-	@Override
-	public float getParticleInitialRadius() {
-		return .75f;
-	}
+    @Override
+    public float getParticleInitialRadius() {
+        return .75f;
+    }
 
-	@Override
-	public SpeedLevel getMinimumRequiredSpeedLevel() {
-		return SpeedLevel.MEDIUM;
-	}
+    @Override
+    public SpeedLevel getMinimumRequiredSpeedLevel() {
+        return SpeedLevel.MEDIUM;
+    }
 
-	@Override
-	public Class<MechanicalMixerBlockEntity> getBlockEntityClass() {
-		return MechanicalMixerBlockEntity.class;
-	}
+    @Override
+    public Class<MechanicalMixerBlockEntity> getBlockEntityClass() {
+        return MechanicalMixerBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends MechanicalMixerBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.MECHANICAL_MIXER.get();
-	}
+    @Override
+    public BlockEntityType<? extends MechanicalMixerBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.MECHANICAL_MIXER.get();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
-
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 }

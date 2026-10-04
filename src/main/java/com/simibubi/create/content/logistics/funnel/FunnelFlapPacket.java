@@ -10,11 +10,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public class FunnelFlapPacket extends BlockEntityDataPacket<FunnelBlockEntity> {
-	public static final StreamCodec<ByteBuf, FunnelFlapPacket> STREAM_CODEC = StreamCodec.composite(
-			BlockPos.STREAM_CODEC, packet -> packet.pos,
-			ByteBufCodecs.BOOL, packet -> packet.inwards,
-			FunnelFlapPacket::new
-	);
+    public static final StreamCodec<ByteBuf, FunnelFlapPacket> STREAM_CODEC =
+            StreamCodec.composite(
+                    BlockPos.STREAM_CODEC,
+                    packet -> packet.pos,
+                    ByteBufCodecs.BOOL,
+                    packet -> packet.inwards,
+                    FunnelFlapPacket::new);
 
     private final boolean inwards;
 
@@ -22,18 +24,18 @@ public class FunnelFlapPacket extends BlockEntityDataPacket<FunnelBlockEntity> {
         this(blockEntity.getBlockPos(), inwards);
     }
 
-	private FunnelFlapPacket(BlockPos pos, boolean inwards) {
-		super(pos);
-		this.inwards = inwards;
-	}
+    private FunnelFlapPacket(BlockPos pos, boolean inwards) {
+        super(pos);
+        this.inwards = inwards;
+    }
 
     @Override
     protected void handlePacket(FunnelBlockEntity blockEntity) {
         blockEntity.flap(inwards);
     }
 
-	@Override
-	public PacketTypeProvider getTypeProvider() {
-		return AllPackets.FUNNEL_FLAP;
-	}
+    @Override
+    public PacketTypeProvider getTypeProvider() {
+        return AllPackets.FUNNEL_FLAP;
+    }
 }

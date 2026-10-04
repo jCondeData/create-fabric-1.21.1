@@ -1,11 +1,5 @@
 package com.simibubi.create.content.logistics.tableCloth;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllTags.AllBlockTags;
@@ -47,286 +41,309 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
 public class TableClothBlockEntity extends SmartBlockEntity {
 
-	public AutoRequestData requestData;
-	public List<ItemStack> manuallyAddedItems;
-	public UUID owner;
+    public AutoRequestData requestData;
+    public List<ItemStack> manuallyAddedItems;
+    public UUID owner;
 
-	public Direction facing;
-	public boolean sideOccluded;
-	public FilteringBehaviour priceTag;
+    public Direction facing;
+    public boolean sideOccluded;
+    public FilteringBehaviour priceTag;
 
-	private List<ItemStack> renderedItemsForShop;
+    private List<ItemStack> renderedItemsForShop;
 
-	public TableClothBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-		manuallyAddedItems = new ArrayList<>();
-		requestData = new AutoRequestData();
-		owner = null;
-		facing = Direction.SOUTH;
-	}
+    public TableClothBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        manuallyAddedItems = new ArrayList<>();
+        requestData = new AutoRequestData();
+        owner = null;
+        facing = Direction.SOUTH;
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-		behaviours.add(priceTag = new TableClothFilteringBehaviour(this));
-	}
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        behaviours.add(priceTag = new TableClothFilteringBehaviour(this));
+    }
 
-	public List<ItemStack> getItemsForRender() {
-		if (isShop()) {
-			if (renderedItemsForShop == null)
-				renderedItemsForShop = requestData.encodedRequest().stacks()
-					.stream()
-					.map(b -> b.stack)
-					.limit(4)
-					.toList();
-			return renderedItemsForShop;
-		}
+    public List<ItemStack> getItemsForRender() {
+        if (isShop()) {
+            if (renderedItemsForShop == null)
+                renderedItemsForShop =
+                        requestData.encodedRequest().stacks().stream()
+                                .map(b -> b.stack)
+                                .limit(4)
+                                .toList();
+            return renderedItemsForShop;
+        }
 
-		return manuallyAddedItems;
-	}
+        return manuallyAddedItems;
+    }
 
-	@Override
-	public void lazyTick() {
-		super.lazyTick();
-		BlockPos relativePos = worldPosition.relative(facing);
-		sideOccluded = AllBlockTags.TABLE_CLOTHS.matches(level.getBlockState(relativePos))
-			|| Block.isFaceFull(level.getBlockState(relativePos.below())
-			.getOcclusionShape(level, relativePos.below()), facing.getOpposite());
-	}
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        BlockPos relativePos = worldPosition.relative(facing);
+        sideOccluded =
+                AllBlockTags.TABLE_CLOTHS.matches(level.getBlockState(relativePos))
+                        || Block.isFaceFull(
+                                level.getBlockState(relativePos.below())
+                                        .getOcclusionShape(level, relativePos.below()),
+                                facing.getOpposite());
+    }
 
-	@Override
-	protected AABB createRenderBoundingBox() {
-		return super.createRenderBoundingBox().inflate(1);
-	}
+    @Override
+    protected AABB createRenderBoundingBox() {
+        return super.createRenderBoundingBox().inflate(1);
+    }
 
-	public boolean isShop() {
-		return !requestData.encodedRequest().isEmpty();
-	}
+    public boolean isShop() {
+        return !requestData.encodedRequest().isEmpty();
+    }
 
-	public ItemInteractionResult use(Player player, BlockHitResult ray) {
-		if (isShop())
-			return useShop(player);
+    public ItemInteractionResult use(Player player, BlockHitResult ray) {
+        if (isShop()) return useShop(player);
 
-		ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
 
-		if (heldItem.isEmpty()) {
-			if (manuallyAddedItems.isEmpty())
-				return ItemInteractionResult.SUCCESS;
-			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
-			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
+        if (heldItem.isEmpty()) {
+            if (manuallyAddedItems.isEmpty()) return ItemInteractionResult.SUCCESS;
+            player.setItemInHand(
+                    InteractionHand.MAIN_HAND,
+                    manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
+            level.playSound(
+                    null,
+                    worldPosition,
+                    SoundEvents.ITEM_FRAME_REMOVE_ITEM,
+                    SoundSource.BLOCKS,
+                    0.5f,
+                    1f);
 
-			if (manuallyAddedItems.isEmpty()) {
-				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
-				if (level instanceof ServerLevel serverLevel)
-					CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new RemoveBlockEntityPacket(worldPosition));
-			} else
-				notifyUpdate();
+            if (manuallyAddedItems.isEmpty()) {
+                level.setBlock(
+                        worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
+                if (level instanceof ServerLevel serverLevel)
+                    CatnipServices.NETWORK.sendToClientsTrackingChunk(
+                            serverLevel,
+                            new ChunkPos(worldPosition),
+                            new RemoveBlockEntityPacket(worldPosition));
+            } else notifyUpdate();
 
-			return ItemInteractionResult.SUCCESS;
-		}
+            return ItemInteractionResult.SUCCESS;
+        }
 
-		if (manuallyAddedItems.size() >= 4)
-			return ItemInteractionResult.SUCCESS;
+        if (manuallyAddedItems.size() >= 4) return ItemInteractionResult.SUCCESS;
 
-		level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
-		manuallyAddedItems.add(heldItem.copyWithCount(1));
-		facing = player.getDirection()
-			.getOpposite();
-		heldItem.shrink(1);
-		if (heldItem.isEmpty())
-			player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-		notifyUpdate();
-		return ItemInteractionResult.SUCCESS;
-	}
+        level.playSound(
+                null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
+        manuallyAddedItems.add(heldItem.copyWithCount(1));
+        facing = player.getDirection().getOpposite();
+        heldItem.shrink(1);
+        if (heldItem.isEmpty()) player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        notifyUpdate();
+        return ItemInteractionResult.SUCCESS;
+    }
 
-	public boolean targetsPriceTag(Player player, BlockHitResult ray) {
-		return priceTag != null && priceTag.mayInteract(player) && priceTag.getSlotPositioning()
-			.testHit(level, worldPosition, getBlockState(), ray.getLocation()
-				.subtract(Vec3.atLowerCornerOf(worldPosition)));
-	}
+    public boolean targetsPriceTag(Player player, BlockHitResult ray) {
+        return priceTag != null
+                && priceTag.mayInteract(player)
+                && priceTag.getSlotPositioning()
+                        .testHit(
+                                level,
+                                worldPosition,
+                                getBlockState(),
+                                ray.getLocation().subtract(Vec3.atLowerCornerOf(worldPosition)));
+    }
 
-	public ItemInteractionResult useShop(Player player) {
-		ItemStack itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
-		ItemStack prevListItem = ItemStack.EMPTY;
-		boolean addOntoList = false;
+    public ItemInteractionResult useShop(Player player) {
+        ItemStack itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack prevListItem = ItemStack.EMPTY;
+        boolean addOntoList = false;
 
-		// Remove other lists from inventory
-		for (int i = 0; i < 9; i++) {
-			ItemStack item = player.getInventory()
-				.getItem(i);
-			if (!AllItems.SHOPPING_LIST.isIn(item))
-				continue;
-			prevListItem = item;
-			addOntoList = true;
-			player.getInventory()
-				.setItem(i, ItemStack.EMPTY);
-		}
+        // Remove other lists from inventory
+        for (int i = 0; i < 9; i++) {
+            ItemStack item = player.getInventory().getItem(i);
+            if (!AllItems.SHOPPING_LIST.isIn(item)) continue;
+            prevListItem = item;
+            addOntoList = true;
+            player.getInventory().setItem(i, ItemStack.EMPTY);
+        }
 
-		// add onto existing list if in hand
-		if (AllItems.SHOPPING_LIST.isIn(itemInHand)) {
-			prevListItem = itemInHand;
-			addOntoList = true;
-		}
+        // add onto existing list if in hand
+        if (AllItems.SHOPPING_LIST.isIn(itemInHand)) {
+            prevListItem = itemInHand;
+            addOntoList = true;
+        }
 
-		if (!itemInHand.isEmpty() && !addOntoList) {
-			CreateLang.translate("stock_keeper.shopping_list_empty_hand")
-				.sendStatus(player);
-			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
-			return ItemInteractionResult.SUCCESS;
-		}
+        if (!itemInHand.isEmpty() && !addOntoList) {
+            CreateLang.translate("stock_keeper.shopping_list_empty_hand").sendStatus(player);
+            AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
+            return ItemInteractionResult.SUCCESS;
+        }
 
-		if (getPaymentItem().isEmpty()) {
-			CreateLang.translate("stock_keeper.no_price_set")
-				.sendStatus(player);
-			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
-			return ItemInteractionResult.SUCCESS;
-		}
+        if (getPaymentItem().isEmpty()) {
+            CreateLang.translate("stock_keeper.no_price_set").sendStatus(player);
+            AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
+            return ItemInteractionResult.SUCCESS;
+        }
 
-		UUID tickerID = null;
-		BlockPos tickerPos = requestData.targetOffset().offset(worldPosition);
-		if (level.getBlockEntity(tickerPos) instanceof StockTickerBlockEntity stbe && stbe.isKeeperPresent())
-			tickerID = stbe.behaviour.freqId;
+        UUID tickerID = null;
+        BlockPos tickerPos = requestData.targetOffset().offset(worldPosition);
+        if (level.getBlockEntity(tickerPos) instanceof StockTickerBlockEntity stbe
+                && stbe.isKeeperPresent()) tickerID = stbe.behaviour.freqId;
 
-		int stockLevel = getStockLevelForTrade(ShoppingListItem.getList(prevListItem));
+        int stockLevel = getStockLevelForTrade(ShoppingListItem.getList(prevListItem));
 
-		if (tickerID == null) {
-			CreateLang.translate("stock_keeper.keeper_missing")
-				.style(ChatFormatting.RED)
-				.sendStatus(player);
-			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
-			return ItemInteractionResult.SUCCESS;
-		}
+        if (tickerID == null) {
+            CreateLang.translate("stock_keeper.keeper_missing")
+                    .style(ChatFormatting.RED)
+                    .sendStatus(player);
+            AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
+            return ItemInteractionResult.SUCCESS;
+        }
 
-		if (stockLevel == 0) {
-			CreateLang.translate("stock_keeper.out_of_stock")
-				.style(ChatFormatting.RED)
-				.sendStatus(player);
-			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
-			if (!prevListItem.isEmpty()) {
-				if (player.getItemInHand(InteractionHand.MAIN_HAND)
-					.isEmpty())
-					player.setItemInHand(InteractionHand.MAIN_HAND, prevListItem);
-				else
-					player.getInventory()
-						.placeItemBackInInventory(prevListItem);
-			}
+        if (stockLevel == 0) {
+            CreateLang.translate("stock_keeper.out_of_stock")
+                    .style(ChatFormatting.RED)
+                    .sendStatus(player);
+            AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
+            if (!prevListItem.isEmpty()) {
+                if (player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty())
+                    player.setItemInHand(InteractionHand.MAIN_HAND, prevListItem);
+                else player.getInventory().placeItemBackInInventory(prevListItem);
+            }
 
-			return ItemInteractionResult.SUCCESS;
-		}
+            return ItemInteractionResult.SUCCESS;
+        }
 
-		ShoppingList list = new ShoppingList(new ArrayList<>(), owner, tickerID);
+        ShoppingList list = new ShoppingList(new ArrayList<>(), owner, tickerID);
 
-		if (addOntoList) {
-			ShoppingList prevList = ShoppingListItem.getList(prevListItem).duplicate();
-			if (owner.equals(prevList.shopOwner()) && tickerID.equals(prevList.shopNetwork()))
-				list = prevList;
-			else
-				addOntoList = false;
-		}
+        if (addOntoList) {
+            ShoppingList prevList = ShoppingListItem.getList(prevListItem).duplicate();
+            if (owner.equals(prevList.shopOwner()) && tickerID.equals(prevList.shopNetwork()))
+                list = prevList;
+            else addOntoList = false;
+        }
 
-		if (list.getPurchases(worldPosition) >= stockLevel) {
-			for (IntAttached<BlockPos> entry : list.purchases())
-				if (worldPosition.equals(entry.getValue()))
-					entry.setFirst(Math.min(stockLevel, entry.getFirst()));
+        if (list.getPurchases(worldPosition) >= stockLevel) {
+            for (IntAttached<BlockPos> entry : list.purchases())
+                if (worldPosition.equals(entry.getValue()))
+                    entry.setFirst(Math.min(stockLevel, entry.getFirst()));
 
-			CreateLang.translate("stock_keeper.limited_stock")
-				.style(ChatFormatting.RED)
-				.sendStatus(player);
-		} else {
-			AllSoundEvents.CONFIRM_2.playOnServer(level, worldPosition, 0.5f, 1.0f);
+            CreateLang.translate("stock_keeper.limited_stock")
+                    .style(ChatFormatting.RED)
+                    .sendStatus(player);
+        } else {
+            AllSoundEvents.CONFIRM_2.playOnServer(level, worldPosition, 0.5f, 1.0f);
 
-			ShoppingList.Mutable mutable = new ShoppingList.Mutable(list);
-			mutable.addPurchases(worldPosition, 1);
-			list = mutable.toImmutable();
+            ShoppingList.Mutable mutable = new ShoppingList.Mutable(list);
+            mutable.addPurchases(worldPosition, 1);
+            list = mutable.toImmutable();
 
-			if (!addOntoList)
-				CreateLang.translate("stock_keeper.use_list_to_add_purchases")
-					.color(0xeeeeee)
-					.sendStatus(player);
-			if (!addOntoList)
-				level.playSound(null, worldPosition, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1, 1.5f);
-		}
+            if (!addOntoList)
+                CreateLang.translate("stock_keeper.use_list_to_add_purchases")
+                        .color(0xeeeeee)
+                        .sendStatus(player);
+            if (!addOntoList)
+                level.playSound(
+                        null,
+                        worldPosition,
+                        SoundEvents.BOOK_PAGE_TURN,
+                        SoundSource.BLOCKS,
+                        1,
+                        1.5f);
+        }
 
-		ItemStack newListItem =
-			ShoppingListItem.saveList(AllItems.SHOPPING_LIST.asStack(), list, requestData.encodedTargetAddress());
+        ItemStack newListItem =
+                ShoppingListItem.saveList(
+                        AllItems.SHOPPING_LIST.asStack(), list, requestData.encodedTargetAddress());
 
-		if (player.getItemInHand(InteractionHand.MAIN_HAND)
-			.isEmpty())
-			player.setItemInHand(InteractionHand.MAIN_HAND, newListItem);
-		else
-			player.getInventory()
-				.placeItemBackInInventory(newListItem);
+        if (player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty())
+            player.setItemInHand(InteractionHand.MAIN_HAND, newListItem);
+        else player.getInventory().placeItemBackInInventory(newListItem);
 
-		return ItemInteractionResult.SUCCESS;
-	}
+        return ItemInteractionResult.SUCCESS;
+    }
 
-	public int getStockLevelForTrade(@Nullable ShoppingList otherPurchases) {
-		BlockPos tickerPos = requestData.targetOffset().offset(worldPosition);
-		if (!(level.getBlockEntity(tickerPos) instanceof StockTickerBlockEntity stbe))
-			return 0;
+    public int getStockLevelForTrade(@Nullable ShoppingList otherPurchases) {
+        BlockPos tickerPos = requestData.targetOffset().offset(worldPosition);
+        if (!(level.getBlockEntity(tickerPos) instanceof StockTickerBlockEntity stbe)) return 0;
 
-		InventorySummary recentSummary = null;
+        InventorySummary recentSummary = null;
 
-		if (level.isClientSide()) {
-			if (stbe.getTicksSinceLastUpdate() > 15)
-				stbe.refreshClientStockSnapshot();
-			recentSummary = stbe.getLastClientsideStockSnapshotAsSummary();
-		} else
-			recentSummary = stbe.getRecentSummary();
+        if (level.isClientSide()) {
+            if (stbe.getTicksSinceLastUpdate() > 15) stbe.refreshClientStockSnapshot();
+            recentSummary = stbe.getLastClientsideStockSnapshotAsSummary();
+        } else recentSummary = stbe.getRecentSummary();
 
-		if (recentSummary == null)
-			return 0;
+        if (recentSummary == null) return 0;
 
-		InventorySummary modifierSummary = new InventorySummary();
-		if (otherPurchases != null)
-			modifierSummary = otherPurchases.bakeEntries(level, worldPosition)
-				.getFirst();
+        InventorySummary modifierSummary = new InventorySummary();
+        if (otherPurchases != null)
+            modifierSummary = otherPurchases.bakeEntries(level, worldPosition).getFirst();
 
-		int smallestQuotient = Integer.MAX_VALUE;
-		for (BigItemStack entry : requestData.encodedRequest().stacks())
-			if (entry.count > 0)
-				smallestQuotient = Math.min(smallestQuotient,
-					(recentSummary.getCountOf(entry.stack) - modifierSummary.getCountOf(entry.stack)) / entry.count);
+        int smallestQuotient = Integer.MAX_VALUE;
+        for (BigItemStack entry : requestData.encodedRequest().stacks())
+            if (entry.count > 0)
+                smallestQuotient =
+                        Math.min(
+                                smallestQuotient,
+                                (recentSummary.getCountOf(entry.stack)
+                                                - modifierSummary.getCountOf(entry.stack))
+                                        / entry.count);
 
-		return smallestQuotient;
-	}
+        return smallestQuotient;
+    }
 
-	@Override
-	protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-		super.write(tag, registries, clientPacket);
-		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems, registries));
-		tag.putInt("Facing", facing.get2DDataValue());
-		tag.put("RequestData", CatnipCodecUtils.encode(AutoRequestData.CODEC, registries, requestData).orElseThrow());
-		if (owner != null)
-			tag.putUUID("OwnerUUID", owner);
-	}
+    @Override
+    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
+        tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems, registries));
+        tag.putInt("Facing", facing.get2DDataValue());
+        tag.put(
+                "RequestData",
+                CatnipCodecUtils.encode(AutoRequestData.CODEC, registries, requestData)
+                        .orElseThrow());
+        if (owner != null) tag.putUUID("OwnerUUID", owner);
+    }
 
-	@Override
-	protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(tag, registries, clientPacket);
-		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND), registries);
-		requestData = CatnipCodecUtils.decode(AutoRequestData.CODEC, registries, tag.get("RequestData"))
-			.orElse(new AutoRequestData());
-		owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
-		facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
-	}
+    @Override
+    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
+        manuallyAddedItems =
+                NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND), registries);
+        requestData =
+                CatnipCodecUtils.decode(AutoRequestData.CODEC, registries, tag.get("RequestData"))
+                        .orElse(new AutoRequestData());
+        owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
+        facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
+    }
 
-	@Override
-	public void destroy() {
-		super.destroy();
-		manuallyAddedItems.forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(),
-			worldPosition.getZ(), stack));
-		manuallyAddedItems.clear();
-	}
+    @Override
+    public void destroy() {
+        super.destroy();
+        manuallyAddedItems.forEach(
+                stack ->
+                        Containers.dropItemStack(
+                                level,
+                                worldPosition.getX(),
+                                worldPosition.getY(),
+                                worldPosition.getZ(),
+                                stack));
+        manuallyAddedItems.clear();
+    }
 
-	public ItemStack getPaymentItem() {
-		return priceTag.getFilter();
-	}
+    public ItemStack getPaymentItem() {
+        return priceTag.getFilter();
+    }
 
-	public int getPaymentAmount() {
-		return priceTag.getFilter()
-			.isEmpty() ? 1 : priceTag.count;
-	}
-
+    public int getPaymentAmount() {
+        return priceTag.getFilter().isEmpty() ? 1 : priceTag.count;
+    }
 }

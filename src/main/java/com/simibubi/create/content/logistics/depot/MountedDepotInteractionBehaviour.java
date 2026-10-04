@@ -15,31 +15,31 @@ import net.minecraft.world.phys.Vec3;
 
 public class MountedDepotInteractionBehaviour extends MovingInteractionBehaviour {
 
-	@Override
-	public boolean handlePlayerInteraction(Player player, InteractionHand activeHand, BlockPos localPos,
-		AbstractContraptionEntity contraptionEntity) {
-		ItemStack itemInHand = player.getItemInHand(activeHand);
-		if (activeHand == InteractionHand.OFF_HAND)
-			return false;
-		if (player.level().isClientSide)
-			return true;
+    @Override
+    public boolean handlePlayerInteraction(
+            Player player,
+            InteractionHand activeHand,
+            BlockPos localPos,
+            AbstractContraptionEntity contraptionEntity) {
+        ItemStack itemInHand = player.getItemInHand(activeHand);
+        if (activeHand == InteractionHand.OFF_HAND) return false;
+        if (player.level().isClientSide) return true;
 
-		MountedStorageManager manager = contraptionEntity.getContraption().getStorage();
+        MountedStorageManager manager = contraptionEntity.getContraption().getStorage();
 
-		MountedItemStorage storage = manager.getAllItemStorages().get(localPos);
-		if (!(storage instanceof DepotMountedStorage depot))
-			return false;
+        MountedItemStorage storage = manager.getAllItemStorages().get(localPos);
+        if (!(storage instanceof DepotMountedStorage depot)) return false;
 
-		ItemStack itemOnDepot = depot.getItem();
-		if (itemOnDepot.isEmpty() && itemInHand.isEmpty())
-			return true;
+        ItemStack itemOnDepot = depot.getItem();
+        if (itemOnDepot.isEmpty() && itemInHand.isEmpty()) return true;
 
-		depot.setItem(itemInHand.copy());
-		player.setItemInHand(activeHand, itemOnDepot.copy());
-		AllSoundEvents.DEPOT_PLOP.playOnServer(player.level(),
-			BlockPos.containing(contraptionEntity.toGlobalVector(Vec3.atCenterOf(localPos), 0)));
+        depot.setItem(itemInHand.copy());
+        player.setItemInHand(activeHand, itemOnDepot.copy());
+        AllSoundEvents.DEPOT_PLOP.playOnServer(
+                player.level(),
+                BlockPos.containing(
+                        contraptionEntity.toGlobalVector(Vec3.atCenterOf(localPos), 0)));
 
-		return true;
-	}
-
+        return true;
+    }
 }

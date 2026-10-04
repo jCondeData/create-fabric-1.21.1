@@ -4,10 +4,9 @@ import net.createmod.catnip.platform.CatnipServices;
 
 public interface IClearableMenu {
 
-	default void sendClearPacket() {
-		CatnipServices.NETWORK.sendToServer(ClearMenuPacket.INSTANCE);
-	}
+    default void sendClearPacket() {
+        CatnipServices.NETWORK.sendToServer(ClearMenuPacket.INSTANCE);
+    }
 
-	void clearContents();
-
+    void clearContents();
 }

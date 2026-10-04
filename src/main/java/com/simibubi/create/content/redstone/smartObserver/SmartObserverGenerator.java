@@ -12,25 +12,23 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 public class SmartObserverGenerator extends SpecialBlockStateGen {
 
-	@Override
-	protected int getXRotation(BlockState state) {
-		return switch (state.getValue(SmartObserverBlock.TARGET)) {
-		case CEILING -> -90;
-		case WALL -> 0;
-		case FLOOR -> 90;
-		};
-	}
+    @Override
+    protected int getXRotation(BlockState state) {
+        return switch (state.getValue(SmartObserverBlock.TARGET)) {
+            case CEILING -> -90;
+            case WALL -> 0;
+            case FLOOR -> 90;
+        };
+    }
 
-	@Override
-	protected int getYRotation(BlockState state) {
-		return horizontalAngle(state.getValue(ThresholdSwitchBlock.FACING)) + 180;
-	}
+    @Override
+    protected int getYRotation(BlockState state) {
+        return horizontalAngle(state.getValue(ThresholdSwitchBlock.FACING)) + 180;
+    }
 
-	@Override
-	public <T extends Block> ModelFile getModel(DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov,
-		BlockState state) {
-		return AssetLookup.forPowered(ctx, prov)
-			.apply(state);
-	}
-
+    @Override
+    public <T extends Block> ModelFile getModel(
+            DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov, BlockState state) {
+        return AssetLookup.forPowered(ctx, prov).apply(state);
+    }
 }

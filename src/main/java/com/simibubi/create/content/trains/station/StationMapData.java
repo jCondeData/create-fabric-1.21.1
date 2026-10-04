@@ -5,8 +5,7 @@ import net.minecraft.world.level.LevelAccessor;
 
 public interface StationMapData {
 
-	boolean toggleStation(LevelAccessor level, BlockPos pos, StationBlockEntity stationBlockEntity);
+    boolean toggleStation(LevelAccessor level, BlockPos pos, StationBlockEntity stationBlockEntity);
 
-	void addStationMarker(StationMarker marker);
-
+    void addStationMarker(StationMarker marker);
 }

@@ -1,8 +1,5 @@
 package com.simibubi.create.content.redstone.displayLink.source;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.simibubi.create.api.behaviour.display.DisplaySource;
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 import com.simibubi.create.content.redstone.displayLink.target.DisplayTargetStats;
@@ -12,23 +9,26 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ComputerDisplaySource extends DisplaySource {
 
-	@Override
-	public List<MutableComponent> provideText(DisplayLinkContext context, DisplayTargetStats stats) {
-		List<MutableComponent> components = new ArrayList<>();
-		ListTag tag = context.sourceConfig().getList("ComputerSourceList", Tag.TAG_STRING);
+    @Override
+    public List<MutableComponent> provideText(
+            DisplayLinkContext context, DisplayTargetStats stats) {
+        List<MutableComponent> components = new ArrayList<>();
+        ListTag tag = context.sourceConfig().getList("ComputerSourceList", Tag.TAG_STRING);
 
-		for (int i = 0; i < tag.size(); i++) {
-			components.add(Component.literal(tag.getString(i)));
-		}
+        for (int i = 0; i < tag.size(); i++) {
+            components.add(Component.literal(tag.getString(i)));
+        }
 
-		return components;
-	}
+        return components;
+    }
 
-	@Override
-	public boolean shouldPassiveReset() {
-		return false;
-	}
-
+    @Override
+    public boolean shouldPassiveReset() {
+        return false;
+    }
 }

@@ -13,140 +13,172 @@ import com.simibubi.create.foundation.utility.CreateLang;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class SequencedAssemblySubCategory {
 
-	private final int width;
+    private final int width;
 
-	public SequencedAssemblySubCategory(int width) {
-		this.width = width;
-	}
+    public SequencedAssemblySubCategory(int width) {
+        this.width = width;
+    }
 
-	public int getWidth() {
-		return width;
-	}
+    public int getWidth() {
+        return width;
+    }
 
-	public void setRecipe(IRecipeLayoutBuilder builder, SequencedRecipe<?> recipe, IFocusGroup focuses, int x) {}
+    public void setRecipe(
+            IRecipeLayoutBuilder builder, SequencedRecipe<?> recipe, IFocusGroup focuses, int x) {}
 
-	public abstract void draw(SequencedRecipe<?> recipe, GuiGraphics graphics, double mouseX, double mouseY, int index);
+    public abstract void draw(
+            SequencedRecipe<?> recipe,
+            GuiGraphics graphics,
+            double mouseX,
+            double mouseY,
+            int index);
 
-	public static class AssemblyPressing extends SequencedAssemblySubCategory {
+    public static class AssemblyPressing extends SequencedAssemblySubCategory {
 
-		AnimatedPress press;
+        AnimatedPress press;
 
-		public AssemblyPressing() {
-			super(25);
-			press = new AnimatedPress(false);
-		}
+        public AssemblyPressing() {
+            super(25);
+            press = new AnimatedPress(false);
+        }
 
-		@Override
-		public void draw(SequencedRecipe<?> recipe, GuiGraphics graphics, double mouseX, double mouseY, int index) {
-			PoseStack ms = graphics.pose();
-			press.offset = index;
-			ms.pushPose();
-			ms.translate(-5, 50, 0);
-			ms.scale(.6f, .6f, .6f);
-			press.draw(graphics, getWidth() / 2, 0);
-			ms.popPose();
-		}
+        @Override
+        public void draw(
+                SequencedRecipe<?> recipe,
+                GuiGraphics graphics,
+                double mouseX,
+                double mouseY,
+                int index) {
+            PoseStack ms = graphics.pose();
+            press.offset = index;
+            ms.pushPose();
+            ms.translate(-5, 50, 0);
+            ms.scale(.6f, .6f, .6f);
+            press.draw(graphics, getWidth() / 2, 0);
+            ms.popPose();
+        }
+    }
 
-	}
+    public static class AssemblySpouting extends SequencedAssemblySubCategory {
 
-	public static class AssemblySpouting extends SequencedAssemblySubCategory {
+        AnimatedSpout spout;
 
-		AnimatedSpout spout;
+        public AssemblySpouting() {
+            super(25);
+            spout = new AnimatedSpout();
+        }
 
-		public AssemblySpouting() {
-			super(25);
-			spout = new AnimatedSpout();
-		}
+        @Override
+        public void setRecipe(
+                IRecipeLayoutBuilder builder,
+                SequencedRecipe<?> recipe,
+                IFocusGroup focuses,
+                int x) {
+            FluidIngredient fluidIngredient = recipe.getRecipe().getFluidIngredients().get(0);
 
-		@Override
-		public void setRecipe(IRecipeLayoutBuilder builder, SequencedRecipe<?> recipe, IFocusGroup focuses, int x) {
-			FluidIngredient fluidIngredient = recipe.getRecipe()
-					.getFluidIngredients()
-					.get(0);
+            CreateRecipeCategory.addFluidSlot(builder, x + 4, 15, fluidIngredient);
+        }
 
-			CreateRecipeCategory.addFluidSlot(builder, x + 4, 15, fluidIngredient);
-		}
+        @Override
+        public void draw(
+                SequencedRecipe<?> recipe,
+                GuiGraphics graphics,
+                double mouseX,
+                double mouseY,
+                int index) {
+            PoseStack ms = graphics.pose();
+            spout.offset = index;
+            ms.pushPose();
+            ms.translate(-7, 50, 0);
+            ms.scale(.75f, .75f, .75f);
+            spout.withFluids(
+                            recipe.getRecipe()
+                                    .getFluidIngredients()
+                                    .get(0)
+                                    .getMatchingFluidStacks())
+                    .draw(graphics, getWidth() / 2, 0);
+            ms.popPose();
+        }
+    }
 
-		@Override
-		public void draw(SequencedRecipe<?> recipe, GuiGraphics graphics, double mouseX, double mouseY, int index) {
-			PoseStack ms = graphics.pose();
-			spout.offset = index;
-			ms.pushPose();
-			ms.translate(-7, 50, 0);
-			ms.scale(.75f, .75f, .75f);
-			spout.withFluids(recipe.getRecipe()
-				.getFluidIngredients()
-				.get(0)
-				.getMatchingFluidStacks())
-				.draw(graphics, getWidth() / 2, 0);
-			ms.popPose();
-		}
+    public static class AssemblyDeploying extends SequencedAssemblySubCategory {
 
-	}
+        AnimatedDeployer deployer;
 
-	public static class AssemblyDeploying extends SequencedAssemblySubCategory {
+        public AssemblyDeploying() {
+            super(25);
+            deployer = new AnimatedDeployer();
+        }
 
-		AnimatedDeployer deployer;
+        @Override
+        public void setRecipe(
+                IRecipeLayoutBuilder builder,
+                SequencedRecipe<?> recipe,
+                IFocusGroup focuses,
+                int x) {
+            IRecipeSlotBuilder slot =
+                    builder.addSlot(RecipeIngredientRole.INPUT, x + 4, 15)
+                            .setBackground(CreateRecipeCategory.getRenderedSlot(), -1, -1)
+                            .addIngredients(recipe.getRecipe().getIngredients().get(1));
 
-		public AssemblyDeploying() {
-			super(25);
-			deployer = new AnimatedDeployer();
-		}
+            if (recipe.getAsAssemblyRecipe() instanceof DeployerApplicationRecipe deployerRecipe
+                    && deployerRecipe.shouldKeepHeldItem()) {
+                slot.addTooltipCallback(
+                        (recipeSlotView, tooltip) ->
+                                tooltip.add(
+                                        1,
+                                        CreateLang.translateDirect("recipe.deploying.not_consumed")
+                                                .withStyle(ChatFormatting.GOLD)));
+            }
+        }
 
-		@Override
-		public void setRecipe(IRecipeLayoutBuilder builder, SequencedRecipe<?> recipe, IFocusGroup focuses, int x) {
-			IRecipeSlotBuilder slot = builder
-					.addSlot(RecipeIngredientRole.INPUT, x + 4, 15)
-					.setBackground(CreateRecipeCategory.getRenderedSlot(), -1, -1)
-					.addIngredients(recipe.getRecipe().getIngredients().get(1));
+        @Override
+        public void draw(
+                SequencedRecipe<?> recipe,
+                GuiGraphics graphics,
+                double mouseX,
+                double mouseY,
+                int index) {
+            PoseStack ms = graphics.pose();
+            deployer.offset = index;
+            ms.pushPose();
+            ms.translate(-7, 50, 0);
+            ms.scale(.75f, .75f, .75f);
+            deployer.draw(graphics, getWidth() / 2, 0);
+            ms.popPose();
+        }
+    }
 
-			if (recipe.getAsAssemblyRecipe() instanceof DeployerApplicationRecipe deployerRecipe && deployerRecipe.shouldKeepHeldItem()) {
-				slot.addTooltipCallback(
-						(recipeSlotView, tooltip) -> tooltip.add(1, CreateLang.translateDirect("recipe.deploying.not_consumed").withStyle(ChatFormatting.GOLD))
-				);
-			}
-		}
+    public static class AssemblyCutting extends SequencedAssemblySubCategory {
 
-		@Override
-		public void draw(SequencedRecipe<?> recipe, GuiGraphics graphics, double mouseX, double mouseY, int index) {
-			PoseStack ms = graphics.pose();
-			deployer.offset = index;
-			ms.pushPose();
-			ms.translate(-7, 50, 0);
-			ms.scale(.75f, .75f, .75f);
-			deployer.draw(graphics, getWidth() / 2, 0);
-			ms.popPose();
-		}
+        AnimatedSaw saw;
 
-	}
+        public AssemblyCutting() {
+            super(25);
+            saw = new AnimatedSaw();
+        }
 
-	public static class AssemblyCutting extends SequencedAssemblySubCategory {
-
-		AnimatedSaw saw;
-
-		public AssemblyCutting() {
-			super(25);
-			saw = new AnimatedSaw();
-		}
-
-		@Override
-		public void draw(SequencedRecipe<?> recipe, GuiGraphics graphics, double mouseX, double mouseY, int index) {
-			PoseStack ms = graphics.pose();
-			ms.pushPose();
-			ms.translate(0, 51.5f, 0);
-			ms.scale(.6f, .6f, .6f);
-			saw.draw(graphics, getWidth() / 2, 30);
-			ms.popPose();
-		}
-
-	}
-
+        @Override
+        public void draw(
+                SequencedRecipe<?> recipe,
+                GuiGraphics graphics,
+                double mouseX,
+                double mouseY,
+                int index) {
+            PoseStack ms = graphics.pose();
+            ms.pushPose();
+            ms.translate(0, 51.5f, 0);
+            ms.scale(.6f, .6f, .6f);
+            saw.draw(graphics, getWidth() / 2, 30);
+            ms.popPose();
+        }
+    }
 }

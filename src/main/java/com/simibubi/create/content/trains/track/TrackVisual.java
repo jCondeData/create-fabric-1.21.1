@@ -1,12 +1,5 @@
 package com.simibubi.create.content.trains.track;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.simibubi.create.AllPartialModels;
@@ -24,8 +17,10 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
+
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+
 import net.createmod.catnip.data.Couple;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.BlockPos;
@@ -33,272 +28,299 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
-public class TrackVisual extends AbstractBlockEntityVisual<TrackBlockEntity> implements ShaderLightVisual {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
-	private final List<BezierTrackVisual> visuals = new ArrayList<>();
+import javax.annotation.Nullable;
 
-	public TrackVisual(VisualizationContext context, TrackBlockEntity track, float partialTick) {
-		super(context, track, partialTick);
+public class TrackVisual extends AbstractBlockEntityVisual<TrackBlockEntity>
+        implements ShaderLightVisual {
 
-		collectConnections();
-	}
+    private final List<BezierTrackVisual> visuals = new ArrayList<>();
 
-	@Override
-	public void setSectionCollector(SectionCollector sectionCollector) {
-		super.setSectionCollector(sectionCollector);
-		lightSections.sections(collectLightSections());
-	}
+    public TrackVisual(VisualizationContext context, TrackBlockEntity track, float partialTick) {
+        super(context, track, partialTick);
 
-	@Override
-	public void update(float pt) {
-		if (blockEntity.connections.isEmpty())
-			return;
+        collectConnections();
+    }
 
-		_delete();
+    @Override
+    public void setSectionCollector(SectionCollector sectionCollector) {
+        super.setSectionCollector(sectionCollector);
+        lightSections.sections(collectLightSections());
+    }
 
-		collectConnections();
+    @Override
+    public void update(float pt) {
+        if (blockEntity.connections.isEmpty()) return;
 
-		lightSections.sections(collectLightSections());
-	}
+        _delete();
 
-	private void collectConnections() {
-		blockEntity.connections.values()
-			.stream()
-			.map(this::createInstance)
-			.filter(Objects::nonNull)
-			.forEach(visuals::add);
-	}
+        collectConnections();
 
-	@Override
-	public void updateLight(float partialTick) {
-		visuals.forEach(BezierTrackVisual::updateLight);
-	}
+        lightSections.sections(collectLightSections());
+    }
 
-	@Nullable
-	private BezierTrackVisual createInstance(BezierConnection bc) {
-		if (!bc.isPrimary())
-			return null;
-		return new BezierTrackVisual(bc);
-	}
+    private void collectConnections() {
+        blockEntity.connections.values().stream()
+                .map(this::createInstance)
+                .filter(Objects::nonNull)
+                .forEach(visuals::add);
+    }
 
-	@Override
-	public void _delete() {
-		visuals.forEach(BezierTrackVisual::delete);
-		visuals.clear();
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        visuals.forEach(BezierTrackVisual::updateLight);
+    }
 
-	public LongSet collectLightSections() {
-		if (blockEntity.connections.isEmpty()) {
-			return LongSet.of();
-		}
-		int minX = Integer.MAX_VALUE;
-		int minY = Integer.MAX_VALUE;
-		int minZ = Integer.MAX_VALUE;
-		int maxX = Integer.MIN_VALUE;
-		int maxY = Integer.MIN_VALUE;
-		int maxZ = Integer.MIN_VALUE;
-		for (BezierConnection connection : blockEntity.connections.values()) {
-			for (BlockPos pos : connection.bePositions) {
-				minX = Math.min(minX, pos.getX());
-				minY = Math.min(minY, pos.getY());
-				minZ = Math.min(minZ, pos.getZ());
-				maxX = Math.max(maxX, pos.getX());
-				maxY = Math.max(maxY, pos.getY());
-				maxZ = Math.max(maxZ, pos.getZ());
-			}
-		}
+    @Nullable
+    private BezierTrackVisual createInstance(BezierConnection bc) {
+        if (!bc.isPrimary()) return null;
+        return new BezierTrackVisual(bc);
+    }
 
-		var minSectionX = ContraptionVisual.minLightSection(minX);
-		var minSectionY = ContraptionVisual.minLightSection(minY);
-		var minSectionZ = ContraptionVisual.minLightSection(minZ);
-		int maxSectionX = ContraptionVisual.maxLightSection(maxX);
-		int maxSectionY = ContraptionVisual.maxLightSection(maxY);
-		int maxSectionZ = ContraptionVisual.maxLightSection(maxZ);
+    @Override
+    public void _delete() {
+        visuals.forEach(BezierTrackVisual::delete);
+        visuals.clear();
+    }
 
-		LongSet out = new LongArraySet();
+    public LongSet collectLightSections() {
+        if (blockEntity.connections.isEmpty()) {
+            return LongSet.of();
+        }
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int minZ = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        int maxZ = Integer.MIN_VALUE;
+        for (BezierConnection connection : blockEntity.connections.values()) {
+            for (BlockPos pos : connection.bePositions) {
+                minX = Math.min(minX, pos.getX());
+                minY = Math.min(minY, pos.getY());
+                minZ = Math.min(minZ, pos.getZ());
+                maxX = Math.max(maxX, pos.getX());
+                maxY = Math.max(maxY, pos.getY());
+                maxZ = Math.max(maxZ, pos.getZ());
+            }
+        }
 
-		for (int x = minSectionX; x <= maxSectionX; x++) {
-			for (int y = minSectionY; y <= maxSectionY; y++) {
-				for (int z = minSectionZ; z <= maxSectionZ; z++) {
-					out.add(SectionPos.asLong(x, y, z));
-				}
-			}
-		}
+        var minSectionX = ContraptionVisual.minLightSection(minX);
+        var minSectionY = ContraptionVisual.minLightSection(minY);
+        var minSectionZ = ContraptionVisual.minLightSection(minZ);
+        int maxSectionX = ContraptionVisual.maxLightSection(maxX);
+        int maxSectionY = ContraptionVisual.maxLightSection(maxY);
+        int maxSectionZ = ContraptionVisual.maxLightSection(maxZ);
 
-		return out;
-	}
+        LongSet out = new LongArraySet();
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        for (int x = minSectionX; x <= maxSectionX; x++) {
+            for (int y = minSectionY; y <= maxSectionY; y++) {
+                for (int z = minSectionZ; z <= maxSectionZ; z++) {
+                    out.add(SectionPos.asLong(x, y, z));
+                }
+            }
+        }
+
+        return out;
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
         for (BezierTrackVisual instance : visuals) {
             instance.collectCrumblingInstances(consumer);
         }
     }
 
-	private class BezierTrackVisual {
+    private class BezierTrackVisual {
 
-		private final TransformedInstance[] ties;
-		private final TransformedInstance[] left;
-		private final TransformedInstance[] right;
+        private final TransformedInstance[] ties;
+        private final TransformedInstance[] left;
+        private final TransformedInstance[] right;
 
-		private @Nullable GirderVisual girder;
+        private @Nullable GirderVisual girder;
 
-		private BezierTrackVisual(BezierConnection bc) {
-			girder = bc.hasGirder ? new GirderVisual(bc) : null;
+        private BezierTrackVisual(BezierConnection bc) {
+            girder = bc.hasGirder ? new GirderVisual(bc) : null;
 
-			PoseStack pose = new PoseStack();
-			TransformStack.of(pose)
-				.translate(getVisualPosition());
+            PoseStack pose = new PoseStack();
+            TransformStack.of(pose).translate(getVisualPosition());
 
-			int segCount = bc.getSegmentCount();
-			ties = new TransformedInstance[segCount];
-			left = new TransformedInstance[segCount];
-			right = new TransformedInstance[segCount];
+            int segCount = bc.getSegmentCount();
+            ties = new TransformedInstance[segCount];
+            left = new TransformedInstance[segCount];
+            right = new TransformedInstance[segCount];
 
-			TrackMaterial.TrackModelHolder modelHolder = bc.getMaterial().getModelHolder();
+            TrackMaterial.TrackModelHolder modelHolder = bc.getMaterial().getModelHolder();
 
-			instancerProvider().instancer(InstanceTypes.TRANSFORMED, SpecialModels.flatChunk(modelHolder.tie()))
-				.createInstances(ties);
-			instancerProvider().instancer(InstanceTypes.TRANSFORMED, SpecialModels.flatChunk(modelHolder.leftSegment()))
-				.createInstances(left);
-			instancerProvider().instancer(InstanceTypes.TRANSFORMED, SpecialModels.flatChunk(modelHolder.rightSegment()))
-				.createInstances(right);
+            instancerProvider()
+                    .instancer(
+                            InstanceTypes.TRANSFORMED, SpecialModels.flatChunk(modelHolder.tie()))
+                    .createInstances(ties);
+            instancerProvider()
+                    .instancer(
+                            InstanceTypes.TRANSFORMED,
+                            SpecialModels.flatChunk(modelHolder.leftSegment()))
+                    .createInstances(left);
+            instancerProvider()
+                    .instancer(
+                            InstanceTypes.TRANSFORMED,
+                            SpecialModels.flatChunk(modelHolder.rightSegment()))
+                    .createInstances(right);
 
-			SegmentAngles[] segments = bc.getBakedSegments();
-			for (int i = 1; i < segments.length; i++) {
-				SegmentAngles segment = segments[i];
-				var modelIndex = i - 1;
+            SegmentAngles[] segments = bc.getBakedSegments();
+            for (int i = 1; i < segments.length; i++) {
+                SegmentAngles segment = segments[i];
+                var modelIndex = i - 1;
 
-				ties[modelIndex].setTransform(pose)
-					.mul(segment.tieTransform)
-					.setChanged();
+                ties[modelIndex].setTransform(pose).mul(segment.tieTransform).setChanged();
 
-				for (boolean first : Iterate.trueAndFalse) {
-					Pose transform = segment.railTransforms.get(first);
-					(first ? this.left : this.right)[modelIndex].setTransform(pose)
-						.mul(transform)
-						.setChanged();
-				}
-			}
+                for (boolean first : Iterate.trueAndFalse) {
+                    Pose transform = segment.railTransforms.get(first);
+                    (first ? this.left : this.right)
+                            [modelIndex].setTransform(pose)
+                            .mul(transform)
+                            .setChanged();
+                }
+            }
 
-			updateLight();
-		}
+            updateLight();
+        }
 
-		void delete() {
-			for (var d : ties)
-				d.delete();
-			for (var d : left)
-				d.delete();
-			for (var d : right)
-				d.delete();
-			if (girder != null)
-				girder.delete();
-		}
+        void delete() {
+            for (var d : ties) d.delete();
+            for (var d : left) d.delete();
+            for (var d : right) d.delete();
+            if (girder != null) girder.delete();
+        }
 
-		void updateLight() {
-			// Light for ties/rails handled by shader light since they tend to clip into blocks
-			if (girder != null)
-				girder.updateLight();
-		}
+        void updateLight() {
+            // Light for ties/rails handled by shader light since they tend to clip into blocks
+            if (girder != null) girder.updateLight();
+        }
 
-		public void collectCrumblingInstances(Consumer<Instance> consumer) {
-			for (var d : ties)
-				consumer.accept(d);
-			for (var d : left)
-				consumer.accept(d);
-			for (var d : right)
-				consumer.accept(d);
-			if (girder != null)
-				girder.collectCrumblingInstances(consumer);
-		}
+        public void collectCrumblingInstances(Consumer<Instance> consumer) {
+            for (var d : ties) consumer.accept(d);
+            for (var d : left) consumer.accept(d);
+            for (var d : right) consumer.accept(d);
+            if (girder != null) girder.collectCrumblingInstances(consumer);
+        }
 
-		private class GirderVisual {
+        private class GirderVisual {
 
-			private final Couple<TransformedInstance[]> beams;
-			private final Couple<Couple<TransformedInstance[]>> beamCaps;
-			private final BlockPos[] lightPos;
+            private final Couple<TransformedInstance[]> beams;
+            private final Couple<Couple<TransformedInstance[]>> beamCaps;
+            private final BlockPos[] lightPos;
 
-			private GirderVisual(BezierConnection bc) {
-				BlockPos tePosition = bc.bePositions.getFirst();
-				PoseStack pose = new PoseStack();
-				TransformStack.of(pose)
-					.translate(getVisualPosition())
-					.nudge((int) bc.bePositions.getFirst()
-						.asLong());
+            private GirderVisual(BezierConnection bc) {
+                BlockPos tePosition = bc.bePositions.getFirst();
+                PoseStack pose = new PoseStack();
+                TransformStack.of(pose)
+                        .translate(getVisualPosition())
+                        .nudge((int) bc.bePositions.getFirst().asLong());
 
-				int segCount = bc.getSegmentCount();
-				beams = Couple.create(() -> new TransformedInstance[segCount]);
-				beamCaps = Couple.create(() -> Couple.create(() -> new TransformedInstance[segCount]));
-				lightPos = new BlockPos[segCount];
-				beams.forEach(instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.GIRDER_SEGMENT_MIDDLE))::createInstances);
-				beamCaps.forEachWithContext((c, top) -> {
-					var partialModel = Models.partial(top ? AllPartialModels.GIRDER_SEGMENT_TOP : AllPartialModels.GIRDER_SEGMENT_BOTTOM);
-					c.forEach(instancerProvider().instancer(InstanceTypes.TRANSFORMED, partialModel)::createInstances);
-				});
+                int segCount = bc.getSegmentCount();
+                beams = Couple.create(() -> new TransformedInstance[segCount]);
+                beamCaps =
+                        Couple.create(() -> Couple.create(() -> new TransformedInstance[segCount]));
+                lightPos = new BlockPos[segCount];
+                beams.forEach(
+                        instancerProvider()
+                                        .instancer(
+                                                InstanceTypes.TRANSFORMED,
+                                                Models.partial(
+                                                        AllPartialModels.GIRDER_SEGMENT_MIDDLE))
+                                ::createInstances);
+                beamCaps.forEachWithContext(
+                        (c, top) -> {
+                            var partialModel =
+                                    Models.partial(
+                                            top
+                                                    ? AllPartialModels.GIRDER_SEGMENT_TOP
+                                                    : AllPartialModels.GIRDER_SEGMENT_BOTTOM);
+                            c.forEach(
+                                    instancerProvider()
+                                                    .instancer(
+                                                            InstanceTypes.TRANSFORMED, partialModel)
+                                            ::createInstances);
+                        });
 
-				GirderAngles[] bakedGirders = bc.getBakedGirders();
-				for (int i = 1; i < bakedGirders.length; i++) {
-					GirderAngles segment = bakedGirders[i];
-					var modelIndex = i - 1;
-					lightPos[modelIndex] = segment.lightPosition.offset(tePosition);
+                GirderAngles[] bakedGirders = bc.getBakedGirders();
+                for (int i = 1; i < bakedGirders.length; i++) {
+                    GirderAngles segment = bakedGirders[i];
+                    var modelIndex = i - 1;
+                    lightPos[modelIndex] = segment.lightPosition.offset(tePosition);
 
-					for (boolean first : Iterate.trueAndFalse) {
-						Pose beamTransform = segment.beams.get(first);
-						beams.get(first)[modelIndex].setTransform(pose)
-							.mul(beamTransform)
-							.setChanged();
-						for (boolean top : Iterate.trueAndFalse) {
-							Pose beamCapTransform = segment.beamCaps.get(top)
-								.get(first);
-							beamCaps.get(top)
-								.get(first)[modelIndex].setTransform(pose)
-								.mul(beamCapTransform)
-								.setChanged();
-						}
-					}
-				}
+                    for (boolean first : Iterate.trueAndFalse) {
+                        Pose beamTransform = segment.beams.get(first);
+                        beams.get(first)[modelIndex]
+                                .setTransform(pose)
+                                .mul(beamTransform)
+                                .setChanged();
+                        for (boolean top : Iterate.trueAndFalse) {
+                            Pose beamCapTransform = segment.beamCaps.get(top).get(first);
+                            beamCaps.get(top)
+                                    .get(first)[modelIndex]
+                                    .setTransform(pose)
+                                    .mul(beamCapTransform)
+                                    .setChanged();
+                        }
+                    }
+                }
 
-				updateLight();
-			}
+                updateLight();
+            }
 
-			void delete() {
-				beams.forEach(arr -> {
-					for (var d : arr)
-						d.delete();
-				});
-				beamCaps.forEach(c -> c.forEach(arr -> {
-					for (var d : arr)
-						d.delete();
-				}));
-			}
+            void delete() {
+                beams.forEach(
+                        arr -> {
+                            for (var d : arr) d.delete();
+                        });
+                beamCaps.forEach(
+                        c ->
+                                c.forEach(
+                                        arr -> {
+                                            for (var d : arr) d.delete();
+                                        }));
+            }
 
-			void updateLight() {
-				beams.forEach(arr -> {
-					for (int i = 0; i < arr.length; i++)
-						TrackVisual.updateLight(arr[i], level, lightPos[i]);
-				});
-				beamCaps.forEach(c -> c.forEach(arr -> {
-					for (int i = 0; i < arr.length; i++)
-						TrackVisual.updateLight(arr[i], level, lightPos[i]);
-				}));
-			}
+            void updateLight() {
+                beams.forEach(
+                        arr -> {
+                            for (int i = 0; i < arr.length; i++)
+                                TrackVisual.updateLight(arr[i], level, lightPos[i]);
+                        });
+                beamCaps.forEach(
+                        c ->
+                                c.forEach(
+                                        arr -> {
+                                            for (int i = 0; i < arr.length; i++)
+                                                TrackVisual.updateLight(arr[i], level, lightPos[i]);
+                                        }));
+            }
 
-			public void collectCrumblingInstances(Consumer<Instance> consumer) {
-				beams.forEach(arr -> {
-					for (var d : arr)
-						consumer.accept(d);
-				});
-				beamCaps.forEach(c -> c.forEach(arr -> {
-					for (var d : arr)
-						consumer.accept(d);
-				}));
-			}
-		}
+            public void collectCrumblingInstances(Consumer<Instance> consumer) {
+                beams.forEach(
+                        arr -> {
+                            for (var d : arr) consumer.accept(d);
+                        });
+                beamCaps.forEach(
+                        c ->
+                                c.forEach(
+                                        arr -> {
+                                            for (var d : arr) consumer.accept(d);
+                                        }));
+            }
+        }
+    }
 
-	}
-
-	private static void updateLight(FlatLit instance, Level level, BlockPos pos) {
-		instance.light(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos))
-				.setChanged();
-	}
+    private static void updateLight(FlatLit instance, Level level, BlockPos pos) {
+        instance.light(
+                        level.getBrightness(LightLayer.BLOCK, pos),
+                        level.getBrightness(LightLayer.SKY, pos))
+                .setChanged();
+    }
 }

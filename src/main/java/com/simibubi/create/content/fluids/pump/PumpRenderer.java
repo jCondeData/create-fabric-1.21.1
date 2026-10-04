@@ -10,13 +10,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class PumpRenderer extends KineticBlockEntityRenderer<PumpBlockEntity> {
 
-	public PumpRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public PumpRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected SuperByteBuffer getRotatedModel(PumpBlockEntity be, BlockState state) {
-		return CachedBuffers.partialFacing(AllPartialModels.MECHANICAL_PUMP_COG, state);
-	}
-
+    @Override
+    protected SuperByteBuffer getRotatedModel(PumpBlockEntity be, BlockState state) {
+        return CachedBuffers.partialFacing(AllPartialModels.MECHANICAL_PUMP_COG, state);
+    }
 }

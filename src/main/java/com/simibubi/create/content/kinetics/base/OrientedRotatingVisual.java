@@ -1,7 +1,5 @@
 package com.simibubi.create.content.kinetics.base;
 
-import java.util.function.Consumer;
-
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllPartialModels.GantryShaftKey;
 import com.simibubi.create.content.kinetics.gantry.GantryShaftBlock;
@@ -16,79 +14,118 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.visualization.SimpleBlockEntityVisualizer;
+
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class OrientedRotatingVisual<T extends KineticBlockEntity> extends KineticBlockEntityVisual<T> {
-	protected final RotatingInstance rotatingModel;
+import java.util.function.Consumer;
 
-	/**
-	 * @param from  The source model orientation to rotate away from.
-	 * @param to    The orientation to rotate to.
-	 * @param model The model to spin.
-	 */
-	public OrientedRotatingVisual(VisualizationContext context, T blockEntity, float partialTick, Direction from, Direction to, Model model) {
-		super(context, blockEntity, partialTick);
+public class OrientedRotatingVisual<T extends KineticBlockEntity>
+        extends KineticBlockEntityVisual<T> {
+    protected final RotatingInstance rotatingModel;
 
-		rotatingModel = instancerProvider().instancer(AllInstanceTypes.ROTATING, model)
-			.createInstance()
-			.rotateToFace(from, to)
-			.setup(blockEntity)
-			.setPosition(getVisualPosition());
+    /**
+     * @param from The source model orientation to rotate away from.
+     * @param to The orientation to rotate to.
+     * @param model The model to spin.
+     */
+    public OrientedRotatingVisual(
+            VisualizationContext context,
+            T blockEntity,
+            float partialTick,
+            Direction from,
+            Direction to,
+            Model model) {
+        super(context, blockEntity, partialTick);
 
-		rotatingModel.setChanged();
-	}
+        rotatingModel =
+                instancerProvider()
+                        .instancer(AllInstanceTypes.ROTATING, model)
+                        .createInstance()
+                        .rotateToFace(from, to)
+                        .setup(blockEntity)
+                        .setPosition(getVisualPosition());
 
-	public static <T extends KineticBlockEntity> SimpleBlockEntityVisualizer.Factory<T> of(PartialModel partial) {
-		return (context, blockEntity, partialTick) -> {
-			Direction facing = blockEntity.getBlockState()
-				.getValue(BlockStateProperties.FACING);
-			return new OrientedRotatingVisual<>(context, blockEntity, partialTick, Direction.SOUTH, facing, Models.partial(partial));
-		};
-	}
+        rotatingModel.setChanged();
+    }
 
-	public static <T extends KineticBlockEntity> SimpleBlockEntityVisualizer.Factory<T> backHorizontal(PartialModel partial) {
-		return (context, blockEntity, partialTick) -> {
-			Direction facing = blockEntity.getBlockState()
-				.getValue(BlockStateProperties.HORIZONTAL_FACING)
-				.getOpposite();
-			return new OrientedRotatingVisual<>(context, blockEntity, partialTick, Direction.SOUTH, facing, Models.partial(partial));
-		};
-	}
+    public static <T extends KineticBlockEntity> SimpleBlockEntityVisualizer.Factory<T> of(
+            PartialModel partial) {
+        return (context, blockEntity, partialTick) -> {
+            Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.FACING);
+            return new OrientedRotatingVisual<>(
+                    context,
+                    blockEntity,
+                    partialTick,
+                    Direction.SOUTH,
+                    facing,
+                    Models.partial(partial));
+        };
+    }
 
-	public static BlockEntityVisual<? super GantryShaftBlockEntity> gantryShaft(VisualizationContext visualizationContext, GantryShaftBlockEntity gantryShaftBlockEntity, float partialTick) {
-		var blockState = gantryShaftBlockEntity.getBlockState();
+    public static <T extends KineticBlockEntity>
+            SimpleBlockEntityVisualizer.Factory<T> backHorizontal(PartialModel partial) {
+        return (context, blockEntity, partialTick) -> {
+            Direction facing =
+                    blockEntity
+                            .getBlockState()
+                            .getValue(BlockStateProperties.HORIZONTAL_FACING)
+                            .getOpposite();
+            return new OrientedRotatingVisual<>(
+                    context,
+                    blockEntity,
+                    partialTick,
+                    Direction.SOUTH,
+                    facing,
+                    Models.partial(partial));
+        };
+    }
 
-		Part part = blockState.getValue(GantryShaftBlock.PART);
+    public static BlockEntityVisual<? super GantryShaftBlockEntity> gantryShaft(
+            VisualizationContext visualizationContext,
+            GantryShaftBlockEntity gantryShaftBlockEntity,
+            float partialTick) {
+        var blockState = gantryShaftBlockEntity.getBlockState();
 
-		boolean isPowered = blockState.getValue(GantryShaftBlock.POWERED);
-		boolean isFlipped = blockState.getValue(GantryShaftBlock.FACING)
-			.getAxisDirection() == AxisDirection.NEGATIVE;
+        Part part = blockState.getValue(GantryShaftBlock.PART);
 
-		var model = Models.partial(AllPartialModels.GANTRY_SHAFTS.get(new GantryShaftKey(part, isPowered, isFlipped)));
+        boolean isPowered = blockState.getValue(GantryShaftBlock.POWERED);
+        boolean isFlipped =
+                blockState.getValue(GantryShaftBlock.FACING).getAxisDirection()
+                        == AxisDirection.NEGATIVE;
 
-		return new OrientedRotatingVisual<>(visualizationContext, gantryShaftBlockEntity, partialTick, Direction.UP, blockState.getValue(GantryShaftBlock.FACING), model);
-	}
+        var model =
+                Models.partial(
+                        AllPartialModels.GANTRY_SHAFTS.get(
+                                new GantryShaftKey(part, isPowered, isFlipped)));
 
-	@Override
-	public void update(float pt) {
-		rotatingModel.setup(blockEntity)
-			.setChanged();
-	}
+        return new OrientedRotatingVisual<>(
+                visualizationContext,
+                gantryShaftBlockEntity,
+                partialTick,
+                Direction.UP,
+                blockState.getValue(GantryShaftBlock.FACING),
+                model);
+    }
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(rotatingModel);
-	}
+    @Override
+    public void update(float pt) {
+        rotatingModel.setup(blockEntity).setChanged();
+    }
 
-	@Override
-	protected void _delete() {
-		rotatingModel.delete();
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        relight(rotatingModel);
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		consumer.accept(rotatingModel);
-	}
+    @Override
+    protected void _delete() {
+        rotatingModel.delete();
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        consumer.accept(rotatingModel);
+    }
 }

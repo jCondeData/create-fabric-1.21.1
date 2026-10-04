@@ -8,17 +8,16 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class GearshiftBlockEntity extends SplitShaftBlockEntity {
 
-	public GearshiftBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public GearshiftBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	public float getRotationSpeedModifier(Direction face) {
-		if (hasSource()) {
-			if (face != getSourceFacing() && getBlockState().getValue(BlockStateProperties.POWERED))
-				return -1;
-		}
-		return 1;
-	}
-	
+    @Override
+    public float getRotationSpeedModifier(Direction face) {
+        if (hasSource()) {
+            if (face != getSourceFacing() && getBlockState().getValue(BlockStateProperties.POWERED))
+                return -1;
+        }
+        return 1;
+    }
 }

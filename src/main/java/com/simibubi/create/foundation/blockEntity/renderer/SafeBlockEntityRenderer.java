@@ -1,11 +1,7 @@
 package com.simibubi.create.foundation.blockEntity.renderer;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity;
-import com.simibubi.create.foundation.mixin.accessor.LevelRendererAccessor;
-
 import com.simibubi.create.foundation.mixin.accessor.LevelRendererAccessor;
 
 import net.createmod.ponder.api.level.PonderLevel;
@@ -19,49 +15,60 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class SafeBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
-	@Override
-	public final void render(T be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light,
-		int overlay) {
-		if (isInvalid(be))
-			return;
-		renderSafe(be, partialTicks, ms, bufferSource, light, overlay);
-	}
+import org.jetbrains.annotations.NotNull;
 
-	protected abstract void renderSafe(T be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light,
-		int overlay);
+public abstract class SafeBlockEntityRenderer<T extends BlockEntity>
+        implements BlockEntityRenderer<T> {
+    @Override
+    public final void render(
+            T be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource bufferSource,
+            int light,
+            int overlay) {
+        if (isInvalid(be)) return;
+        renderSafe(be, partialTicks, ms, bufferSource, light, overlay);
+    }
 
-	public boolean isInvalid(T be) {
-		return !be.hasLevel() || be.getBlockState()
-			.getBlock() == Blocks.AIR;
-	}
+    protected abstract void renderSafe(
+            T be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource bufferSource,
+            int light,
+            int overlay);
 
-	public boolean shouldCullItem(Vec3 itemPos, Level level) {
-		if (level instanceof PonderLevel)
-			return false;
+    public boolean isInvalid(T be) {
+        return !be.hasLevel() || be.getBlockState().getBlock() == Blocks.AIR;
+    }
 
-		LevelRendererAccessor accessor = (LevelRendererAccessor) Minecraft.getInstance().levelRenderer;
-		Frustum frustum = accessor.create$getCapturedFrustum() != null ?
-			accessor.create$getCapturedFrustum() :
-			accessor.create$getCullingFrustum();
+    public boolean shouldCullItem(Vec3 itemPos, Level level) {
+        if (level instanceof PonderLevel) return false;
 
-		AABB itemBB = new AABB(
-				itemPos.x - 0.25,
-				itemPos.y - 0.25,
-				itemPos.z - 0.25,
-				itemPos.x + 0.25,
-				itemPos.y + 0.25,
-				itemPos.z + 0.25
-		);
+        LevelRendererAccessor accessor =
+                (LevelRendererAccessor) Minecraft.getInstance().levelRenderer;
+        Frustum frustum =
+                accessor.create$getCapturedFrustum() != null
+                        ? accessor.create$getCapturedFrustum()
+                        : accessor.create$getCullingFrustum();
 
-		return !frustum.isVisible(itemBB);
-	}
+        AABB itemBB =
+                new AABB(
+                        itemPos.x - 0.25,
+                        itemPos.y - 0.25,
+                        itemPos.z - 0.25,
+                        itemPos.x + 0.25,
+                        itemPos.y + 0.25,
+                        itemPos.z + 0.25);
 
-	@Override
-	public @NotNull AABB getRenderBoundingBox(@NotNull T blockEntity) {
-		if (blockEntity instanceof CachedRenderBBBlockEntity cbe)
-			return cbe.getRenderBoundingBox();
+        return !frustum.isVisible(itemBB);
+    }
 
-		return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity);
-	}
+    @Override
+    public @NotNull AABB getRenderBoundingBox(@NotNull T blockEntity) {
+        if (blockEntity instanceof CachedRenderBBBlockEntity cbe) return cbe.getRenderBoundingBox();
+
+        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity);
+    }
 }

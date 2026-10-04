@@ -7,60 +7,60 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import com.simibubi.create.foundation.fluid.FluidRenderer;
 
-import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.animation.LerpedFloat;
+import net.createmod.catnip.data.Iterate;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-public class TransparentStraightPipeRenderer extends SafeBlockEntityRenderer<StraightPipeBlockEntity> {
+public class TransparentStraightPipeRenderer
+        extends SafeBlockEntityRenderer<StraightPipeBlockEntity> {
 
-	public TransparentStraightPipeRenderer(BlockEntityRendererProvider.Context context) {
-	}
+    public TransparentStraightPipeRenderer(BlockEntityRendererProvider.Context context) {}
 
-	@Override
-	protected void renderSafe(StraightPipeBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
-		int light, int overlay) {
-		FluidTransportBehaviour pipe = be.getBehaviour(FluidTransportBehaviour.TYPE);
-		if (pipe == null)
-			return;
+    @Override
+    protected void renderSafe(
+            StraightPipeBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        FluidTransportBehaviour pipe = be.getBehaviour(FluidTransportBehaviour.TYPE);
+        if (pipe == null) return;
 
-		for (Direction side : Iterate.directions) {
+        for (Direction side : Iterate.directions) {
 
-			Flow flow = pipe.getFlow(side);
-			if (flow == null)
-				continue;
-			FluidStack fluidStack = flow.fluid;
-			if (fluidStack.isEmpty())
-				continue;
-			LerpedFloat progress = flow.progress;
-			if (progress == null)
-				continue;
+            Flow flow = pipe.getFlow(side);
+            if (flow == null) continue;
+            FluidStack fluidStack = flow.fluid;
+            if (fluidStack.isEmpty()) continue;
+            LerpedFloat progress = flow.progress;
+            if (progress == null) continue;
 
-			float value = progress.getValue(partialTicks);
-			boolean inbound = flow.inbound;
-			if (value == 1) {
-				if (inbound) {
-					Flow opposite = pipe.getFlow(side.getOpposite());
-					if (opposite == null)
-						value -= 1e-6f;
-				} else {
-					FluidTransportBehaviour adjacent = BlockEntityBehaviour.get(be.getLevel(), be.getBlockPos()
-						.relative(side), FluidTransportBehaviour.TYPE);
-					if (adjacent == null)
-						value -= 1e-6f;
-					else {
-						Flow other = adjacent.getFlow(side.getOpposite());
-						if (other == null || !other.inbound && !other.complete)
-							value -= 1e-6f;
-					}
-				}
-			}
+            float value = progress.getValue(partialTicks);
+            boolean inbound = flow.inbound;
+            if (value == 1) {
+                if (inbound) {
+                    Flow opposite = pipe.getFlow(side.getOpposite());
+                    if (opposite == null) value -= 1e-6f;
+                } else {
+                    FluidTransportBehaviour adjacent =
+                            BlockEntityBehaviour.get(
+                                    be.getLevel(),
+                                    be.getBlockPos().relative(side),
+                                    FluidTransportBehaviour.TYPE);
+                    if (adjacent == null) value -= 1e-6f;
+                    else {
+                        Flow other = adjacent.getFlow(side.getOpposite());
+                        if (other == null || !other.inbound && !other.complete) value -= 1e-6f;
+                    }
+                }
+            }
 
-			FluidRenderer.renderFluidStream(fluidStack, side, 3 / 16f, value, inbound, buffer, ms, light);
-		}
-
-	}
-
+            FluidRenderer.renderFluidStream(
+                    fluidStack, side, 3 / 16f, value, inbound, buffer, ms, light);
+        }
+    }
 }

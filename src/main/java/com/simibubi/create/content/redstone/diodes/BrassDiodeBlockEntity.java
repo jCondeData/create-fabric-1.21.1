@@ -2,10 +2,6 @@ package com.simibubi.create.content.redstone.diodes;
 
 import static com.simibubi.create.content.redstone.diodes.BrassDiodeBlock.POWERING;
 
-import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.simibubi.create.content.equipment.clipboard.ClipboardCloneable;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -22,97 +18,110 @@ import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
 public abstract class BrassDiodeBlockEntity extends SmartBlockEntity implements ClipboardCloneable {
 
-	protected int state;
-	ScrollValueBehaviour maxState;
+    protected int state;
+    ScrollValueBehaviour maxState;
 
-	public BrassDiodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public BrassDiodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-		maxState = new BrassDiodeScrollValueBehaviour(CreateLang.translateDirect("logistics.redstone_interval"), this,
-			new BrassDiodeScrollSlot()).between(2, 60 * 20 * 60);
-		maxState.withFormatter(this::format);
-		maxState.withCallback(this::onMaxDelayChanged);
-		maxState.setValue(defaultValue());
-		behaviours.add(maxState);
-	}
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        maxState =
+                new BrassDiodeScrollValueBehaviour(
+                                CreateLang.translateDirect("logistics.redstone_interval"),
+                                this,
+                                new BrassDiodeScrollSlot())
+                        .between(2, 60 * 20 * 60);
+        maxState.withFormatter(this::format);
+        maxState.withCallback(this::onMaxDelayChanged);
+        maxState.setValue(defaultValue());
+        behaviours.add(maxState);
+    }
 
-	protected int defaultValue() {
-		return 2;
-	}
+    protected int defaultValue() {
+        return 2;
+    }
 
-	public float getProgress() {
-		int max = Math.max(2, maxState.getValue());
-		return Mth.clamp(state, 0, max) / (float) max;
-	}
+    public float getProgress() {
+        int max = Math.max(2, maxState.getValue());
+        return Mth.clamp(state, 0, max) / (float) max;
+    }
 
-	public boolean isIdle() {
-		return state == 0;
-	}
+    public boolean isIdle() {
+        return state == 0;
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
-		boolean powered = getBlockState().getValue(DiodeBlock.POWERED);
-		boolean powering = getBlockState().getValue(POWERING);
-		boolean atMax = state >= maxState.getValue();
-		boolean atMin = state <= 0;
-		updateState(powered, powering, atMax, atMin);
-	}
+    @Override
+    public void tick() {
+        super.tick();
+        boolean powered = getBlockState().getValue(DiodeBlock.POWERED);
+        boolean powering = getBlockState().getValue(POWERING);
+        boolean atMax = state >= maxState.getValue();
+        boolean atMin = state <= 0;
+        updateState(powered, powering, atMax, atMin);
+    }
 
-	protected abstract void updateState(boolean powered, boolean powering, boolean atMax, boolean atMin);
+    protected abstract void updateState(
+            boolean powered, boolean powering, boolean atMax, boolean atMin);
 
-	private void onMaxDelayChanged(int newMax) {
-		state = Mth.clamp(state, 0, newMax);
-		sendData();
-	}
+    private void onMaxDelayChanged(int newMax) {
+        state = Mth.clamp(state, 0, newMax);
+        sendData();
+    }
 
-	@Override
-	protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		state = compound.getInt("State");
-		super.read(compound, registries, clientPacket);
-	}
+    @Override
+    protected void read(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        state = compound.getInt("State");
+        super.read(compound, registries, clientPacket);
+    }
 
-	@Override
-	public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		compound.putInt("State", state);
-		super.write(compound, registries, clientPacket);
-	}
+    @Override
+    public void write(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        compound.putInt("State", state);
+        super.write(compound, registries, clientPacket);
+    }
 
-	private String format(int value) {
-		if (value < 60)
-			return value + "t";
-		if (value < 20 * 60)
-			return (value / 20) + "s";
-		return (value / 20 / 60) + "m";
-	}
+    private String format(int value) {
+        if (value < 60) return value + "t";
+        if (value < 20 * 60) return (value / 20) + "s";
+        return (value / 20 / 60) + "m";
+    }
 
-	@Override
-	public String getClipboardKey() {
-		return "Block";
-	}
+    @Override
+    public String getClipboardKey() {
+        return "Block";
+    }
 
-	@Override
-	public boolean readFromClipboard(@NotNull HolderLookup.Provider registries, CompoundTag tag, Player player, Direction side, boolean simulate) {
-		if (!tag.contains("Inverted"))
-			return false;
-		if (simulate)
-			return true;
-		BlockState blockState = getBlockState();
-		if (blockState.getValue(BrassDiodeBlock.INVERTED) != tag.getBoolean("Inverted"))
-			level.setBlockAndUpdate(worldPosition, blockState.cycle(BrassDiodeBlock.INVERTED));
-		return true;
-	}
+    @Override
+    public boolean readFromClipboard(
+            @NotNull HolderLookup.Provider registries,
+            CompoundTag tag,
+            Player player,
+            Direction side,
+            boolean simulate) {
+        if (!tag.contains("Inverted")) return false;
+        if (simulate) return true;
+        BlockState blockState = getBlockState();
+        if (blockState.getValue(BrassDiodeBlock.INVERTED) != tag.getBoolean("Inverted"))
+            level.setBlockAndUpdate(worldPosition, blockState.cycle(BrassDiodeBlock.INVERTED));
+        return true;
+    }
 
-	@Override
-	public boolean writeToClipboard(@NotNull HolderLookup.Provider registries, CompoundTag tag, Direction side) {
-		tag.putBoolean("Inverted", getBlockState().getOptionalValue(BrassDiodeBlock.INVERTED)
-			.orElse(false));
-		return true;
-	}
-
+    @Override
+    public boolean writeToClipboard(
+            @NotNull HolderLookup.Provider registries, CompoundTag tag, Direction side) {
+        tag.putBoolean(
+                "Inverted",
+                getBlockState().getOptionalValue(BrassDiodeBlock.INVERTED).orElse(false));
+        return true;
+    }
 }

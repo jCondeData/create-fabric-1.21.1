@@ -8,17 +8,16 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class ClutchBlockEntity extends SplitShaftBlockEntity {
 
-	public ClutchBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public ClutchBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	public float getRotationSpeedModifier(Direction face) {
-		if (hasSource()) {
-			if (face != getSourceFacing() && getBlockState().getValue(BlockStateProperties.POWERED))
-				return 0;
-		}
-		return 1;
-	}
-
+    @Override
+    public float getRotationSpeedModifier(Direction face) {
+        if (hasSource()) {
+            if (face != getSourceFacing() && getBlockState().getValue(BlockStateProperties.POWERED))
+                return 0;
+        }
+        return 1;
+    }
 }

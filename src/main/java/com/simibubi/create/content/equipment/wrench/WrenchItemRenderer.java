@@ -9,6 +9,7 @@ import com.simibubi.create.foundation.item.render.CustomRenderedItemModelRendere
 import com.simibubi.create.foundation.item.render.PartialItemModelRenderer;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -16,19 +17,28 @@ import net.minecraft.world.item.ItemStack;
 
 public class WrenchItemRenderer extends CustomRenderedItemModelRenderer {
 
-	protected static final PartialModel GEAR = PartialModel.of(Create.asResource("item/wrench/gear"));
+    protected static final PartialModel GEAR =
+            PartialModel.of(Create.asResource("item/wrench/gear"));
 
-	@Override
-	protected void render(ItemStack stack, CustomRenderedItemModel model, PartialItemModelRenderer renderer, ItemDisplayContext transformType,
-		PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-		renderer.render(model.getOriginalModel(), light);
+    @Override
+    protected void render(
+            ItemStack stack,
+            CustomRenderedItemModel model,
+            PartialItemModelRenderer renderer,
+            ItemDisplayContext transformType,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        renderer.render(model.getOriginalModel(), light);
 
-		float xOffset = -1/16f;
-		ms.translate(-xOffset, 0, 0);
-		ms.mulPose(Axis.YP.rotationDegrees(ScrollValueHandler.getScroll(AnimationTickHolder.getPartialTicks())));
-		ms.translate(xOffset, 0, 0);
+        float xOffset = -1 / 16f;
+        ms.translate(-xOffset, 0, 0);
+        ms.mulPose(
+                Axis.YP.rotationDegrees(
+                        ScrollValueHandler.getScroll(AnimationTickHolder.getPartialTicks())));
+        ms.translate(xOffset, 0, 0);
 
-		renderer.render(GEAR.get(), light);
-	}
-
+        renderer.render(GEAR.get(), light);
+    }
 }

@@ -1,9 +1,5 @@
 package com.simibubi.create.content.kinetics.crank;
 
-import java.util.function.Consumer;
-
-import org.joml.Quaternionf;
-
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityVisual;
 
@@ -13,61 +9,81 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class ValveHandleVisual extends KineticBlockEntityVisual<HandCrankBlockEntity> implements SimpleDynamicVisual {
-	private final TransformedInstance crank;
+import org.joml.Quaternionf;
 
-	public ValveHandleVisual(VisualizationContext modelManager, HandCrankBlockEntity blockEntity, float partialTick) {
-		super(modelManager, blockEntity, partialTick);
+import java.util.function.Consumer;
 
-		BlockState state = blockEntity.getBlockState();
-		DyeColor color = null;
-		if (state != null && state.getBlock() instanceof ValveHandleBlock vhb)
-			color = vhb.color;
+public class ValveHandleVisual extends KineticBlockEntityVisual<HandCrankBlockEntity>
+        implements SimpleDynamicVisual {
+    private final TransformedInstance crank;
 
-		crank = instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED,
-				Models.partial(
-					color == null ? AllPartialModels.VALVE_HANDLE : AllPartialModels.DYED_VALVE_HANDLES.get(color)))
-			.createInstance();
+    public ValveHandleVisual(
+            VisualizationContext modelManager,
+            HandCrankBlockEntity blockEntity,
+            float partialTick) {
+        super(modelManager, blockEntity, partialTick);
 
-		rotateCrank(partialTick);
-	}
+        BlockState state = blockEntity.getBlockState();
+        DyeColor color = null;
+        if (state != null && state.getBlock() instanceof ValveHandleBlock vhb) color = vhb.color;
 
-	@Override
-	public void beginFrame(Context ctx) {
-		rotateCrank(ctx.partialTick());
-	}
+        crank =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(
+                                        color == null
+                                                ? AllPartialModels.VALVE_HANDLE
+                                                : AllPartialModels.DYED_VALVE_HANDLES.get(color)))
+                        .createInstance();
 
-	private void rotateCrank(float pt) {
-		var facing = blockState.getValue(BlockStateProperties.FACING);
-		float angle = blockEntity.getIndependentAngle(pt);
+        rotateCrank(partialTick);
+    }
 
-		crank.setIdentityTransform()
-			.translate(getVisualPosition())
-			.center()
-			.rotate(angle, Direction.get(Direction.AxisDirection.POSITIVE, facing.getAxis()))
-			.rotate(new Quaternionf().rotateTo(0, 1, 0, facing.getStepX(), facing.getStepY(), facing.getStepZ()))
-			.uncenter()
-			.setChanged();
-	}
+    @Override
+    public void beginFrame(Context ctx) {
+        rotateCrank(ctx.partialTick());
+    }
 
-	@Override
-	protected void _delete() {
-		crank.delete();
-	}
+    private void rotateCrank(float pt) {
+        var facing = blockState.getValue(BlockStateProperties.FACING);
+        float angle = blockEntity.getIndependentAngle(pt);
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(crank);
-	}
+        crank.setIdentityTransform()
+                .translate(getVisualPosition())
+                .center()
+                .rotate(angle, Direction.get(Direction.AxisDirection.POSITIVE, facing.getAxis()))
+                .rotate(
+                        new Quaternionf()
+                                .rotateTo(
+                                        0,
+                                        1,
+                                        0,
+                                        facing.getStepX(),
+                                        facing.getStepY(),
+                                        facing.getStepZ()))
+                .uncenter()
+                .setChanged();
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		consumer.accept(crank);
-	}
+    @Override
+    protected void _delete() {
+        crank.delete();
+    }
+
+    @Override
+    public void updateLight(float partialTick) {
+        relight(crank);
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        consumer.accept(crank);
+    }
 }

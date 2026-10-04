@@ -1,8 +1,5 @@
 package com.simibubi.create.foundation.blockEntity.behaviour.edgeInteraction;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.kinetics.crafter.CrafterHelper;
@@ -28,94 +25,93 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EdgeInteractionRenderer {
 
-	public static void tick() {
-		Minecraft mc = Minecraft.getInstance();
-		HitResult target = mc.hitResult;
-		if (target == null || !(target instanceof BlockHitResult result))
-			return;
+    public static void tick() {
+        Minecraft mc = Minecraft.getInstance();
+        HitResult target = mc.hitResult;
+        if (target == null || !(target instanceof BlockHitResult result)) return;
 
-		ClientLevel world = mc.level;
-		BlockPos pos = result.getBlockPos();
-		Player player = mc.player;
-		ItemStack heldItem = player.getMainHandItem();
+        ClientLevel world = mc.level;
+        BlockPos pos = result.getBlockPos();
+        Player player = mc.player;
+        ItemStack heldItem = player.getMainHandItem();
 
-		if (player.isShiftKeyDown())
-			return;
-		EdgeInteractionBehaviour behaviour = BlockEntityBehaviour.get(world, pos, EdgeInteractionBehaviour.TYPE);
-		if (behaviour == null)
-			return;
-		if (behaviour.requiredItem.orElse(heldItem.getItem()) != heldItem.getItem())
-			return;
+        if (player.isShiftKeyDown()) return;
+        EdgeInteractionBehaviour behaviour =
+                BlockEntityBehaviour.get(world, pos, EdgeInteractionBehaviour.TYPE);
+        if (behaviour == null) return;
+        if (behaviour.requiredItem.orElse(heldItem.getItem()) != heldItem.getItem()) return;
 
-		Direction face = result.getDirection();
-		List<Direction> connectiveSides = EdgeInteractionHandler.getConnectiveSides(world, pos, face, behaviour);
-		if (connectiveSides.isEmpty())
-			return;
+        Direction face = result.getDirection();
+        List<Direction> connectiveSides =
+                EdgeInteractionHandler.getConnectiveSides(world, pos, face, behaviour);
+        if (connectiveSides.isEmpty()) return;
 
-		Direction closestEdge = connectiveSides.get(0);
-		double bestDistance = Double.MAX_VALUE;
-		Vec3 center = VecHelper.getCenterOf(pos);
-		for (Direction direction : connectiveSides) {
-			double distance = Vec3.atLowerCornerOf(direction.getNormal())
-				.subtract(target.getLocation()
-					.subtract(center))
-				.length();
-			if (distance > bestDistance)
-				continue;
-			bestDistance = distance;
-			closestEdge = direction;
-		}
+        Direction closestEdge = connectiveSides.get(0);
+        double bestDistance = Double.MAX_VALUE;
+        Vec3 center = VecHelper.getCenterOf(pos);
+        for (Direction direction : connectiveSides) {
+            double distance =
+                    Vec3.atLowerCornerOf(direction.getNormal())
+                            .subtract(target.getLocation().subtract(center))
+                            .length();
+            if (distance > bestDistance) continue;
+            bestDistance = distance;
+            closestEdge = direction;
+        }
 
-		AABB bb = EdgeInteractionHandler.getBB(pos, closestEdge);
-		boolean hit = bb.contains(target.getLocation());
-		Vec3 offset = Vec3.atLowerCornerOf(closestEdge.getNormal())
-			.scale(.5)
-			.add(Vec3.atLowerCornerOf(face.getNormal())
-				.scale(.469))
-			.add(VecHelper.CENTER_OF_ORIGIN);
+        AABB bb = EdgeInteractionHandler.getBB(pos, closestEdge);
+        boolean hit = bb.contains(target.getLocation());
+        Vec3 offset =
+                Vec3.atLowerCornerOf(closestEdge.getNormal())
+                        .scale(.5)
+                        .add(Vec3.atLowerCornerOf(face.getNormal()).scale(.469))
+                        .add(VecHelper.CENTER_OF_ORIGIN);
 
-		ValueBox box = new ValueBox(CommonComponents.EMPTY, bb, pos).passive(!hit)
-			.transform(new EdgeValueBoxTransform(offset))
-			.wideOutline();
-		Outliner.getInstance().showOutline("edge", box)
-			.highlightFace(face);
+        ValueBox box =
+                new ValueBox(CommonComponents.EMPTY, bb, pos)
+                        .passive(!hit)
+                        .transform(new EdgeValueBoxTransform(offset))
+                        .wideOutline();
+        Outliner.getInstance().showOutline("edge", box).highlightFace(face);
 
-		if (!hit)
-			return;
+        if (!hit) return;
 
-		List<MutableComponent> tip = new ArrayList<>();
-		tip.add(CreateLang.translateDirect("logistics.crafter.connected"));
-		tip.add(CreateLang.translateDirect(CrafterHelper.areCraftersConnected(world, pos, pos.relative(closestEdge))
-			? "logistics.crafter.click_to_separate"
-			: "logistics.crafter.click_to_merge"));
-		CreateClient.VALUE_SETTINGS_HANDLER.showHoverTip(tip);
-	}
+        List<MutableComponent> tip = new ArrayList<>();
+        tip.add(CreateLang.translateDirect("logistics.crafter.connected"));
+        tip.add(
+                CreateLang.translateDirect(
+                        CrafterHelper.areCraftersConnected(world, pos, pos.relative(closestEdge))
+                                ? "logistics.crafter.click_to_separate"
+                                : "logistics.crafter.click_to_merge"));
+        CreateClient.VALUE_SETTINGS_HANDLER.showHoverTip(tip);
+    }
 
-	static class EdgeValueBoxTransform extends ValueBoxTransform.Sided {
+    static class EdgeValueBoxTransform extends ValueBoxTransform.Sided {
 
-		private Vec3 add;
+        private Vec3 add;
 
-		public EdgeValueBoxTransform(Vec3 add) {
-			this.add = add;
-		}
+        public EdgeValueBoxTransform(Vec3 add) {
+            this.add = add;
+        }
 
-		@Override
-		protected Vec3 getSouthLocation() {
-			return Vec3.ZERO;
-		}
+        @Override
+        protected Vec3 getSouthLocation() {
+            return Vec3.ZERO;
+        }
 
-		@Override
-		public Vec3 getLocalOffset(LevelAccessor level, BlockPos pos, BlockState state) {
-			return add;
-		}
+        @Override
+        public Vec3 getLocalOffset(LevelAccessor level, BlockPos pos, BlockState state) {
+            return add;
+        }
 
-		@Override
-		public void rotate(LevelAccessor level, BlockPos pos, BlockState state, PoseStack ms) {
-			super.rotate(level, pos, state, ms);
-		}
-
-	}
-
+        @Override
+        public void rotate(LevelAccessor level, BlockPos pos, BlockState state, PoseStack ms) {
+            super.rotate(level, pos, state, ms);
+        }
+    }
 }

@@ -9,22 +9,20 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public class SophisticatedStorage implements ThresholdSwitchCompat {
 
-	@Override
-	public boolean isFromThisMod(BlockEntity be) {
-		if (be == null)
-			return false;
+    @Override
+    public boolean isFromThisMod(BlockEntity be) {
+        if (be == null) return false;
 
-		String namespace = RegisteredObjectsHelper.getKeyOrThrow(be.getType())
-			.getNamespace();
+        String namespace = RegisteredObjectsHelper.getKeyOrThrow(be.getType()).getNamespace();
 
-		return
-			Mods.SOPHISTICATEDSTORAGE.id().equals(namespace)
-			|| Mods.SOPHISTICATEDBACKPACKS.id().equals(namespace);
-	}
+        return Mods.SOPHISTICATEDSTORAGE.id().equals(namespace)
+                || Mods.SOPHISTICATEDBACKPACKS.id().equals(namespace);
+    }
 
-	@Override
-	public long getSpaceInSlot(IItemHandler inv, int slot) {
-		return ((long) inv.getSlotLimit(slot) * inv.getStackInSlot(slot).getOrDefault(DataComponents.MAX_STACK_SIZE, 64)) / 64;
-	}
-
+    @Override
+    public long getSpaceInSlot(IItemHandler inv, int slot) {
+        return ((long) inv.getSlotLimit(slot)
+                        * inv.getStackInSlot(slot).getOrDefault(DataComponents.MAX_STACK_SIZE, 64))
+                / 64;
+    }
 }

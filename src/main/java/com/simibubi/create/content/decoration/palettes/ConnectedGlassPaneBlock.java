@@ -7,17 +7,14 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 public class ConnectedGlassPaneBlock extends GlassPaneBlock {
 
-	public ConnectedGlassPaneBlock(Properties builder) {
-		super(builder);
-	}
+    public ConnectedGlassPaneBlock(Properties builder) {
+        super(builder);
+    }
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
-		if (side.getAxis()
-			.isVertical())
-			return adjacentBlockState == state;
-		return super.skipRendering(state, adjacentBlockState, side);
-	}
-
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side) {
+        if (side.getAxis().isVertical()) return adjacentBlockState == state;
+        return super.skipRendering(state, adjacentBlockState, side);
+    }
 }

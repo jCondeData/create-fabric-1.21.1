@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -26,113 +25,112 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEntity>, ICogWheel {
 
-	public MillstoneBlock(Properties properties) {
-		super(properties);
-	}
+    public MillstoneBlock(Properties properties) {
+        super(properties);
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		return AllShapes.MILLSTONE;
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return AllShapes.MILLSTONE;
+    }
 
-	@Override
-	public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-		return face == Direction.DOWN;
-	}
+    @Override
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return face == Direction.DOWN;
+    }
 
-	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		if (!stack.isEmpty())
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-		if (level.isClientSide)
-			return ItemInteractionResult.SUCCESS;
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult) {
+        if (!stack.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (level.isClientSide) return ItemInteractionResult.SUCCESS;
 
-		withBlockEntityDo(level, pos, millstone -> {
-			boolean emptyOutput = true;
-			IItemHandlerModifiable inv = millstone.outputInv;
-			for (int slot = 0; slot < inv.getSlots(); slot++) {
-				ItemStack stackInSlot = inv.getStackInSlot(slot);
-				if (!stackInSlot.isEmpty())
-					emptyOutput = false;
-				player.getInventory()
-					.placeItemBackInInventory(stackInSlot);
-				inv.setStackInSlot(slot, ItemStack.EMPTY);
-			}
+        withBlockEntityDo(
+                level,
+                pos,
+                millstone -> {
+                    boolean emptyOutput = true;
+                    IItemHandlerModifiable inv = millstone.outputInv;
+                    for (int slot = 0; slot < inv.getSlots(); slot++) {
+                        ItemStack stackInSlot = inv.getStackInSlot(slot);
+                        if (!stackInSlot.isEmpty()) emptyOutput = false;
+                        player.getInventory().placeItemBackInInventory(stackInSlot);
+                        inv.setStackInSlot(slot, ItemStack.EMPTY);
+                    }
 
-			if (emptyOutput) {
-				inv = millstone.inputInv;
-				for (int slot = 0; slot < inv.getSlots(); slot++) {
-					player.getInventory()
-						.placeItemBackInInventory(inv.getStackInSlot(slot));
-					inv.setStackInSlot(slot, ItemStack.EMPTY);
-				}
-			}
+                    if (emptyOutput) {
+                        inv = millstone.inputInv;
+                        for (int slot = 0; slot < inv.getSlots(); slot++) {
+                            player.getInventory()
+                                    .placeItemBackInInventory(inv.getStackInSlot(slot));
+                            inv.setStackInSlot(slot, ItemStack.EMPTY);
+                        }
+                    }
 
-			millstone.setChanged();
-			millstone.sendData();
-		});
+                    millstone.setChanged();
+                    millstone.sendData();
+                });
 
-		return ItemInteractionResult.SUCCESS;
-	}
+        return ItemInteractionResult.SUCCESS;
+    }
 
-	@Override
-	public void updateEntityAfterFallOn(BlockGetter worldIn, Entity entityIn) {
-		super.updateEntityAfterFallOn(worldIn, entityIn);
+    @Override
+    public void updateEntityAfterFallOn(BlockGetter worldIn, Entity entityIn) {
+        super.updateEntityAfterFallOn(worldIn, entityIn);
 
-		if (entityIn.level().isClientSide)
-			return;
-		if (!(entityIn instanceof ItemEntity itemEntity))
-			return;
-		if (!entityIn.isAlive())
-			return;
+        if (entityIn.level().isClientSide) return;
+        if (!(entityIn instanceof ItemEntity itemEntity)) return;
+        if (!entityIn.isAlive()) return;
 
-		MillstoneBlockEntity millstone = null;
-		for (BlockPos pos : Iterate.hereAndBelow(entityIn.blockPosition()))
-			if (millstone == null)
-				millstone = getBlockEntity(worldIn, pos);
+        MillstoneBlockEntity millstone = null;
+        for (BlockPos pos : Iterate.hereAndBelow(entityIn.blockPosition()))
+            if (millstone == null) millstone = getBlockEntity(worldIn, pos);
 
-		if (millstone == null)
-			return;
+        if (millstone == null) return;
 
-		IItemHandler capability = millstone.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, millstone.getBlockPos(), null);
-		if (capability == null)
-			return;
+        IItemHandler capability =
+                millstone
+                        .getLevel()
+                        .getCapability(
+                                Capabilities.ItemHandler.BLOCK, millstone.getBlockPos(), null);
+        if (capability == null) return;
 
-		ItemStack remainder = capability
-			.insertItem(0, itemEntity.getItem(), false);
-		if (remainder.isEmpty())
-			itemEntity.discard();
-		if (remainder.getCount() < itemEntity.getItem()
-			.getCount())
-			itemEntity.setItem(remainder);
-	}
+        ItemStack remainder = capability.insertItem(0, itemEntity.getItem(), false);
+        if (remainder.isEmpty()) itemEntity.discard();
+        if (remainder.getCount() < itemEntity.getItem().getCount()) itemEntity.setItem(remainder);
+    }
 
-	@Override
-	public Axis getRotationAxis(BlockState state) {
-		return Axis.Y;
-	}
+    @Override
+    public Axis getRotationAxis(BlockState state) {
+        return Axis.Y;
+    }
 
-	@Override
-	public Class<MillstoneBlockEntity> getBlockEntityClass() {
-		return MillstoneBlockEntity.class;
-	}
+    @Override
+    public Class<MillstoneBlockEntity> getBlockEntityClass() {
+        return MillstoneBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends MillstoneBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.MILLSTONE.get();
-	}
+    @Override
+    public BlockEntityType<? extends MillstoneBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.MILLSTONE.get();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
-
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 }

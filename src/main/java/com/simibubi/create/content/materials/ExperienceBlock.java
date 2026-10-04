@@ -11,18 +11,23 @@ import net.minecraft.world.phys.Vec3;
 
 public class ExperienceBlock extends Block {
 
-	public ExperienceBlock(Properties pProperties) {
-		super(pProperties);
-	}
+    public ExperienceBlock(Properties pProperties) {
+        super(pProperties);
+    }
 
-	@Override
-	public void animateTick(BlockState pState, Level pLevel, BlockPos pPos, RandomSource pRand) {
-		if (pRand.nextInt(5) != 0)
-			return;
-		Vec3 vec3 = VecHelper.clampComponentWise(VecHelper.offsetRandomly(Vec3.ZERO, pRand, .75f), .55f)
-			.add(VecHelper.getCenterOf(pPos));
-		pLevel.addParticle(ParticleTypes.END_ROD, vec3.x, vec3.y, vec3.z, pRand.nextGaussian() * 0.005D,
-			pRand.nextGaussian() * 0.005D, pRand.nextGaussian() * 0.005D);
-	}
-
+    @Override
+    public void animateTick(BlockState pState, Level pLevel, BlockPos pPos, RandomSource pRand) {
+        if (pRand.nextInt(5) != 0) return;
+        Vec3 vec3 =
+                VecHelper.clampComponentWise(VecHelper.offsetRandomly(Vec3.ZERO, pRand, .75f), .55f)
+                        .add(VecHelper.getCenterOf(pPos));
+        pLevel.addParticle(
+                ParticleTypes.END_ROD,
+                vec3.x,
+                vec3.y,
+                vec3.z,
+                pRand.nextGaussian() * 0.005D,
+                pRand.nextGaussian() * 0.005D,
+                pRand.nextGaussian() * 0.005D);
+    }
 }

@@ -42,141 +42,165 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-public class StationBlock extends Block implements IBE<StationBlockEntity>, IWrenchable, ProperWaterloggedBlock {
+public class StationBlock extends Block
+        implements IBE<StationBlockEntity>, IWrenchable, ProperWaterloggedBlock {
 
-	public static final BooleanProperty ASSEMBLING = BooleanProperty.create("assembling");
+    public static final BooleanProperty ASSEMBLING = BooleanProperty.create("assembling");
 
-	public StationBlock(Properties p_54120_) {
-		super(p_54120_);
-		registerDefaultState(defaultBlockState().setValue(ASSEMBLING, false)
-			.setValue(WATERLOGGED, false));
-	}
+    public StationBlock(Properties p_54120_) {
+        super(p_54120_);
+        registerDefaultState(
+                defaultBlockState().setValue(ASSEMBLING, false).setValue(WATERLOGGED, false));
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(ASSEMBLING, WATERLOGGED));
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder.add(ASSEMBLING, WATERLOGGED));
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		return withWater(super.getStateForPlacement(pContext), pContext);
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return withWater(super.getStateForPlacement(pContext), pContext);
+    }
 
-	@Override
-	public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-		LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-		updateWater(pLevel, pState, pCurrentPos);
-		return pState;
-	}
+    @Override
+    public BlockState updateShape(
+            BlockState pState,
+            Direction pDirection,
+            BlockState pNeighborState,
+            LevelAccessor pLevel,
+            BlockPos pCurrentPos,
+            BlockPos pNeighborPos) {
+        updateWater(pLevel, pState, pCurrentPos);
+        return pState;
+    }
 
-	@Override
-	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
-		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
-		AdvancementBehaviour.setPlacedBy(pLevel, pPos, pPlacer);
-	}
+    @Override
+    public void setPlacedBy(
+            Level pLevel,
+            BlockPos pPos,
+            BlockState pState,
+            LivingEntity pPlacer,
+            ItemStack pStack) {
+        super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
+        AdvancementBehaviour.setPlacedBy(pLevel, pPos, pPlacer);
+    }
 
-	@Override
-	public FluidState getFluidState(BlockState pState) {
-		return fluidState(pState);
-	}
+    @Override
+    public FluidState getFluidState(BlockState pState) {
+        return fluidState(pState);
+    }
 
-	@Override
-	public boolean hasAnalogOutputSignal(BlockState pState) {
-		return true;
-	}
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState pState) {
+        return true;
+    }
 
-	@Override
-	public int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
-		return getBlockEntityOptional(pLevel, pPos).map(ste -> ste.trainPresent ? 15 : 0)
-			.orElse(0);
-	}
+    @Override
+    public int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
+        return getBlockEntityOptional(pLevel, pPos).map(ste -> ste.trainPresent ? 15 : 0).orElse(0);
+    }
 
-	@Override
-	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		IBE.onRemove(state, worldIn, pos, newState);
-	}
+    @Override
+    public void onRemove(
+            BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        IBE.onRemove(state, worldIn, pos, newState);
+    }
 
-	@Override
-	public void updateEntityAfterFallOn(BlockGetter worldIn, Entity entityIn) {
-		super.updateEntityAfterFallOn(worldIn, entityIn);
-		SharedDepotBlockMethods.onLanded(worldIn, entityIn);
-	}
+    @Override
+    public void updateEntityAfterFallOn(BlockGetter worldIn, Entity entityIn) {
+        super.updateEntityAfterFallOn(worldIn, entityIn);
+        SharedDepotBlockMethods.onLanded(worldIn, entityIn);
+    }
 
-	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		if (player == null || player.isShiftKeyDown())
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-		if (AllItems.WRENCH.isIn(stack))
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult) {
+        if (player == null || player.isShiftKeyDown())
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (AllItems.WRENCH.isIn(stack))
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
-		if (stack.getItem() == Items.FILLED_MAP) {
-			return onBlockEntityUseItemOn(level, pos, station -> {
-				if (level.isClientSide)
-					return ItemInteractionResult.SUCCESS;
+        if (stack.getItem() == Items.FILLED_MAP) {
+            return onBlockEntityUseItemOn(
+                    level,
+                    pos,
+                    station -> {
+                        if (level.isClientSide) return ItemInteractionResult.SUCCESS;
 
-				if (station.getStation() == null || station.getStation().getId() == null)
-					return ItemInteractionResult.FAIL;
+                        if (station.getStation() == null || station.getStation().getId() == null)
+                            return ItemInteractionResult.FAIL;
 
-				MapItemSavedData savedData = MapItem.getSavedData(stack, level);
-				if (!(savedData instanceof StationMapData stationMapData))
-					return ItemInteractionResult.FAIL;
+                        MapItemSavedData savedData = MapItem.getSavedData(stack, level);
+                        if (!(savedData instanceof StationMapData stationMapData))
+                            return ItemInteractionResult.FAIL;
 
-				if (!stationMapData.toggleStation(level, pos, station))
-					return ItemInteractionResult.FAIL;
+                        if (!stationMapData.toggleStation(level, pos, station))
+                            return ItemInteractionResult.FAIL;
 
-				return ItemInteractionResult.SUCCESS;
-			});
-		}
+                        return ItemInteractionResult.SUCCESS;
+                    });
+        }
 
-		InteractionResult result = onBlockEntityUse(level, pos, station -> {
-			ItemStack autoSchedule = station.getAutoSchedule();
-			if (autoSchedule.isEmpty())
-				return InteractionResult.PASS;
-			if (level.isClientSide)
-				return InteractionResult.SUCCESS;
-			player.getInventory()
-				.placeItemBackInInventory(autoSchedule.copy());
-			station.depotBehaviour.removeHeldItem();
-			station.notifyUpdate();
-			AllSoundEvents.playItemPickup(player);
-			return InteractionResult.SUCCESS;
-		});
+        InteractionResult result =
+                onBlockEntityUse(
+                        level,
+                        pos,
+                        station -> {
+                            ItemStack autoSchedule = station.getAutoSchedule();
+                            if (autoSchedule.isEmpty()) return InteractionResult.PASS;
+                            if (level.isClientSide) return InteractionResult.SUCCESS;
+                            player.getInventory().placeItemBackInInventory(autoSchedule.copy());
+                            station.depotBehaviour.removeHeldItem();
+                            station.notifyUpdate();
+                            AllSoundEvents.playItemPickup(player);
+                            return InteractionResult.SUCCESS;
+                        });
 
-		if (result == InteractionResult.PASS)
-			CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> withBlockEntityDo(level, pos, be -> this.displayScreen(be, player)));
-		return ItemInteractionResult.SUCCESS;
-	}
+        if (result == InteractionResult.PASS)
+            CatnipServices.PLATFORM.executeOnClientOnly(
+                    () ->
+                            () ->
+                                    withBlockEntityDo(
+                                            level, pos, be -> this.displayScreen(be, player)));
+        return ItemInteractionResult.SUCCESS;
+    }
 
-	@OnlyIn(value = Dist.CLIENT)
-	protected void displayScreen(StationBlockEntity be, Player player) {
-		if (!(player instanceof LocalPlayer))
-			return;
-		GlobalStation station = be.getStation();
-		BlockState blockState = be.getBlockState();
-		if (station == null || blockState == null)
-			return;
-		boolean assembling = blockState.getBlock() == this && blockState.getValue(ASSEMBLING);
-		ScreenOpener.open(assembling ? new AssemblyScreen(be, station) : new StationScreen(be, station));
-	}
+    @OnlyIn(value = Dist.CLIENT)
+    protected void displayScreen(StationBlockEntity be, Player player) {
+        if (!(player instanceof LocalPlayer)) return;
+        GlobalStation station = be.getStation();
+        BlockState blockState = be.getBlockState();
+        if (station == null || blockState == null) return;
+        boolean assembling = blockState.getBlock() == this && blockState.getValue(ASSEMBLING);
+        ScreenOpener.open(
+                assembling ? new AssemblyScreen(be, station) : new StationScreen(be, station));
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-		return AllShapes.STATION;
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AllShapes.STATION;
+    }
 
-	@Override
-	public Class<StationBlockEntity> getBlockEntityClass() {
-		return StationBlockEntity.class;
-	}
+    @Override
+    public Class<StationBlockEntity> getBlockEntityClass() {
+        return StationBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends StationBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.TRACK_STATION.get();
-	}
+    @Override
+    public BlockEntityType<? extends StationBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.TRACK_STATION.get();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
-
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 }

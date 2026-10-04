@@ -11,6 +11,7 @@ import com.simibubi.create.content.trains.track.TrackTargetingBehaviour.Rendered
 import com.simibubi.create.content.trains.track.TrackTargetingBlockItem.OverlapResult;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+
 import net.createmod.catnip.render.SuperRenderTypeBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -27,108 +28,123 @@ import net.minecraft.world.phys.Vec3;
 
 public class TrackTargetingClient {
 
-	static BlockPos lastHovered;
-	static boolean lastDirection;
-	static EdgePointType<?> lastType;
-	static BezierTrackPointLocation lastHoveredBezierSegment;
+    static BlockPos lastHovered;
+    static boolean lastDirection;
+    static EdgePointType<?> lastType;
+    static BezierTrackPointLocation lastHoveredBezierSegment;
 
-	static OverlapResult lastResult;
-	static TrackGraphLocation lastLocation;
+    static OverlapResult lastResult;
+    static TrackGraphLocation lastLocation;
 
-	public static void clientTick() {
-		Minecraft mc = Minecraft.getInstance();
-		LocalPlayer player = mc.player;
-		Vec3 lookAngle = player.getLookAngle();
+    public static void clientTick() {
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        Vec3 lookAngle = player.getLookAngle();
 
-		BlockPos hovered = null;
-		boolean direction = false;
-		EdgePointType<?> type = null;
-		BezierTrackPointLocation hoveredBezier = null;
+        BlockPos hovered = null;
+        boolean direction = false;
+        EdgePointType<?> type = null;
+        BezierTrackPointLocation hoveredBezier = null;
 
-		ItemStack stack = player.getMainHandItem();
-		if (stack.getItem() instanceof TrackTargetingBlockItem ttbi)
-			type = ttbi.getType(stack);
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() instanceof TrackTargetingBlockItem ttbi) type = ttbi.getType(stack);
 
-		if (type == EdgePointType.SIGNAL)
-			Create.RAILWAYS.sided(null)
-				.tickSignalOverlay();
+        if (type == EdgePointType.SIGNAL) Create.RAILWAYS.sided(null).tickSignalOverlay();
 
-		boolean alreadySelected = stack.has(AllDataComponents.TRACK_TARGETING_ITEM_SELECTED_POS);
+        boolean alreadySelected = stack.has(AllDataComponents.TRACK_TARGETING_ITEM_SELECTED_POS);
 
-		if (type != null) {
-			BezierPointSelection bezierSelection = TrackBlockOutline.result;
+        if (type != null) {
+            BezierPointSelection bezierSelection = TrackBlockOutline.result;
 
-			if (alreadySelected) {
-				hovered = stack.get(AllDataComponents.TRACK_TARGETING_ITEM_SELECTED_POS);
-				direction = stack.getOrDefault(AllDataComponents.TRACK_TARGETING_ITEM_SELECTED_DIRECTION, false);
-				if (stack.has(AllDataComponents.TRACK_TARGETING_ITEM_BEZIER)) {
-					hoveredBezier = stack.get(AllDataComponents.TRACK_TARGETING_ITEM_BEZIER);
-				}
+            if (alreadySelected) {
+                hovered = stack.get(AllDataComponents.TRACK_TARGETING_ITEM_SELECTED_POS);
+                direction =
+                        stack.getOrDefault(
+                                AllDataComponents.TRACK_TARGETING_ITEM_SELECTED_DIRECTION, false);
+                if (stack.has(AllDataComponents.TRACK_TARGETING_ITEM_BEZIER)) {
+                    hoveredBezier = stack.get(AllDataComponents.TRACK_TARGETING_ITEM_BEZIER);
+                }
 
-			} else if (bezierSelection != null) {
-				hovered = bezierSelection.blockEntity()
-					.getBlockPos();
-				hoveredBezier = bezierSelection.loc();
-				direction = lookAngle.dot(bezierSelection.direction()) < 0;
+            } else if (bezierSelection != null) {
+                hovered = bezierSelection.blockEntity().getBlockPos();
+                hoveredBezier = bezierSelection.loc();
+                direction = lookAngle.dot(bezierSelection.direction()) < 0;
 
-			} else {
-				HitResult hitResult = mc.hitResult;
-				if (hitResult != null && hitResult.getType() == Type.BLOCK) {
-					BlockHitResult blockHitResult = (BlockHitResult) hitResult;
-					BlockPos pos = blockHitResult.getBlockPos();
-					BlockState blockState = mc.level.getBlockState(pos);
-					if (blockState.getBlock() instanceof ITrackBlock track) {
-						direction = track.getNearestTrackAxis(mc.level, pos, blockState, lookAngle)
-							.getSecond() == AxisDirection.POSITIVE;
-						hovered = pos;
-					}
-				}
-			}
-		}
+            } else {
+                HitResult hitResult = mc.hitResult;
+                if (hitResult != null && hitResult.getType() == Type.BLOCK) {
+                    BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+                    BlockPos pos = blockHitResult.getBlockPos();
+                    BlockState blockState = mc.level.getBlockState(pos);
+                    if (blockState.getBlock() instanceof ITrackBlock track) {
+                        direction =
+                                track.getNearestTrackAxis(mc.level, pos, blockState, lookAngle)
+                                                .getSecond()
+                                        == AxisDirection.POSITIVE;
+                        hovered = pos;
+                    }
+                }
+            }
+        }
 
-		if (hovered == null) {
-			lastHovered = null;
-			lastResult = null;
-			lastLocation = null;
-			lastHoveredBezierSegment = null;
-			return;
-		}
+        if (hovered == null) {
+            lastHovered = null;
+            lastResult = null;
+            lastLocation = null;
+            lastHoveredBezierSegment = null;
+            return;
+        }
 
-		if (Objects.equal(hovered, lastHovered) && Objects.equal(hoveredBezier, lastHoveredBezierSegment)
-			&& direction == lastDirection && type == lastType)
-			return;
+        if (Objects.equal(hovered, lastHovered)
+                && Objects.equal(hoveredBezier, lastHoveredBezierSegment)
+                && direction == lastDirection
+                && type == lastType) return;
 
-		lastType = type;
-		lastHovered = hovered;
-		lastDirection = direction;
-		lastHoveredBezierSegment = hoveredBezier;
+        lastType = type;
+        lastHovered = hovered;
+        lastDirection = direction;
+        lastHoveredBezierSegment = hoveredBezier;
 
-		TrackTargetingBlockItem.withGraphLocation(mc.level, hovered, direction, hoveredBezier, type,
-			(result, location) -> {
-				lastResult = result;
-				lastLocation = location;
-			});
-	}
+        TrackTargetingBlockItem.withGraphLocation(
+                mc.level,
+                hovered,
+                direction,
+                hoveredBezier,
+                type,
+                (result, location) -> {
+                    lastResult = result;
+                    lastLocation = location;
+                });
+    }
 
-	public static void render(PoseStack ms, SuperRenderTypeBuffer buffer, Vec3 camera) {
-		if (lastLocation == null || lastResult.feedback != null)
-			return;
+    public static void render(PoseStack ms, SuperRenderTypeBuffer buffer, Vec3 camera) {
+        if (lastLocation == null || lastResult.feedback != null) return;
 
-		Minecraft mc = Minecraft.getInstance();
-		BlockPos pos = lastHovered;
-		int light = LevelRenderer.getLightColor(mc.level, pos);
-		AxisDirection direction = lastDirection ? AxisDirection.POSITIVE : AxisDirection.NEGATIVE;
+        Minecraft mc = Minecraft.getInstance();
+        BlockPos pos = lastHovered;
+        int light = LevelRenderer.getLightColor(mc.level, pos);
+        AxisDirection direction = lastDirection ? AxisDirection.POSITIVE : AxisDirection.NEGATIVE;
 
-		RenderedTrackOverlayType type = lastType == EdgePointType.SIGNAL ? RenderedTrackOverlayType.SIGNAL
-			: lastType == EdgePointType.OBSERVER ? RenderedTrackOverlayType.OBSERVER : RenderedTrackOverlayType.STATION;
+        RenderedTrackOverlayType type =
+                lastType == EdgePointType.SIGNAL
+                        ? RenderedTrackOverlayType.SIGNAL
+                        : lastType == EdgePointType.OBSERVER
+                                ? RenderedTrackOverlayType.OBSERVER
+                                : RenderedTrackOverlayType.STATION;
 
-		ms.pushPose();
-		TransformStack.of(ms)
-			.translate(Vec3.atLowerCornerOf(pos)
-				.subtract(camera));
-		TrackTargetingBehaviour.render(mc.level, pos, direction, lastHoveredBezierSegment, ms, buffer, light,
-			OverlayTexture.NO_OVERLAY, type, 1 + 1 / 16f);
-		ms.popPose();
-	}
-
+        ms.pushPose();
+        TransformStack.of(ms).translate(Vec3.atLowerCornerOf(pos).subtract(camera));
+        TrackTargetingBehaviour.render(
+                mc.level,
+                pos,
+                direction,
+                lastHoveredBezierSegment,
+                ms,
+                buffer,
+                light,
+                OverlayTexture.NO_OVERLAY,
+                type,
+                1 + 1 / 16f);
+        ms.popPose();
+    }
 }

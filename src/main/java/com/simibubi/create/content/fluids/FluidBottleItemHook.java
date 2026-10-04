@@ -22,37 +22,35 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 @EventBusSubscriber
 public class FluidBottleItemHook extends Item {
 
-	private FluidBottleItemHook(Properties p) {
-		super(p);
-	}
+    private FluidBottleItemHook(Properties p) {
+        super(p);
+    }
 
-	@SubscribeEvent
-	public static void preventWaterBottlesFromCreatesFluids(PlayerInteractEvent.RightClickItem event) {
-		ItemStack itemStack = event.getItemStack();
-		if (itemStack.isEmpty())
-			return;
-		if (!(itemStack.getItem() instanceof BottleItem))
-			return;
+    @SubscribeEvent
+    public static void preventWaterBottlesFromCreatesFluids(
+            PlayerInteractEvent.RightClickItem event) {
+        ItemStack itemStack = event.getItemStack();
+        if (itemStack.isEmpty()) return;
+        if (!(itemStack.getItem() instanceof BottleItem)) return;
 
-		Level world = event.getLevel();
-		Player player = event.getEntity();
-		HitResult raytraceresult = getPlayerPOVHitResult(world, player, ClipContext.Fluid.SOURCE_ONLY);
-		if (raytraceresult.getType() != HitResult.Type.BLOCK)
-			return;
-		BlockPos blockpos = ((BlockHitResult) raytraceresult).getBlockPos();
-		if (!world.mayInteract(player, blockpos))
-			return;
+        Level world = event.getLevel();
+        Player player = event.getEntity();
+        HitResult raytraceresult =
+                getPlayerPOVHitResult(world, player, ClipContext.Fluid.SOURCE_ONLY);
+        if (raytraceresult.getType() != HitResult.Type.BLOCK) return;
+        BlockPos blockpos = ((BlockHitResult) raytraceresult).getBlockPos();
+        if (!world.mayInteract(player, blockpos)) return;
 
-		FluidState fluidState = world.getFluidState(blockpos);
-		if (fluidState.is(FluidTags.WATER) && RegisteredObjectsHelper.getKeyOrThrow(fluidState.getType())
-			.getNamespace()
-			.equals(Create.ID)) {
-			event.setCancellationResult(InteractionResult.PASS);
-			event.setCanceled(true);
-			return;
-		}
+        FluidState fluidState = world.getFluidState(blockpos);
+        if (fluidState.is(FluidTags.WATER)
+                && RegisteredObjectsHelper.getKeyOrThrow(fluidState.getType())
+                        .getNamespace()
+                        .equals(Create.ID)) {
+            event.setCancellationResult(InteractionResult.PASS);
+            event.setCanceled(true);
+            return;
+        }
 
-		return;
-	}
-
+        return;
+    }
 }

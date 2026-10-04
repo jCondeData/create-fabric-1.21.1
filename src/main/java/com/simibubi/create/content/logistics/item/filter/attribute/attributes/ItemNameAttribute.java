@@ -1,10 +1,5 @@
 package com.simibubi.create.content.logistics.item.filter.attribute.attributes;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -13,6 +8,7 @@ import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 
 import io.netty.buffer.ByteBuf;
+
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -22,73 +18,81 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public record ItemNameAttribute(String itemName) implements ItemAttribute {
-	public static final MapCodec<ItemNameAttribute> CODEC = Codec.STRING
-			.xmap(ItemNameAttribute::new, ItemNameAttribute::itemName)
-			.fieldOf("value");
+    public static final MapCodec<ItemNameAttribute> CODEC =
+            Codec.STRING.xmap(ItemNameAttribute::new, ItemNameAttribute::itemName).fieldOf("value");
 
-	public static final StreamCodec<ByteBuf, ItemNameAttribute> STREAM_CODEC = ByteBufCodecs.STRING_UTF8
-		.map(ItemNameAttribute::new, ItemNameAttribute::itemName);
+    public static final StreamCodec<ByteBuf, ItemNameAttribute> STREAM_CODEC =
+            ByteBufCodecs.STRING_UTF8.map(ItemNameAttribute::new, ItemNameAttribute::itemName);
 
-	private static String extractCustomName(ItemStack stack) {
-		if (stack.has(DataComponents.CUSTOM_NAME)) {
-			try {
-				Component itextcomponent = Component.Serializer.fromJson(stack.getOrDefault(DataComponents.CUSTOM_NAME, Component.empty()).getString(), RegistryAccess.EMPTY);
-				if (itextcomponent != null) {
-					return itextcomponent.getString();
-				}
-			} catch (JsonParseException ignored) {
-			}
-		}
-		return "";
-	}
+    private static String extractCustomName(ItemStack stack) {
+        if (stack.has(DataComponents.CUSTOM_NAME)) {
+            try {
+                Component itextcomponent =
+                        Component.Serializer.fromJson(
+                                stack.getOrDefault(DataComponents.CUSTOM_NAME, Component.empty())
+                                        .getString(),
+                                RegistryAccess.EMPTY);
+                if (itextcomponent != null) {
+                    return itextcomponent.getString();
+                }
+            } catch (JsonParseException ignored) {
+            }
+        }
+        return "";
+    }
 
-	@Override
-	public boolean appliesTo(ItemStack itemStack, Level level) {
-		return extractCustomName(itemStack).equals(itemName);
-	}
+    @Override
+    public boolean appliesTo(ItemStack itemStack, Level level) {
+        return extractCustomName(itemStack).equals(itemName);
+    }
 
-	@Override
-	public String getTranslationKey() {
-		return "has_name";
-	}
+    @Override
+    public String getTranslationKey() {
+        return "has_name";
+    }
 
-	@Override
-	public Object[] getTranslationParameters() {
-		return new Object[]{itemName};
-	}
+    @Override
+    public Object[] getTranslationParameters() {
+        return new Object[] {itemName};
+    }
 
-	@Override
-	public ItemAttributeType getType() {
-		return AllItemAttributeTypes.HAS_NAME;
-	}
+    @Override
+    public ItemAttributeType getType() {
+        return AllItemAttributeTypes.HAS_NAME;
+    }
 
-	public static class Type implements ItemAttributeType {
-		@Override
-		public @NotNull ItemAttribute createAttribute() {
-			return new ItemNameAttribute("dummy");
-		}
+    public static class Type implements ItemAttributeType {
+        @Override
+        public @NotNull ItemAttribute createAttribute() {
+            return new ItemNameAttribute("dummy");
+        }
 
-		@Override
-		public List<ItemAttribute> getAllAttributes(ItemStack stack, Level level) {
-			List<ItemAttribute> list = new ArrayList<>();
+        @Override
+        public List<ItemAttribute> getAllAttributes(ItemStack stack, Level level) {
+            List<ItemAttribute> list = new ArrayList<>();
 
-			String name = extractCustomName(stack);
-			if (!name.isEmpty()) {
-				list.add(new ItemNameAttribute(name));
-			}
+            String name = extractCustomName(stack);
+            if (!name.isEmpty()) {
+                list.add(new ItemNameAttribute(name));
+            }
 
-			return list;
-		}
+            return list;
+        }
 
-		@Override
-		public MapCodec<? extends ItemAttribute> codec() {
-			return CODEC;
-		}
+        @Override
+        public MapCodec<? extends ItemAttribute> codec() {
+            return CODEC;
+        }
 
-		@Override
-		public StreamCodec<? super RegistryFriendlyByteBuf, ? extends ItemAttribute> streamCodec() {
-			return STREAM_CODEC;
-		}
-	}
+        @Override
+        public StreamCodec<? super RegistryFriendlyByteBuf, ? extends ItemAttribute> streamCodec() {
+            return STREAM_CODEC;
+        }
+    }
 }

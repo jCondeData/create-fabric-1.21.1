@@ -1,9 +1,5 @@
 package com.simibubi.create.content.contraptions.bearing;
 
-import javax.annotation.Nullable;
-
-import org.joml.Quaternionf;
-
 import com.mojang.math.Axis;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
@@ -18,6 +14,7 @@ import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
@@ -27,86 +24,92 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import org.joml.Quaternionf;
+
+import javax.annotation.Nullable;
+
 public class StabilizedBearingMovementBehaviour implements MovementBehaviour {
 
-	@Override
-	public ItemStack canBeDisabledVia(MovementContext context) {
-		return null;
-	}
+    @Override
+    public ItemStack canBeDisabledVia(MovementContext context) {
+        return null;
+    }
 
-	@Override
-	public boolean disableBlockEntityRendering() {
-		return true;
-	}
+    @Override
+    public boolean disableBlockEntityRendering() {
+        return true;
+    }
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public void renderInContraption(MovementContext context, VirtualRenderWorld renderWorld,
-									ContraptionMatrices matrices, MultiBufferSource buffer) {
-		if (VisualizationManager.supportsVisualization(context.world))
-			return;
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void renderInContraption(
+            MovementContext context,
+            VirtualRenderWorld renderWorld,
+            ContraptionMatrices matrices,
+            MultiBufferSource buffer) {
+        if (VisualizationManager.supportsVisualization(context.world)) return;
 
-		Direction facing = context.state.getValue(BlockStateProperties.FACING);
-		PartialModel top = AllPartialModels.BEARING_TOP;
-		SuperByteBuffer superBuffer = CachedBuffers.partial(top, context.state);
-		float renderPartialTicks = AnimationTickHolder.getPartialTicks();
+        Direction facing = context.state.getValue(BlockStateProperties.FACING);
+        PartialModel top = AllPartialModels.BEARING_TOP;
+        SuperByteBuffer superBuffer = CachedBuffers.partial(top, context.state);
+        float renderPartialTicks = AnimationTickHolder.getPartialTicks();
 
-		// rotate to match blockstate
-		Quaternionf orientation = BearingVisual.getBlockStateOrientation(facing);
+        // rotate to match blockstate
+        Quaternionf orientation = BearingVisual.getBlockStateOrientation(facing);
 
-		// rotate against parent
-		float angle = getCounterRotationAngle(context, facing, renderPartialTicks) * facing.getAxisDirection()
-			.getStep();
+        // rotate against parent
+        float angle =
+                getCounterRotationAngle(context, facing, renderPartialTicks)
+                        * facing.getAxisDirection().getStep();
 
-		Quaternionf rotation = Axis.of(facing.step())
-			.rotationDegrees(angle);
+        Quaternionf rotation = Axis.of(facing.step()).rotationDegrees(angle);
 
-		rotation.mul(orientation);
+        rotation.mul(orientation);
 
-		orientation = rotation;
+        orientation = rotation;
 
-		superBuffer.transform(matrices.getModel());
-		superBuffer.rotateCentered(orientation);
+        superBuffer.transform(matrices.getModel());
+        superBuffer.rotateCentered(orientation);
 
-		// render
-		superBuffer.light(LevelRenderer.getLightColor(renderWorld, context.localPos))
-			.useLevelLight(context.world, matrices.getWorld())
-			.renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.solid()));
-	}
+        // render
+        superBuffer
+                .light(LevelRenderer.getLightColor(renderWorld, context.localPos))
+                .useLevelLight(context.world, matrices.getWorld())
+                .renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.solid()));
+    }
 
-	@Nullable
-	@Override
-	public ActorVisual createVisual(VisualizationContext visualizationContext, VirtualRenderWorld simulationWorld,
-									MovementContext movementContext) {
-		return new StabilizedBearingVisual(visualizationContext, simulationWorld, movementContext);
-	}
+    @Nullable
+    @Override
+    public ActorVisual createVisual(
+            VisualizationContext visualizationContext,
+            VirtualRenderWorld simulationWorld,
+            MovementContext movementContext) {
+        return new StabilizedBearingVisual(visualizationContext, simulationWorld, movementContext);
+    }
 
-	static float getCounterRotationAngle(MovementContext context, Direction facing, float renderPartialTicks) {
-		if (!context.contraption.canBeStabilized(facing, context.localPos))
-			return 0;
+    static float getCounterRotationAngle(
+            MovementContext context, Direction facing, float renderPartialTicks) {
+        if (!context.contraption.canBeStabilized(facing, context.localPos)) return 0;
 
-		float offset = 0;
-		Direction.Axis axis = facing.getAxis();
-		AbstractContraptionEntity entity = context.contraption.entity;
+        float offset = 0;
+        Direction.Axis axis = facing.getAxis();
+        AbstractContraptionEntity entity = context.contraption.entity;
 
-		if (entity instanceof ControlledContraptionEntity controlledCE) {
-			if (context.contraption.canBeStabilized(facing, context.localPos))
-				offset = -controlledCE.getAngle(renderPartialTicks);
+        if (entity instanceof ControlledContraptionEntity controlledCE) {
+            if (context.contraption.canBeStabilized(facing, context.localPos))
+                offset = -controlledCE.getAngle(renderPartialTicks);
 
-		} else if (entity instanceof OrientedContraptionEntity orientedCE) {
-			if (axis.isVertical())
-				offset = -orientedCE.getViewYRot(renderPartialTicks);
-			else {
-				if (orientedCE.isInitialOrientationPresent() && orientedCE.getInitialOrientation()
-					.getAxis() == axis)
-					offset = -orientedCE.getViewXRot(renderPartialTicks);
-			}
-		}
-		return offset;
-	}
-
+        } else if (entity instanceof OrientedContraptionEntity orientedCE) {
+            if (axis.isVertical()) offset = -orientedCE.getViewYRot(renderPartialTicks);
+            else {
+                if (orientedCE.isInitialOrientationPresent()
+                        && orientedCE.getInitialOrientation().getAxis() == axis)
+                    offset = -orientedCE.getViewXRot(renderPartialTicks);
+            }
+        }
+        return offset;
+    }
 }

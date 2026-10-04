@@ -10,18 +10,17 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 public class BrassDiodeRenderer extends ColoredOverlayBlockEntityRenderer<BrassDiodeBlockEntity> {
 
-	public BrassDiodeRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public BrassDiodeRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected int getColor(BrassDiodeBlockEntity be, float partialTicks) {
-		return Color.mixColors(0x2C0300, 0xCD0000, be.getProgress());
-	}
+    @Override
+    protected int getColor(BrassDiodeBlockEntity be, float partialTicks) {
+        return Color.mixColors(0x2C0300, 0xCD0000, be.getProgress());
+    }
 
-	@Override
-	protected SuperByteBuffer getOverlayBuffer(BrassDiodeBlockEntity be) {
-		return CachedBuffers.partial(AllPartialModels.FLEXPEATER_INDICATOR, be.getBlockState());
-	}
-
+    @Override
+    protected SuperByteBuffer getOverlayBuffer(BrassDiodeBlockEntity be) {
+        return CachedBuffers.partial(AllPartialModels.FLEXPEATER_INDICATOR, be.getBlockState());
+    }
 }

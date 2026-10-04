@@ -1,10 +1,5 @@
 package com.simibubi.create.content.logistics.packagePort.frogport;
 
-import java.util.function.Consumer;
-
-import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-
 import com.simibubi.create.AllPartialModels;
 
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -14,253 +9,303 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
-public class FrogportVisual extends AbstractBlockEntityVisual<FrogportBlockEntity> implements SimpleDynamicVisual {
-	private final TransformedInstance body;
-	private TransformedInstance head;
-	private final TransformedInstance tongue;
-	private final TransformedInstance rig;
-	private final TransformedInstance box;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
-	private final Matrix4f basePose = new Matrix4f();
-	private float lastYaw = Float.NaN;
-	private float lastHeadPitch = Float.NaN;
-	private float lastTonguePitch = Float.NaN;
-	private float lastTongueLength = Float.NaN;
-	private boolean lastGoggles = false;
+import java.util.function.Consumer;
 
-	public FrogportVisual(VisualizationContext ctx, FrogportBlockEntity blockEntity, float partialTick) {
-		super(ctx, blockEntity, partialTick);
+public class FrogportVisual extends AbstractBlockEntityVisual<FrogportBlockEntity>
+        implements SimpleDynamicVisual {
+    private final TransformedInstance body;
+    private TransformedInstance head;
+    private final TransformedInstance tongue;
+    private final TransformedInstance rig;
+    private final TransformedInstance box;
 
-		body = ctx.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FROGPORT_BODY))
-			.createInstance();
+    private final Matrix4f basePose = new Matrix4f();
+    private float lastYaw = Float.NaN;
+    private float lastHeadPitch = Float.NaN;
+    private float lastTonguePitch = Float.NaN;
+    private float lastTongueLength = Float.NaN;
+    private boolean lastGoggles = false;
 
-		head = ctx.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FROGPORT_HEAD))
-			.createInstance();
+    public FrogportVisual(
+            VisualizationContext ctx, FrogportBlockEntity blockEntity, float partialTick) {
+        super(ctx, blockEntity, partialTick);
 
-		tongue = ctx.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FROGPORT_TONGUE))
-			.createInstance();
+        body =
+                ctx.instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.FROGPORT_BODY))
+                        .createInstance();
 
-		rig = ctx.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.AIR.defaultBlockState()))
-			.createInstance();
+        head =
+                ctx.instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.FROGPORT_HEAD))
+                        .createInstance();
 
-		box = ctx.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, Models.block(Blocks.AIR.defaultBlockState()))
-			.createInstance();
+        tongue =
+                ctx.instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.FROGPORT_TONGUE))
+                        .createInstance();
 
-		rig.handle().setVisible(false);
-		box.handle().setVisible(false);
+        rig =
+                ctx.instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.block(Blocks.AIR.defaultBlockState()))
+                        .createInstance();
 
-		animate(partialTick);
-	}
+        box =
+                ctx.instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.block(Blocks.AIR.defaultBlockState()))
+                        .createInstance();
 
-	@Override
-	public void beginFrame(Context ctx) {
-		animate(ctx.partialTick());
-	}
+        rig.handle().setVisible(false);
+        box.handle().setVisible(false);
 
-	private void animate(float partialTicks) {
-		updateGoggles();
-		
-		float yaw = blockEntity.getYaw();
+        animate(partialTick);
+    }
 
-		float headPitch = 80;
-		float tonguePitch = 0;
-		float tongueLength = 0;
-		float headPitchModifier = 1;
+    @Override
+    public void beginFrame(Context ctx) {
+        animate(ctx.partialTick());
+    }
 
-		boolean hasTarget = blockEntity.target != null;
-		boolean animating = blockEntity.isAnimationInProgress();
-		boolean depositing = blockEntity.currentlyDepositing;
+    private void animate(float partialTicks) {
+        updateGoggles();
 
-		Vec3 diff = Vec3.ZERO;
+        float yaw = blockEntity.getYaw();
 
-		if (hasTarget) {
-			diff = blockEntity.target
-				.getExactTargetLocation(blockEntity, blockEntity.getLevel(), blockEntity.getBlockPos())
-				.subtract(0, animating && depositing ? 0 : 0.75, 0)
-				.subtract(Vec3.atCenterOf(blockEntity.getBlockPos()));
-			tonguePitch = (float) Mth.atan2(diff.y, diff.multiply(1, 0, 1)
-				.length() + (3 / 16f)) * Mth.RAD_TO_DEG;
-			tongueLength = Math.max((float) diff.length(), 1);
-			headPitch = Mth.clamp(tonguePitch * 2, 60, 100);
-		}
+        float headPitch = 80;
+        float tonguePitch = 0;
+        float tongueLength = 0;
+        float headPitchModifier = 1;
 
-		if (animating) {
-			float progress = blockEntity.animationProgress.getValue(partialTicks);
-			float scale = 1;
-			float itemDistance = 0;
+        boolean hasTarget = blockEntity.target != null;
+        boolean animating = blockEntity.isAnimationInProgress();
+        boolean depositing = blockEntity.currentlyDepositing;
 
-			if (depositing) {
-				double modifier = Math.max(0, 1 - Math.pow((progress - 0.25) * 4 - 1, 4));
-				itemDistance =
-					(float) Math.max(tongueLength * Math.min(1, (progress - 0.25) * 3), tongueLength * modifier);
-				tongueLength *= Math.max(0, 1 - Math.pow((progress * 1.25 - 0.25) * 4 - 1, 4));
-				headPitchModifier = (float) Math.max(0, 1 - Math.pow((progress * 1.25) * 2 - 1, 4));
-				scale = 0.25f + progress * 3 / 4;
+        Vec3 diff = Vec3.ZERO;
 
-			} else {
-				tongueLength *= Math.pow(Math.max(0, 1 - progress * 1.25), 5);
-				headPitchModifier = 1 - (float) Math.min(1, Math.max(0, (Math.pow(progress * 1.5, 2) - 0.5) * 2));
-				scale = (float) Math.max(0.5, 1 - progress * 1.25);
-				itemDistance = tongueLength;
-			}
+        if (hasTarget) {
+            diff =
+                    blockEntity
+                            .target
+                            .getExactTargetLocation(
+                                    blockEntity, blockEntity.getLevel(), blockEntity.getBlockPos())
+                            .subtract(0, animating && depositing ? 0 : 0.75, 0)
+                            .subtract(Vec3.atCenterOf(blockEntity.getBlockPos()));
+            tonguePitch =
+                    (float) Mth.atan2(diff.y, diff.multiply(1, 0, 1).length() + (3 / 16f))
+                            * Mth.RAD_TO_DEG;
+            tongueLength = Math.max((float) diff.length(), 1);
+            headPitch = Mth.clamp(tonguePitch * 2, 60, 100);
+        }
 
-			renderPackage(diff, scale, itemDistance);
+        if (animating) {
+            float progress = blockEntity.animationProgress.getValue(partialTicks);
+            float scale = 1;
+            float itemDistance = 0;
 
-		} else {
-			tongueLength = 0;
-			float anticipation = blockEntity.anticipationProgress.getValue(partialTicks);
-			headPitchModifier =
-				anticipation > 0 ? (float) Math.max(0, 1 - Math.pow((anticipation * 1.25) * 2 - 1, 4)) : 0;
-			rig.handle()
-				.setVisible(false);
-			box.handle()
-				.setVisible(false);
-		}
+            if (depositing) {
+                double modifier = Math.max(0, 1 - Math.pow((progress - 0.25) * 4 - 1, 4));
+                itemDistance =
+                        (float)
+                                Math.max(
+                                        tongueLength * Math.min(1, (progress - 0.25) * 3),
+                                        tongueLength * modifier);
+                tongueLength *= Math.max(0, 1 - Math.pow((progress * 1.25 - 0.25) * 4 - 1, 4));
+                headPitchModifier = (float) Math.max(0, 1 - Math.pow((progress * 1.25) * 2 - 1, 4));
+                scale = 0.25f + progress * 3 / 4;
 
-		headPitch *= headPitchModifier;
+            } else {
+                tongueLength *= Math.pow(Math.max(0, 1 - progress * 1.25), 5);
+                headPitchModifier =
+                        1
+                                - (float)
+                                        Math.min(
+                                                1,
+                                                Math.max(
+                                                        0,
+                                                        (Math.pow(progress * 1.5, 2) - 0.5) * 2));
+                scale = (float) Math.max(0.5, 1 - progress * 1.25);
+                itemDistance = tongueLength;
+            }
 
-		headPitch = Math.max(headPitch, blockEntity.manualOpenAnimationProgress.getValue(partialTicks) * 60);
-		tongueLength = Math.max(tongueLength, blockEntity.manualOpenAnimationProgress.getValue(partialTicks) * 0.25f);
-if (yaw != lastYaw) {
-			body.setIdentityTransform()
-				.translate(getVisualPosition())
-				.center()
-				.rotateYDegrees(yaw)
-				.uncenter()
-				.setChanged();
+            renderPackage(diff, scale, itemDistance);
 
-			// Save the base pose to avoid recalculating it twice every frame
-			basePose.set(body.pose)
-				.translate(8 / 16f, 10 / 16f, 11 / 16f);
+        } else {
+            tongueLength = 0;
+            float anticipation = blockEntity.anticipationProgress.getValue(partialTicks);
+            headPitchModifier =
+                    anticipation > 0
+                            ? (float) Math.max(0, 1 - Math.pow((anticipation * 1.25) * 2 - 1, 4))
+                            : 0;
+            rig.handle().setVisible(false);
+            box.handle().setVisible(false);
+        }
 
-			// I'm not entirely sure that yaw ever changes
-			lastYaw = yaw;
+        headPitch *= headPitchModifier;
 
-			// Force the head and tongue to update
-			lastTonguePitch = Float.NaN;
-			lastHeadPitch = Float.NaN;
-		}
+        headPitch =
+                Math.max(
+                        headPitch,
+                        blockEntity.manualOpenAnimationProgress.getValue(partialTicks) * 60);
+        tongueLength =
+                Math.max(
+                        tongueLength,
+                        blockEntity.manualOpenAnimationProgress.getValue(partialTicks) * 0.25f);
+        if (yaw != lastYaw) {
+            body.setIdentityTransform()
+                    .translate(getVisualPosition())
+                    .center()
+                    .rotateYDegrees(yaw)
+                    .uncenter()
+                    .setChanged();
 
-		if (headPitch != lastHeadPitch) {
-			head.setTransform(basePose)
-				.rotateXDegrees(headPitch)
-				.translateBack(8 / 16f, 10 / 16f, 11 / 16f)
-				.setChanged();
+            // Save the base pose to avoid recalculating it twice every frame
+            basePose.set(body.pose).translate(8 / 16f, 10 / 16f, 11 / 16f);
 
-			lastHeadPitch = headPitch;
-		}
+            // I'm not entirely sure that yaw ever changes
+            lastYaw = yaw;
 
-		if (tonguePitch != lastTonguePitch || tongueLength != lastTongueLength) {
-			tongue.setTransform(basePose)
-				.rotateXDegrees(tonguePitch)
-				.scale(1f, 1f, tongueLength / (7 / 16f))
-				.translateBack(8 / 16f, 10 / 16f, 11 / 16f)
-				.setChanged();
+            // Force the head and tongue to update
+            lastTonguePitch = Float.NaN;
+            lastHeadPitch = Float.NaN;
+        }
 
-			lastTonguePitch = tonguePitch;
-			lastTongueLength = tongueLength;
-		}
-	}
+        if (headPitch != lastHeadPitch) {
+            head.setTransform(basePose)
+                    .rotateXDegrees(headPitch)
+                    .translateBack(8 / 16f, 10 / 16f, 11 / 16f)
+                    .setChanged();
 
-	public void updateGoggles() {
-		if (blockEntity.goggles && !lastGoggles) {
-			head.delete();
-			head = instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FROGPORT_HEAD_GOGGLES))
-				.createInstance();
-			lastHeadPitch = -1;
-			updateLight(0);
-			lastGoggles = true;
-		}
-		
-		if (!blockEntity.goggles && lastGoggles) {
-			head.delete();
-			head = instancerProvider()
-				.instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FROGPORT_HEAD))
-				.createInstance();
-			lastHeadPitch = -1;
-			updateLight(0);
-			lastGoggles = false;
-		}
-	}
+            lastHeadPitch = headPitch;
+        }
 
-	private void renderPackage(Vec3 diff, float scale, float itemDistance) {
-		if (blockEntity.animatedPackage == null || scale < 0.45) {
-			rig.handle()
-				.setVisible(false);
-			box.handle()
-				.setVisible(false);
-			return;
-		}
-		ResourceLocation key = BuiltInRegistries.ITEM.getKey(blockEntity.animatedPackage.getItem());
-		if (key == BuiltInRegistries.ITEM.getDefaultKey()) {
-			rig.handle()
-				.setVisible(false);
-			box.handle()
-				.setVisible(false);
-			return;
-		}
+        if (tonguePitch != lastTonguePitch || tongueLength != lastTongueLength) {
+            tongue.setTransform(basePose)
+                    .rotateXDegrees(tonguePitch)
+                    .scale(1f, 1f, tongueLength / (7 / 16f))
+                    .translateBack(8 / 16f, 10 / 16f, 11 / 16f)
+                    .setChanged();
 
-		boolean animating = blockEntity.isAnimationInProgress();
-		boolean depositing = blockEntity.currentlyDepositing;
+            lastTonguePitch = tonguePitch;
+            lastTongueLength = tongueLength;
+        }
+    }
 
-		instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.PACKAGES.get(key)))
-			.stealInstance(box);
-		box.handle().setVisible(true);
+    public void updateGoggles() {
+        if (blockEntity.goggles && !lastGoggles) {
+            head.delete();
+            head =
+                    instancerProvider()
+                            .instancer(
+                                    InstanceTypes.TRANSFORMED,
+                                    Models.partial(AllPartialModels.FROGPORT_HEAD_GOGGLES))
+                            .createInstance();
+            lastHeadPitch = -1;
+            updateLight(0);
+            lastGoggles = true;
+        }
 
-		box.setIdentityTransform()
-			.translate(getVisualPosition())
-			.translate(0, 3 / 16f, 0)
-			.translate(diff.normalize()
-				.scale(itemDistance)
-				.subtract(0, animating && depositing ? 0.75 : 0, 0))
-			.center()
-			.scale(scale)
-			.uncenter()
-			.setChanged();
+        if (!blockEntity.goggles && lastGoggles) {
+            head.delete();
+            head =
+                    instancerProvider()
+                            .instancer(
+                                    InstanceTypes.TRANSFORMED,
+                                    Models.partial(AllPartialModels.FROGPORT_HEAD))
+                            .createInstance();
+            lastHeadPitch = -1;
+            updateLight(0);
+            lastGoggles = false;
+        }
+    }
 
-		if (!depositing) {
-			rig.handle()
-				.setVisible(false);
-			return;
-		}
+    private void renderPackage(Vec3 diff, float scale, float itemDistance) {
+        if (blockEntity.animatedPackage == null || scale < 0.45) {
+            rig.handle().setVisible(false);
+            box.handle().setVisible(false);
+            return;
+        }
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(blockEntity.animatedPackage.getItem());
+        if (key == BuiltInRegistries.ITEM.getDefaultKey()) {
+            rig.handle().setVisible(false);
+            box.handle().setVisible(false);
+            return;
+        }
 
-		instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.PACKAGE_RIGGING.get(key)))
-			.stealInstance(rig);
-		rig.handle().setVisible(true);
+        boolean animating = blockEntity.isAnimationInProgress();
+        boolean depositing = blockEntity.currentlyDepositing;
 
-		rig.pose.set(box.pose);
-		rig.setChanged();
-	}
+        instancerProvider()
+                .instancer(
+                        InstanceTypes.TRANSFORMED,
+                        Models.partial(AllPartialModels.PACKAGES.get(key)))
+                .stealInstance(box);
+        box.handle().setVisible(true);
 
-	@Override
-	public void collectCrumblingInstances(Consumer<@Nullable Instance> consumer) {
-		consumer.accept(body);
-		consumer.accept(head);
-	}
+        box.setIdentityTransform()
+                .translate(getVisualPosition())
+                .translate(0, 3 / 16f, 0)
+                .translate(
+                        diff.normalize()
+                                .scale(itemDistance)
+                                .subtract(0, animating && depositing ? 0.75 : 0, 0))
+                .center()
+                .scale(scale)
+                .uncenter()
+                .setChanged();
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(body, head, tongue, rig, box);
-	}
+        if (!depositing) {
+            rig.handle().setVisible(false);
+            return;
+        }
 
-	@Override
-	protected void _delete() {
-		body.delete();
-		head.delete();
-		tongue.delete();
-		rig.delete();
-		box.delete();
-	}
+        instancerProvider()
+                .instancer(
+                        InstanceTypes.TRANSFORMED,
+                        Models.partial(AllPartialModels.PACKAGE_RIGGING.get(key)))
+                .stealInstance(rig);
+        rig.handle().setVisible(true);
+
+        rig.pose.set(box.pose);
+        rig.setChanged();
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<@Nullable Instance> consumer) {
+        consumer.accept(body);
+        consumer.accept(head);
+    }
+
+    @Override
+    public void updateLight(float partialTick) {
+        relight(body, head, tongue, rig, box);
+    }
+
+    @Override
+    protected void _delete() {
+        body.delete();
+        head.delete();
+        tongue.delete();
+        rig.delete();
+        box.delete();
+    }
 }

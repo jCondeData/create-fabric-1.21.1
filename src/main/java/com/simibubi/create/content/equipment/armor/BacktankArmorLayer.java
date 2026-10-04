@@ -23,77 +23,82 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class BacktankArmorLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
+public class BacktankArmorLayer<T extends LivingEntity, M extends EntityModel<T>>
+        extends RenderLayer<T, M> {
 
-	public BacktankArmorLayer(RenderLayerParent<T, M> renderer) {
-		super(renderer);
-	}
+    public BacktankArmorLayer(RenderLayerParent<T, M> renderer) {
+        super(renderer);
+    }
 
-	@Override
-	public void render(PoseStack ms, MultiBufferSource buffer, int light, LivingEntity entity, float yaw, float pitch,
-					   float pt, float p_225628_8_, float p_225628_9_, float p_225628_10_) {
-		if (entity.getPose() == Pose.SLEEPING)
-			return;
+    @Override
+    public void render(
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            LivingEntity entity,
+            float yaw,
+            float pitch,
+            float pt,
+            float p_225628_8_,
+            float p_225628_9_,
+            float p_225628_10_) {
+        if (entity.getPose() == Pose.SLEEPING) return;
 
-		BacktankItem item = BacktankItem.getWornBy(entity);
-		if (item == null)
-			return;
+        BacktankItem item = BacktankItem.getWornBy(entity);
+        if (item == null) return;
 
-		M entityModel = getParentModel();
-		if (!(entityModel instanceof HumanoidModel<?> model))
-			return;
+        M entityModel = getParentModel();
+        if (!(entityModel instanceof HumanoidModel<?> model)) return;
 
-		VertexConsumer vc = buffer.getBuffer(Sheets.cutoutBlockSheet());
-		BlockState renderedState = item.getBlock().defaultBlockState()
-			.setValue(BacktankBlock.HORIZONTAL_FACING, Direction.SOUTH);
-		SuperByteBuffer backtank = CachedBuffers.block(renderedState);
-		SuperByteBuffer cogs = CachedBuffers.partial(BacktankRenderer.getCogsModel(renderedState), renderedState);
-		SuperByteBuffer nob = CachedBuffers.partial(BacktankRenderer.getShaftModel(renderedState), renderedState);
+        VertexConsumer vc = buffer.getBuffer(Sheets.cutoutBlockSheet());
+        BlockState renderedState =
+                item.getBlock()
+                        .defaultBlockState()
+                        .setValue(BacktankBlock.HORIZONTAL_FACING, Direction.SOUTH);
+        SuperByteBuffer backtank = CachedBuffers.block(renderedState);
+        SuperByteBuffer cogs =
+                CachedBuffers.partial(BacktankRenderer.getCogsModel(renderedState), renderedState);
+        SuperByteBuffer nob =
+                CachedBuffers.partial(BacktankRenderer.getShaftModel(renderedState), renderedState);
 
-		ms.pushPose();
+        ms.pushPose();
 
-		model.body.translateAndRotate(ms);
-		ms.translate(-1 / 2f, 10 / 16f, 1f);
-		ms.scale(1, -1, -1);
+        model.body.translateAndRotate(ms);
+        ms.translate(-1 / 2f, 10 / 16f, 1f);
+        ms.scale(1, -1, -1);
 
-		backtank.disableDiffuse()
-			.light(light)
-			.renderInto(ms, vc);
+        backtank.disableDiffuse().light(light).renderInto(ms, vc);
 
-		nob.disableDiffuse()
-			.translate(0, -3f / 16, 0)
-			.light(light)
-			.renderInto(ms, vc);
+        nob.disableDiffuse().translate(0, -3f / 16, 0).light(light).renderInto(ms, vc);
 
-		cogs.center()
-			.rotateYDegrees(180)
-			.uncenter()
-			.translate(0, 6.5f / 16, 11f / 16)
-			.rotate(AngleHelper.rad(2 * AnimationTickHolder.getRenderTime(entity.level()) % 360), Direction.EAST)
-			.translate(0, -6.5f / 16, -11f / 16);
+        cogs.center()
+                .rotateYDegrees(180)
+                .uncenter()
+                .translate(0, 6.5f / 16, 11f / 16)
+                .rotate(
+                        AngleHelper.rad(
+                                2 * AnimationTickHolder.getRenderTime(entity.level()) % 360),
+                        Direction.EAST)
+                .translate(0, -6.5f / 16, -11f / 16);
 
-		cogs.disableDiffuse()
-			.light(light)
-			.renderInto(ms, vc);
+        cogs.disableDiffuse().light(light).renderInto(ms, vc);
 
-		ms.popPose();
-	}
+        ms.popPose();
+    }
 
-	public static void registerOnAll(EntityRenderDispatcher renderManager) {
-		for (EntityRenderer<? extends Player> renderer : renderManager.getSkinMap().values())
-			registerOn(renderer);
-		for (EntityRenderer<?> renderer : ((EntityRenderDispatcherAccessor) renderManager).create$getRenderers().values())
-			registerOn(renderer);
-	}
+    public static void registerOnAll(EntityRenderDispatcher renderManager) {
+        for (EntityRenderer<? extends Player> renderer : renderManager.getSkinMap().values())
+            registerOn(renderer);
+        for (EntityRenderer<?> renderer :
+                ((EntityRenderDispatcherAccessor) renderManager).create$getRenderers().values())
+            registerOn(renderer);
+    }
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static void registerOn(EntityRenderer<?> entityRenderer) {
-		if (!(entityRenderer instanceof LivingEntityRenderer<?, ?> livingRenderer))
-			return;
-		if (!(livingRenderer.getModel() instanceof HumanoidModel))
-			return;
-		BacktankArmorLayer<?, ?> layer = new BacktankArmorLayer<>(livingRenderer);
-		livingRenderer.addLayer((BacktankArmorLayer) layer);
-	}
-
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static void registerOn(EntityRenderer<?> entityRenderer) {
+        if (!(entityRenderer instanceof LivingEntityRenderer<?, ?> livingRenderer)) return;
+        if (!(livingRenderer.getModel() instanceof HumanoidModel)) return;
+        BacktankArmorLayer<?, ?> layer = new BacktankArmorLayer<>(livingRenderer);
+        livingRenderer.addLayer((BacktankArmorLayer) layer);
+    }
 }

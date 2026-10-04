@@ -23,63 +23,72 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ControlsBlock extends HorizontalDirectionalBlock implements IWrenchable, ProperWaterloggedBlock {
+public class ControlsBlock extends HorizontalDirectionalBlock
+        implements IWrenchable, ProperWaterloggedBlock {
 
-	public static final BooleanProperty OPEN = BooleanProperty.create("open");
-	public static final BooleanProperty VIRTUAL = BooleanProperty.create("virtual");
+    public static final BooleanProperty OPEN = BooleanProperty.create("open");
+    public static final BooleanProperty VIRTUAL = BooleanProperty.create("virtual");
 
-	public static final MapCodec<ControlsBlock> CODEC = simpleCodec(ControlsBlock::new);
+    public static final MapCodec<ControlsBlock> CODEC = simpleCodec(ControlsBlock::new);
 
-	public ControlsBlock(Properties p_54120_) {
-		super(p_54120_);
-		registerDefaultState(defaultBlockState().setValue(OPEN, false)
-			.setValue(WATERLOGGED, false)
-			.setValue(VIRTUAL, false));
-	}
+    public ControlsBlock(Properties p_54120_) {
+        super(p_54120_);
+        registerDefaultState(
+                defaultBlockState()
+                        .setValue(OPEN, false)
+                        .setValue(WATERLOGGED, false)
+                        .setValue(VIRTUAL, false));
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(FACING, OPEN, WATERLOGGED, VIRTUAL));
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder.add(FACING, OPEN, WATERLOGGED, VIRTUAL));
+    }
 
-	@Override
-	public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-		LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-		updateWater(pLevel, pState, pCurrentPos);
-		return pState.setValue(OPEN, pLevel instanceof ContraptionWorld);
-	}
+    @Override
+    public BlockState updateShape(
+            BlockState pState,
+            Direction pDirection,
+            BlockState pNeighborState,
+            LevelAccessor pLevel,
+            BlockPos pCurrentPos,
+            BlockPos pNeighborPos) {
+        updateWater(pLevel, pState, pCurrentPos);
+        return pState.setValue(OPEN, pLevel instanceof ContraptionWorld);
+    }
 
-	@Override
-	public FluidState getFluidState(BlockState pState) {
-		return fluidState(pState);
-	}
+    @Override
+    public FluidState getFluidState(BlockState pState) {
+        return fluidState(pState);
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		BlockState state = withWater(super.getStateForPlacement(pContext), pContext);
-		Direction horizontalDirection = pContext.getHorizontalDirection();
-		Player player = pContext.getPlayer();
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState state = withWater(super.getStateForPlacement(pContext), pContext);
+        Direction horizontalDirection = pContext.getHorizontalDirection();
+        Player player = pContext.getPlayer();
 
-		state = state.setValue(FACING, horizontalDirection.getOpposite());
-		if (player != null && player.isShiftKeyDown())
-			state = state.setValue(FACING, horizontalDirection);
+        state = state.setValue(FACING, horizontalDirection.getOpposite());
+        if (player != null && player.isShiftKeyDown())
+            state = state.setValue(FACING, horizontalDirection);
 
-		return state;
-	}
+        return state;
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-		return AllShapes.CONTROLS.get(pState.getValue(FACING));
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AllShapes.CONTROLS.get(pState.getValue(FACING));
+    }
 
-	@Override
-	public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos,
-		CollisionContext pContext) {
-		return AllShapes.CONTROLS_COLLISION.get(pState.getValue(FACING));
-	}
+    @Override
+    public VoxelShape getCollisionShape(
+            BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AllShapes.CONTROLS_COLLISION.get(pState.getValue(FACING));
+    }
 
-	@Override
-	protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
-		return CODEC;
-	}
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
 }

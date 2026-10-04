@@ -6,11 +6,11 @@ import com.simibubi.create.foundation.block.connected.ConnectedTextureBehaviour.
 import net.minecraft.resources.ResourceLocation;
 
 public interface CTType {
-	ResourceLocation getId();
+    ResourceLocation getId();
 
-	int getSheetSize();
+    int getSheetSize();
 
-	ContextRequirement getContextRequirement();
+    ContextRequirement getContextRequirement();
 
-	int getTextureIndex(CTContext context);
+    int getTextureIndex(CTContext context);
 }

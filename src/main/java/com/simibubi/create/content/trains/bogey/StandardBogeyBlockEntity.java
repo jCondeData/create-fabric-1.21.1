@@ -8,12 +8,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class StandardBogeyBlockEntity extends AbstractBogeyBlockEntity {
 
-	public StandardBogeyBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public StandardBogeyBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	public BogeyStyle getDefaultStyle() {
-		return AllBogeyStyles.STANDARD;
-	}
+    @Override
+    public BogeyStyle getDefaultStyle() {
+        return AllBogeyStyles.STANDARD;
+    }
 }

@@ -9,19 +9,24 @@ import net.minecraft.network.chat.Component;
 
 public class DebugValueCommand {
 
-	public static float value = 0;
+    public static float value = 0;
 
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal("debugValue")
-			.requires(cs -> cs.hasPermission(4))
-			.then(Commands.argument("value", FloatArgumentType.floatArg())
-					.executes((ctx) -> {
-						value = FloatArgumentType.getFloat(ctx, "value");
-						ctx.getSource().sendSuccess(() -> {
-                            return Component.literal("Set value to: "+value);
-                        }, true);
-						return 1;
-					}));
-
-	}
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
+        return Commands.literal("debugValue")
+                .requires(cs -> cs.hasPermission(4))
+                .then(
+                        Commands.argument("value", FloatArgumentType.floatArg())
+                                .executes(
+                                        (ctx) -> {
+                                            value = FloatArgumentType.getFloat(ctx, "value");
+                                            ctx.getSource()
+                                                    .sendSuccess(
+                                                            () -> {
+                                                                return Component.literal(
+                                                                        "Set value to: " + value);
+                                                            },
+                                                            true);
+                                            return 1;
+                                        }));
+    }
 }

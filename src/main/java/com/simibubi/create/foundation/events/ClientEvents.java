@@ -1,7 +1,5 @@
 package com.simibubi.create.foundation.events;
 
-import java.util.function.Supplier;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllItems;
@@ -93,7 +91,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -116,292 +113,319 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
+import java.util.function.Supplier;
+
 @EventBusSubscriber(Dist.CLIENT)
 public class ClientEvents {
-	@SubscribeEvent
-	public static void onTickPre(ClientTickEvent.Pre event) {
-		onTick( true);
-	}
+    @SubscribeEvent
+    public static void onTickPre(ClientTickEvent.Pre event) {
+        onTick(true);
+    }
 
-	@SubscribeEvent
-	public static void onTickPost(ClientTickEvent.Post event) {
-		onTick(false);
-	}
+    @SubscribeEvent
+    public static void onTickPost(ClientTickEvent.Post event) {
+        onTick(false);
+    }
 
-	public static void onTick(boolean isPreEvent) {
-		if (!isGameActive())
-			return;
+    public static void onTick(boolean isPreEvent) {
+        if (!isGameActive()) return;
 
-		Level world = Minecraft.getInstance().level;
-		if (isPreEvent) {
-			LinkedControllerClientHandler.tick();
-			ControlsHandler.tick();
-			AirCurrent.Client.tickClientPlayerSounds();
-			return;
-		}
+        Level world = Minecraft.getInstance().level;
+        if (isPreEvent) {
+            LinkedControllerClientHandler.tick();
+            ControlsHandler.tick();
+            AirCurrent.Client.tickClientPlayerSounds();
+            return;
+        }
 
-		SoundScapes.tick();
+        SoundScapes.tick();
 
-		CreateClient.SCHEMATIC_SENDER.tick();
-		CreateClient.SCHEMATIC_AND_QUILL_HANDLER.tick();
-		CreateClient.GLUE_HANDLER.tick();
-		CreateClient.SCHEMATIC_HANDLER.tick();
-		CreateClient.ZAPPER_RENDER_HANDLER.tick();
-		CreateClient.POTATO_CANNON_RENDER_HANDLER.tick();
-		CreateClient.SOUL_PULSE_EFFECT_HANDLER.tick(world);
-		CreateClient.RAILWAYS.clientTick();
+        CreateClient.SCHEMATIC_SENDER.tick();
+        CreateClient.SCHEMATIC_AND_QUILL_HANDLER.tick();
+        CreateClient.GLUE_HANDLER.tick();
+        CreateClient.SCHEMATIC_HANDLER.tick();
+        CreateClient.ZAPPER_RENDER_HANDLER.tick();
+        CreateClient.POTATO_CANNON_RENDER_HANDLER.tick();
+        CreateClient.SOUL_PULSE_EFFECT_HANDLER.tick(world);
+        CreateClient.RAILWAYS.clientTick();
 
-		ContraptionHandler.tick(world);
-		CapabilityMinecartController.tick(world);
-		CouplingPhysics.tick(world);
+        ContraptionHandler.tick(world);
+        CapabilityMinecartController.tick(world);
+        CouplingPhysics.tick(world);
 
-		// ScreenOpener.tick();
-		ServerSpeedProvider.clientTick();
-		BeltConnectorHandler.tick();
-//		BeltSlicer.tickHoveringInformation();
-		FilteringRenderer.tick();
-		LinkRenderer.tick();
-		ScrollValueRenderer.tick();
-		ChassisRangeDisplay.tick();
-		EdgeInteractionRenderer.tick();
-		GirderWrenchBehavior.tick();
-		WorldshaperRenderHandler.tick();
-		CouplingHandlerClient.tick();
-		CouplingRenderer.tickDebugModeRenders();
-		KineticDebugger.tick();
-		ExtendoGripRenderHandler.tick();
-		// CollisionDebugger.tick();
-		ArmInteractionPointHandler.tick();
-		EjectorTargetHandler.tick();
-		ContraptionRenderInfoManager.tickFor(world);
-		BlueprintOverlayRenderer.tick();
-		ToolboxHandlerClient.clientTick();
-		RadialWrenchHandler.clientTick();
-		TrackTargetingClient.clientTick();
-		TrackPlacement.clientTick();
-		TrainRelocator.clientTick();
-		ClickToLinkBlockItem.clientTick();
-		CurvedTrackInteraction.clientTick();
-		CameraDistanceModifier.tick();
-		CameraAngleAnimationService.tick();
-		TrainHUD.tick();
-		ClipboardValueSettingsHandler.clientTick();
-		CreateClient.VALUE_SETTINGS_HANDLER.tick();
-		ScrollValueHandler.tick();
-		NetheriteBacktankFirstPersonRenderer.clientTick();
-		ContraptionPlayerPassengerRotation.tick();
-		ChainConveyorInteractionHandler.clientTick();
-		ChainConveyorRidingHandler.clientTick();
-		ChainConveyorConnectionHandler.clientTick();
-		PackagePortTargetSelectionHandler.tick();
-		LogisticallyLinkedClientHandler.tick();
-		TableClothOverlayRenderer.tick();
-		CardboardArmorStealthOverlay.clientTick();
-		FactoryPanelConnectionHandler.clientTick();
-		TickBasedCache.clientTick();
-	}
+        // ScreenOpener.tick();
+        ServerSpeedProvider.clientTick();
+        BeltConnectorHandler.tick();
+        //		BeltSlicer.tickHoveringInformation();
+        FilteringRenderer.tick();
+        LinkRenderer.tick();
+        ScrollValueRenderer.tick();
+        ChassisRangeDisplay.tick();
+        EdgeInteractionRenderer.tick();
+        GirderWrenchBehavior.tick();
+        WorldshaperRenderHandler.tick();
+        CouplingHandlerClient.tick();
+        CouplingRenderer.tickDebugModeRenders();
+        KineticDebugger.tick();
+        ExtendoGripRenderHandler.tick();
+        // CollisionDebugger.tick();
+        ArmInteractionPointHandler.tick();
+        EjectorTargetHandler.tick();
+        ContraptionRenderInfoManager.tickFor(world);
+        BlueprintOverlayRenderer.tick();
+        ToolboxHandlerClient.clientTick();
+        RadialWrenchHandler.clientTick();
+        TrackTargetingClient.clientTick();
+        TrackPlacement.clientTick();
+        TrainRelocator.clientTick();
+        ClickToLinkBlockItem.clientTick();
+        CurvedTrackInteraction.clientTick();
+        CameraDistanceModifier.tick();
+        CameraAngleAnimationService.tick();
+        TrainHUD.tick();
+        ClipboardValueSettingsHandler.clientTick();
+        CreateClient.VALUE_SETTINGS_HANDLER.tick();
+        ScrollValueHandler.tick();
+        NetheriteBacktankFirstPersonRenderer.clientTick();
+        ContraptionPlayerPassengerRotation.tick();
+        ChainConveyorInteractionHandler.clientTick();
+        ChainConveyorRidingHandler.clientTick();
+        ChainConveyorConnectionHandler.clientTick();
+        PackagePortTargetSelectionHandler.tick();
+        LogisticallyLinkedClientHandler.tick();
+        TableClothOverlayRenderer.tick();
+        CardboardArmorStealthOverlay.clientTick();
+        FactoryPanelConnectionHandler.clientTick();
+        TickBasedCache.clientTick();
+    }
 
-	@SubscribeEvent
-	public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event) {
-		CreateClient.checkGraphicsFanciness();
-	}
+    @SubscribeEvent
+    public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event) {
+        CreateClient.checkGraphicsFanciness();
+    }
 
-	@SubscribeEvent
-	public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event) {
-		CreateClient.RAILWAYS.cleanUp();
-	}
+    @SubscribeEvent
+    public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event) {
+        CreateClient.RAILWAYS.cleanUp();
+    }
 
-	@SubscribeEvent
-	public static void onLoadWorld(LevelEvent.Load event) {
-		LevelAccessor world = event.getLevel();
-		if (world.isClientSide() && world instanceof ClientLevel && !(world instanceof WrappedClientLevel)) {
-			CreateClient.invalidateRenderers();
-			AnimationTickHolder.reset();
-		}
-	}
+    @SubscribeEvent
+    public static void onLoadWorld(LevelEvent.Load event) {
+        LevelAccessor world = event.getLevel();
+        if (world.isClientSide()
+                && world instanceof ClientLevel
+                && !(world instanceof WrappedClientLevel)) {
+            CreateClient.invalidateRenderers();
+            AnimationTickHolder.reset();
+        }
+    }
 
-	@SubscribeEvent
-	public static void onUnloadWorld(LevelEvent.Unload event) {
-		if (!event.getLevel()
-			.isClientSide())
-			return;
-		CreateClient.invalidateRenderers();
-		CreateClient.SOUL_PULSE_EFFECT_HANDLER.refresh();
-		AnimationTickHolder.reset();
-		ControlsHandler.levelUnloaded(event.getLevel());
-	}
+    @SubscribeEvent
+    public static void onUnloadWorld(LevelEvent.Unload event) {
+        if (!event.getLevel().isClientSide()) return;
+        CreateClient.invalidateRenderers();
+        CreateClient.SOUL_PULSE_EFFECT_HANDLER.refresh();
+        AnimationTickHolder.reset();
+        ControlsHandler.levelUnloaded(event.getLevel());
+    }
 
-	@SubscribeEvent
-	public static void onRenderWorld(RenderLevelStageEvent event) {
-		if (event.getStage() != Stage.AFTER_PARTICLES)
-			return;
+    @SubscribeEvent
+    public static void onRenderWorld(RenderLevelStageEvent event) {
+        if (event.getStage() != Stage.AFTER_PARTICLES) return;
 
-		PoseStack ms = event.getPoseStack();
-		ms.pushPose();
-		SuperRenderTypeBuffer buffer = DefaultSuperRenderTypeBuffer.getInstance();
-		Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera()
-			.getPosition();
+        PoseStack ms = event.getPoseStack();
+        ms.pushPose();
+        SuperRenderTypeBuffer buffer = DefaultSuperRenderTypeBuffer.getInstance();
+        Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
-		TrackBlockOutline.drawCurveSelection(ms, buffer, camera);
-		TrackTargetingClient.render(ms, buffer, camera);
-		CouplingRenderer.renderAll(ms, buffer, camera);
-		CarriageCouplingRenderer.renderAll(ms, buffer, camera);
-		CreateClient.SCHEMATIC_HANDLER.render(ms, buffer, camera);
-		ChainConveyorInteractionHandler.drawCustomBlockSelection(ms, buffer, camera);
+        TrackBlockOutline.drawCurveSelection(ms, buffer, camera);
+        TrackTargetingClient.render(ms, buffer, camera);
+        CouplingRenderer.renderAll(ms, buffer, camera);
+        CarriageCouplingRenderer.renderAll(ms, buffer, camera);
+        CreateClient.SCHEMATIC_HANDLER.render(ms, buffer, camera);
+        ChainConveyorInteractionHandler.drawCustomBlockSelection(ms, buffer, camera);
 
-		buffer.draw();
-		RenderSystem.enableCull();
-		ms.popPose();
+        buffer.draw();
+        RenderSystem.enableCull();
+        ms.popPose();
 
-		ContraptionPlayerPassengerRotation.frame();
-	}
+        ContraptionPlayerPassengerRotation.frame();
+    }
 
-	@SubscribeEvent
-	public static void onCameraSetup(ViewportEvent.ComputeCameraAngles event) {
-		float partialTicks = AnimationTickHolder.getPartialTicks();
+    @SubscribeEvent
+    public static void onCameraSetup(ViewportEvent.ComputeCameraAngles event) {
+        float partialTicks = AnimationTickHolder.getPartialTicks();
 
-		if (CameraAngleAnimationService.isYawAnimating())
-			event.setYaw(CameraAngleAnimationService.getYaw(partialTicks));
+        if (CameraAngleAnimationService.isYawAnimating())
+            event.setYaw(CameraAngleAnimationService.getYaw(partialTicks));
 
-		if (CameraAngleAnimationService.isPitchAnimating())
-			event.setPitch(CameraAngleAnimationService.getPitch(partialTicks));
-	}
+        if (CameraAngleAnimationService.isPitchAnimating())
+            event.setPitch(CameraAngleAnimationService.getPitch(partialTicks));
+    }
 
-	@SubscribeEvent
-	public static void addToItemTooltip(ItemTooltipEvent event) {
-		if (!AllConfigs.client().tooltips.get())
-			return;
-		if (event.getEntity() == null)
-			return;
+    @SubscribeEvent
+    public static void addToItemTooltip(ItemTooltipEvent event) {
+        if (!AllConfigs.client().tooltips.get()) return;
+        if (event.getEntity() == null) return;
 
-		Item item = event.getItemStack().getItem();
-		TooltipModifier modifier = TooltipModifier.REGISTRY.get(item);
-		if (modifier != null && modifier != TooltipModifier.EMPTY) {
-			modifier.modify(event);
-		}
+        Item item = event.getItemStack().getItem();
+        TooltipModifier modifier = TooltipModifier.REGISTRY.get(item);
+        if (modifier != null && modifier != TooltipModifier.EMPTY) {
+            modifier.modify(event);
+        }
 
-		SequencedAssemblyRecipe.addToTooltip(event);
-	}
+        SequencedAssemblyRecipe.addToTooltip(event);
+    }
 
-	@SubscribeEvent
-	public static void onRenderFramePre(ClientTickEvent.Pre event) {
-		onRenderFrame(true);
-	}
+    @SubscribeEvent
+    public static void onRenderFramePre(ClientTickEvent.Pre event) {
+        onRenderFrame(true);
+    }
 
-	@SubscribeEvent
-	public static void onRenderFramePost(ClientTickEvent.Post event) {
-		onRenderFrame(false);
-	}
+    @SubscribeEvent
+    public static void onRenderFramePost(ClientTickEvent.Post event) {
+        onRenderFrame(false);
+    }
 
-	public static void onRenderFrame(boolean isPreEvent) {
-		if (!isGameActive())
-			return;
-		TurntableHandler.gameRenderFrame();
-	}
+    public static void onRenderFrame(boolean isPreEvent) {
+        if (!isGameActive()) return;
+        TurntableHandler.gameRenderFrame();
+    }
 
-	@SubscribeEvent
-	public static void onMount(EntityMountEvent event) {
-		if (event.getEntityMounting() != Minecraft.getInstance().player)
-			return;
+    @SubscribeEvent
+    public static void onMount(EntityMountEvent event) {
+        if (event.getEntityMounting() != Minecraft.getInstance().player) return;
 
-		if (event.isDismounting()) {
-			CameraDistanceModifier.reset();
-			return;
-		}
+        if (event.isDismounting()) {
+            CameraDistanceModifier.reset();
+            return;
+        }
 
-		if (!event.isMounting() || !(event.getEntityBeingMounted() instanceof CarriageContraptionEntity carriage)) {
-			return;
-		}
+        if (!event.isMounting()
+                || !(event.getEntityBeingMounted() instanceof CarriageContraptionEntity carriage)) {
+            return;
+        }
 
-		CameraDistanceModifier.zoomOut();
-	}
+        CameraDistanceModifier.zoomOut();
+    }
 
-	protected static boolean isGameActive() {
-		return !(Minecraft.getInstance().level == null || Minecraft.getInstance().player == null);
-	}
+    protected static boolean isGameActive() {
+        return !(Minecraft.getInstance().level == null || Minecraft.getInstance().player == null);
+    }
 
-	@SubscribeEvent
-	public static void getFogDensity(ViewportEvent.RenderFog event) {
-		Camera camera = event.getCamera();
-		Level level = Minecraft.getInstance().level;
-		BlockPos blockPos = camera.getBlockPosition();
-		FluidState fluidState = level.getFluidState(blockPos);
-		if (camera.getPosition().y >= blockPos.getY() + fluidState.getHeight(level, blockPos))
-			return;
+    @SubscribeEvent
+    public static void getFogDensity(ViewportEvent.RenderFog event) {
+        Camera camera = event.getCamera();
+        Level level = Minecraft.getInstance().level;
+        BlockPos blockPos = camera.getBlockPosition();
+        FluidState fluidState = level.getFluidState(blockPos);
+        if (camera.getPosition().y >= blockPos.getY() + fluidState.getHeight(level, blockPos))
+            return;
 
-		Fluid fluid = fluidState.getType();
-		Entity entity = camera.getEntity();
+        Fluid fluid = fluidState.getType();
+        Entity entity = camera.getEntity();
 
-		if (entity.isSpectator())
-			return;
+        if (entity.isSpectator()) return;
 
-		ItemStack divingHelmet = DivingHelmetItem.getWornItem(entity);
-		if (!divingHelmet.isEmpty()) {
-			if (FluidHelper.isWater(fluid)) {
-				event.scaleFarPlaneDistance(6.25f);
-				event.setCanceled(true);
-				return;
-			} else if (FluidHelper.isLava(fluid) && NetheriteDivingHandler.isNetheriteDivingHelmet(divingHelmet)) {
-				event.setNearPlaneDistance(-4.0f);
-				event.setFarPlaneDistance(20.0f);
-				event.setCanceled(true);
-				return;
-			}
-		}
-	}
+        ItemStack divingHelmet = DivingHelmetItem.getWornItem(entity);
+        if (!divingHelmet.isEmpty()) {
+            if (FluidHelper.isWater(fluid)) {
+                event.scaleFarPlaneDistance(6.25f);
+                event.setCanceled(true);
+                return;
+            } else if (FluidHelper.isLava(fluid)
+                    && NetheriteDivingHandler.isNetheriteDivingHelmet(divingHelmet)) {
+                event.setNearPlaneDistance(-4.0f);
+                event.setFarPlaneDistance(20.0f);
+                event.setCanceled(true);
+                return;
+            }
+        }
+    }
 
-	@SubscribeEvent
-	public static void leftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
-		ItemStack stack = event.getItemStack();
-		if (stack.getItem() instanceof ZapperItem) {
-			CatnipServices.NETWORK.sendToServer(LeftClickPacket.INSTANCE);
-		}
-	}
+    @SubscribeEvent
+    public static void leftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
+        ItemStack stack = event.getItemStack();
+        if (stack.getItem() instanceof ZapperItem) {
+            CatnipServices.NETWORK.sendToServer(LeftClickPacket.INSTANCE);
+        }
+    }
 
-	@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
-	public static class ModBusEvents {
+    @EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+    public static class ModBusEvents {
 
-		@SubscribeEvent
-		public static void registerClientReloadListeners(RegisterClientReloadListenersEvent event) {
-			event.registerReloadListener(CreateClient.RESOURCE_RELOAD_LISTENER);
-			event.registerReloadListener(TrainHatInfoReloadListener.LISTENER);
-		}
+        @SubscribeEvent
+        public static void registerClientReloadListeners(RegisterClientReloadListenersEvent event) {
+            event.registerReloadListener(CreateClient.RESOURCE_RELOAD_LISTENER);
+            event.registerReloadListener(TrainHatInfoReloadListener.LISTENER);
+        }
 
-		@SubscribeEvent
-		public static void addEntityRendererLayers(EntityRenderersEvent.AddLayers event) {
-			EntityRenderDispatcher dispatcher = Minecraft.getInstance()
-				.getEntityRenderDispatcher();
-			BacktankArmorLayer.registerOnAll(dispatcher);
-			CreateHatArmorLayer.registerOnAll(dispatcher);
-		}
+        @SubscribeEvent
+        public static void addEntityRendererLayers(EntityRenderersEvent.AddLayers event) {
+            EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+            BacktankArmorLayer.registerOnAll(dispatcher);
+            CreateHatArmorLayer.registerOnAll(dispatcher);
+        }
 
-		@SubscribeEvent
-		public static void registerGuiOverlays(RegisterGuiLayersEvent event) {
-			// Register overlays in reverse order
-			event.registerAbove(VanillaGuiLayers.AIR_LEVEL, Create.asResource("remaining_air"), RemainingAirOverlay.INSTANCE);
-			event.registerAbove(VanillaGuiLayers.EXPERIENCE_BAR, Create.asResource("train_hud"), TrainHUD.OVERLAY);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("value_settings"), CreateClient.VALUE_SETTINGS_HANDLER);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("track_placement"), TrackPlacementOverlay.INSTANCE);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("goggle_info"), GoggleOverlayRenderer.OVERLAY);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("blueprint"), BlueprintOverlayRenderer.OVERLAY);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("linked_controller"), LinkedControllerClientHandler.OVERLAY);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("schematic"), CreateClient.SCHEMATIC_HANDLER);
-			event.registerAbove(VanillaGuiLayers.HOTBAR, Create.asResource("toolbox"), ToolboxHandlerClient.OVERLAY);
-		}
+        @SubscribeEvent
+        public static void registerGuiOverlays(RegisterGuiLayersEvent event) {
+            // Register overlays in reverse order
+            event.registerAbove(
+                    VanillaGuiLayers.AIR_LEVEL,
+                    Create.asResource("remaining_air"),
+                    RemainingAirOverlay.INSTANCE);
+            event.registerAbove(
+                    VanillaGuiLayers.EXPERIENCE_BAR,
+                    Create.asResource("train_hud"),
+                    TrainHUD.OVERLAY);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("value_settings"),
+                    CreateClient.VALUE_SETTINGS_HANDLER);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("track_placement"),
+                    TrackPlacementOverlay.INSTANCE);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("goggle_info"),
+                    GoggleOverlayRenderer.OVERLAY);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("blueprint"),
+                    BlueprintOverlayRenderer.OVERLAY);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("linked_controller"),
+                    LinkedControllerClientHandler.OVERLAY);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("schematic"),
+                    CreateClient.SCHEMATIC_HANDLER);
+            event.registerAbove(
+                    VanillaGuiLayers.HOTBAR,
+                    Create.asResource("toolbox"),
+                    ToolboxHandlerClient.OVERLAY);
+        }
 
-		@SubscribeEvent
-		public static void registerItemDecorations(RegisterItemDecorationsEvent event) {
-			event.register(AllItems.POTATO_CANNON, PotatoCannonItemRenderer.DECORATOR);
-		}
+        @SubscribeEvent
+        public static void registerItemDecorations(RegisterItemDecorationsEvent event) {
+            event.register(AllItems.POTATO_CANNON, PotatoCannonItemRenderer.DECORATOR);
+        }
 
-		@SubscribeEvent
-		public static void onLoadComplete(FMLLoadCompleteEvent event) {
-			ModContainer createContainer = ModList.get()
-				.getModContainerById(Create.ID)
-				.orElseThrow(() -> new IllegalStateException("Create mod container missing on LoadComplete"));
-			Supplier<IConfigScreenFactory> configScreen = () -> (mc, previousScreen) -> new BaseConfigScreen(previousScreen, Create.ID);
-			createContainer.registerExtensionPoint(IConfigScreenFactory.class, configScreen);
-		}
-
-	}
+        @SubscribeEvent
+        public static void onLoadComplete(FMLLoadCompleteEvent event) {
+            ModContainer createContainer =
+                    ModList.get()
+                            .getModContainerById(Create.ID)
+                            .orElseThrow(
+                                    () ->
+                                            new IllegalStateException(
+                                                    "Create mod container missing on"
+                                                        + " LoadComplete"));
+            Supplier<IConfigScreenFactory> configScreen =
+                    () -> (mc, previousScreen) -> new BaseConfigScreen(previousScreen, Create.ID);
+            createContainer.registerExtensionPoint(IConfigScreenFactory.class, configScreen);
+        }
+    }
 }

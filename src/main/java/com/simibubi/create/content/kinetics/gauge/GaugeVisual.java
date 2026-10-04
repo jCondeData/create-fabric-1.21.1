@@ -1,8 +1,5 @@
 package com.simibubi.create.content.kinetics.gauge;
 
-import java.util.ArrayList;
-import java.util.function.Consumer;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.ShaftVisual;
@@ -17,158 +14,181 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.data.Couple;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 
-public abstract class GaugeVisual extends ShaftVisual<GaugeBlockEntity> implements SimpleDynamicVisual {
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
-	protected final ArrayList<DialFace> faces = new ArrayList<>(2);
+public abstract class GaugeVisual extends ShaftVisual<GaugeBlockEntity>
+        implements SimpleDynamicVisual {
 
-	protected final PoseStack ms = new PoseStack();
+    protected final ArrayList<DialFace> faces = new ArrayList<>(2);
 
-	protected GaugeVisual(VisualizationContext context, GaugeBlockEntity blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick);
+    protected final PoseStack ms = new PoseStack();
 
-		GaugeBlock gaugeBlock = (GaugeBlock) blockState.getBlock();
+    protected GaugeVisual(
+            VisualizationContext context, GaugeBlockEntity blockEntity, float partialTick) {
+        super(context, blockEntity, partialTick);
 
-		Instancer<TransformedInstance> dialModel = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.GAUGE_DIAL));
-		Instancer<TransformedInstance> headModel = getHeadModel();
+        GaugeBlock gaugeBlock = (GaugeBlock) blockState.getBlock();
 
-		var msr = TransformStack.of(ms);
-		msr.translate(getVisualPosition());
+        Instancer<TransformedInstance> dialModel =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.GAUGE_DIAL));
+        Instancer<TransformedInstance> headModel = getHeadModel();
 
-		float progress = Mth.lerp(AnimationTickHolder.getPartialTicks(), blockEntity.prevDialState, blockEntity.dialState);
+        var msr = TransformStack.of(ms);
+        msr.translate(getVisualPosition());
 
-		for (Direction facing : Iterate.directions) {
-			if (!gaugeBlock.shouldRenderHeadOnFace(level, pos, blockState, facing))
-				continue;
+        float progress =
+                Mth.lerp(
+                        AnimationTickHolder.getPartialTicks(),
+                        blockEntity.prevDialState,
+                        blockEntity.dialState);
 
-			DialFace face = makeFace(facing, dialModel, headModel);
+        for (Direction facing : Iterate.directions) {
+            if (!gaugeBlock.shouldRenderHeadOnFace(level, pos, blockState, facing)) continue;
 
-			faces.add(face);
+            DialFace face = makeFace(facing, dialModel, headModel);
 
-			face.setupTransform(msr, progress);
-		}
-	}
+            faces.add(face);
 
-	private DialFace makeFace(Direction face, Instancer<TransformedInstance> dialModel, Instancer<TransformedInstance> headModel) {
-		return new DialFace(face, dialModel.createInstance(), headModel.createInstance());
-	}
+            face.setupTransform(msr, progress);
+        }
+    }
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		if (Mth.equal(blockEntity.prevDialState, blockEntity.dialState))
-			return;
+    private DialFace makeFace(
+            Direction face,
+            Instancer<TransformedInstance> dialModel,
+            Instancer<TransformedInstance> headModel) {
+        return new DialFace(face, dialModel.createInstance(), headModel.createInstance());
+    }
 
-		float progress = Mth.lerp(ctx.partialTick(), blockEntity.prevDialState, blockEntity.dialState);
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        if (Mth.equal(blockEntity.prevDialState, blockEntity.dialState)) return;
 
-		var msr = TransformStack.of(ms);
+        float progress =
+                Mth.lerp(ctx.partialTick(), blockEntity.prevDialState, blockEntity.dialState);
 
-		for (DialFace faceEntry : faces) {
-			faceEntry.updateTransform(msr, progress);
-		}
-	}
+        var msr = TransformStack.of(ms);
 
-	@Override
-	public void updateLight(float partialTick) {
-		super.updateLight(partialTick);
+        for (DialFace faceEntry : faces) {
+            faceEntry.updateTransform(msr, progress);
+        }
+    }
 
-		relight(faces.stream()
-				.flatMap(Couple::stream).toArray(FlatLit[]::new));
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        super.updateLight(partialTick);
 
-	@Override
-	protected void _delete() {
-		super._delete();
+        relight(faces.stream().flatMap(Couple::stream).toArray(FlatLit[]::new));
+    }
 
-		faces.forEach(DialFace::delete);
-	}
+    @Override
+    protected void _delete() {
+        super._delete();
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		super.collectCrumblingInstances(consumer);
-		for (DialFace face : faces) {
-			face.forEach(consumer);
-		}
-	}
+        faces.forEach(DialFace::delete);
+    }
 
-	protected abstract Instancer<TransformedInstance> getHeadModel();
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        super.collectCrumblingInstances(consumer);
+        for (DialFace face : faces) {
+            face.forEach(consumer);
+        }
+    }
 
-	protected class DialFace extends Couple<TransformedInstance> {
+    protected abstract Instancer<TransformedInstance> getHeadModel();
 
-		Direction face;
+    protected class DialFace extends Couple<TransformedInstance> {
 
-		public DialFace(Direction face, TransformedInstance first, TransformedInstance second) {
-			super(first, second);
-			this.face = face;
-		}
+        Direction face;
 
-		private void setupTransform(TransformStack<?> msr, float progress) {
-			float dialPivot = 5.75f / 16;
+        public DialFace(Direction face, TransformedInstance first, TransformedInstance second) {
+            super(first, second);
+            this.face = face;
+        }
 
-			msr.pushPose();
-			rotateToFace(msr);
+        private void setupTransform(TransformStack<?> msr, float progress) {
+            float dialPivot = 5.75f / 16;
 
-			getSecond().setTransform(ms).setChanged();
+            msr.pushPose();
+            rotateToFace(msr);
 
-			msr.translate(0, dialPivot, dialPivot)
-			   .rotate((float) (Math.PI / 2 * -progress), Direction.EAST)
-			   .translate(0, -dialPivot, -dialPivot);
+            getSecond().setTransform(ms).setChanged();
 
-			getFirst().setTransform(ms).setChanged();
+            msr.translate(0, dialPivot, dialPivot)
+                    .rotate((float) (Math.PI / 2 * -progress), Direction.EAST)
+                    .translate(0, -dialPivot, -dialPivot);
 
-			msr.popPose();
-		}
+            getFirst().setTransform(ms).setChanged();
 
-		private void updateTransform(TransformStack<?> msr, float progress) {
-			float dialPivot = 5.75f / 16;
+            msr.popPose();
+        }
 
-			msr.pushPose();
+        private void updateTransform(TransformStack<?> msr, float progress) {
+            float dialPivot = 5.75f / 16;
 
-			rotateToFace(msr)
-					.translate(0, dialPivot, dialPivot)
-					.rotate((float) (Math.PI / 2 * -progress), Direction.EAST)
-					.translate(0, -dialPivot, -dialPivot);
+            msr.pushPose();
 
-			getFirst().setTransform(ms).setChanged();
+            rotateToFace(msr)
+                    .translate(0, dialPivot, dialPivot)
+                    .rotate((float) (Math.PI / 2 * -progress), Direction.EAST)
+                    .translate(0, -dialPivot, -dialPivot);
 
-			msr.popPose();
-		}
+            getFirst().setTransform(ms).setChanged();
 
-		protected TransformStack<?> rotateToFace(TransformStack<?> msr) {
-			return msr.center()
-					  .rotate((float) ((-face.toYRot() - 90) / 180 * Math.PI), Direction.UP)
-					  .uncenter();
-		}
+            msr.popPose();
+        }
 
-		private void delete() {
-			getFirst().delete();
-			getSecond().delete();
-		}
-	}
+        protected TransformStack<?> rotateToFace(TransformStack<?> msr) {
+            return msr.center()
+                    .rotate((float) ((-face.toYRot() - 90) / 180 * Math.PI), Direction.UP)
+                    .uncenter();
+        }
 
-	public static class Speed extends GaugeVisual {
-		public Speed(VisualizationContext context, GaugeBlockEntity blockEntity, float partialTick) {
-			super(context, blockEntity, partialTick);
-		}
+        private void delete() {
+            getFirst().delete();
+            getSecond().delete();
+        }
+    }
 
-		@Override
-		protected Instancer<TransformedInstance> getHeadModel() {
-			return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.GAUGE_HEAD_SPEED));
-		}
-	}
+    public static class Speed extends GaugeVisual {
+        public Speed(
+                VisualizationContext context, GaugeBlockEntity blockEntity, float partialTick) {
+            super(context, blockEntity, partialTick);
+        }
 
-	public static class Stress extends GaugeVisual {
-		public Stress(VisualizationContext context, GaugeBlockEntity blockEntity, float partialTick) {
-			super(context, blockEntity, partialTick);
-		}
+        @Override
+        protected Instancer<TransformedInstance> getHeadModel() {
+            return instancerProvider()
+                    .instancer(
+                            InstanceTypes.TRANSFORMED,
+                            Models.partial(AllPartialModels.GAUGE_HEAD_SPEED));
+        }
+    }
 
-		@Override
-		protected Instancer<TransformedInstance> getHeadModel() {
-			return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.GAUGE_HEAD_STRESS));
-		}
-	}
+    public static class Stress extends GaugeVisual {
+        public Stress(
+                VisualizationContext context, GaugeBlockEntity blockEntity, float partialTick) {
+            super(context, blockEntity, partialTick);
+        }
+
+        @Override
+        protected Instancer<TransformedInstance> getHeadModel() {
+            return instancerProvider()
+                    .instancer(
+                            InstanceTypes.TRANSFORMED,
+                            Models.partial(AllPartialModels.GAUGE_HEAD_STRESS));
+        }
+    }
 }

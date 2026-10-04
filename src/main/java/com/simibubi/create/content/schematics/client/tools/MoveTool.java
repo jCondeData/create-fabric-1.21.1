@@ -8,30 +8,32 @@ import net.minecraft.world.phys.Vec3;
 
 public class MoveTool extends PlacementToolBase {
 
-	@Override
-	public void init() {
-		super.init();
-		renderSelectedFace = true;
-	}
+    @Override
+    public void init() {
+        super.init();
+        renderSelectedFace = true;
+    }
 
-	@Override
-	public void updateSelection() {
-		super.updateSelection();
-	}
+    @Override
+    public void updateSelection() {
+        super.updateSelection();
+    }
 
-	@Override
-	public boolean handleMouseWheel(double delta) {
-		if (!schematicSelected || !selectedFace.getAxis().isHorizontal())
-			return true;
+    @Override
+    public boolean handleMouseWheel(double delta) {
+        if (!schematicSelected || !selectedFace.getAxis().isHorizontal()) return true;
 
-		SchematicTransformation transformation = schematicHandler.getTransformation();
-		Vec3 vec = Vec3.atLowerCornerOf(selectedFace.getNormal()).scale(-Math.signum(delta));
-		vec = vec.multiply(transformation.getMirrorModifier(Axis.X), 1, transformation.getMirrorModifier(Axis.Z));
-		vec = VecHelper.rotate(vec, transformation.getRotationTarget(), Axis.Y);
-		transformation.move((int) vec.x, 0, (int) vec.z);
-		schematicHandler.markDirty();
+        SchematicTransformation transformation = schematicHandler.getTransformation();
+        Vec3 vec = Vec3.atLowerCornerOf(selectedFace.getNormal()).scale(-Math.signum(delta));
+        vec =
+                vec.multiply(
+                        transformation.getMirrorModifier(Axis.X),
+                        1,
+                        transformation.getMirrorModifier(Axis.Z));
+        vec = VecHelper.rotate(vec, transformation.getRotationTarget(), Axis.Y);
+        transformation.move((int) vec.x, 0, (int) vec.z);
+        schematicHandler.markDirty();
 
-		return true;
-	}
-
+        return true;
+    }
 }

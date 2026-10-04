@@ -17,104 +17,104 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 public class ItemThroughputDisplaySource extends AccumulatedItemCountDisplaySource {
 
-	static final int POOL_SIZE = 10;
+    static final int POOL_SIZE = 10;
 
-	@Override
-	protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
-		CompoundTag conf = context.sourceConfig();
-		if (conf.contains("Inactive"))
-			return ZERO.copy();
+    @Override
+    protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
+        CompoundTag conf = context.sourceConfig();
+        if (conf.contains("Inactive")) return ZERO.copy();
 
-		double interval = 20 * Math.pow(60, conf.getInt("Interval"));
-		double rate = conf.getFloat("Rate") * interval;
+        double interval = 20 * Math.pow(60, conf.getInt("Interval"));
+        double rate = conf.getFloat("Rate") * interval;
 
-		if (rate > 0) {
-			long previousTime = conf.getLong("LastReceived");
-			long gameTime = context.blockEntity()
-				.getLevel()
-				.getGameTime();
-			int diff = (int) (gameTime - previousTime);
-			if (diff > 0) {
-				// Too long since last item
-				int lastAmount = conf.getInt("LastReceivedAmount");
-				double timeBetweenStacks = lastAmount / rate;
-				if (diff > timeBetweenStacks * 2)
-					conf.putBoolean("Inactive", true);
-			}
-		}
+        if (rate > 0) {
+            long previousTime = conf.getLong("LastReceived");
+            long gameTime = context.blockEntity().getLevel().getGameTime();
+            int diff = (int) (gameTime - previousTime);
+            if (diff > 0) {
+                // Too long since last item
+                int lastAmount = conf.getInt("LastReceivedAmount");
+                double timeBetweenStacks = lastAmount / rate;
+                if (diff > timeBetweenStacks * 2) conf.putBoolean("Inactive", true);
+            }
+        }
 
-		return CreateLang.number(rate)
-			.component();
-	}
+        return CreateLang.number(rate).component();
+    }
 
-	public void itemReceived(DisplayLinkBlockEntity be, int amount) {
-		if (be.getBlockState()
-			.getOptionalValue(DisplayLinkBlock.POWERED)
-			.orElse(true))
-			return;
+    public void itemReceived(DisplayLinkBlockEntity be, int amount) {
+        if (be.getBlockState().getOptionalValue(DisplayLinkBlock.POWERED).orElse(true)) return;
 
-		CompoundTag conf = be.getSourceConfig();
-		long gameTime = be.getLevel()
-			.getGameTime();
+        CompoundTag conf = be.getSourceConfig();
+        long gameTime = be.getLevel().getGameTime();
 
-		if (!conf.contains("LastReceived")) {
-			conf.putLong("LastReceived", gameTime);
-			return;
-		}
+        if (!conf.contains("LastReceived")) {
+            conf.putLong("LastReceived", gameTime);
+            return;
+        }
 
-		long previousTime = conf.getLong("LastReceived");
-		ListTag rates = conf.getList("PrevRates", Tag.TAG_FLOAT);
+        long previousTime = conf.getLong("LastReceived");
+        ListTag rates = conf.getList("PrevRates", Tag.TAG_FLOAT);
 
-		if (rates.size() != POOL_SIZE) {
-			rates = new ListTag();
-			for (int i = 0; i < POOL_SIZE; i++)
-				rates.add(FloatTag.valueOf(-1));
-		}
+        if (rates.size() != POOL_SIZE) {
+            rates = new ListTag();
+            for (int i = 0; i < POOL_SIZE; i++) rates.add(FloatTag.valueOf(-1));
+        }
 
-		int poolIndex = conf.getInt("Index") % POOL_SIZE;
-		rates.set(poolIndex, FloatTag.valueOf((float) (amount / (double) (gameTime - previousTime))));
+        int poolIndex = conf.getInt("Index") % POOL_SIZE;
+        rates.set(
+                poolIndex, FloatTag.valueOf((float) (amount / (double) (gameTime - previousTime))));
 
-		float rate = 0;
-		int validIntervals = 0;
-		for (int i = 0; i < POOL_SIZE; i++) {
-			float pooledRate = rates.getFloat(i);
-			if (pooledRate >= 0) {
-				rate += pooledRate;
-				validIntervals++;
-			}
-		}
+        float rate = 0;
+        int validIntervals = 0;
+        for (int i = 0; i < POOL_SIZE; i++) {
+            float pooledRate = rates.getFloat(i);
+            if (pooledRate >= 0) {
+                rate += pooledRate;
+                validIntervals++;
+            }
+        }
 
-		conf.remove("Rate");
-		if (validIntervals > 0) {
-			rate /= validIntervals;
-			conf.putFloat("Rate", rate);
-		}
+        conf.remove("Rate");
+        if (validIntervals > 0) {
+            rate /= validIntervals;
+            conf.putFloat("Rate", rate);
+        }
 
-		conf.remove("Inactive");
-		conf.putInt("LastReceivedAmount", amount);
-		conf.putLong("LastReceived", gameTime);
-		conf.putInt("Index", poolIndex + 1);
-		conf.put("PrevRates", rates);
-		be.updateGatheredData();
-	}
+        conf.remove("Inactive");
+        conf.putInt("LastReceivedAmount", amount);
+        conf.putLong("LastReceived", gameTime);
+        conf.putInt("Index", poolIndex + 1);
+        conf.put("PrevRates", rates);
+        be.updateGatheredData();
+    }
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public void initConfigurationWidgets(DisplayLinkContext context, ModularGuiLineBuilder builder,
-		boolean isFirstLine) {
-		super.initConfigurationWidgets(context, builder, isFirstLine);
-		if (isFirstLine)
-			return;
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void initConfigurationWidgets(
+            DisplayLinkContext context, ModularGuiLineBuilder builder, boolean isFirstLine) {
+        super.initConfigurationWidgets(context, builder, isFirstLine);
+        if (isFirstLine) return;
 
-		builder.addSelectionScrollInput(0, 80, (si, l) -> {
-			si.forOptions(CreateLang.translatedOptions("display_source.item_throughput.interval", "second", "minute", "hour"))
-				.titled(CreateLang.translateDirect("display_source.item_throughput.interval"));
-		}, "Interval");
-	}
+        builder.addSelectionScrollInput(
+                0,
+                80,
+                (si, l) -> {
+                    si.forOptions(
+                                    CreateLang.translatedOptions(
+                                            "display_source.item_throughput.interval",
+                                            "second",
+                                            "minute",
+                                            "hour"))
+                            .titled(
+                                    CreateLang.translateDirect(
+                                            "display_source.item_throughput.interval"));
+                },
+                "Interval");
+    }
 
-	@Override
-	protected String getTranslationKey() {
-		return "item_throughput";
-	}
-
+    @Override
+    protected String getTranslationKey() {
+        return "item_throughput";
+    }
 }

@@ -15,70 +15,64 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class PortableItemInterfaceBlockEntity extends PortableStorageInterfaceBlockEntity {
 
-	protected IItemHandlerModifiable capability;
+    protected IItemHandlerModifiable capability;
 
-	public PortableItemInterfaceBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-		capability = createEmptyHandler();
-	}
+    public PortableItemInterfaceBlockEntity(
+            BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        capability = createEmptyHandler();
+    }
 
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-				Capabilities.ItemHandler.BLOCK,
-				AllBlockEntityTypes.PORTABLE_STORAGE_INTERFACE.get(),
-				(be, context) -> be.capability
-		);
-	}
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                AllBlockEntityTypes.PORTABLE_STORAGE_INTERFACE.get(),
+                (be, context) -> be.capability);
+    }
 
-	@Override
-	public void startTransferringTo(Contraption contraption, float distance) {
-		capability = new InterfaceItemHandler(contraption.getStorage().getAllItems());
-		invalidateCapability();
-		super.startTransferringTo(contraption, distance);
-	}
+    @Override
+    public void startTransferringTo(Contraption contraption, float distance) {
+        capability = new InterfaceItemHandler(contraption.getStorage().getAllItems());
+        invalidateCapability();
+        super.startTransferringTo(contraption, distance);
+    }
 
-	@Override
-	protected void stopTransferring() {
-		capability = createEmptyHandler();
-		invalidateCapability();
-		super.stopTransferring();
-	}
+    @Override
+    protected void stopTransferring() {
+        capability = createEmptyHandler();
+        invalidateCapability();
+        super.stopTransferring();
+    }
 
-	private IItemHandlerModifiable createEmptyHandler() {
-		return new InterfaceItemHandler(new ItemStackHandler(0));
-	}
+    private IItemHandlerModifiable createEmptyHandler() {
+        return new InterfaceItemHandler(new ItemStackHandler(0));
+    }
 
-	@Override
-	protected void invalidateCapability() {
-		invalidateCapabilities();
-	}
+    @Override
+    protected void invalidateCapability() {
+        invalidateCapabilities();
+    }
 
-	class InterfaceItemHandler extends ItemHandlerWrapper {
+    class InterfaceItemHandler extends ItemHandlerWrapper {
 
-		public InterfaceItemHandler(IItemHandlerModifiable wrapped) {
-			super(wrapped);
-		}
+        public InterfaceItemHandler(IItemHandlerModifiable wrapped) {
+            super(wrapped);
+        }
 
-		@Override
-		public ItemStack extractItem(int slot, int amount, boolean simulate) {
-			if (!canTransfer())
-				return ItemStack.EMPTY;
-			ItemStack extractItem = super.extractItem(slot, amount, simulate);
-			if (!simulate && !extractItem.isEmpty())
-				onContentTransferred();
-			return extractItem;
-		}
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if (!canTransfer()) return ItemStack.EMPTY;
+            ItemStack extractItem = super.extractItem(slot, amount, simulate);
+            if (!simulate && !extractItem.isEmpty()) onContentTransferred();
+            return extractItem;
+        }
 
-		@Override
-		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-			if (!canTransfer())
-				return stack;
-			ItemStack insertItem = super.insertItem(slot, stack, simulate);
-			if (!simulate && !ItemStack.matches(insertItem, stack))
-				onContentTransferred();
-			return insertItem;
-		}
-
-	}
-
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (!canTransfer()) return stack;
+            ItemStack insertItem = super.insertItem(slot, stack, simulate);
+            if (!simulate && !ItemStack.matches(insertItem, stack)) onContentTransferred();
+            return insertItem;
+        }
+    }
 }

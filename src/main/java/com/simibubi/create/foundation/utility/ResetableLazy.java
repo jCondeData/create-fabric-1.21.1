@@ -6,27 +6,26 @@ import java.util.function.Supplier;
 
 public class ResetableLazy<T> implements Supplier<T> {
 
-	private final Supplier<@NotNull T> supplier;
-	private T value;
+    private final Supplier<@NotNull T> supplier;
+    private T value;
 
-	public ResetableLazy(Supplier<@NotNull T> supplier) {
-		this.supplier = supplier;
-	}
+    public ResetableLazy(Supplier<@NotNull T> supplier) {
+        this.supplier = supplier;
+    }
 
-	@Override
-	public T get() {
-		if (value == null) {
-			value = supplier.get();
-		}
-		return value;
-	}
+    @Override
+    public T get() {
+        if (value == null) {
+            value = supplier.get();
+        }
+        return value;
+    }
 
-	public void reset() {
-		value = null;
-	}
+    public void reset() {
+        value = null;
+    }
 
-	public static <T> ResetableLazy<T> of(Supplier<@NotNull T> supplier) {
-		return new ResetableLazy<>(supplier);
-	}
-
+    public static <T> ResetableLazy<T> of(Supplier<@NotNull T> supplier) {
+        return new ResetableLazy<>(supplier);
+    }
 }

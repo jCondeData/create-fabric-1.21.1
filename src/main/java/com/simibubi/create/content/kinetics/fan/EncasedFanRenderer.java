@@ -8,6 +8,7 @@ import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
@@ -20,38 +21,47 @@ import net.minecraft.util.Mth;
 
 public class EncasedFanRenderer extends KineticBlockEntityRenderer<EncasedFanBlockEntity> {
 
-	public EncasedFanRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public EncasedFanRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected void renderSafe(EncasedFanBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
-		int light, int overlay) {
-		if (VisualizationManager.supportsVisualization(be.getLevel())) return;
+    @Override
+    protected void renderSafe(
+            EncasedFanBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        if (VisualizationManager.supportsVisualization(be.getLevel())) return;
 
-		Direction direction = be.getBlockState()
-				.getValue(FACING);
-		VertexConsumer vb = buffer.getBuffer(RenderType.cutoutMipped());
+        Direction direction = be.getBlockState().getValue(FACING);
+        VertexConsumer vb = buffer.getBuffer(RenderType.cutoutMipped());
 
-		int lightBehind = LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().relative(direction.getOpposite()));
-		int lightInFront = LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().relative(direction));
+        int lightBehind =
+                LevelRenderer.getLightColor(
+                        be.getLevel(), be.getBlockPos().relative(direction.getOpposite()));
+        int lightInFront =
+                LevelRenderer.getLightColor(be.getLevel(), be.getBlockPos().relative(direction));
 
-		SuperByteBuffer shaftHalf =
-				CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, be.getBlockState(), direction.getOpposite());
-		SuperByteBuffer fanInner =
-				CachedBuffers.partialFacing(AllPartialModels.ENCASED_FAN_INNER, be.getBlockState(), direction.getOpposite());
+        SuperByteBuffer shaftHalf =
+                CachedBuffers.partialFacing(
+                        AllPartialModels.SHAFT_HALF, be.getBlockState(), direction.getOpposite());
+        SuperByteBuffer fanInner =
+                CachedBuffers.partialFacing(
+                        AllPartialModels.ENCASED_FAN_INNER,
+                        be.getBlockState(),
+                        direction.getOpposite());
 
-		float time = AnimationTickHolder.getRenderTime(be.getLevel());
-		float speed = be.getSpeed() * 5;
-		if (speed > 0)
-			speed = Mth.clamp(speed, 80, 64 * 20);
-		if (speed < 0)
-			speed = Mth.clamp(speed, -64 * 20, -80);
-		float angle = (time * speed * 3 / 10f) % 360;
-		angle = angle / 180f * (float) Math.PI;
+        float time = AnimationTickHolder.getRenderTime(be.getLevel());
+        float speed = be.getSpeed() * 5;
+        if (speed > 0) speed = Mth.clamp(speed, 80, 64 * 20);
+        if (speed < 0) speed = Mth.clamp(speed, -64 * 20, -80);
+        float angle = (time * speed * 3 / 10f) % 360;
+        angle = angle / 180f * (float) Math.PI;
 
-		standardKineticRotationTransform(shaftHalf, be, lightBehind).renderInto(ms, vb);
-		kineticRotationTransform(fanInner, be, direction.getAxis(), angle, lightInFront).renderInto(ms, vb);
-	}
-
+        standardKineticRotationTransform(shaftHalf, be, lightBehind).renderInto(ms, vb);
+        kineticRotationTransform(fanInner, be, direction.getAxis(), angle, lightInFront)
+                .renderInto(ms, vb);
+    }
 }

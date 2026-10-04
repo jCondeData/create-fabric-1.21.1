@@ -1,12 +1,5 @@
 package com.simibubi.create.foundation.mixin;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import com.simibubi.create.foundation.item.CustomUseEffectsItem;
 
 import net.createmod.catnip.data.TriState;
@@ -17,34 +10,49 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 @Mixin(LivingEntity.class)
 public abstract class CustomItemUseEffectsMixin extends Entity {
-	private CustomItemUseEffectsMixin(EntityType<?> entityType, Level level) {
-		super(entityType, level);
-	}
+    private CustomItemUseEffectsMixin(EntityType<?> entityType, Level level) {
+        super(entityType, level);
+    }
 
-	@Shadow
-	public abstract ItemStack getUseItem();
+    @Shadow
+    public abstract ItemStack getUseItem();
 
-	@Inject(method = "shouldTriggerItemUseEffects()Z", at = @At("HEAD"), cancellable = true)
-	private void create$onShouldTriggerUseEffects(CallbackInfoReturnable<Boolean> cir) {
-		ItemStack using = getUseItem();
-		Item item = using.getItem();
-		if (item instanceof CustomUseEffectsItem handler) {
-			TriState result = handler.shouldTriggerUseEffects(using, (LivingEntity) (Object) this);
-			if (result != TriState.DEFAULT) {
-				cir.setReturnValue(result.getValue());
-			}
-		}
-	}
+    @Inject(method = "shouldTriggerItemUseEffects()Z", at = @At("HEAD"), cancellable = true)
+    private void create$onShouldTriggerUseEffects(CallbackInfoReturnable<Boolean> cir) {
+        ItemStack using = getUseItem();
+        Item item = using.getItem();
+        if (item instanceof CustomUseEffectsItem handler) {
+            TriState result = handler.shouldTriggerUseEffects(using, (LivingEntity) (Object) this);
+            if (result != TriState.DEFAULT) {
+                cir.setReturnValue(result.getValue());
+            }
+        }
+    }
 
-	@Inject(method = "triggerItemUseEffects(Lnet/minecraft/world/item/ItemStack;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/UseAnim;", ordinal = 0), cancellable = true)
-	private void create$onTriggerUseEffects(ItemStack stack, int count, CallbackInfo ci) {
-		Item item = stack.getItem();
-		if (item instanceof CustomUseEffectsItem handler) {
-			if (handler.triggerUseEffects(stack, (LivingEntity) (Object) this, count, random)) {
-				ci.cancel();
-			}
-		}
-	}
+    @Inject(
+            method = "triggerItemUseEffects(Lnet/minecraft/world/item/ItemStack;I)V",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/UseAnim;",
+                            ordinal = 0),
+            cancellable = true)
+    private void create$onTriggerUseEffects(ItemStack stack, int count, CallbackInfo ci) {
+        Item item = stack.getItem();
+        if (item instanceof CustomUseEffectsItem handler) {
+            if (handler.triggerUseEffects(stack, (LivingEntity) (Object) this, count, random)) {
+                ci.cancel();
+            }
+        }
+    }
 }

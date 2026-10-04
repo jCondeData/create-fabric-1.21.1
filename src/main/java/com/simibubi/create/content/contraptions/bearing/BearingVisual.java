@@ -1,9 +1,5 @@
 package com.simibubi.create.content.contraptions.bearing;
 
-import java.util.function.Consumer;
-
-import org.joml.Quaternionf;
-
 import com.mojang.math.Axis;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -17,74 +13,89 @@ import dev.engine_room.flywheel.lib.instance.OrientedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class BearingVisual<B extends KineticBlockEntity & IBearingBlockEntity> extends OrientedRotatingVisual<B> implements SimpleDynamicVisual {
-	final OrientedInstance topInstance;
+import org.joml.Quaternionf;
 
-	final Axis rotationAxis;
-	final Quaternionf blockOrientation;
+import java.util.function.Consumer;
 
-	public BearingVisual(VisualizationContext context, B blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick, Direction.SOUTH, blockEntity.getBlockState().getValue(BlockStateProperties.FACING).getOpposite(), Models.partial(AllPartialModels.SHAFT_HALF));
+public class BearingVisual<B extends KineticBlockEntity & IBearingBlockEntity>
+        extends OrientedRotatingVisual<B> implements SimpleDynamicVisual {
+    final OrientedInstance topInstance;
 
-		Direction facing = blockState.getValue(BlockStateProperties.FACING);
-		rotationAxis = Axis.of(Direction.get(Direction.AxisDirection.POSITIVE, rotationAxis()).step());
+    final Axis rotationAxis;
+    final Quaternionf blockOrientation;
 
-		blockOrientation = getBlockStateOrientation(facing);
+    public BearingVisual(VisualizationContext context, B blockEntity, float partialTick) {
+        super(
+                context,
+                blockEntity,
+                partialTick,
+                Direction.SOUTH,
+                blockEntity.getBlockState().getValue(BlockStateProperties.FACING).getOpposite(),
+                Models.partial(AllPartialModels.SHAFT_HALF));
 
-		PartialModel top =
-				blockEntity.isWoodenTop() ? AllPartialModels.BEARING_TOP_WOODEN : AllPartialModels.BEARING_TOP;
+        Direction facing = blockState.getValue(BlockStateProperties.FACING);
+        rotationAxis =
+                Axis.of(Direction.get(Direction.AxisDirection.POSITIVE, rotationAxis()).step());
 
-		topInstance = instancerProvider().instancer(InstanceTypes.ORIENTED, Models.partial(top))
-				.createInstance();
+        blockOrientation = getBlockStateOrientation(facing);
 
-		topInstance.position(getVisualPosition())
-				.rotation(blockOrientation)
-				.setChanged();
-	}
+        PartialModel top =
+                blockEntity.isWoodenTop()
+                        ? AllPartialModels.BEARING_TOP_WOODEN
+                        : AllPartialModels.BEARING_TOP;
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		float interpolatedAngle = blockEntity.getInterpolatedAngle(ctx.partialTick() - 1);
-		Quaternionf rot = rotationAxis.rotationDegrees(interpolatedAngle);
+        topInstance =
+                instancerProvider()
+                        .instancer(InstanceTypes.ORIENTED, Models.partial(top))
+                        .createInstance();
 
-		rot.mul(blockOrientation);
+        topInstance.position(getVisualPosition()).rotation(blockOrientation).setChanged();
+    }
 
-		topInstance.rotation(rot)
-				.setChanged();
-	}
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        float interpolatedAngle = blockEntity.getInterpolatedAngle(ctx.partialTick() - 1);
+        Quaternionf rot = rotationAxis.rotationDegrees(interpolatedAngle);
 
-	@Override
-	public void updateLight(float partialTick) {
-		super.updateLight(partialTick);
-		relight(topInstance);
-	}
+        rot.mul(blockOrientation);
 
-	@Override
-	protected void _delete() {
-		super._delete();
-		topInstance.delete();
-	}
+        topInstance.rotation(rot).setChanged();
+    }
 
-	static Quaternionf getBlockStateOrientation(Direction facing) {
-		Quaternionf orientation;
+    @Override
+    public void updateLight(float partialTick) {
+        super.updateLight(partialTick);
+        relight(topInstance);
+    }
 
-		if (facing.getAxis().isHorizontal()) {
-			orientation = Axis.YP.rotationDegrees(AngleHelper.horizontalAngle(facing.getOpposite()));
-		} else {
-			orientation = new Quaternionf();
-		}
+    @Override
+    protected void _delete() {
+        super._delete();
+        topInstance.delete();
+    }
 
-		orientation.mul(Axis.XP.rotationDegrees(-90 - AngleHelper.verticalAngle(facing)));
-		return orientation;
-	}
+    static Quaternionf getBlockStateOrientation(Direction facing) {
+        Quaternionf orientation;
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		super.collectCrumblingInstances(consumer);
-		consumer.accept(topInstance);
-	}
+        if (facing.getAxis().isHorizontal()) {
+            orientation =
+                    Axis.YP.rotationDegrees(AngleHelper.horizontalAngle(facing.getOpposite()));
+        } else {
+            orientation = new Quaternionf();
+        }
+
+        orientation.mul(Axis.XP.rotationDegrees(-90 - AngleHelper.verticalAngle(facing)));
+        return orientation;
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        super.collectCrumblingInstances(consumer);
+        consumer.accept(topInstance);
+    }
 }

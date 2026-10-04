@@ -10,12 +10,11 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public class ClientResourceReloadListener implements ResourceManagerReloadListener {
 
-	@Override
-	public void onResourceManagerReload(ResourceManager resourceManager) {
-		CreateClient.invalidateRenderers();
-		SoundScapes.invalidateAll();
-		BeltHelper.uprightCache.clear();
-		TableClothModel.reload();
-	}
-
+    @Override
+    public void onResourceManagerReload(ResourceManager resourceManager) {
+        CreateClient.invalidateRenderers();
+        SoundScapes.invalidateAll();
+        BeltHelper.uprightCache.clear();
+        TableClothModel.reload();
+    }
 }

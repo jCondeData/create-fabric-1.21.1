@@ -12,24 +12,24 @@ import org.jetbrains.annotations.NotNull;
 
 public class HarvesterBlock extends AttachedActorBlock implements IBE<HarvesterBlockEntity> {
 
-	public static final MapCodec<HarvesterBlock> CODEC = simpleCodec(HarvesterBlock::new);
+    public static final MapCodec<HarvesterBlock> CODEC = simpleCodec(HarvesterBlock::new);
 
-	public HarvesterBlock(Properties p_i48377_1_) {
-		super(p_i48377_1_);
-	}
+    public HarvesterBlock(Properties p_i48377_1_) {
+        super(p_i48377_1_);
+    }
 
-	@Override
-	public Class<HarvesterBlockEntity> getBlockEntityClass() {
-		return HarvesterBlockEntity.class;
-	}
+    @Override
+    public Class<HarvesterBlockEntity> getBlockEntityClass() {
+        return HarvesterBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends HarvesterBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.HARVESTER.get();
-	}
+    @Override
+    public BlockEntityType<? extends HarvesterBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.HARVESTER.get();
+    }
 
-	@Override
-	protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
-		return CODEC;
-	}
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
 }

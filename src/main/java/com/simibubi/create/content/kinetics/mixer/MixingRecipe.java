@@ -6,8 +6,7 @@ import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.Pro
 
 public class MixingRecipe extends BasinRecipe {
 
-	public MixingRecipe(ProcessingRecipeParams params) {
-		super(AllRecipeTypes.MIXING, params);
-	}
-
+    public MixingRecipe(ProcessingRecipeParams params) {
+        super(AllRecipeTypes.MIXING, params);
+    }
 }

@@ -6,13 +6,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class LargeWaterWheelBlockEntity extends WaterWheelBlockEntity {
 
-	public LargeWaterWheelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public LargeWaterWheelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	protected int getSize() {
-		return 2;
-	}
-
+    @Override
+    protected int getSize() {
+        return 2;
+    }
 }

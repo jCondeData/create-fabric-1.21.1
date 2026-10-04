@@ -10,16 +10,17 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class FabulousWarningCommand {
 
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal("dismissFabulousWarning")
-				.requires(AllCommands.SOURCE_IS_PLAYER)
-				.executes(ctx -> {
-					ServerPlayer player = ctx.getSource().getPlayerOrException();
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
+        return Commands.literal("dismissFabulousWarning")
+                .requires(AllCommands.SOURCE_IS_PLAYER)
+                .executes(
+                        ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-					CatnipServices.NETWORK.simpleActionToClient(player, "fabulousWarning", "");
+                            CatnipServices.NETWORK.simpleActionToClient(
+                                    player, "fabulousWarning", "");
 
-					return Command.SINGLE_SUCCESS;
-				});
-
-	}
+                            return Command.SINGLE_SUCCESS;
+                        });
+    }
 }

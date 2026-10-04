@@ -12,16 +12,20 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class PackagePortItem extends BlockItem {
 
-	public PackagePortItem(Block pBlock, Properties pProperties) {
-		super(pBlock, pProperties);
-	}
+    public PackagePortItem(Block pBlock, Properties pProperties) {
+        super(pBlock, pProperties);
+    }
 
-	@Override
-	protected boolean updateCustomBlockEntityTag(BlockPos pos, Level world, Player player, ItemStack p_195943_4_,
-		BlockState p_195943_5_) {
-		if (!world.isClientSide && player instanceof ServerPlayer sp)
-			CatnipServices.NETWORK.sendToClient(sp, new PackagePortPlacementPacket.ClientBoundRequest(pos));
-		return super.updateCustomBlockEntityTag(pos, world, player, p_195943_4_, p_195943_5_);
-	}
-
+    @Override
+    protected boolean updateCustomBlockEntityTag(
+            BlockPos pos,
+            Level world,
+            Player player,
+            ItemStack p_195943_4_,
+            BlockState p_195943_5_) {
+        if (!world.isClientSide && player instanceof ServerPlayer sp)
+            CatnipServices.NETWORK.sendToClient(
+                    sp, new PackagePortPlacementPacket.ClientBoundRequest(pos));
+        return super.updateCustomBlockEntityTag(pos, world, player, p_195943_4_, p_195943_5_);
+    }
 }

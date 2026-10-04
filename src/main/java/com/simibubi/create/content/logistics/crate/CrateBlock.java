@@ -17,24 +17,25 @@ import org.jetbrains.annotations.NotNull;
 
 public class CrateBlock extends WrenchableDirectionalBlock implements IWrenchable {
 
-	public static final MapCodec<CrateBlock> CODEC = simpleCodec(CrateBlock::new);
+    public static final MapCodec<CrateBlock> CODEC = simpleCodec(CrateBlock::new);
 
-	public CrateBlock(Properties p_i48415_1_) {
-		super(p_i48415_1_);
-	}
+    public CrateBlock(Properties p_i48415_1_) {
+        super(p_i48415_1_);
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		return AllShapes.CRATE_BLOCK_SHAPE;
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return AllShapes.CRATE_BLOCK_SHAPE;
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	protected @NotNull MapCodec<? extends DirectionalBlock> codec() {
-		return CODEC;
-	}
+    @Override
+    protected @NotNull MapCodec<? extends DirectionalBlock> codec() {
+        return CODEC;
+    }
 }

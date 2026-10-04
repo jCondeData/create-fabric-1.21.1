@@ -4,10 +4,13 @@ import net.createmod.catnip.lang.Lang;
 import net.minecraft.util.StringRepresentable;
 
 public enum BeltPart implements StringRepresentable {
-	START, MIDDLE, END, PULLEY;
+    START,
+    MIDDLE,
+    END,
+    PULLEY;
 
-	@Override
-	public String getSerializedName() {
-		return Lang.asId(name());
-	}
+    @Override
+    public String getSerializedName() {
+        return Lang.asId(name());
+    }
 }

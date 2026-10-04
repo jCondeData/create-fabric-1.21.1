@@ -1,7 +1,5 @@
 package com.simibubi.create.content.logistics.vault;
 
-import java.util.List;
-
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.api.connectivity.ConnectivityHandler;
 import com.simibubi.create.foundation.ICapabilityProvider;
@@ -30,301 +28,322 @@ import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 
-public class ItemVaultBlockEntity extends SmartBlockEntity implements IMultiBlockEntityContainer.Inventory {
+import java.util.List;
 
-	protected ICapabilityProvider<IItemHandler> itemCapability = null;
+public class ItemVaultBlockEntity extends SmartBlockEntity
+        implements IMultiBlockEntityContainer.Inventory {
 
-	protected ItemStackHandler inventory;
-	protected BlockPos controller;
-	protected BlockPos lastKnownPos;
-	protected boolean updateConnectivity;
-	protected int radius;
-	protected int length;
-	protected Axis axis;
+    protected ICapabilityProvider<IItemHandler> itemCapability = null;
 
-	public ItemVaultBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
+    protected ItemStackHandler inventory;
+    protected BlockPos controller;
+    protected BlockPos lastKnownPos;
+    protected boolean updateConnectivity;
+    protected int radius;
+    protected int length;
+    protected Axis axis;
 
-		inventory = new ItemStackHandler(AllConfigs.server().logistics.vaultCapacity.get()) {
-			@Override
-			protected void onContentsChanged(int slot) {
-				super.onContentsChanged(slot);
-				updateComparators();
-				level.blockEntityChanged(worldPosition);
-			}
-		};
+    public ItemVaultBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
 
-		radius = 1;
-		length = 1;
-	}
+        inventory =
+                new ItemStackHandler(AllConfigs.server().logistics.vaultCapacity.get()) {
+                    @Override
+                    protected void onContentsChanged(int slot) {
+                        super.onContentsChanged(slot);
+                        updateComparators();
+                        level.blockEntityChanged(worldPosition);
+                    }
+                };
 
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-				Capabilities.ItemHandler.BLOCK,
-				AllBlockEntityTypes.ITEM_VAULT.get(),
-				(be, context) -> {
-					be.initCapability();
-					if (be.itemCapability == null)
-						return null;
-					return be.itemCapability.getCapability();
-				}
-		);
-	}
+        radius = 1;
+        length = 1;
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                AllBlockEntityTypes.ITEM_VAULT.get(),
+                (be, context) -> {
+                    be.initCapability();
+                    if (be.itemCapability == null) return null;
+                    return be.itemCapability.getCapability();
+                });
+    }
 
-	protected void updateConnectivity() {
-		updateConnectivity = false;
-		if (level.isClientSide())
-			return;
-		if (!isController())
-			return;
-		ConnectivityHandler.formMulti(this);
-	}
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 
-	protected void updateComparators() {
-		ItemVaultBlockEntity controllerBE = getControllerBE();
-		if (controllerBE == null)
-			return;
+    protected void updateConnectivity() {
+        updateConnectivity = false;
+        if (level.isClientSide()) return;
+        if (!isController()) return;
+        ConnectivityHandler.formMulti(this);
+    }
 
-		level.blockEntityChanged(controllerBE.worldPosition);
+    protected void updateComparators() {
+        ItemVaultBlockEntity controllerBE = getControllerBE();
+        if (controllerBE == null) return;
 
-		BlockPos pos = controllerBE.getBlockPos();
-		for (int y = 0; y < controllerBE.radius; y++) {
-			for (int z = 0; z < (controllerBE.axis == Axis.X ? controllerBE.radius : controllerBE.length); z++) {
-				for (int x = 0; x < (controllerBE.axis == Axis.Z ? controllerBE.radius : controllerBE.length); x++) {
-					level.updateNeighbourForOutputSignal(pos.offset(x, y, z), getBlockState().getBlock());
-				}
-			}
-		}
-	}
+        level.blockEntityChanged(controllerBE.worldPosition);
 
-	@Override
-	public void tick() {
-		super.tick();
+        BlockPos pos = controllerBE.getBlockPos();
+        for (int y = 0; y < controllerBE.radius; y++) {
+            for (int z = 0;
+                    z < (controllerBE.axis == Axis.X ? controllerBE.radius : controllerBE.length);
+                    z++) {
+                for (int x = 0;
+                        x
+                                < (controllerBE.axis == Axis.Z
+                                        ? controllerBE.radius
+                                        : controllerBE.length);
+                        x++) {
+                    level.updateNeighbourForOutputSignal(
+                            pos.offset(x, y, z), getBlockState().getBlock());
+                }
+            }
+        }
+    }
 
-		if (lastKnownPos == null)
-			lastKnownPos = getBlockPos();
-		else if (!lastKnownPos.equals(worldPosition) && worldPosition != null) {
-			onPositionChanged();
-			return;
-		}
+    @Override
+    public void tick() {
+        super.tick();
 
-		if (updateConnectivity)
-			updateConnectivity();
-	}
+        if (lastKnownPos == null) lastKnownPos = getBlockPos();
+        else if (!lastKnownPos.equals(worldPosition) && worldPosition != null) {
+            onPositionChanged();
+            return;
+        }
 
-	@Override
-	public BlockPos getLastKnownPos() {
-		return lastKnownPos;
-	}
+        if (updateConnectivity) updateConnectivity();
+    }
 
-	@Override
-	public boolean isController() {
-		return controller == null || worldPosition.getX() == controller.getX()
-			&& worldPosition.getY() == controller.getY() && worldPosition.getZ() == controller.getZ();
-	}
+    @Override
+    public BlockPos getLastKnownPos() {
+        return lastKnownPos;
+    }
 
-	private void onPositionChanged() {
-		removeController(true);
-		lastKnownPos = worldPosition;
-	}
+    @Override
+    public boolean isController() {
+        return controller == null
+                || worldPosition.getX() == controller.getX()
+                        && worldPosition.getY() == controller.getY()
+                        && worldPosition.getZ() == controller.getZ();
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public ItemVaultBlockEntity getControllerBE() {
-		if (isController())
-			return this;
-		BlockEntity blockEntity = level.getBlockEntity(controller);
-		if (blockEntity instanceof ItemVaultBlockEntity)
-			return (ItemVaultBlockEntity) blockEntity;
-		return null;
-	}
+    private void onPositionChanged() {
+        removeController(true);
+        lastKnownPos = worldPosition;
+    }
 
-	public void removeController(boolean keepContents) {
-		if (level.isClientSide())
-			return;
-		updateConnectivity = true;
-		controller = null;
-		radius = 1;
-		length = 1;
+    @SuppressWarnings("unchecked")
+    @Override
+    public ItemVaultBlockEntity getControllerBE() {
+        if (isController()) return this;
+        BlockEntity blockEntity = level.getBlockEntity(controller);
+        if (blockEntity instanceof ItemVaultBlockEntity) return (ItemVaultBlockEntity) blockEntity;
+        return null;
+    }
 
-		BlockState state = getBlockState();
-		if (ItemVaultBlock.isVault(state)) {
-			state = state.setValue(ItemVaultBlock.LARGE, false);
-			getLevel().setBlock(worldPosition, state, 22);
-		}
+    public void removeController(boolean keepContents) {
+        if (level.isClientSide()) return;
+        updateConnectivity = true;
+        controller = null;
+        radius = 1;
+        length = 1;
 
-		itemCapability = null;
-		invalidateCapabilities();
-		setChanged();
-		sendData();
-	}
+        BlockState state = getBlockState();
+        if (ItemVaultBlock.isVault(state)) {
+            state = state.setValue(ItemVaultBlock.LARGE, false);
+            getLevel().setBlock(worldPosition, state, 22);
+        }
 
-	@Override
-	public void setController(BlockPos controller) {
-		if (level.isClientSide && !isVirtual())
-			return;
-		if (controller.equals(this.controller))
-			return;
-		this.controller = controller;
-		itemCapability = null;
-		invalidateCapabilities();
-		setChanged();
-		sendData();
-	}
+        itemCapability = null;
+        invalidateCapabilities();
+        setChanged();
+        sendData();
+    }
 
-	@Override
-	public BlockPos getController() {
-		return isController() ? worldPosition : controller;
-	}
+    @Override
+    public void setController(BlockPos controller) {
+        if (level.isClientSide && !isVirtual()) return;
+        if (controller.equals(this.controller)) return;
+        this.controller = controller;
+        itemCapability = null;
+        invalidateCapabilities();
+        setChanged();
+        sendData();
+    }
 
-	@Override
-	protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(compound, registries, clientPacket);
+    @Override
+    public BlockPos getController() {
+        return isController() ? worldPosition : controller;
+    }
 
-		BlockPos controllerBefore = controller;
-		int prevSize = radius;
-		int prevLength = length;
+    @Override
+    protected void read(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(compound, registries, clientPacket);
 
-		updateConnectivity = compound.contains("Uninitialized");
-		
-		lastKnownPos = null;
-		if (compound.contains("LastKnownPos"))
-			lastKnownPos = NBTHelper.readBlockPos(compound, "LastKnownPos");
-		
-		controller = null;
-		if (compound.contains("Controller"))
-			controller = NBTHelper.readBlockPos(compound, "Controller");
+        BlockPos controllerBefore = controller;
+        int prevSize = radius;
+        int prevLength = length;
 
-		if (isController()) {
-			radius = compound.getInt("Size");
-			length = compound.getInt("Length");
-		}
+        updateConnectivity = compound.contains("Uninitialized");
 
-		if (!clientPacket) {
-			inventory.deserializeNBT(registries, compound.getCompound("Inventory"));
-			return;
-		}
+        lastKnownPos = null;
+        if (compound.contains("LastKnownPos"))
+            lastKnownPos = NBTHelper.readBlockPos(compound, "LastKnownPos");
 
-		boolean changeOfController =
-			controllerBefore == null ? controller != null : !controllerBefore.equals(controller);
-		if (hasLevel() && (changeOfController || prevSize != radius || prevLength != length))
-			level.setBlocksDirty(getBlockPos(), Blocks.AIR.defaultBlockState(), getBlockState());
-	}
+        controller = null;
+        if (compound.contains("Controller"))
+            controller = NBTHelper.readBlockPos(compound, "Controller");
 
-	@Override
-	protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		if (updateConnectivity)
-			compound.putBoolean("Uninitialized", true);
+        if (isController()) {
+            radius = compound.getInt("Size");
+            length = compound.getInt("Length");
+        }
 
-		if (lastKnownPos != null)
-			compound.put("LastKnownPos", NbtUtils.writeBlockPos(lastKnownPos));
-		if (!isController())
-			compound.put("Controller", NbtUtils.writeBlockPos(controller));
-		if (isController()) {
-			compound.putInt("Size", radius);
-			compound.putInt("Length", length);
-		}
+        if (!clientPacket) {
+            inventory.deserializeNBT(registries, compound.getCompound("Inventory"));
+            return;
+        }
 
-		super.write(compound, registries, clientPacket);
+        boolean changeOfController =
+                controllerBefore == null
+                        ? controller != null
+                        : !controllerBefore.equals(controller);
+        if (hasLevel() && (changeOfController || prevSize != radius || prevLength != length))
+            level.setBlocksDirty(getBlockPos(), Blocks.AIR.defaultBlockState(), getBlockState());
+    }
 
-		if (!clientPacket) {
-			compound.putString("StorageType", "CombinedInv");
-			compound.put("Inventory", inventory.serializeNBT(registries));
-		}
-	}
+    @Override
+    protected void write(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        if (updateConnectivity) compound.putBoolean("Uninitialized", true);
 
-	public ItemStackHandler getInventoryOfBlock() {
-		return inventory;
-	}
+        if (lastKnownPos != null)
+            compound.put("LastKnownPos", NbtUtils.writeBlockPos(lastKnownPos));
+        if (!isController()) compound.put("Controller", NbtUtils.writeBlockPos(controller));
+        if (isController()) {
+            compound.putInt("Size", radius);
+            compound.putInt("Length", length);
+        }
 
-	public void applyInventoryToBlock(ItemStackHandler handler) {
-		for (int i = 0; i < inventory.getSlots(); i++)
-			inventory.setStackInSlot(i, i < handler.getSlots() ? handler.getStackInSlot(i) : ItemStack.EMPTY);
-	}
+        super.write(compound, registries, clientPacket);
 
-	private void initCapability() {
-		if (itemCapability != null && itemCapability.getCapability() != null)
-			return;
-		if (!isController()) {
-			ItemVaultBlockEntity controllerBE = getControllerBE();
-			if (controllerBE == null)
-				return;
-			controllerBE.initCapability();
-			itemCapability = ICapabilityProvider.of(() -> {
-				if (controllerBE.isRemoved())
-					return null;
-				if (controllerBE.itemCapability == null)
-					return null;
-				return controllerBE.itemCapability.getCapability();
-			});
-			return;
-		}
+        if (!clientPacket) {
+            compound.putString("StorageType", "CombinedInv");
+            compound.put("Inventory", inventory.serializeNBT(registries));
+        }
+    }
 
-		boolean alongZ = ItemVaultBlock.getVaultBlockAxis(getBlockState()) == Axis.Z;
-		IItemHandlerModifiable[] invs = new IItemHandlerModifiable[length * radius * radius];
-		for (int yOffset = 0; yOffset < length; yOffset++) {
-			for (int xOffset = 0; xOffset < radius; xOffset++) {
-				for (int zOffset = 0; zOffset < radius; zOffset++) {
-					BlockPos vaultPos = alongZ ? worldPosition.offset(xOffset, zOffset, yOffset)
-						: worldPosition.offset(yOffset, xOffset, zOffset);
-					ItemVaultBlockEntity vaultAt =
-						ConnectivityHandler.partAt(AllBlockEntityTypes.ITEM_VAULT.get(), level, vaultPos);
-					invs[yOffset * radius * radius + xOffset * radius + zOffset] =
-						vaultAt != null ? vaultAt.inventory : new ItemStackHandler();
-				}
-			}
-		}
+    public ItemStackHandler getInventoryOfBlock() {
+        return inventory;
+    }
 
-		itemCapability = ICapabilityProvider.of(new VersionedInventoryWrapper(new CombinedInvWrapper(invs)));
-	}
+    public void applyInventoryToBlock(ItemStackHandler handler) {
+        for (int i = 0; i < inventory.getSlots(); i++)
+            inventory.setStackInSlot(
+                    i, i < handler.getSlots() ? handler.getStackInSlot(i) : ItemStack.EMPTY);
+    }
 
-	public static int getMaxLength(int radius) {
-		return radius * 3;
-	}
+    private void initCapability() {
+        if (itemCapability != null && itemCapability.getCapability() != null) return;
+        if (!isController()) {
+            ItemVaultBlockEntity controllerBE = getControllerBE();
+            if (controllerBE == null) return;
+            controllerBE.initCapability();
+            itemCapability =
+                    ICapabilityProvider.of(
+                            () -> {
+                                if (controllerBE.isRemoved()) return null;
+                                if (controllerBE.itemCapability == null) return null;
+                                return controllerBE.itemCapability.getCapability();
+                            });
+            return;
+        }
 
-	@Override
-	public void preventConnectivityUpdate() { updateConnectivity = false; }
+        boolean alongZ = ItemVaultBlock.getVaultBlockAxis(getBlockState()) == Axis.Z;
+        IItemHandlerModifiable[] invs = new IItemHandlerModifiable[length * radius * radius];
+        for (int yOffset = 0; yOffset < length; yOffset++) {
+            for (int xOffset = 0; xOffset < radius; xOffset++) {
+                for (int zOffset = 0; zOffset < radius; zOffset++) {
+                    BlockPos vaultPos =
+                            alongZ
+                                    ? worldPosition.offset(xOffset, zOffset, yOffset)
+                                    : worldPosition.offset(yOffset, xOffset, zOffset);
+                    ItemVaultBlockEntity vaultAt =
+                            ConnectivityHandler.partAt(
+                                    AllBlockEntityTypes.ITEM_VAULT.get(), level, vaultPos);
+                    invs[yOffset * radius * radius + xOffset * radius + zOffset] =
+                            vaultAt != null ? vaultAt.inventory : new ItemStackHandler();
+                }
+            }
+        }
 
-	@Override
-	public void notifyMultiUpdated() {
-		BlockState state = this.getBlockState();
-		if (ItemVaultBlock.isVault(state)) { // safety
-			level.setBlock(getBlockPos(), state.setValue(ItemVaultBlock.LARGE, radius > 2), 6);
-		}
-		itemCapability = null;
-		invalidateCapabilities();
-		setChanged();
-	}
+        itemCapability =
+                ICapabilityProvider.of(new VersionedInventoryWrapper(new CombinedInvWrapper(invs)));
+    }
 
-	@Override
-	public Direction.Axis getMainConnectionAxis() { return getMainAxisOf(this); }
+    public static int getMaxLength(int radius) {
+        return radius * 3;
+    }
 
-	@Override
-	public int getMaxLength(Direction.Axis longAxis, int width) {
-		if (longAxis == Direction.Axis.Y) return getMaxWidth();
-		return getMaxLength(width);
-	}
+    @Override
+    public void preventConnectivityUpdate() {
+        updateConnectivity = false;
+    }
 
-	@Override
-	public int getMaxWidth() {
-		return 3;
-	}
+    @Override
+    public void notifyMultiUpdated() {
+        BlockState state = this.getBlockState();
+        if (ItemVaultBlock.isVault(state)) { // safety
+            level.setBlock(getBlockPos(), state.setValue(ItemVaultBlock.LARGE, radius > 2), 6);
+        }
+        itemCapability = null;
+        invalidateCapabilities();
+        setChanged();
+    }
 
-	@Override
-	public int getHeight() { return length; }
+    @Override
+    public Direction.Axis getMainConnectionAxis() {
+        return getMainAxisOf(this);
+    }
 
-	@Override
-	public int getWidth() { return radius; }
+    @Override
+    public int getMaxLength(Direction.Axis longAxis, int width) {
+        if (longAxis == Direction.Axis.Y) return getMaxWidth();
+        return getMaxLength(width);
+    }
 
-	@Override
-	public void setHeight(int height) { this.length = height; }
+    @Override
+    public int getMaxWidth() {
+        return 3;
+    }
 
-	@Override
-	public void setWidth(int width) { this.radius = width; }
+    @Override
+    public int getHeight() {
+        return length;
+    }
 
-	@Override
-	public boolean hasInventory() { return true; }
+    @Override
+    public int getWidth() {
+        return radius;
+    }
+
+    @Override
+    public void setHeight(int height) {
+        this.length = height;
+    }
+
+    @Override
+    public void setWidth(int width) {
+        this.radius = width;
+    }
+
+    @Override
+    public boolean hasInventory() {
+        return true;
+    }
 }

@@ -13,32 +13,40 @@ import net.minecraft.world.item.ItemStack;
 
 public class PotatoProjectileRenderer extends EntityRenderer<PotatoProjectileEntity> {
 
-	public PotatoProjectileRenderer(EntityRendererProvider.Context context) {
-		super(context);
-	}
+    public PotatoProjectileRenderer(EntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	public void render(PotatoProjectileEntity entity, float yaw, float pt, PoseStack ms, MultiBufferSource buffer,
-		int light) {
-		ItemStack item = entity.getItem();
-		if (item.isEmpty())
-			return;
-		ms.pushPose();
-		ms.translate(0, entity.getBoundingBox()
-			.getYsize() / 2 - 1 / 8f, 0);
-		entity.getRenderMode()
-			.transform(ms, entity, pt);
+    @Override
+    public void render(
+            PotatoProjectileEntity entity,
+            float yaw,
+            float pt,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light) {
+        ItemStack item = entity.getItem();
+        if (item.isEmpty()) return;
+        ms.pushPose();
+        ms.translate(0, entity.getBoundingBox().getYsize() / 2 - 1 / 8f, 0);
+        entity.getRenderMode().transform(ms, entity, pt);
 
-		Minecraft.getInstance()
-			.getItemRenderer()
-			.renderStatic(item, ItemDisplayContext.GROUND, light, OverlayTexture.NO_OVERLAY, ms, buffer, entity.level(),
-				0);
-		ms.popPose();
-	}
+        Minecraft.getInstance()
+                .getItemRenderer()
+                .renderStatic(
+                        item,
+                        ItemDisplayContext.GROUND,
+                        light,
+                        OverlayTexture.NO_OVERLAY,
+                        ms,
+                        buffer,
+                        entity.level(),
+                        0);
+        ms.popPose();
+    }
 
-	@Override
-	public ResourceLocation getTextureLocation(PotatoProjectileEntity entity) {
-		return null;
-	}
-
+    @Override
+    public ResourceLocation getTextureLocation(PotatoProjectileEntity entity) {
+        return null;
+    }
 }

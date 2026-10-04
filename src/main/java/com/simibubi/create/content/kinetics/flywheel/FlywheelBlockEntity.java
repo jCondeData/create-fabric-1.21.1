@@ -13,41 +13,41 @@ import net.minecraft.world.phys.AABB;
 
 public class FlywheelBlockEntity extends KineticBlockEntity {
 
-	LerpedFloat visualSpeed = LerpedFloat.linear();
-	float angle;
+    LerpedFloat visualSpeed = LerpedFloat.linear();
+    float angle;
 
-	public FlywheelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public FlywheelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	protected AABB createRenderBoundingBox() {
-		return super.createRenderBoundingBox().inflate(2);
-	}
+    @Override
+    protected AABB createRenderBoundingBox() {
+        return super.createRenderBoundingBox().inflate(2);
+    }
 
-	@Override
-	public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		super.write(compound, registries, clientPacket);
-	}
+    @Override
+    public void write(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(compound, registries, clientPacket);
+    }
 
-	@Override
-	protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(compound, registries, clientPacket);
-		if (clientPacket)
-			visualSpeed.chase(getGeneratedSpeed(), 1 / 64f, Chaser.EXP);
-	}
+    @Override
+    protected void read(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(compound, registries, clientPacket);
+        if (clientPacket) visualSpeed.chase(getGeneratedSpeed(), 1 / 64f, Chaser.EXP);
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
+    @Override
+    public void tick() {
+        super.tick();
 
-		if (!level.isClientSide)
-			return;
+        if (!level.isClientSide) return;
 
-		float targetSpeed = getSpeed();
-		visualSpeed.updateChaseTarget(targetSpeed);
-		visualSpeed.tickChaser();
-		angle += visualSpeed.getValue() * 3 / 10f;
-		angle %= 360;
-	}
+        float targetSpeed = getSpeed();
+        visualSpeed.updateChaseTarget(targetSpeed);
+        visualSpeed.tickChaser();
+        angle += visualSpeed.getValue() * 3 / 10f;
+        angle %= 360;
+    }
 }

@@ -8,18 +8,20 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public class StorageDrawers implements ThresholdSwitchCompat {
 
-	@Override
-	public boolean isFromThisMod(BlockEntity blockEntity) {
-		return blockEntity != null && Mods.STORAGEDRAWERS.id()
-			.equals(RegisteredObjectsHelper.getKeyOrThrow(blockEntity.getType())
-				.getNamespace());
-	}
+    @Override
+    public boolean isFromThisMod(BlockEntity blockEntity) {
+        return blockEntity != null
+                && Mods.STORAGEDRAWERS
+                        .id()
+                        .equals(
+                                RegisteredObjectsHelper.getKeyOrThrow(blockEntity.getType())
+                                        .getNamespace());
+    }
 
-	@Override
-	public long getSpaceInSlot(IItemHandler inv, int slot) {
-		if (slot == 0)
-			return 0;
+    @Override
+    public long getSpaceInSlot(IItemHandler inv, int slot) {
+        if (slot == 0) return 0;
 
-		return inv.getSlotLimit(slot);
-	}
+        return inv.getSlotLimit(slot);
+    }
 }

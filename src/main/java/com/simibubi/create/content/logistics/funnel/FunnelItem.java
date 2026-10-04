@@ -15,40 +15,34 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 @EventBusSubscriber
 public class FunnelItem extends BlockItem {
 
-	public FunnelItem(Block p_i48527_1_, Properties p_i48527_2_) {
-		super(p_i48527_1_, p_i48527_2_);
-	}
+    public FunnelItem(Block p_i48527_1_, Properties p_i48527_2_) {
+        super(p_i48527_1_, p_i48527_2_);
+    }
 
-	@SubscribeEvent
-	public static void funnelItemAlwaysPlacesWhenUsed(PlayerInteractEvent.RightClickBlock event) {
-		if (event.getItemStack().getItem() instanceof FunnelItem)
-			event.setUseBlock(TriState.FALSE);
-	}
+    @SubscribeEvent
+    public static void funnelItemAlwaysPlacesWhenUsed(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getItemStack().getItem() instanceof FunnelItem) event.setUseBlock(TriState.FALSE);
+    }
 
-	@Override
-	protected BlockState getPlacementState(BlockPlaceContext ctx) {
-		Level world = ctx.getLevel();
-		BlockPos pos = ctx.getClickedPos();
-		BlockState state = super.getPlacementState(ctx);
-		if (state == null)
-			return state;
-		if (!(state.getBlock() instanceof FunnelBlock))
-			return state;
-		if (state.getValue(FunnelBlock.FACING)
-			.getAxis()
-			.isVertical())
-			return state;
+    @Override
+    protected BlockState getPlacementState(BlockPlaceContext ctx) {
+        Level world = ctx.getLevel();
+        BlockPos pos = ctx.getClickedPos();
+        BlockState state = super.getPlacementState(ctx);
+        if (state == null) return state;
+        if (!(state.getBlock() instanceof FunnelBlock)) return state;
+        if (state.getValue(FunnelBlock.FACING).getAxis().isVertical()) return state;
 
-		Direction direction = state.getValue(FunnelBlock.FACING);
-		FunnelBlock block = (FunnelBlock) getBlock();
-		Block beltFunnelBlock = block.getEquivalentBeltFunnel(world, pos, state)
-			.getBlock();
-		BlockState equivalentBeltFunnel = beltFunnelBlock.getStateForPlacement(ctx)
-			.setValue(BeltFunnelBlock.HORIZONTAL_FACING, direction);
-		if (BeltFunnelBlock.isOnValidBelt(equivalentBeltFunnel, world, pos))
-			return equivalentBeltFunnel;
+        Direction direction = state.getValue(FunnelBlock.FACING);
+        FunnelBlock block = (FunnelBlock) getBlock();
+        Block beltFunnelBlock = block.getEquivalentBeltFunnel(world, pos, state).getBlock();
+        BlockState equivalentBeltFunnel =
+                beltFunnelBlock
+                        .getStateForPlacement(ctx)
+                        .setValue(BeltFunnelBlock.HORIZONTAL_FACING, direction);
+        if (BeltFunnelBlock.isOnValidBelt(equivalentBeltFunnel, world, pos))
+            return equivalentBeltFunnel;
 
-		return state;
-	}
-
+        return state;
+    }
 }

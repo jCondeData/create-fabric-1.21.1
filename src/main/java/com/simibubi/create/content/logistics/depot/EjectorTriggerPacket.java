@@ -10,21 +10,20 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 
 public class EjectorTriggerPacket extends BlockEntityConfigurationPacket<EjectorBlockEntity> {
-	public static final StreamCodec<ByteBuf, EjectorTriggerPacket> STREAM_CODEC = BlockPos.STREAM_CODEC.map(
-			EjectorTriggerPacket::new, packet -> packet.pos
-	);
+    public static final StreamCodec<ByteBuf, EjectorTriggerPacket> STREAM_CODEC =
+            BlockPos.STREAM_CODEC.map(EjectorTriggerPacket::new, packet -> packet.pos);
 
-	public EjectorTriggerPacket(BlockPos pos) {
-		super(pos);
-	}
+    public EjectorTriggerPacket(BlockPos pos) {
+        super(pos);
+    }
 
-	@Override
-	protected void applySettings(ServerPlayer player, EjectorBlockEntity be) {
-		be.activate();
-	}
+    @Override
+    protected void applySettings(ServerPlayer player, EjectorBlockEntity be) {
+        be.activate();
+    }
 
-	@Override
-	public PacketTypeProvider getTypeProvider() {
-		return AllPackets.TRIGGER_EJECTOR;
-	}
+    @Override
+    public PacketTypeProvider getTypeProvider() {
+        return AllPackets.TRIGGER_EJECTOR;
+    }
 }

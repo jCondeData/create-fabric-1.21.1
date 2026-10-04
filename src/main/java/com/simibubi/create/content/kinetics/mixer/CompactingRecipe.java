@@ -6,8 +6,7 @@ import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.Pro
 
 public class CompactingRecipe extends BasinRecipe {
 
-	public CompactingRecipe(ProcessingRecipeParams params) {
-		super(AllRecipeTypes.COMPACTING, params);
-	}
-
+    public CompactingRecipe(ProcessingRecipeParams params) {
+        super(AllRecipeTypes.COMPACTING, params);
+    }
 }

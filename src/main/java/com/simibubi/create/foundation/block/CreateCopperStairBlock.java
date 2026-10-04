@@ -1,29 +1,29 @@
 package com.simibubi.create.foundation.block;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
 
+import org.jetbrains.annotations.NotNull;
+
 public class CreateCopperStairBlock extends StairBlock {
-	public static final MapCodec<StairBlock> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-			propertiesCodec()
-	).apply(i, CreateCopperStairBlock::new));
+    public static final MapCodec<StairBlock> CODEC =
+            RecordCodecBuilder.mapCodec(
+                    i -> i.group(propertiesCodec()).apply(i, CreateCopperStairBlock::new));
 
-	public CreateCopperStairBlock(Properties properties) {
-		super(Blocks.AIR.defaultBlockState(), properties);
-	}
+    public CreateCopperStairBlock(Properties properties) {
+        super(Blocks.AIR.defaultBlockState(), properties);
+    }
 
-	@Override
-	public float getExplosionResistance() {
-		return explosionResistance;
-	}
+    @Override
+    public float getExplosionResistance() {
+        return explosionResistance;
+    }
 
-	@Override
-	public @NotNull MapCodec<? extends StairBlock> codec() {
-		return CODEC;
-	}
+    @Override
+    public @NotNull MapCodec<? extends StairBlock> codec() {
+        return CODEC;
+    }
 }

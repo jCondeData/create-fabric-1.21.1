@@ -1,10 +1,5 @@
 package com.simibubi.create.content.kinetics.flywheel;
 
-import java.util.function.Consumer;
-
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityVisual;
 import com.simibubi.create.content.kinetics.base.RotatingInstance;
@@ -17,87 +12,104 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.Direction;
 
-public class FlywheelVisual extends KineticBlockEntityVisual<FlywheelBlockEntity> implements SimpleDynamicVisual {
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
-	protected final RotatingInstance shaft;
-	protected final TransformedInstance wheel;
-	protected float lastAngle = Float.NaN;
+import java.util.function.Consumer;
 
-	protected final Matrix4f baseTransform = new Matrix4f();
+public class FlywheelVisual extends KineticBlockEntityVisual<FlywheelBlockEntity>
+        implements SimpleDynamicVisual {
 
-	public FlywheelVisual(VisualizationContext context, FlywheelBlockEntity blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick);
+    protected final RotatingInstance shaft;
+    protected final TransformedInstance wheel;
+    protected float lastAngle = Float.NaN;
 
-		var axis = rotationAxis();
-		shaft = instancerProvider().instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT))
-			.createInstance();
+    protected final Matrix4f baseTransform = new Matrix4f();
 
-		shaft.setup(FlywheelVisual.this.blockEntity)
-			.setPosition(getVisualPosition())
-			.rotateToFace(axis)
-			.setChanged();
+    public FlywheelVisual(
+            VisualizationContext context, FlywheelBlockEntity blockEntity, float partialTick) {
+        super(context, blockEntity, partialTick);
 
-		wheel = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.FLYWHEEL))
-			.createInstance();
+        var axis = rotationAxis();
+        shaft =
+                instancerProvider()
+                        .instancer(
+                                AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT))
+                        .createInstance();
 
+        shaft.setup(FlywheelVisual.this.blockEntity)
+                .setPosition(getVisualPosition())
+                .rotateToFace(axis)
+                .setChanged();
 
-		Direction align = Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE);
+        wheel =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.FLYWHEEL))
+                        .createInstance();
 
-		wheel.translate(getVisualPosition())
-			.center()
-			.rotate(new Quaternionf().rotateTo(0, 1, 0, align.getStepX(), align.getStepY(), align.getStepZ()));
+        Direction align = Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE);
 
-		baseTransform.set(wheel.pose);
+        wheel.translate(getVisualPosition())
+                .center()
+                .rotate(
+                        new Quaternionf()
+                                .rotateTo(
+                                        0,
+                                        1,
+                                        0,
+                                        align.getStepX(),
+                                        align.getStepY(),
+                                        align.getStepZ()));
 
-		animate(blockEntity.angle);
-	}
+        baseTransform.set(wheel.pose);
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
+        animate(blockEntity.angle);
+    }
 
-		float partialTicks = ctx.partialTick();
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
 
-		float speed = blockEntity.visualSpeed.getValue(partialTicks) * 3 / 10f;
-		float angle = blockEntity.angle + speed * partialTicks;
+        float partialTicks = ctx.partialTick();
 
-		if (Math.abs(angle - lastAngle) < 0.001)
-			return;
+        float speed = blockEntity.visualSpeed.getValue(partialTicks) * 3 / 10f;
+        float angle = blockEntity.angle + speed * partialTicks;
 
-		animate(angle);
+        if (Math.abs(angle - lastAngle) < 0.001) return;
 
-		lastAngle = angle;
-	}
+        animate(angle);
 
-	private void animate(float angle) {
-		wheel.setTransform(baseTransform)
-			.rotateY(AngleHelper.rad(angle))
-			.uncenter()
-			.setChanged();
-	}
+        lastAngle = angle;
+    }
 
-	@Override
-	public void update(float pt) {
-		shaft.setup(blockEntity)
-			.setChanged();
-	}
+    private void animate(float angle) {
+        wheel.setTransform(baseTransform).rotateY(AngleHelper.rad(angle)).uncenter().setChanged();
+    }
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(shaft, wheel);
-	}
+    @Override
+    public void update(float pt) {
+        shaft.setup(blockEntity).setChanged();
+    }
 
-	@Override
-	protected void _delete() {
-		shaft.delete();
-		wheel.delete();
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        relight(shaft, wheel);
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		consumer.accept(shaft);
-		consumer.accept(wheel);
-	}
+    @Override
+    protected void _delete() {
+        shaft.delete();
+        wheel.delete();
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        consumer.accept(shaft);
+        consumer.accept(wheel);
+    }
 }

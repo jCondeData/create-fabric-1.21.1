@@ -14,58 +14,57 @@ import net.minecraft.world.entity.player.Player;
 
 public class ContraptionPlayerPassengerRotation {
 
-	static boolean active;
-	static int prevId;
-	static float prevYaw;
-	static float prevPitch;
+    static boolean active;
+    static int prevId;
+    static float prevYaw;
+    static float prevPitch;
 
-	public static void tick() {
-		active = AllConfigs.client().rotateWhenSeated.get();
-	}
+    public static void tick() {
+        active = AllConfigs.client().rotateWhenSeated.get();
+    }
 
-	public static void frame() {
-		Player player = Minecraft.getInstance().player;
-		if (!active)
-			return;
-		if (player == null || !player.isPassenger()) {
-			prevId = 0;
-			return;
-		}
+    public static void frame() {
+        Player player = Minecraft.getInstance().player;
+        if (!active) return;
+        if (player == null || !player.isPassenger()) {
+            prevId = 0;
+            return;
+        }
 
-		Entity vehicle = player.getVehicle();
-		if (!(vehicle instanceof AbstractContraptionEntity contraptionEntity))
-			return;
+        Entity vehicle = player.getVehicle();
+        if (!(vehicle instanceof AbstractContraptionEntity contraptionEntity)) return;
 
-		ContraptionRotationState rotationState = contraptionEntity.getRotationState();
+        ContraptionRotationState rotationState = contraptionEntity.getRotationState();
 
-		float yaw = AngleHelper.wrapAngle180((contraptionEntity instanceof CarriageContraptionEntity cce)
-			? cce.getViewYRot(AnimationTickHolder.getPartialTicks())
-			: rotationState.yRotation);
+        float yaw =
+                AngleHelper.wrapAngle180(
+                        (contraptionEntity instanceof CarriageContraptionEntity cce)
+                                ? cce.getViewYRot(AnimationTickHolder.getPartialTicks())
+                                : rotationState.yRotation);
 
-		float pitch = (contraptionEntity instanceof CarriageContraptionEntity cce)
-			? cce.getViewXRot(AnimationTickHolder.getPartialTicks())
-			: 0;
+        float pitch =
+                (contraptionEntity instanceof CarriageContraptionEntity cce)
+                        ? cce.getViewXRot(AnimationTickHolder.getPartialTicks())
+                        : 0;
 
-		if (prevId != contraptionEntity.getId()) {
-			prevId = contraptionEntity.getId();
-			prevYaw = yaw;
-			prevPitch = pitch;
-		}
+        if (prevId != contraptionEntity.getId()) {
+            prevId = contraptionEntity.getId();
+            prevYaw = yaw;
+            prevPitch = pitch;
+        }
 
-		float yawDiff = AngleHelper.getShortestAngleDiff(yaw, prevYaw);
-		float pitchDiff = AngleHelper.getShortestAngleDiff(pitch, prevPitch);
+        float yawDiff = AngleHelper.getShortestAngleDiff(yaw, prevYaw);
+        float pitchDiff = AngleHelper.getShortestAngleDiff(pitch, prevPitch);
 
-		prevYaw = yaw;
-		prevPitch = pitch;
+        prevYaw = yaw;
+        prevPitch = pitch;
 
-		float yawRelativeToTrain = Mth.abs(AngleHelper.getShortestAngleDiff(player.getYRot(), -yaw - 90));
-		if (yawRelativeToTrain > 120)
-			pitchDiff *= -1;
-		else if (yawRelativeToTrain > 60)
-			pitchDiff *= 0;
+        float yawRelativeToTrain =
+                Mth.abs(AngleHelper.getShortestAngleDiff(player.getYRot(), -yaw - 90));
+        if (yawRelativeToTrain > 120) pitchDiff *= -1;
+        else if (yawRelativeToTrain > 60) pitchDiff *= 0;
 
-		player.setYRot((float) (player.getYRot() + yawDiff));
-		player.setXRot((float) (player.getXRot() + pitchDiff));
-	}
-
+        player.setYRot((float) (player.getYRot() + yawDiff));
+        player.setXRot((float) (player.getXRot() + pitchDiff));
+    }
 }

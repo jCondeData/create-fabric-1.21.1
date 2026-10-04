@@ -12,10 +12,11 @@ import com.simibubi.create.content.trains.track.BezierConnection.SegmentAngles;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import net.createmod.catnip.render.CachedBuffers;
+
 import net.createmod.catnip.data.Iterate;
-import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.math.AngleHelper;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.render.CachedBuffers;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -30,117 +31,124 @@ import net.minecraft.world.phys.Vec3;
 
 public class TrackRenderer extends SafeBlockEntityRenderer<TrackBlockEntity> {
 
-	public TrackRenderer(BlockEntityRendererProvider.Context context) {}
+    public TrackRenderer(BlockEntityRendererProvider.Context context) {}
 
-	@Override
-	protected void renderSafe(TrackBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light,
-		int overlay) {
-		Level level = be.getLevel();
-		if (VisualizationManager.supportsVisualization(level))
-			return;
-		VertexConsumer vb = buffer.getBuffer(RenderType.cutoutMipped());
-		be.connections.values()
-			.forEach(bc -> renderBezierTurn(level, bc, ms, vb));
-	}
+    @Override
+    protected void renderSafe(
+            TrackBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        Level level = be.getLevel();
+        if (VisualizationManager.supportsVisualization(level)) return;
+        VertexConsumer vb = buffer.getBuffer(RenderType.cutoutMipped());
+        be.connections.values().forEach(bc -> renderBezierTurn(level, bc, ms, vb));
+    }
 
-	public static void renderBezierTurn(Level level, BezierConnection bc, PoseStack ms, VertexConsumer vb) {
-		if (!bc.isPrimary())
-			return;
+    public static void renderBezierTurn(
+            Level level, BezierConnection bc, PoseStack ms, VertexConsumer vb) {
+        if (!bc.isPrimary()) return;
 
-		ms.pushPose();
-		BlockPos bePosition = bc.bePositions.getFirst();
-		BlockState air = Blocks.AIR.defaultBlockState();
-		SegmentAngles[] segments = bc.getBakedSegments();
+        ms.pushPose();
+        BlockPos bePosition = bc.bePositions.getFirst();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        SegmentAngles[] segments = bc.getBakedSegments();
 
-		renderGirder(level, bc, ms, vb, bePosition);
+        renderGirder(level, bc, ms, vb, bePosition);
 
-		for (int i = 1; i < segments.length; i++) {
-			SegmentAngles segment = segments[i];
-			int light = LevelRenderer.getLightColor(level, segment.lightPosition.offset(bePosition));
+        for (int i = 1; i < segments.length; i++) {
+            SegmentAngles segment = segments[i];
+            int light =
+                    LevelRenderer.getLightColor(level, segment.lightPosition.offset(bePosition));
 
-			TrackMaterial.TrackModelHolder modelHolder = bc.getMaterial().getModelHolder();
+            TrackMaterial.TrackModelHolder modelHolder = bc.getMaterial().getModelHolder();
 
-			CachedBuffers.partial(modelHolder.tie(), air)
-				.mulPose(segment.tieTransform.pose())
-				.mulNormal(segment.tieTransform.normal())
-				.light(light)
-				.renderInto(ms, vb);
+            CachedBuffers.partial(modelHolder.tie(), air)
+                    .mulPose(segment.tieTransform.pose())
+                    .mulNormal(segment.tieTransform.normal())
+                    .light(light)
+                    .renderInto(ms, vb);
 
-			for (boolean first : Iterate.trueAndFalse) {
-				Pose transform = segment.railTransforms.get(first);
-				CachedBuffers.partial(first ? modelHolder.leftSegment() : modelHolder.rightSegment(), air)
-					.mulPose(transform.pose())
-					.mulNormal(transform.normal())
-					.light(light)
-					.renderInto(ms, vb);
-			}
-		}
+            for (boolean first : Iterate.trueAndFalse) {
+                Pose transform = segment.railTransforms.get(first);
+                CachedBuffers.partial(
+                                first ? modelHolder.leftSegment() : modelHolder.rightSegment(), air)
+                        .mulPose(transform.pose())
+                        .mulNormal(transform.normal())
+                        .light(light)
+                        .renderInto(ms, vb);
+            }
+        }
 
-		ms.popPose();
-	}
+        ms.popPose();
+    }
 
-	private static void renderGirder(Level level, BezierConnection bc, PoseStack ms, VertexConsumer vb,
-		BlockPos tePosition) {
-		if (!bc.hasGirder)
-			return;
+    private static void renderGirder(
+            Level level,
+            BezierConnection bc,
+            PoseStack ms,
+            VertexConsumer vb,
+            BlockPos tePosition) {
+        if (!bc.hasGirder) return;
 
-		BlockState air = Blocks.AIR.defaultBlockState();
-		GirderAngles[] girders = bc.getBakedGirders();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        GirderAngles[] girders = bc.getBakedGirders();
 
-		for (int i = 1; i < girders.length; i++) {
-			GirderAngles segment = girders[i];
-			int light = LevelRenderer.getLightColor(level, segment.lightPosition.offset(tePosition));
+        for (int i = 1; i < girders.length; i++) {
+            GirderAngles segment = girders[i];
+            int light =
+                    LevelRenderer.getLightColor(level, segment.lightPosition.offset(tePosition));
 
-			for (boolean first : Iterate.trueAndFalse) {
-				Pose beamTransform = segment.beams.get(first);
-				CachedBuffers.partial(GIRDER_SEGMENT_MIDDLE, air)
-					.mulPose(beamTransform.pose())
-					.mulNormal(beamTransform.normal())
-					.light(light)
-					.renderInto(ms, vb);
+            for (boolean first : Iterate.trueAndFalse) {
+                Pose beamTransform = segment.beams.get(first);
+                CachedBuffers.partial(GIRDER_SEGMENT_MIDDLE, air)
+                        .mulPose(beamTransform.pose())
+                        .mulNormal(beamTransform.normal())
+                        .light(light)
+                        .renderInto(ms, vb);
 
-				for (boolean top : Iterate.trueAndFalse) {
-					Pose beamCapTransform = segment.beamCaps.get(top)
-						.get(first);
-					CachedBuffers.partial(top ? GIRDER_SEGMENT_TOP : GIRDER_SEGMENT_BOTTOM, air)
-						.mulPose(beamCapTransform.pose())
-						.mulNormal(beamCapTransform.normal())
-						.light(light)
-						.renderInto(ms, vb);
-				}
-			}
-		}
-	}
+                for (boolean top : Iterate.trueAndFalse) {
+                    Pose beamCapTransform = segment.beamCaps.get(top).get(first);
+                    CachedBuffers.partial(top ? GIRDER_SEGMENT_TOP : GIRDER_SEGMENT_BOTTOM, air)
+                            .mulPose(beamCapTransform.pose())
+                            .mulNormal(beamCapTransform.normal())
+                            .light(light)
+                            .renderInto(ms, vb);
+                }
+            }
+        }
+    }
 
-	public static Vec3 getModelAngles(Vec3 normal, Vec3 diff) {
-		double diffX = diff.x();
-		double diffY = diff.y();
-		double diffZ = diff.z();
-		double len = Mth.sqrt((float) (diffX * diffX + diffZ * diffZ));
-		double yaw = Mth.atan2(diffX, diffZ);
-		double pitch = Mth.atan2(len, diffY) - Math.PI * .5;
+    public static Vec3 getModelAngles(Vec3 normal, Vec3 diff) {
+        double diffX = diff.x();
+        double diffY = diff.y();
+        double diffZ = diff.z();
+        double len = Mth.sqrt((float) (diffX * diffX + diffZ * diffZ));
+        double yaw = Mth.atan2(diffX, diffZ);
+        double pitch = Mth.atan2(len, diffY) - Math.PI * .5;
 
-		Vec3 yawPitchNormal = VecHelper.rotate(VecHelper.rotate(new Vec3(0, 1, 0), AngleHelper.deg(pitch), Axis.X),
-			AngleHelper.deg(yaw), Axis.Y);
+        Vec3 yawPitchNormal =
+                VecHelper.rotate(
+                        VecHelper.rotate(new Vec3(0, 1, 0), AngleHelper.deg(pitch), Axis.X),
+                        AngleHelper.deg(yaw),
+                        Axis.Y);
 
-		double signum = Math.signum(yawPitchNormal.dot(normal));
-		if (Math.abs(signum) < 0.5f)
-			signum = yawPitchNormal.distanceToSqr(normal) < 0.5f ? -1 : 1;
-		double dot = diff.cross(normal)
-			.normalize()
-			.dot(yawPitchNormal);
-		double roll = Math.acos(Mth.clamp(dot, -1, 1)) * signum;
-		return new Vec3(pitch, yaw, roll);
-	}
+        double signum = Math.signum(yawPitchNormal.dot(normal));
+        if (Math.abs(signum) < 0.5f) signum = yawPitchNormal.distanceToSqr(normal) < 0.5f ? -1 : 1;
+        double dot = diff.cross(normal).normalize().dot(yawPitchNormal);
+        double roll = Math.acos(Mth.clamp(dot, -1, 1)) * signum;
+        return new Vec3(pitch, yaw, roll);
+    }
 
-	@Override
-	public boolean shouldRenderOffScreen(TrackBlockEntity pBlockEntity) {
-		return true;
-	}
+    @Override
+    public boolean shouldRenderOffScreen(TrackBlockEntity pBlockEntity) {
+        return true;
+    }
 
-	@Override
-	public int getViewDistance() {
-		return 96 * 2;
-	}
-
+    @Override
+    public int getViewDistance() {
+        return 96 * 2;
+    }
 }

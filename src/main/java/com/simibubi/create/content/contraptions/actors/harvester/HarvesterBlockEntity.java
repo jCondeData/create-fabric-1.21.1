@@ -9,24 +9,23 @@ import net.minecraft.world.phys.AABB;
 
 public class HarvesterBlockEntity extends CachedRenderBBBlockEntity {
 
-	// For simulations such as Ponder
-	private float manuallyAnimatedSpeed;
+    // For simulations such as Ponder
+    private float manuallyAnimatedSpeed;
 
-	public HarvesterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public HarvesterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	protected AABB createRenderBoundingBox() {
-		return new AABB(worldPosition);
-	}
+    @Override
+    protected AABB createRenderBoundingBox() {
+        return new AABB(worldPosition);
+    }
 
-	public float getAnimatedSpeed() {
-		return manuallyAnimatedSpeed;
-	}
+    public float getAnimatedSpeed() {
+        return manuallyAnimatedSpeed;
+    }
 
-	public void setAnimatedSpeed(float speed) {
-		manuallyAnimatedSpeed = speed;
-	}
-
+    public void setAnimatedSpeed(float speed) {
+        manuallyAnimatedSpeed = speed;
+    }
 }

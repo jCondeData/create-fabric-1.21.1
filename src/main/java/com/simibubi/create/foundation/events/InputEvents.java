@@ -25,95 +25,91 @@ import net.neoforged.neoforge.client.event.InputEvent;
 @EventBusSubscriber(Dist.CLIENT)
 public class InputEvents {
 
-	@SubscribeEvent
-	public static void onKeyInput(InputEvent.Key event) {
-		if (Minecraft.getInstance().screen != null)
-			return;
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.Key event) {
+        if (Minecraft.getInstance().screen != null) return;
 
-		int key = event.getKey();
-		boolean pressed = !(event.getAction() == 0);
+        int key = event.getKey();
+        boolean pressed = !(event.getAction() == 0);
 
-		CreateClient.SCHEMATIC_HANDLER.onKeyInput(key, pressed);
-		ToolboxHandlerClient.onKeyInput(key, pressed);
-		RadialWrenchHandler.onKeyInput(key, pressed);
-	}
+        CreateClient.SCHEMATIC_HANDLER.onKeyInput(key, pressed);
+        ToolboxHandlerClient.onKeyInput(key, pressed);
+        RadialWrenchHandler.onKeyInput(key, pressed);
+    }
 
-	@SubscribeEvent
-	public static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {
-		if (Minecraft.getInstance().screen != null)
-			return;
+    @SubscribeEvent
+    public static void onMouseScrolled(InputEvent.MouseScrollingEvent event) {
+        if (Minecraft.getInstance().screen != null) return;
 
-		double delta = event.getScrollDeltaY();
-//		CollisionDebugger.onScroll(delta);
-		boolean cancelled = CreateClient.SCHEMATIC_HANDLER.mouseScrolled(delta)
-			|| CreateClient.SCHEMATIC_AND_QUILL_HANDLER.mouseScrolled(delta) || TrainHUD.onScroll(delta)
-			|| ElevatorControlsHandler.onScroll(delta);
-		event.setCanceled(cancelled);
-	}
+        double delta = event.getScrollDeltaY();
+        //		CollisionDebugger.onScroll(delta);
+        boolean cancelled =
+                CreateClient.SCHEMATIC_HANDLER.mouseScrolled(delta)
+                        || CreateClient.SCHEMATIC_AND_QUILL_HANDLER.mouseScrolled(delta)
+                        || TrainHUD.onScroll(delta)
+                        || ElevatorControlsHandler.onScroll(delta);
+        event.setCanceled(cancelled);
+    }
 
-	@SubscribeEvent
-	public static void onMouseInput(InputEvent.MouseButton.Pre event) {
-		if (Minecraft.getInstance().screen != null)
-			return;
+    @SubscribeEvent
+    public static void onMouseInput(InputEvent.MouseButton.Pre event) {
+        if (Minecraft.getInstance().screen != null) return;
 
-		int button = event.getButton();
-		boolean pressed = !(event.getAction() == 0);
+        int button = event.getButton();
+        boolean pressed = !(event.getAction() == 0);
 
-		RadialWrenchHandler.onKeyInput(button, pressed);
-		if (CreateClient.SCHEMATIC_HANDLER.onMouseInput(button, pressed))
-			event.setCanceled(true);
-		else if (CreateClient.SCHEMATIC_AND_QUILL_HANDLER.onMouseInput(button, pressed))
-			event.setCanceled(true);
-	}
+        RadialWrenchHandler.onKeyInput(button, pressed);
+        if (CreateClient.SCHEMATIC_HANDLER.onMouseInput(button, pressed)) event.setCanceled(true);
+        else if (CreateClient.SCHEMATIC_AND_QUILL_HANDLER.onMouseInput(button, pressed))
+            event.setCanceled(true);
+    }
 
-	@SubscribeEvent
-	public static void onClickInput(InputEvent.InteractionKeyMappingTriggered event) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null)
-			return;
+    @SubscribeEvent
+    public static void onClickInput(InputEvent.InteractionKeyMappingTriggered event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null) return;
 
-		if (CurvedTrackInteraction.onClickInput(event)) {
-			event.setCanceled(true);
-			return;
-		}
+        if (CurvedTrackInteraction.onClickInput(event)) {
+            event.setCanceled(true);
+            return;
+        }
 
-		KeyMapping key = event.getKeyMapping();
+        KeyMapping key = event.getKeyMapping();
 
-		if (key == mc.options.keyUse || key == mc.options.keyAttack) {
-			if (CreateClient.GLUE_HANDLER.onMouseInput(key == mc.options.keyAttack))
-				event.setCanceled(true);
-		}
+        if (key == mc.options.keyUse || key == mc.options.keyAttack) {
+            if (CreateClient.GLUE_HANDLER.onMouseInput(key == mc.options.keyAttack))
+                event.setCanceled(true);
+        }
 
-		if (key == mc.options.keyUse
-			&& (FactoryPanelConnectionHandler.onRightClick() || ChainConveyorConnectionHandler.onRightClick())) {
-			event.setCanceled(true);
-			return;
-		}
+        if (key == mc.options.keyUse
+                && (FactoryPanelConnectionHandler.onRightClick()
+                        || ChainConveyorConnectionHandler.onRightClick())) {
+            event.setCanceled(true);
+            return;
+        }
 
-		if (key == mc.options.keyPickItem) {
-			if (ToolboxHandlerClient.onPickItem())
-				event.setCanceled(true);
-			return;
-		}
+        if (key == mc.options.keyPickItem) {
+            if (ToolboxHandlerClient.onPickItem()) event.setCanceled(true);
+            return;
+        }
 
-		if (!event.isUseItem())
-			return;
+        if (!event.isUseItem()) return;
 
-		LinkedControllerClientHandler.deactivateInLectern();
-		TrainRelocator.onClicked(event);
+        LinkedControllerClientHandler.deactivateInLectern();
+        TrainRelocator.onClicked(event);
 
-		if (ChainConveyorInteractionHandler.onUse()) {
-			event.setCanceled(true);
-			return;
-		} else if (PackagePortTargetSelectionHandler.onUse()) {
-			event.setCanceled(true);
-			return;
-		}
+        if (ChainConveyorInteractionHandler.onUse()) {
+            event.setCanceled(true);
+            return;
+        } else if (PackagePortTargetSelectionHandler.onUse()) {
+            event.setCanceled(true);
+            return;
+        }
 
-		CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> {
-			if (ChainPackageInteractionHandler.onUse())
-				event.setCanceled(true);
-		});
-	}
-
+        CatnipServices.PLATFORM.executeOnClientOnly(
+                () ->
+                        () -> {
+                            if (ChainPackageInteractionHandler.onUse()) event.setCanceled(true);
+                        });
+    }
 }

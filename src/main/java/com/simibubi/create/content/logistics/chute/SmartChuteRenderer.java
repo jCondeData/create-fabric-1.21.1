@@ -8,19 +8,21 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 public class SmartChuteRenderer extends SmartBlockEntityRenderer<SmartChuteBlockEntity> {
 
-	public SmartChuteRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public SmartChuteRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected void renderSafe(SmartChuteBlockEntity blockEntity, float partialTicks, PoseStack ms,
-		MultiBufferSource buffer, int light, int overlay) {
-		super.renderSafe(blockEntity, partialTicks, ms, buffer, light, overlay);
-		if (blockEntity.item.isEmpty())
-			return;
-		if (blockEntity.itemPosition.getValue(partialTicks) > 0)
-			return;
-		ChuteRenderer.renderItem(blockEntity, partialTicks, ms, buffer, light, overlay);
-	}
-
+    @Override
+    protected void renderSafe(
+            SmartChuteBlockEntity blockEntity,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        super.renderSafe(blockEntity, partialTicks, ms, buffer, light, overlay);
+        if (blockEntity.item.isEmpty()) return;
+        if (blockEntity.itemPosition.getValue(partialTicks) > 0) return;
+        ChuteRenderer.renderItem(blockEntity, partialTicks, ms, buffer, light, overlay);
+    }
 }

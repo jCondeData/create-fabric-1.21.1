@@ -2,100 +2,101 @@ package com.simibubi.create.content.fluids.tank;
 
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 
 /**
  * One person walking sounds like one person walking, and you can easily distinguish where they are.
+ * <br>
+ * With two people walking, you can still pick out which footsteps belong to which person. <br>
+ * Try and listen to three people walking in a group, however, and you'll find that you can't
+ * distinguish individual footsteps anymore. You now just hear the sound of a group of people
+ * walking.
  *
- * <br>With two people walking, you can still pick out which footsteps belong to which person.
+ * <p>You'll likely find that you perceive any number of people walking in a group as a single
+ * distinguishable sound. This class is a helper to take advantage of that for sound effects in
+ * Create to avoid saturating the sound engine without a perceptible loss in quality.
  *
- * <br>Try and listen to three people walking in a group, however, and you'll find that you can't distinguish
- * individual footsteps anymore. You now just hear the sound of a group of people walking.
- *
- * <p>You'll likely find that you perceive any number of people walking in a group as a single distinguishable sound.
- * This class is a helper to take advantage of that for sound effects in Create to avoid saturating the sound engine
- * without a perceptible loss in quality.
- *
- * <p>NOTE: It's up to the user of this class to decide how to group sounds such that they are perceived as a single
- * sound. There are no spatial calculations made here.
+ * <p>NOTE: It's up to the user of this class to decide how to group sounds such that they are
+ * perceived as a single sound. There are no spatial calculations made here.
  */
 public class SoundPool {
-	/**
-	 * The maximum number of sounds that can be played at once.
-	 */
-	private final int maxConcurrent;
-	/**
-	 * The number of ticks to wait before playing sounds. Useful if sounds are queued across many block entities,
-	 * and you don't have control over the tick order.
-	 */
-	private final int mergeTicks;
+    /** The maximum number of sounds that can be played at once. */
+    private final int maxConcurrent;
 
-	private final Sound sound;
+    /**
+     * The number of ticks to wait before playing sounds. Useful if sounds are queued across many
+     * block entities, and you don't have control over the tick order.
+     */
+    private final int mergeTicks;
 
-	private final LongList queuedPositions = new LongArrayList();
+    private final Sound sound;
 
-	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+    private final LongList queuedPositions = new LongArrayList();
 
-	private int ticks = 0;
+    private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-	public SoundPool(int maxConcurrent, int mergeTicks, Sound sound) {
-		this.maxConcurrent = maxConcurrent;
-		this.sound = sound;
-		this.mergeTicks = mergeTicks;
-	}
+    private int ticks = 0;
 
-	public void queueAt(BlockPos pos) {
-		queueAt(pos.asLong());
-	}
+    public SoundPool(int maxConcurrent, int mergeTicks, Sound sound) {
+        this.maxConcurrent = maxConcurrent;
+        this.sound = sound;
+        this.mergeTicks = mergeTicks;
+    }
 
-	public void queueAt(long pos) {
-		queuedPositions.add(pos);
-	}
+    public void queueAt(BlockPos pos) {
+        queueAt(pos.asLong());
+    }
 
-	public void play(Level level) {
-		if (queuedPositions.isEmpty()) {
-			return;
-		}
+    public void queueAt(long pos) {
+        queuedPositions.add(pos);
+    }
 
-		ticks++;
+    public void play(Level level) {
+        if (queuedPositions.isEmpty()) {
+            return;
+        }
 
-		if (ticks < mergeTicks) {
-			// Wait for more sounds to be queued in further ticks.
-			return;
-		}
+        ticks++;
 
-		ticks = 0;
+        if (ticks < mergeTicks) {
+            // Wait for more sounds to be queued in further ticks.
+            return;
+        }
 
-		var numberOfPositions = queuedPositions.size();
+        ticks = 0;
 
-		if (numberOfPositions <= maxConcurrent) {
-			// Fewer sound positions than maxConcurrent, play them all.
-			for (long pos : queuedPositions) {
-				playAt(level, pos);
-			}
-		} else {
-			// Roll for n random positions and play there.
-			while (!queuedPositions.isEmpty() && queuedPositions.size() > numberOfPositions - maxConcurrent) {
-				rollNextPosition(level);
-			}
-		}
+        var numberOfPositions = queuedPositions.size();
 
-		queuedPositions.clear();
-	}
+        if (numberOfPositions <= maxConcurrent) {
+            // Fewer sound positions than maxConcurrent, play them all.
+            for (long pos : queuedPositions) {
+                playAt(level, pos);
+            }
+        } else {
+            // Roll for n random positions and play there.
+            while (!queuedPositions.isEmpty()
+                    && queuedPositions.size() > numberOfPositions - maxConcurrent) {
+                rollNextPosition(level);
+            }
+        }
 
-	private void rollNextPosition(Level level) {
-		int index = level.random.nextInt(queuedPositions.size());
-		long pos = queuedPositions.removeLong(index);
-		playAt(level, pos);
-	}
+        queuedPositions.clear();
+    }
 
-	private void playAt(Level level, long pos) {
-		sound.playAt(level, this.pos.set(pos));
-	}
+    private void rollNextPosition(Level level) {
+        int index = level.random.nextInt(queuedPositions.size());
+        long pos = queuedPositions.removeLong(index);
+        playAt(level, pos);
+    }
 
-	public interface Sound {
-		void playAt(Level level, Vec3i pos);
-	}
+    private void playAt(Level level, long pos) {
+        sound.playAt(level, this.pos.set(pos));
+    }
+
+    public interface Sound {
+        void playAt(Level level, Vec3i pos);
+    }
 }

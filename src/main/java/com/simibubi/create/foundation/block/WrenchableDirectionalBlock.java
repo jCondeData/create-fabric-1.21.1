@@ -16,49 +16,48 @@ import org.jetbrains.annotations.NotNull;
 
 public class WrenchableDirectionalBlock extends DirectionalBlock implements IWrenchable {
 
-	public static final MapCodec<WrenchableDirectionalBlock> CODEC = simpleCodec(WrenchableDirectionalBlock::new);
+    public static final MapCodec<WrenchableDirectionalBlock> CODEC =
+            simpleCodec(WrenchableDirectionalBlock::new);
 
-	public WrenchableDirectionalBlock(Properties properties) {
-		super(properties);
-	}
+    public WrenchableDirectionalBlock(Properties properties) {
+        super(properties);
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-		builder.add(FACING);
-		super.createBlockStateDefinition(builder);
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+        super.createBlockStateDefinition(builder);
+    }
 
-	@Override
-	public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
-		Direction facing = originalState.getValue(FACING);
+    @Override
+    public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
+        Direction facing = originalState.getValue(FACING);
 
-		if (facing.getAxis() == targetedFace.getAxis())
-			return originalState;
+        if (facing.getAxis() == targetedFace.getAxis()) return originalState;
 
-		Direction newFacing = facing.getClockWise(targetedFace.getAxis());
+        Direction newFacing = facing.getClockWise(targetedFace.getAxis());
 
-		return originalState.setValue(FACING, newFacing);
-	}
+        return originalState.setValue(FACING, newFacing);
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		return defaultBlockState().setValue(FACING, context.getNearestLookingDirection());
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return defaultBlockState().setValue(FACING, context.getNearestLookingDirection());
+    }
 
-	@Override
-	public BlockState rotate(BlockState state, Rotation rot) {
-		return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
-	}
+    @Override
+    public BlockState rotate(BlockState state, Rotation rot) {
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
+    }
 
-	@Override
-	@SuppressWarnings("deprecation")
-	public BlockState mirror(BlockState state, Mirror mirrorIn) {
-		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
-	}
+    @Override
+    @SuppressWarnings("deprecation")
+    public BlockState mirror(BlockState state, Mirror mirrorIn) {
+        return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
+    }
 
-	@Override
-	protected @NotNull MapCodec<? extends DirectionalBlock> codec() {
-		return CODEC;
-	}
-
+    @Override
+    protected @NotNull MapCodec<? extends DirectionalBlock> codec() {
+        return CODEC;
+    }
 }

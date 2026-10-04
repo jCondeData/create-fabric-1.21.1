@@ -1,9 +1,5 @@
 package com.simibubi.create.content.trains.schedule.destination;
 
-import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
-
 import com.simibubi.create.Create;
 import com.simibubi.create.content.trains.graph.DiscoveredPath;
 import com.simibubi.create.content.trains.schedule.Schedule;
@@ -19,45 +15,48 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
+
 public abstract class ScheduleInstruction extends ScheduleDataEntry {
-	public static final StreamCodec<RegistryFriendlyByteBuf, ScheduleInstruction> STREAM_CODEC = CreateStreamCodecs.ofLegacyNbtWithRegistries(
-			ScheduleInstruction::write, ScheduleInstruction::fromTag
-	);
+    public static final StreamCodec<RegistryFriendlyByteBuf, ScheduleInstruction> STREAM_CODEC =
+            CreateStreamCodecs.ofLegacyNbtWithRegistries(
+                    ScheduleInstruction::write, ScheduleInstruction::fromTag);
 
-	public abstract boolean supportsConditions();
+    public abstract boolean supportsConditions();
 
-	@Nullable
-	public abstract DiscoveredPath start(ScheduleRuntime runtime, Level level);
+    @Nullable
+    public abstract DiscoveredPath start(ScheduleRuntime runtime, Level level);
 
-	public final CompoundTag write(HolderLookup.Provider registries) {
-		CompoundTag tag = new CompoundTag();
-		CompoundTag dataCopy =  data.copy();
-		writeAdditional(registries, dataCopy);
-		tag.putString("Id", getId().toString());
-		tag.put("Data", dataCopy);
-		return tag;
-	}
+    public final CompoundTag write(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        CompoundTag dataCopy = data.copy();
+        writeAdditional(registries, dataCopy);
+        tag.putString("Id", getId().toString());
+        tag.put("Data", dataCopy);
+        return tag;
+    }
 
-	public static ScheduleInstruction fromTag(HolderLookup.Provider registries, CompoundTag tag) {
-		ResourceLocation location = ResourceLocation.parse(tag.getString("Id"));
-		Supplier<? extends ScheduleInstruction> supplier = null;
-		for (Pair<ResourceLocation, Supplier<? extends ScheduleInstruction>> pair : Schedule.INSTRUCTION_TYPES)
-			if (pair.getFirst()
-				.equals(location))
-				supplier = pair.getSecond();
+    public static ScheduleInstruction fromTag(HolderLookup.Provider registries, CompoundTag tag) {
+        ResourceLocation location = ResourceLocation.parse(tag.getString("Id"));
+        Supplier<? extends ScheduleInstruction> supplier = null;
+        for (Pair<ResourceLocation, Supplier<? extends ScheduleInstruction>> pair :
+                Schedule.INSTRUCTION_TYPES)
+            if (pair.getFirst().equals(location)) supplier = pair.getSecond();
 
-		if (supplier == null) {
-			Create.LOGGER.warn("Could not parse schedule instruction type: " + location);
-			return new DestinationInstruction();
-		}
+        if (supplier == null) {
+            Create.LOGGER.warn("Could not parse schedule instruction type: " + location);
+            return new DestinationInstruction();
+        }
 
-		ScheduleInstruction scheduleDestination = supplier.get();
-		// Left around for migration purposes. Data added in writeAdditional has moved into the "Data" tag
-		scheduleDestination.readAdditional(registries, tag);
-		CompoundTag data = tag.getCompound("Data");
-		scheduleDestination.readAdditional(registries, data);
-		scheduleDestination.data = data;
-		return scheduleDestination;
-	}
-
+        ScheduleInstruction scheduleDestination = supplier.get();
+        // Left around for migration purposes. Data added in writeAdditional has moved into the
+        // "Data" tag
+        scheduleDestination.readAdditional(registries, tag);
+        CompoundTag data = tag.getCompound("Data");
+        scheduleDestination.readAdditional(registries, data);
+        scheduleDestination.data = data;
+        return scheduleDestination;
+    }
 }

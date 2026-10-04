@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.math.VecHelper;
@@ -30,76 +31,84 @@ public class HarvesterActorVisual extends ActorVisual {
     private double rotation;
     private double previousRotation;
 
-    public HarvesterActorVisual(VisualizationContext visualizationContext, VirtualRenderWorld simulationWorld, MovementContext movementContext) {
+    public HarvesterActorVisual(
+            VisualizationContext visualizationContext,
+            VirtualRenderWorld simulationWorld,
+            MovementContext movementContext) {
         super(visualizationContext, simulationWorld, movementContext);
 
         BlockState state = movementContext.state;
 
         facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        harvester = instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.partial(getRollingPartial()))
-				.createInstance();
+        harvester =
+                instancerProvider
+                        .instancer(InstanceTypes.TRANSFORMED, Models.partial(getRollingPartial()))
+                        .createInstance();
 
         horizontalAngle = facing.toYRot() + ((facing.getAxis() == Direction.Axis.X) ? 180 : 0);
 
-		harvester.light(localBlockLight(), 0);
-		harvester.setChanged();
-	}
+        harvester.light(localBlockLight(), 0);
+        harvester.setChanged();
+    }
 
-	protected PartialModel getRollingPartial() {
-		return AllPartialModels.HARVESTER_BLADE;
-	}
+    protected PartialModel getRollingPartial() {
+        return AllPartialModels.HARVESTER_BLADE;
+    }
 
-	protected Vec3 getRotationOffset() {
-		return rotOffset;
-	}
+    protected Vec3 getRotationOffset() {
+        return rotOffset;
+    }
 
-	protected double getRadius() {
-		return 6.5;
-	}
+    protected double getRadius() {
+        return 6.5;
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
+    @Override
+    public void tick() {
+        super.tick();
 
-		previousRotation = rotation;
+        previousRotation = rotation;
 
-		if (context.contraption.stalled || context.disabled
-			|| VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite()))
-			return;
+        if (context.contraption.stalled
+                || context.disabled
+                || VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite()))
+            return;
 
-		double arcLength = context.motion.length();
+        double arcLength = context.motion.length();
 
-		double radians = arcLength * 16 / getRadius();
+        double radians = arcLength * 16 / getRadius();
 
-		float deg = AngleHelper.deg(radians);
+        float deg = AngleHelper.deg(radians);
 
-		deg = (float) (((int) (deg * 3000)) / 3000);
+        deg = (float) (((int) (deg * 3000)) / 3000);
 
-		rotation += deg * 1.25;
+        rotation += deg * 1.25;
 
-		rotation %= 360;
-	}
+        rotation %= 360;
+    }
 
     @Override
     public void beginFrame() {
-        harvester.setIdentityTransform()
-				.translate(context.localPos)
-				.center()
-				.rotateYDegrees(horizontalAngle)
-				.uncenter()
-				.translate(getRotationOffset())
-				.rotateXDegrees((float) getRotation())
-				.translateBack(getRotationOffset())
-				.setChanged();
-	}
+        harvester
+                .setIdentityTransform()
+                .translate(context.localPos)
+                .center()
+                .rotateYDegrees(horizontalAngle)
+                .uncenter()
+                .translate(getRotationOffset())
+                .rotateXDegrees((float) getRotation())
+                .translateBack(getRotationOffset())
+                .setChanged();
+    }
 
-	@Override
-	protected void _delete() {
-		harvester.delete();
-	}
+    @Override
+    protected void _delete() {
+        harvester.delete();
+    }
 
-	protected double getRotation() {
-        return AngleHelper.angleLerp(AnimationTickHolder.getPartialTicks(), previousRotation, rotation);
+    protected double getRotation() {
+        return AngleHelper.angleLerp(
+                AnimationTickHolder.getPartialTicks(), previousRotation, rotation);
     }
 }

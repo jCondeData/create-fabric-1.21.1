@@ -1,9 +1,5 @@
 package com.simibubi.create.content.logistics.packager;
 
-import java.util.function.Consumer;
-
-import org.jetbrains.annotations.Nullable;
-
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.InstanceTypes;
@@ -12,91 +8,98 @@ import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 
-public class PackagerVisual<T extends PackagerBlockEntity> extends AbstractBlockEntityVisual<T> implements SimpleDynamicVisual {
-	public final TransformedInstance hatch;
-	public final TransformedInstance tray;
+import org.jetbrains.annotations.Nullable;
 
-	public float lastTrayOffset = Float.NaN;
-	public PartialModel lastHatchPartial;
+import java.util.function.Consumer;
 
+public class PackagerVisual<T extends PackagerBlockEntity> extends AbstractBlockEntityVisual<T>
+        implements SimpleDynamicVisual {
+    public final TransformedInstance hatch;
+    public final TransformedInstance tray;
 
-	public PackagerVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
-		super(ctx, blockEntity, partialTick);
+    public float lastTrayOffset = Float.NaN;
+    public PartialModel lastHatchPartial;
 
-		lastHatchPartial = PackagerRenderer.getHatchModel(blockEntity);
-		hatch = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(lastHatchPartial))
-			.createInstance();
+    public PackagerVisual(VisualizationContext ctx, T blockEntity, float partialTick) {
+        super(ctx, blockEntity, partialTick);
 
-		tray = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(PackagerRenderer.getTrayModel(blockState)))
-			.createInstance();
+        lastHatchPartial = PackagerRenderer.getHatchModel(blockEntity);
+        hatch =
+                instancerProvider()
+                        .instancer(InstanceTypes.TRANSFORMED, Models.partial(lastHatchPartial))
+                        .createInstance();
 
-		Direction facing = blockState.getValue(PackagerBlock.FACING)
-			.getOpposite();
+        tray =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(PackagerRenderer.getTrayModel(blockState)))
+                        .createInstance();
 
-		var lowerCorner = Vec3.atLowerCornerOf(facing.getNormal());
-		hatch.setIdentityTransform()
-			.translate(getVisualPosition())
-			.translate(lowerCorner
-				.scale(.49999f))
-			.rotateYCenteredDegrees(AngleHelper.horizontalAngle(facing))
-			.rotateXCenteredDegrees(AngleHelper.verticalAngle(facing))
-			.setChanged();
+        Direction facing = blockState.getValue(PackagerBlock.FACING).getOpposite();
 
-		// TODO: I think we need proper ItemVisuals to handle rendering the boxes in here
+        var lowerCorner = Vec3.atLowerCornerOf(facing.getNormal());
+        hatch.setIdentityTransform()
+                .translate(getVisualPosition())
+                .translate(lowerCorner.scale(.49999f))
+                .rotateYCenteredDegrees(AngleHelper.horizontalAngle(facing))
+                .rotateXCenteredDegrees(AngleHelper.verticalAngle(facing))
+                .setChanged();
 
-		animate(partialTick);
-	}
+        // TODO: I think we need proper ItemVisuals to handle rendering the boxes in here
 
-	@Override
-	public void beginFrame(Context ctx) {
-		animate(ctx.partialTick());
-	}
+        animate(partialTick);
+    }
 
-	public void animate(float partialTick) {
-		var hatchPartial = PackagerRenderer.getHatchModel(blockEntity);
+    @Override
+    public void beginFrame(Context ctx) {
+        animate(ctx.partialTick());
+    }
 
-		if (hatchPartial != this.lastHatchPartial) {
-			instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(hatchPartial))
-				.stealInstance(hatch);
+    public void animate(float partialTick) {
+        var hatchPartial = PackagerRenderer.getHatchModel(blockEntity);
 
-			this.lastHatchPartial = hatchPartial;
-		}
+        if (hatchPartial != this.lastHatchPartial) {
+            instancerProvider()
+                    .instancer(InstanceTypes.TRANSFORMED, Models.partial(hatchPartial))
+                    .stealInstance(hatch);
 
-		float trayOffset = blockEntity.getTrayOffset(partialTick);
+            this.lastHatchPartial = hatchPartial;
+        }
 
-		if (trayOffset != lastTrayOffset) {
-			Direction facing = blockState.getValue(PackagerBlock.FACING)
-				.getOpposite();
+        float trayOffset = blockEntity.getTrayOffset(partialTick);
 
-			var lowerCorner = Vec3.atLowerCornerOf(facing.getNormal());
+        if (trayOffset != lastTrayOffset) {
+            Direction facing = blockState.getValue(PackagerBlock.FACING).getOpposite();
 
-			tray.setIdentityTransform()
-				.translate(getVisualPosition())
-				.translate(lowerCorner.scale(trayOffset))
-				.rotateYCenteredDegrees(facing.toYRot())
-				.setChanged();
+            var lowerCorner = Vec3.atLowerCornerOf(facing.getNormal());
 
-			lastTrayOffset = trayOffset;
-		}
-	}
+            tray.setIdentityTransform()
+                    .translate(getVisualPosition())
+                    .translate(lowerCorner.scale(trayOffset))
+                    .rotateYCenteredDegrees(facing.toYRot())
+                    .setChanged();
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(hatch, tray);
-	}
+            lastTrayOffset = trayOffset;
+        }
+    }
 
-	@Override
-	protected void _delete() {
-		hatch.delete();
-		tray.delete();
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        relight(hatch, tray);
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<@Nullable Instance> consumer) {
+    @Override
+    protected void _delete() {
+        hatch.delete();
+        tray.delete();
+    }
 
-	}
+    @Override
+    public void collectCrumblingInstances(Consumer<@Nullable Instance> consumer) {}
 }

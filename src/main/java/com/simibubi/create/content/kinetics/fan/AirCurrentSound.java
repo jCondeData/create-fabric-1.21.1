@@ -7,43 +7,42 @@ import net.minecraft.sounds.SoundSource;
 
 public class AirCurrentSound extends AbstractTickableSoundInstance {
 
-	private float pitch;
+    private float pitch;
 
-	protected AirCurrentSound(SoundEvent p_i46532_1_, float pitch) {
-		super(p_i46532_1_, SoundSource.BLOCKS, SoundInstance.createUnseededRandom());
-		this.pitch = pitch;
-		volume = 0.01f;
-		looping = true;
-		delay = 0;
-		relative = true;
-	}
+    protected AirCurrentSound(SoundEvent p_i46532_1_, float pitch) {
+        super(p_i46532_1_, SoundSource.BLOCKS, SoundInstance.createUnseededRandom());
+        this.pitch = pitch;
+        volume = 0.01f;
+        looping = true;
+        delay = 0;
+        relative = true;
+    }
 
-	@Override
-	public void tick() {}
+    @Override
+    public void tick() {}
 
-	public void setPitch(float pitch) {
-		this.pitch = pitch;
-	}
+    public void setPitch(float pitch) {
+        this.pitch = pitch;
+    }
 
-	public void fadeIn(float maxVolume) {
-		volume = Math.min(maxVolume, volume + .05f);
-	}
+    public void fadeIn(float maxVolume) {
+        volume = Math.min(maxVolume, volume + .05f);
+    }
 
-	public void fadeOut() {
-		volume = Math.max(0, volume - .05f);
-	}
+    public void fadeOut() {
+        volume = Math.max(0, volume - .05f);
+    }
 
-	public boolean isFaded() {
-		return volume == 0;
-	}
+    public boolean isFaded() {
+        return volume == 0;
+    }
 
-	@Override
-	public float getPitch() {
-		return pitch;
-	}
+    @Override
+    public float getPitch() {
+        return pitch;
+    }
 
-	public void stopSound() {
-		stop();
-	}
-
+    public void stopSound() {
+        stop();
+    }
 }

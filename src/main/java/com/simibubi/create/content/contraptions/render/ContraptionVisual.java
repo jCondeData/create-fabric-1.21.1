@@ -1,10 +1,5 @@
 package com.simibubi.create.content.contraptions.render;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.tuple.MutablePair;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
@@ -36,8 +31,10 @@ import dev.engine_room.flywheel.lib.task.NestedPlan;
 import dev.engine_room.flywheel.lib.task.PlanMap;
 import dev.engine_room.flywheel.lib.task.RunnablePlan;
 import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
+
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -48,285 +45,295 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
-public class ContraptionVisual<E extends AbstractContraptionEntity> extends AbstractEntityVisual<E> implements DynamicVisual, TickableVisual, LightUpdatedVisual, ShaderLightVisual {
-	protected static final int LIGHT_PADDING = 1;
+import org.apache.commons.lang3.tuple.MutablePair;
 
-	protected final VisualEmbedding embedding;
-	protected final List<BlockEntityVisual<?>> children = new ArrayList<>();
-	protected final List<ActorVisual> actors = new ArrayList<>();
-	protected final PlanMap<DynamicVisual, DynamicVisual.Context> dynamicVisuals = new PlanMap<>();
-	protected final PlanMap<TickableVisual, TickableVisual.Context> tickableVisuals = new PlanMap<>();
-	protected VirtualRenderWorld virtualRenderWorld;
-	protected Model model;
-	protected TransformedInstance structure;
-	protected SectionCollector sectionCollector;
-	protected long minSection, maxSection;
-	protected long minBlock, maxBlock;
+import java.util.ArrayList;
+import java.util.List;
 
-	private final PoseStack contraptionMatrix = new PoseStack();
+public class ContraptionVisual<E extends AbstractContraptionEntity> extends AbstractEntityVisual<E>
+        implements DynamicVisual, TickableVisual, LightUpdatedVisual, ShaderLightVisual {
+    protected static final int LIGHT_PADDING = 1;
 
-	public ContraptionVisual(VisualizationContext ctx, E entity, float partialTick) {
-		super(ctx, entity, partialTick);
-		embedding = ctx.createEmbedding(Vec3i.ZERO);
+    protected final VisualEmbedding embedding;
+    protected final List<BlockEntityVisual<?>> children = new ArrayList<>();
+    protected final List<ActorVisual> actors = new ArrayList<>();
+    protected final PlanMap<DynamicVisual, DynamicVisual.Context> dynamicVisuals = new PlanMap<>();
+    protected final PlanMap<TickableVisual, TickableVisual.Context> tickableVisuals =
+            new PlanMap<>();
+    protected VirtualRenderWorld virtualRenderWorld;
+    protected Model model;
+    protected TransformedInstance structure;
+    protected SectionCollector sectionCollector;
+    protected long minSection, maxSection;
+    protected long minBlock, maxBlock;
 
-		setEmbeddingMatrices(partialTick);
+    private final PoseStack contraptionMatrix = new PoseStack();
 
-		Contraption contraption = entity.getContraption();
-		// The contraption could be null if it wasn't synced (ex. too much data)
-		if (contraption == null)
-			return;
+    public ContraptionVisual(VisualizationContext ctx, E entity, float partialTick) {
+        super(ctx, entity, partialTick);
+        embedding = ctx.createEmbedding(Vec3i.ZERO);
 
-		setupModel(contraption);
+        setEmbeddingMatrices(partialTick);
 
-		setupChildren(partialTick, contraption);
+        Contraption contraption = entity.getContraption();
+        // The contraption could be null if it wasn't synced (ex. too much data)
+        if (contraption == null) return;
 
-		setupActors(partialTick, contraption);
-	}
+        setupModel(contraption);
 
-	// Must be called before setup children or setup actors as this creates the render world
-	private void setupModel(Contraption contraption) {
-		virtualRenderWorld = ContraptionRenderInfo.setupRenderWorld(level, contraption);
+        setupChildren(partialTick, contraption);
 
-		RenderedBlocks blocks = contraption.getRenderedBlocks();
-		BlockAndTintGetter modelWorld = new WrappedBlockAndTintGetter(virtualRenderWorld) {
-			@Override
-			public BlockState getBlockState(BlockPos pos) {
-				return blocks.lookup().apply(pos);
-			}
-		};
+        setupActors(partialTick, contraption);
+    }
 
-		model = new BlockModelBuilder(modelWorld, blocks.positions())
-			.materialFunc((renderType, aBoolean) -> SimpleMaterial.builderOf(ModelUtil.getMaterial(renderType, aBoolean))
-				.cardinalLightingMode(CardinalLightingMode.CHUNK))
-			.build();
+    // Must be called before setup children or setup actors as this creates the render world
+    private void setupModel(Contraption contraption) {
+        virtualRenderWorld = ContraptionRenderInfo.setupRenderWorld(level, contraption);
 
-		var instancer = embedding.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, model);
+        RenderedBlocks blocks = contraption.getRenderedBlocks();
+        BlockAndTintGetter modelWorld =
+                new WrappedBlockAndTintGetter(virtualRenderWorld) {
+                    @Override
+                    public BlockState getBlockState(BlockPos pos) {
+                        return blocks.lookup().apply(pos);
+                    }
+                };
 
-		// Null in ctor, so we need to create it
-		// But we can steal it if it already exists
-		if (structure == null) {
-			structure = instancer.createInstance();
-		} else {
-			instancer.stealInstance(structure);
-		}
+        model =
+                new BlockModelBuilder(modelWorld, blocks.positions())
+                        .materialFunc(
+                                (renderType, aBoolean) ->
+                                        SimpleMaterial.builderOf(
+                                                        ModelUtil.getMaterial(renderType, aBoolean))
+                                                .cardinalLightingMode(CardinalLightingMode.CHUNK))
+                        .build();
 
-		structure.setChanged();
+        var instancer = embedding.instancerProvider().instancer(InstanceTypes.TRANSFORMED, model);
 
-	}
+        // Null in ctor, so we need to create it
+        // But we can steal it if it already exists
+        if (structure == null) {
+            structure = instancer.createInstance();
+        } else {
+            instancer.stealInstance(structure);
+        }
 
-	private void setupChildren(float partialTick, Contraption contraption) {
-		children.forEach(BlockEntityVisual::delete);
-		children.clear();
-		for (BlockEntity be : contraption.getRenderedBEs()) {
-			setupVisualizer(be, partialTick);
-		}
-	}
+        structure.setChanged();
+    }
 
-	private void setupActors(float partialTick, Contraption contraption) {
-		actors.forEach(ActorVisual::delete);
-		actors.clear();
-		for (var actor : contraption.getActors()) {
-			setupActor(actor, partialTick);
-		}
-	}
+    private void setupChildren(float partialTick, Contraption contraption) {
+        children.forEach(BlockEntityVisual::delete);
+        children.clear();
+        for (BlockEntity be : contraption.getRenderedBEs()) {
+            setupVisualizer(be, partialTick);
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	protected <T extends BlockEntity> void setupVisualizer(T be, float partialTicks) {
-		BlockEntityVisualizer<? super T> visualizer = (BlockEntityVisualizer<? super T>) VisualizerRegistry.getVisualizer(be.getType());
-		if (visualizer == null) {
-			return;
-		}
+    private void setupActors(float partialTick, Contraption contraption) {
+        actors.forEach(ActorVisual::delete);
+        actors.clear();
+        for (var actor : contraption.getActors()) {
+            setupActor(actor, partialTick);
+        }
+    }
 
-		Level level = be.getLevel();
-		be.setLevel(virtualRenderWorld);
-		BlockEntityVisual<? super T> visual = visualizer.createVisual(this.embedding, be, partialTicks);
+    @SuppressWarnings("unchecked")
+    protected <T extends BlockEntity> void setupVisualizer(T be, float partialTicks) {
+        BlockEntityVisualizer<? super T> visualizer =
+                (BlockEntityVisualizer<? super T>) VisualizerRegistry.getVisualizer(be.getType());
+        if (visualizer == null) {
+            return;
+        }
 
-		children.add(visual);
+        Level level = be.getLevel();
+        be.setLevel(virtualRenderWorld);
+        BlockEntityVisual<? super T> visual =
+                visualizer.createVisual(this.embedding, be, partialTicks);
 
-		if (visual instanceof DynamicVisual dynamic) {
-			dynamicVisuals.add(dynamic, dynamic.planFrame());
-		}
+        children.add(visual);
 
-		if (visual instanceof TickableVisual tickable) {
-			tickableVisuals.add(tickable, tickable.planTick());
-		}
+        if (visual instanceof DynamicVisual dynamic) {
+            dynamicVisuals.add(dynamic, dynamic.planFrame());
+        }
 
-		be.setLevel(level);
-	}
+        if (visual instanceof TickableVisual tickable) {
+            tickableVisuals.add(tickable, tickable.planTick());
+        }
 
-	private void setupActor(MutablePair<StructureTemplate.StructureBlockInfo, MovementContext> actor, float partialTick) {
-		MovementContext context = actor.getRight();
-		if (context == null) {
-			return;
-		}
-		if (context.world == null) {
-			context.world = level;
-		}
+        be.setLevel(level);
+    }
 
-		StructureTemplate.StructureBlockInfo blockInfo = actor.getLeft();
+    private void setupActor(
+            MutablePair<StructureTemplate.StructureBlockInfo, MovementContext> actor,
+            float partialTick) {
+        MovementContext context = actor.getRight();
+        if (context == null) {
+            return;
+        }
+        if (context.world == null) {
+            context.world = level;
+        }
 
-		MovementBehaviour movementBehaviour = MovementBehaviour.REGISTRY.get(blockInfo.state());
-		if (movementBehaviour == null) {
-			return;
-		}
-		var visual = movementBehaviour.createVisual(this.embedding, virtualRenderWorld, context);
+        StructureTemplate.StructureBlockInfo blockInfo = actor.getLeft();
 
-		if (visual == null) {
-			return;
-		}
+        MovementBehaviour movementBehaviour = MovementBehaviour.REGISTRY.get(blockInfo.state());
+        if (movementBehaviour == null) {
+            return;
+        }
+        var visual = movementBehaviour.createVisual(this.embedding, virtualRenderWorld, context);
 
-		actors.add(visual);
-	}
+        if (visual == null) {
+            return;
+        }
 
-	@Override
-	public Plan<TickableVisual.Context> planTick() {
-		return NestedPlan.of(
-			ForEachPlan.of(() -> actors, ActorVisual::tick),
-			tickableVisuals
-		);
-	}
+        actors.add(visual);
+    }
 
-	@Override
-	public Plan<DynamicVisual.Context> planFrame() {
-		return NestedPlan.of(
-			RunnablePlan.of(this::beginFrame),
-			ForEachPlan.of(() -> actors, ActorVisual::beginFrame),
-			dynamicVisuals
-		);
-	}
+    @Override
+    public Plan<TickableVisual.Context> planTick() {
+        return NestedPlan.of(ForEachPlan.of(() -> actors, ActorVisual::tick), tickableVisuals);
+    }
 
-	protected void beginFrame(DynamicVisual.Context context) {
-		var partialTick = context.partialTick();
-		setEmbeddingMatrices(partialTick);
+    @Override
+    public Plan<DynamicVisual.Context> planFrame() {
+        return NestedPlan.of(
+                RunnablePlan.of(this::beginFrame),
+                ForEachPlan.of(() -> actors, ActorVisual::beginFrame),
+                dynamicVisuals);
+    }
 
-		if (hasMovedSections()) {
-			sectionCollector.sections(collectLightSections());
-		}
+    protected void beginFrame(DynamicVisual.Context context) {
+        var partialTick = context.partialTick();
+        setEmbeddingMatrices(partialTick);
 
-		if (hasMovedBlocks()) {
-			updateLight(partialTick);
-		}
+        if (hasMovedSections()) {
+            sectionCollector.sections(collectLightSections());
+        }
 
-		var contraption = entity.getContraption();
-		if (contraption.deferInvalidate) {
-			setupModel(contraption);
-			setupChildren(partialTick, contraption);
-			setupActors(partialTick, contraption);
+        if (hasMovedBlocks()) {
+            updateLight(partialTick);
+        }
 
-			contraption.deferInvalidate = false;
-		}
-	}
+        var contraption = entity.getContraption();
+        if (contraption.deferInvalidate) {
+            setupModel(contraption);
+            setupChildren(partialTick, contraption);
+            setupActors(partialTick, contraption);
 
-	private void setEmbeddingMatrices(float partialTick) {
-		var origin = renderOrigin();
-		double x;
-		double y;
-		double z;
-		if (entity.isPrevPosInvalid()) {
-			// When the visual is created the entity's old position is often zero
-			x = entity.getX() - origin.getX();
-			y = entity.getY() - origin.getY();
-			z = entity.getZ() - origin.getZ();
+            contraption.deferInvalidate = false;
+        }
+    }
 
-		} else {
-			x = Mth.lerp(partialTick, entity.xo, entity.getX()) - origin.getX();
-			y = Mth.lerp(partialTick, entity.yo, entity.getY()) - origin.getY();
-			z = Mth.lerp(partialTick, entity.zo, entity.getZ()) - origin.getZ();
-		}
+    private void setEmbeddingMatrices(float partialTick) {
+        var origin = renderOrigin();
+        double x;
+        double y;
+        double z;
+        if (entity.isPrevPosInvalid()) {
+            // When the visual is created the entity's old position is often zero
+            x = entity.getX() - origin.getX();
+            y = entity.getY() - origin.getY();
+            z = entity.getZ() - origin.getZ();
 
-		contraptionMatrix.setIdentity();
-		contraptionMatrix.translate(x, y, z);
-		entity.applyLocalTransforms(contraptionMatrix, partialTick);
+        } else {
+            x = Mth.lerp(partialTick, entity.xo, entity.getX()) - origin.getX();
+            y = Mth.lerp(partialTick, entity.yo, entity.getY()) - origin.getY();
+            z = Mth.lerp(partialTick, entity.zo, entity.getZ()) - origin.getZ();
+        }
 
-		embedding.transforms(contraptionMatrix.last().pose(), contraptionMatrix.last().normal());
-	}
+        contraptionMatrix.setIdentity();
+        contraptionMatrix.translate(x, y, z);
+        entity.applyLocalTransforms(contraptionMatrix, partialTick);
 
-	@Override
-	public void updateLight(float partialTick) {
-	}
+        embedding.transforms(contraptionMatrix.last().pose(), contraptionMatrix.last().normal());
+    }
 
-	public LongSet collectLightSections() {
-		var boundingBox = entity.getBoundingBox();
+    @Override
+    public void updateLight(float partialTick) {}
 
-		var minSectionX = minLightSection(boundingBox.minX);
-		var minSectionY = minLightSection(boundingBox.minY);
-		var minSectionZ = minLightSection(boundingBox.minZ);
-		int maxSectionX = maxLightSection(boundingBox.maxX);
-		int maxSectionY = maxLightSection(boundingBox.maxY);
-		int maxSectionZ = maxLightSection(boundingBox.maxZ);
+    public LongSet collectLightSections() {
+        var boundingBox = entity.getBoundingBox();
 
-		minSection = SectionPos.asLong(minSectionX, minSectionY, minSectionZ);
-		maxSection = SectionPos.asLong(maxSectionX, maxSectionY, maxSectionZ);
+        var minSectionX = minLightSection(boundingBox.minX);
+        var minSectionY = minLightSection(boundingBox.minY);
+        var minSectionZ = minLightSection(boundingBox.minZ);
+        int maxSectionX = maxLightSection(boundingBox.maxX);
+        int maxSectionY = maxLightSection(boundingBox.maxY);
+        int maxSectionZ = maxLightSection(boundingBox.maxZ);
 
-		LongSet longSet = new LongArraySet();
+        minSection = SectionPos.asLong(minSectionX, minSectionY, minSectionZ);
+        maxSection = SectionPos.asLong(maxSectionX, maxSectionY, maxSectionZ);
 
-		for (int x = 0; x <= maxSectionX - minSectionX; x++) {
-			for (int y = 0; y <= maxSectionY - minSectionY; y++) {
-				for (int z = 0; z <= maxSectionZ - minSectionZ; z++) {
-					longSet.add(SectionPos.offset(minSection, x, y, z));
-				}
-			}
-		}
+        LongSet longSet = new LongArraySet();
 
-		return longSet;
-	}
+        for (int x = 0; x <= maxSectionX - minSectionX; x++) {
+            for (int y = 0; y <= maxSectionY - minSectionY; y++) {
+                for (int z = 0; z <= maxSectionZ - minSectionZ; z++) {
+                    longSet.add(SectionPos.offset(minSection, x, y, z));
+                }
+            }
+        }
 
-	protected boolean hasMovedBlocks() {
-		var boundingBox = entity.getBoundingBox();
+        return longSet;
+    }
 
-		int minX = minLight(boundingBox.minX);
-		int minY = minLight(boundingBox.minY);
-		int minZ = minLight(boundingBox.minZ);
-		int maxX = maxLight(boundingBox.maxX);
-		int maxY = maxLight(boundingBox.maxY);
-		int maxZ = maxLight(boundingBox.maxZ);
+    protected boolean hasMovedBlocks() {
+        var boundingBox = entity.getBoundingBox();
 
-		return minBlock != BlockPos.asLong(minX, minY, minZ) || maxBlock != BlockPos.asLong(maxX, maxY, maxZ);
-	}
+        int minX = minLight(boundingBox.minX);
+        int minY = minLight(boundingBox.minY);
+        int minZ = minLight(boundingBox.minZ);
+        int maxX = maxLight(boundingBox.maxX);
+        int maxY = maxLight(boundingBox.maxY);
+        int maxZ = maxLight(boundingBox.maxZ);
 
-	protected boolean hasMovedSections() {
-		var boundingBox = entity.getBoundingBox();
+        return minBlock != BlockPos.asLong(minX, minY, minZ)
+                || maxBlock != BlockPos.asLong(maxX, maxY, maxZ);
+    }
 
-		var minSectionX = minLightSection(boundingBox.minX);
-		var minSectionY = minLightSection(boundingBox.minY);
-		var minSectionZ = minLightSection(boundingBox.minZ);
-		int maxSectionX = maxLightSection(boundingBox.maxX);
-		int maxSectionY = maxLightSection(boundingBox.maxY);
-		int maxSectionZ = maxLightSection(boundingBox.maxZ);
+    protected boolean hasMovedSections() {
+        var boundingBox = entity.getBoundingBox();
 
-		return minSection != SectionPos.asLong(minSectionX, minSectionY, minSectionZ) || maxSection != SectionPos.asLong(maxSectionX, maxSectionY, maxSectionZ);
-	}
+        var minSectionX = minLightSection(boundingBox.minX);
+        var minSectionY = minLightSection(boundingBox.minY);
+        var minSectionZ = minLightSection(boundingBox.minZ);
+        int maxSectionX = maxLightSection(boundingBox.maxX);
+        int maxSectionY = maxLightSection(boundingBox.maxY);
+        int maxSectionZ = maxLightSection(boundingBox.maxZ);
 
-	@Override
-	public void setSectionCollector(SectionCollector collector) {
-		this.sectionCollector = collector;
-	}
+        return minSection != SectionPos.asLong(minSectionX, minSectionY, minSectionZ)
+                || maxSection != SectionPos.asLong(maxSectionX, maxSectionY, maxSectionZ);
+    }
 
-	@Override
-	protected void _delete() {
-		children.forEach(BlockEntityVisual::delete);
+    @Override
+    public void setSectionCollector(SectionCollector collector) {
+        this.sectionCollector = collector;
+    }
 
-		actors.forEach(ActorVisual::delete);
+    @Override
+    protected void _delete() {
+        children.forEach(BlockEntityVisual::delete);
 
-		if (structure != null) {
-			structure.delete();
-		}
-	}
+        actors.forEach(ActorVisual::delete);
 
-	public static int minLight(double aabbPos) {
-		return Mth.floor(aabbPos) - LIGHT_PADDING;
-	}
+        if (structure != null) {
+            structure.delete();
+        }
+    }
 
-	public static int maxLight(double aabbPos) {
-		return Mth.ceil(aabbPos) + LIGHT_PADDING;
-	}
+    public static int minLight(double aabbPos) {
+        return Mth.floor(aabbPos) - LIGHT_PADDING;
+    }
 
-	public static int minLightSection(double aabbPos) {
-		return SectionPos.blockToSectionCoord(minLight(aabbPos));
-	}
+    public static int maxLight(double aabbPos) {
+        return Mth.ceil(aabbPos) + LIGHT_PADDING;
+    }
 
-	public static int maxLightSection(double aabbPos) {
-		return SectionPos.blockToSectionCoord(maxLight(aabbPos));
-	}
+    public static int minLightSection(double aabbPos) {
+        return SectionPos.blockToSectionCoord(minLight(aabbPos));
+    }
+
+    public static int maxLightSection(double aabbPos) {
+        return SectionPos.blockToSectionCoord(maxLight(aabbPos));
+    }
 }

@@ -4,5 +4,5 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 
 @FunctionalInterface
 public interface BogeyVisualizer {
-	BogeyVisual createVisual(VisualizationContext ctx, float partialTick, boolean inContraption);
+    BogeyVisual createVisual(VisualizationContext ctx, float partialTick, boolean inContraption);
 }

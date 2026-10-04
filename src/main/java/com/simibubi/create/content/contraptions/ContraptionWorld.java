@@ -12,50 +12,59 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class ContraptionWorld extends WrappedLevel {
     final Contraption contraption;
-	private final int minY;
-	private final int height;
+    private final int minY;
+    private final int height;
 
-	public ContraptionWorld(Level world, Contraption contraption) {
+    public ContraptionWorld(Level world, Contraption contraption) {
         super(world);
 
         this.contraption = contraption;
 
-		// Include 1 block above/below contraption height range to avoid certain edge-case Starlight crashes with
-		// downward-facing mechanical pistons.
-		minY = nextMultipleOf16(contraption.bounds.minY - 1);
-		height = nextMultipleOf16(contraption.bounds.maxY + 1) - minY;
-	}
+        // Include 1 block above/below contraption height range to avoid certain edge-case Starlight
+        // crashes with
+        // downward-facing mechanical pistons.
+        minY = nextMultipleOf16(contraption.bounds.minY - 1);
+        height = nextMultipleOf16(contraption.bounds.maxY + 1) - minY;
+    }
 
-	// https://math.stackexchange.com/questions/291468
-	private static int nextMultipleOf16(double a) {
-		return (((Math.abs((int) a) - 1) | 15) + 1) * Mth.sign(a);
-	}
+    // https://math.stackexchange.com/questions/291468
+    private static int nextMultipleOf16(double a) {
+        return (((Math.abs((int) a) - 1) | 15) + 1) * Mth.sign(a);
+    }
 
-	@Override
+    @Override
     public BlockState getBlockState(BlockPos pos) {
         StructureTemplate.StructureBlockInfo blockInfo = contraption.getBlocks().get(pos);
 
-        if (blockInfo != null)
-            return blockInfo.state();
+        if (blockInfo != null) return blockInfo.state();
 
         return Blocks.AIR.defaultBlockState();
     }
 
     @Override
-    public void playLocalSound(double x, double y, double z, SoundEvent sound, SoundSource category, float volume, float pitch, boolean distanceDelay) {
+    public void playLocalSound(
+            double x,
+            double y,
+            double z,
+            SoundEvent sound,
+            SoundSource category,
+            float volume,
+            float pitch,
+            boolean distanceDelay) {
         level.playLocalSound(x, y, z, sound, category, volume, pitch, distanceDelay);
     }
 
-	// Ensure that we provide accurate information about ContraptionWorld height to mods (such as Starlight) which
-	// expect Levels to only have blocks located in chunks within their height range.
+    // Ensure that we provide accurate information about ContraptionWorld height to mods (such as
+    // Starlight) which
+    // expect Levels to only have blocks located in chunks within their height range.
 
-	@Override
-	public int getHeight() {
-		return height;
-	}
+    @Override
+    public int getHeight() {
+        return height;
+    }
 
-	@Override
-	public int getMinBuildHeight() {
-		return minY;
-	}
+    @Override
+    public int getMinBuildHeight() {
+        return minY;
+    }
 }

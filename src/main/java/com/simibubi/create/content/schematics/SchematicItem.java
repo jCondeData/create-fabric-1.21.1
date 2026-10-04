@@ -1,19 +1,5 @@
 package com.simibubi.create.content.schematics;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllItems;
@@ -42,125 +28,140 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import org.slf4j.Logger;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+
+import javax.annotation.Nonnull;
+
 public class SchematicItem extends Item {
 
-	private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
-	public SchematicItem(Properties properties) {
-		super(properties);
-	}
+    public SchematicItem(Properties properties) {
+        super(properties);
+    }
 
-	public static ItemStack create(Level level, String schematic, String owner) {
-		ItemStack blueprint = AllItems.SCHEMATIC.asStack();
+    public static ItemStack create(Level level, String schematic, String owner) {
+        ItemStack blueprint = AllItems.SCHEMATIC.asStack();
 
-		blueprint.set(AllDataComponents.SCHEMATIC_DEPLOYED, false);
-		blueprint.set(AllDataComponents.SCHEMATIC_OWNER, owner);
-		blueprint.set(AllDataComponents.SCHEMATIC_FILE, schematic);
-		blueprint.set(AllDataComponents.SCHEMATIC_ANCHOR, BlockPos.ZERO);
-		blueprint.set(AllDataComponents.SCHEMATIC_ROTATION, Rotation.NONE);
-		blueprint.set(AllDataComponents.SCHEMATIC_MIRROR, Mirror.NONE);
+        blueprint.set(AllDataComponents.SCHEMATIC_DEPLOYED, false);
+        blueprint.set(AllDataComponents.SCHEMATIC_OWNER, owner);
+        blueprint.set(AllDataComponents.SCHEMATIC_FILE, schematic);
+        blueprint.set(AllDataComponents.SCHEMATIC_ANCHOR, BlockPos.ZERO);
+        blueprint.set(AllDataComponents.SCHEMATIC_ROTATION, Rotation.NONE);
+        blueprint.set(AllDataComponents.SCHEMATIC_MIRROR, Mirror.NONE);
 
-		writeSize(level, blueprint);
-		return blueprint;
-	}
+        writeSize(level, blueprint);
+        return blueprint;
+    }
 
-	@Override
-	@OnlyIn(value = Dist.CLIENT)
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
-		if (stack.has(AllDataComponents.SCHEMATIC_FILE)) {
-			tooltip.add(Component.literal(ChatFormatting.GOLD + stack.get(AllDataComponents.SCHEMATIC_FILE)));
-		} else {
-			tooltip.add(CreateLang.translateDirect("schematic.invalid").withStyle(ChatFormatting.RED));
-		}
-		super.appendHoverText(stack, context, tooltip, flagIn);
-	}
+    @Override
+    @OnlyIn(value = Dist.CLIENT)
+    public void appendHoverText(
+            ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        if (stack.has(AllDataComponents.SCHEMATIC_FILE)) {
+            tooltip.add(
+                    Component.literal(
+                            ChatFormatting.GOLD + stack.get(AllDataComponents.SCHEMATIC_FILE)));
+        } else {
+            tooltip.add(
+                    CreateLang.translateDirect("schematic.invalid").withStyle(ChatFormatting.RED));
+        }
+        super.appendHoverText(stack, context, tooltip, flagIn);
+    }
 
-	public static void writeSize(Level level, ItemStack blueprint) {
-		StructureTemplate t = loadSchematic(level, blueprint);
-		blueprint.set(AllDataComponents.SCHEMATIC_BOUNDS, t.getSize());
-		SchematicInstances.clearHash(blueprint);
-	}
+    public static void writeSize(Level level, ItemStack blueprint) {
+        StructureTemplate t = loadSchematic(level, blueprint);
+        blueprint.set(AllDataComponents.SCHEMATIC_BOUNDS, t.getSize());
+        SchematicInstances.clearHash(blueprint);
+    }
 
-	public static StructurePlaceSettings getSettings(ItemStack blueprint) {
-		return getSettings(blueprint, true);
-	}
+    public static StructurePlaceSettings getSettings(ItemStack blueprint) {
+        return getSettings(blueprint, true);
+    }
 
-	public static StructurePlaceSettings getSettings(ItemStack blueprint, boolean processNBT) {
-		StructurePlaceSettings settings = new StructurePlaceSettings();
-		settings.setRotation(blueprint.getOrDefault(AllDataComponents.SCHEMATIC_ROTATION, Rotation.NONE));
-		settings.setMirror(blueprint.getOrDefault(AllDataComponents.SCHEMATIC_MIRROR, Mirror.NONE));
-		if (processNBT)
-			settings.addProcessor(SchematicProcessor.INSTANCE);
-		return settings;
-	}
+    public static StructurePlaceSettings getSettings(ItemStack blueprint, boolean processNBT) {
+        StructurePlaceSettings settings = new StructurePlaceSettings();
+        settings.setRotation(
+                blueprint.getOrDefault(AllDataComponents.SCHEMATIC_ROTATION, Rotation.NONE));
+        settings.setMirror(blueprint.getOrDefault(AllDataComponents.SCHEMATIC_MIRROR, Mirror.NONE));
+        if (processNBT) settings.addProcessor(SchematicProcessor.INSTANCE);
+        return settings;
+    }
 
-	public static StructureTemplate loadSchematic(Level level, ItemStack blueprint) {
-		StructureTemplate t = new StructureTemplate();
-		String owner = blueprint.get(AllDataComponents.SCHEMATIC_OWNER);
-		String schematic = blueprint.get(AllDataComponents.SCHEMATIC_FILE);
+    public static StructureTemplate loadSchematic(Level level, ItemStack blueprint) {
+        StructureTemplate t = new StructureTemplate();
+        String owner = blueprint.get(AllDataComponents.SCHEMATIC_OWNER);
+        String schematic = blueprint.get(AllDataComponents.SCHEMATIC_FILE);
 
-		if (owner == null || schematic == null || !schematic.endsWith(".nbt"))
-			return t;
+        if (owner == null || schematic == null || !schematic.endsWith(".nbt")) return t;
 
-		Path dir;
-		Path file;
+        Path dir;
+        Path file;
 
-		if (!level.isClientSide()) {
-			dir = Paths.get("schematics", "uploaded").toAbsolutePath();
-			file = Paths.get(owner, schematic);
-		} else {
-			dir = Paths.get("schematics").toAbsolutePath();
-			file = Paths.get(schematic);
-		}
+        if (!level.isClientSide()) {
+            dir = Paths.get("schematics", "uploaded").toAbsolutePath();
+            file = Paths.get(owner, schematic);
+        } else {
+            dir = Paths.get("schematics").toAbsolutePath();
+            file = Paths.get(schematic);
+        }
 
-		Path path = dir.resolve(file).normalize();
-		if (!path.startsWith(dir))
-			return t;
+        Path path = dir.resolve(file).normalize();
+        if (!path.startsWith(dir)) return t;
 
-		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(
-				new GZIPInputStream(Files.newInputStream(path, StandardOpenOption.READ))))) {
-			CompoundTag nbt = NbtIo.read(stream, NbtAccounter.create(0x20000000L));
-			t.load(level.holderLookup(Registries.BLOCK), nbt);
-		} catch (IOException e) {
-			LOGGER.warn("Failed to read schematic", e);
-		}
+        try (DataInputStream stream =
+                new DataInputStream(
+                        new BufferedInputStream(
+                                new GZIPInputStream(
+                                        Files.newInputStream(path, StandardOpenOption.READ))))) {
+            CompoundTag nbt = NbtIo.read(stream, NbtAccounter.create(0x20000000L));
+            t.load(level.holderLookup(Registries.BLOCK), nbt);
+        } catch (IOException e) {
+            LOGGER.warn("Failed to read schematic", e);
+        }
 
-		return t;
-	}
+        return t;
+    }
 
-	@Nonnull
-	@Override
-	public InteractionResult useOn(UseOnContext context) {
-		if (context.getPlayer() != null && !onItemUse(context.getPlayer(), context.getHand()))
-			return super.useOn(context);
-		return InteractionResult.SUCCESS;
-	}
+    @Nonnull
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        if (context.getPlayer() != null && !onItemUse(context.getPlayer(), context.getHand()))
+            return super.useOn(context);
+        return InteractionResult.SUCCESS;
+    }
 
-	@Override
-	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-		if (!onItemUse(playerIn, handIn))
-			return super.use(worldIn, playerIn, handIn);
-		return new InteractionResultHolder<>(InteractionResult.SUCCESS, playerIn.getItemInHand(handIn));
-	}
+    @Override
+    public InteractionResultHolder<ItemStack> use(
+            Level worldIn, Player playerIn, InteractionHand handIn) {
+        if (!onItemUse(playerIn, handIn)) return super.use(worldIn, playerIn, handIn);
+        return new InteractionResultHolder<>(
+                InteractionResult.SUCCESS, playerIn.getItemInHand(handIn));
+    }
 
-	private boolean onItemUse(Player player, InteractionHand hand) {
-		if (!player.isShiftKeyDown() || hand != InteractionHand.MAIN_HAND)
-			return false;
-		if (!player.getItemInHand(hand).has(AllDataComponents.SCHEMATIC_FILE))
-			return false;
-		if (!player.level().isClientSide())
-			return true;
-		CatnipServices.PLATFORM.executeOnClientOnly(() -> this::displayBlueprintScreen);
-		return true;
-	}
+    private boolean onItemUse(Player player, InteractionHand hand) {
+        if (!player.isShiftKeyDown() || hand != InteractionHand.MAIN_HAND) return false;
+        if (!player.getItemInHand(hand).has(AllDataComponents.SCHEMATIC_FILE)) return false;
+        if (!player.level().isClientSide()) return true;
+        CatnipServices.PLATFORM.executeOnClientOnly(() -> this::displayBlueprintScreen);
+        return true;
+    }
 
-	@OnlyIn(value = Dist.CLIENT)
-	protected void displayBlueprintScreen() {
-		ScreenOpener.open(new SchematicEditScreen());
-	}
-
+    @OnlyIn(value = Dist.CLIENT)
+    protected void displayBlueprintScreen() {
+        ScreenOpener.open(new SchematicEditScreen());
+    }
 }

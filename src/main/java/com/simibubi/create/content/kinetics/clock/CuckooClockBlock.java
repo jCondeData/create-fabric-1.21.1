@@ -18,65 +18,70 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class CuckooClockBlock extends HorizontalKineticBlock implements IBE<CuckooClockBlockEntity> {
+public class CuckooClockBlock extends HorizontalKineticBlock
+        implements IBE<CuckooClockBlockEntity> {
 
-	private boolean mysterious;
+    private boolean mysterious;
 
-	public static CuckooClockBlock regular(Properties properties) {
-		return new CuckooClockBlock(false, properties);
-	}
+    public static CuckooClockBlock regular(Properties properties) {
+        return new CuckooClockBlock(false, properties);
+    }
 
-	public static CuckooClockBlock mysterious(Properties properties) {
-		return new CuckooClockBlock(true, properties);
-	}
+    public static CuckooClockBlock mysterious(Properties properties) {
+        return new CuckooClockBlock(true, properties);
+    }
 
-	protected CuckooClockBlock(boolean mysterious, Properties properties) {
-		super(properties);
-		this.mysterious = mysterious;
-	}
+    protected CuckooClockBlock(boolean mysterious, Properties properties) {
+        super(properties);
+        this.mysterious = mysterious;
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_,
-		CollisionContext p_220053_4_) {
-		return AllShapes.CUCKOO_CLOCK;
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState p_220053_1_,
+            BlockGetter p_220053_2_,
+            BlockPos p_220053_3_,
+            CollisionContext p_220053_4_) {
+        return AllShapes.CUCKOO_CLOCK;
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		Direction preferred = getPreferredHorizontalFacing(context);
-		if (preferred != null)
-			return defaultBlockState().setValue(HORIZONTAL_FACING, preferred.getOpposite());
-		return this.defaultBlockState().setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        Direction preferred = getPreferredHorizontalFacing(context);
+        if (preferred != null)
+            return defaultBlockState().setValue(HORIZONTAL_FACING, preferred.getOpposite());
+        return this.defaultBlockState()
+                .setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
+    }
 
-	@Override
-	public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-		return face == state.getValue(HORIZONTAL_FACING).getOpposite();
-	}
+    @Override
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return face == state.getValue(HORIZONTAL_FACING).getOpposite();
+    }
 
-	public static boolean containsSurprise(BlockState state) {
-		Block block = state.getBlock();
-		return block instanceof CuckooClockBlock && ((CuckooClockBlock) block).mysterious;
-	}
+    public static boolean containsSurprise(BlockState state) {
+        Block block = state.getBlock();
+        return block instanceof CuckooClockBlock && ((CuckooClockBlock) block).mysterious;
+    }
 
-	@Override
-	public Axis getRotationAxis(BlockState state) {
-		return state.getValue(HORIZONTAL_FACING).getAxis();
-	}
+    @Override
+    public Axis getRotationAxis(BlockState state) {
+        return state.getValue(HORIZONTAL_FACING).getAxis();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	public Class<CuckooClockBlockEntity> getBlockEntityClass() {
-		return CuckooClockBlockEntity.class;
-	}
+    @Override
+    public Class<CuckooClockBlockEntity> getBlockEntityClass() {
+        return CuckooClockBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends CuckooClockBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.CUCKOO_CLOCK.get();
-	}
-
+    @Override
+    public BlockEntityType<? extends CuckooClockBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.CUCKOO_CLOCK.get();
+    }
 }

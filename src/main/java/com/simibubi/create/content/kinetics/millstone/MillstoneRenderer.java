@@ -10,13 +10,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class MillstoneRenderer extends KineticBlockEntityRenderer<MillstoneBlockEntity> {
 
-	public MillstoneRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public MillstoneRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected SuperByteBuffer getRotatedModel(MillstoneBlockEntity be, BlockState state) {
-		return CachedBuffers.partial(AllPartialModels.MILLSTONE_COG, state);
-	}
-
+    @Override
+    protected SuperByteBuffer getRotatedModel(MillstoneBlockEntity be, BlockState state) {
+        return CachedBuffers.partial(AllPartialModels.MILLSTONE_COG, state);
+    }
 }

@@ -1,7 +1,5 @@
 package com.simibubi.create.content.fluids.tank.storage.creative;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.simibubi.create.api.contraption.storage.fluid.MountedFluidStorageType;
 import com.simibubi.create.content.fluids.tank.CreativeFluidTankBlockEntity;
 
@@ -10,18 +8,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CreativeFluidTankMountedStorageType extends MountedFluidStorageType<CreativeFluidTankMountedStorage> {
-	public CreativeFluidTankMountedStorageType() {
-		super(CreativeFluidTankMountedStorage.CODEC);
-	}
+import org.jetbrains.annotations.Nullable;
 
-	@Override
-	@Nullable
-	public CreativeFluidTankMountedStorage mount(Level level, BlockState state, BlockPos pos, @Nullable BlockEntity be) {
-		if (be instanceof CreativeFluidTankBlockEntity tank) {
-			return CreativeFluidTankMountedStorage.fromTank(tank);
-		}
+public class CreativeFluidTankMountedStorageType
+        extends MountedFluidStorageType<CreativeFluidTankMountedStorage> {
+    public CreativeFluidTankMountedStorageType() {
+        super(CreativeFluidTankMountedStorage.CODEC);
+    }
 
-		return null;
-	}
+    @Override
+    @Nullable
+    public CreativeFluidTankMountedStorage mount(
+            Level level, BlockState state, BlockPos pos, @Nullable BlockEntity be) {
+        if (be instanceof CreativeFluidTankBlockEntity tank) {
+            return CreativeFluidTankMountedStorage.fromTank(tank);
+        }
+
+        return null;
+    }
 }

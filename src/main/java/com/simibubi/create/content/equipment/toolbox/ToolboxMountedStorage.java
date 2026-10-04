@@ -1,7 +1,5 @@
 package com.simibubi.create.content.equipment.toolbox;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.AllMountedStorageTypes;
 import com.simibubi.create.api.contraption.storage.item.MountedItemStorageType;
@@ -19,43 +17,48 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 
+import org.jetbrains.annotations.Nullable;
+
 public class ToolboxMountedStorage extends WrapperMountedItemStorage<ToolboxInventory> {
-	public static final MapCodec<ToolboxMountedStorage> CODEC = ToolboxInventory.CODEC.xmap(
-		ToolboxMountedStorage::new, storage -> storage.wrapped
-	).fieldOf("value");
+    public static final MapCodec<ToolboxMountedStorage> CODEC =
+            ToolboxInventory.CODEC
+                    .xmap(ToolboxMountedStorage::new, storage -> storage.wrapped)
+                    .fieldOf("value");
 
-	protected ToolboxMountedStorage(MountedItemStorageType<?> type, ToolboxInventory wrapped) {
-		super(type, wrapped);
-	}
+    protected ToolboxMountedStorage(MountedItemStorageType<?> type, ToolboxInventory wrapped) {
+        super(type, wrapped);
+    }
 
-	protected ToolboxMountedStorage(ToolboxInventory wrapped) {
-		this(AllMountedStorageTypes.TOOLBOX.get(), wrapped);
-	}
+    protected ToolboxMountedStorage(ToolboxInventory wrapped) {
+        this(AllMountedStorageTypes.TOOLBOX.get(), wrapped);
+    }
 
-	@Override
-	public void unmount(Level level, BlockState state, BlockPos pos, @Nullable BlockEntity be) {
-		if (be instanceof ToolboxBlockEntity toolbox) {
-			ItemHelper.copyContents(this, toolbox.inventory);
-		}
-	}
+    @Override
+    public void unmount(Level level, BlockState state, BlockPos pos, @Nullable BlockEntity be) {
+        if (be instanceof ToolboxBlockEntity toolbox) {
+            ItemHelper.copyContents(this, toolbox.inventory);
+        }
+    }
 
-	@Override
-	public boolean handleInteraction(ServerPlayer player, Contraption contraption, StructureBlockInfo info) {
-		// The default impl will fail anyway, might as well cancel trying
-		return false;
-	}
+    @Override
+    public boolean handleInteraction(
+            ServerPlayer player, Contraption contraption, StructureBlockInfo info) {
+        // The default impl will fail anyway, might as well cancel trying
+        return false;
+    }
 
-	public static ToolboxMountedStorage fromToolbox(ToolboxBlockEntity toolbox) {
-		// the inventory will send updates to the block entity, make an isolated copy to avoid that
-		ToolboxInventory copy = new ToolboxInventory(null);
-		ItemHelper.copyContents(toolbox.inventory, copy);
-		copy.filters = toolbox.inventory.filters.stream().map(ItemStack::copy).toList();
-		return new ToolboxMountedStorage(copy);
-	}
+    public static ToolboxMountedStorage fromToolbox(ToolboxBlockEntity toolbox) {
+        // the inventory will send updates to the block entity, make an isolated copy to avoid that
+        ToolboxInventory copy = new ToolboxInventory(null);
+        ItemHelper.copyContents(toolbox.inventory, copy);
+        copy.filters = toolbox.inventory.filters.stream().map(ItemStack::copy).toList();
+        return new ToolboxMountedStorage(copy);
+    }
 
-	public static ToolboxMountedStorage fromLegacy(HolderLookup.Provider registries, CompoundTag nbt) {
-		ToolboxInventory inv = new ToolboxInventory(null);
-		inv.deserializeNBT(registries, nbt);
-		return new ToolboxMountedStorage(inv);
-	}
+    public static ToolboxMountedStorage fromLegacy(
+            HolderLookup.Provider registries, CompoundTag nbt) {
+        ToolboxInventory inv = new ToolboxInventory(null);
+        inv.deserializeNBT(registries, nbt);
+        return new ToolboxMountedStorage(inv);
+    }
 }

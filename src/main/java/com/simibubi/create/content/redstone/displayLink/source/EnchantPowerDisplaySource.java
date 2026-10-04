@@ -16,38 +16,38 @@ import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 
 public class EnchantPowerDisplaySource extends NumericSingleLineDisplaySource {
 
-	protected static final RandomSource random = RandomSource.create();
-	protected static final ItemStack stack = new ItemStack(Items.DIAMOND_PICKAXE);
+    protected static final RandomSource random = RandomSource.create();
+    protected static final ItemStack stack = new ItemStack(Items.DIAMOND_PICKAXE);
 
-	@Override
-	protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
-		if (!(context.getSourceBlockEntity() instanceof EnchantingTableBlockEntity))
-			return ZERO.copy();
+    @Override
+    protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
+        if (!(context.getSourceBlockEntity() instanceof EnchantingTableBlockEntity))
+            return ZERO.copy();
 
-		BlockPos pos = context.getSourcePos();
-		Level level = context.level();
-		float enchantPower = 0;
+        BlockPos pos = context.getSourcePos();
+        Level level = context.level();
+        float enchantPower = 0;
 
-		for(BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
-			if (!EnchantingTableBlock.isValidBookShelf(level, pos, offset))
-				continue;
+        for (BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
+            if (!EnchantingTableBlock.isValidBookShelf(level, pos, offset)) continue;
 
-			enchantPower += level.getBlockState(pos.offset(offset)).getEnchantPowerBonus(level, pos.offset(offset));
-		}
+            enchantPower +=
+                    level.getBlockState(pos.offset(offset))
+                            .getEnchantPowerBonus(level, pos.offset(offset));
+        }
 
+        int cost = EnchantmentHelper.getEnchantmentCost(random, 2, (int) enchantPower, stack);
 
-		int cost = EnchantmentHelper.getEnchantmentCost(random, 2, (int) enchantPower, stack);
+        return Component.literal(String.valueOf(cost));
+    }
 
-		return Component.literal(String.valueOf(cost));
-	}
+    @Override
+    protected String getTranslationKey() {
+        return "max_enchant_level";
+    }
 
-	@Override
-	protected String getTranslationKey() {
-		return "max_enchant_level";
-	}
-
-	@Override
-	protected boolean allowsLabeling(DisplayLinkContext context) {
-		return true;
-	}
+    @Override
+    protected boolean allowsLabeling(DisplayLinkContext context) {
+        return true;
+    }
 }

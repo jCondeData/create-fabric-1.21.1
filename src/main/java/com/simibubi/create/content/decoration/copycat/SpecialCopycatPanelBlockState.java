@@ -14,33 +14,32 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 public class SpecialCopycatPanelBlockState extends SpecialBlockStateGen {
 
-	private String name;
+    private String name;
 
-	public SpecialCopycatPanelBlockState(String name) {
-		this.name = name;
-	}
+    public SpecialCopycatPanelBlockState(String name) {
+        this.name = name;
+    }
 
-	@Override
-	protected int getXRotation(BlockState state) {
-		return facing(state) == Direction.UP ? 0 : facing(state) == Direction.DOWN ? 180 : 0;
-	}
+    @Override
+    protected int getXRotation(BlockState state) {
+        return facing(state) == Direction.UP ? 0 : facing(state) == Direction.DOWN ? 180 : 0;
+    }
 
-	@Override
-	protected int getYRotation(BlockState state) {
-		return horizontalAngle(facing(state));
-	}
+    @Override
+    protected int getYRotation(BlockState state) {
+        return horizontalAngle(facing(state));
+    }
 
-	private Direction facing(BlockState state) {
-		return state.getValue(DirectionalBlock.FACING);
-	}
+    private Direction facing(BlockState state) {
+        return state.getValue(DirectionalBlock.FACING);
+    }
 
-	@Override
-	public <T extends Block> ModelFile getModel(DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov,
-		BlockState state) {
-		BlockModelProvider models = prov.models();
-		return facing(state).getAxis() == Axis.Y
-			? models.getExistingFile(prov.modLoc("block/copycat_panel/" + name + "_vertical"))
-			: models.getExistingFile(prov.modLoc("block/copycat_panel/" + name));
-	}
-
+    @Override
+    public <T extends Block> ModelFile getModel(
+            DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov, BlockState state) {
+        BlockModelProvider models = prov.models();
+        return facing(state).getAxis() == Axis.Y
+                ? models.getExistingFile(prov.modLoc("block/copycat_panel/" + name + "_vertical"))
+                : models.getExistingFile(prov.modLoc("block/copycat_panel/" + name));
+    }
 }

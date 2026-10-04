@@ -8,15 +8,18 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public class FunctionalStorage implements ThresholdSwitchCompat {
 
-	@Override
-	public boolean isFromThisMod(BlockEntity blockEntity) {
-		return blockEntity != null && Mods.FUNCTIONALSTORAGE.id()
-			.equals(RegisteredObjectsHelper.getKeyOrThrow(blockEntity.getType())
-				.getNamespace());
-	}
+    @Override
+    public boolean isFromThisMod(BlockEntity blockEntity) {
+        return blockEntity != null
+                && Mods.FUNCTIONALSTORAGE
+                        .id()
+                        .equals(
+                                RegisteredObjectsHelper.getKeyOrThrow(blockEntity.getType())
+                                        .getNamespace());
+    }
 
-	@Override
-	public long getSpaceInSlot(IItemHandler inv, int slot) {
-		return inv.getSlotLimit(slot);
-	}
+    @Override
+    public long getSpaceInSlot(IItemHandler inv, int slot) {
+        return inv.getSlotLimit(slot);
+    }
 }

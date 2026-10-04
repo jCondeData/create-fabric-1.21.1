@@ -1,7 +1,5 @@
 package com.simibubi.create.content.logistics.redstoneRequester;
 
-import java.util.List;
-
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllDataComponents;
@@ -42,142 +40,164 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class RedstoneRequesterBlock extends Block implements IBE<RedstoneRequesterBlockEntity>, IWrenchable {
+import java.util.List;
 
-	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-	public static final EnumProperty<Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
+public class RedstoneRequesterBlock extends Block
+        implements IBE<RedstoneRequesterBlockEntity>, IWrenchable {
 
-	public RedstoneRequesterBlock(Properties pProperties) {
-		super(pProperties);
-		registerDefaultState(defaultBlockState().setValue(POWERED, false));
-	}
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final EnumProperty<Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
-	@Override
-	protected void createBlockStateDefinition(
-		net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(POWERED, AXIS));
-	}
+    public RedstoneRequesterBlock(Properties pProperties) {
+        super(pProperties);
+        registerDefaultState(defaultBlockState().setValue(POWERED, false));
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		BlockState stateForPlacement = super.getStateForPlacement(pContext);
-		if (stateForPlacement == null)
-			return null;
-		return stateForPlacement.setValue(AXIS, pContext.getHorizontalDirection()
-			.getAxis())
-			.setValue(POWERED, pContext.getLevel()
-				.hasNeighborSignal(pContext.getClickedPos()));
-	}
+    @Override
+    protected void createBlockStateDefinition(
+            net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState>
+                    pBuilder) {
+        super.createBlockStateDefinition(pBuilder.add(POWERED, AXIS));
+    }
 
-	@Override
-	public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side) {
-		return false;
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        BlockState stateForPlacement = super.getStateForPlacement(pContext);
+        if (stateForPlacement == null) return null;
+        return stateForPlacement
+                .setValue(AXIS, pContext.getHorizontalDirection().getAxis())
+                .setValue(POWERED, pContext.getLevel().hasNeighborSignal(pContext.getClickedPos()));
+    }
 
-	@Override
-	public boolean hasAnalogOutputSignal(BlockState pState) {
-		return true;
-	}
+    @Override
+    public boolean shouldCheckWeakPower(
+            BlockState state, SignalGetter level, BlockPos pos, Direction side) {
+        return false;
+    }
 
-	@Override
-	public int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
-		RedstoneRequesterBlockEntity req = getBlockEntity(pLevel, pPos);
-		return req != null && req.lastRequestSucceeded ? 15 : 0;
-	}
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState pState) {
+        return true;
+    }
 
-	@Override
-	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		return onBlockEntityUse(level, pos, be -> be.use(player));
-	}
+    @Override
+    public int getAnalogOutputSignal(BlockState pBlockState, Level pLevel, BlockPos pPos) {
+        RedstoneRequesterBlockEntity req = getBlockEntity(pLevel, pPos);
+        return req != null && req.lastRequestSucceeded ? 15 : 0;
+    }
 
-	public static void programRequester(ServerPlayer player, StockTickerBlockEntity be, PackageOrder order,
-		String address, PackageOrder orderContext) {
-		ItemStack stack = player.getMainHandItem();
-		boolean isRequester = AllBlocks.REDSTONE_REQUESTER.isIn(stack);
-		boolean isShopCloth = AllItemTags.TABLE_CLOTHS.matches(stack);
-		if (!isRequester && !isShopCloth)
-			return;
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        return onBlockEntityUse(level, pos, be -> be.use(player));
+    }
 
-		String targetDim = player.level()
-			.dimension()
-			.location()
-			.toString();
-		AutoRequestData autoRequestData = new AutoRequestData(order, orderContext, address, be.getBlockPos(), targetDim, false);
+    public static void programRequester(
+            ServerPlayer player,
+            StockTickerBlockEntity be,
+            PackageOrder order,
+            String address,
+            PackageOrder orderContext) {
+        ItemStack stack = player.getMainHandItem();
+        boolean isRequester = AllBlocks.REDSTONE_REQUESTER.isIn(stack);
+        boolean isShopCloth = AllItemTags.TABLE_CLOTHS.matches(stack);
+        if (!isRequester && !isShopCloth) return;
 
-		autoRequestData.writeToItem(BlockPos.ZERO, stack);
+        String targetDim = player.level().dimension().location().toString();
+        AutoRequestData autoRequestData =
+                new AutoRequestData(
+                        order, orderContext, address, be.getBlockPos(), targetDim, false);
 
-		if (isRequester) {
-			CompoundTag beTag = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
-			beTag.putUUID("Freq", be.behaviour.freqId);
-			BlockEntity.addEntityType(beTag, AllBlockEntityTypes.REDSTONE_REQUESTER.get());
-			stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
-		}
+        autoRequestData.writeToItem(BlockPos.ZERO, stack);
 
-		player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-	}
+        if (isRequester) {
+            CompoundTag beTag =
+                    stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY)
+                            .copyTag();
+            beTag.putUUID("Freq", be.behaviour.freqId);
+            BlockEntity.addEntityType(beTag, AllBlockEntityTypes.REDSTONE_REQUESTER.get());
+            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+        }
 
-	public static void appendRequesterTooltip(ItemStack pStack, List<Component> pTooltip) {
-		if (!pStack.has(AllDataComponents.AUTO_REQUEST_DATA))
-			return;
+        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+    }
 
-		AutoRequestData data = pStack.get(AllDataComponents.AUTO_REQUEST_DATA);
+    public static void appendRequesterTooltip(ItemStack pStack, List<Component> pTooltip) {
+        if (!pStack.has(AllDataComponents.AUTO_REQUEST_DATA)) return;
 
-		//noinspection DataFlowIssue
-		for (BigItemStack entry : data.encodedRequest().stacks()) {
-			pTooltip.add(entry.stack.getHoverName()
-				.copy()
-				.append(" x")
-				.append(String.valueOf(entry.count))
-				.withStyle(ChatFormatting.GRAY));
-		}
+        AutoRequestData data = pStack.get(AllDataComponents.AUTO_REQUEST_DATA);
 
-		CreateLang.translate("logistically_linked.tooltip_clear")
-			.style(ChatFormatting.DARK_GRAY)
-			.addTo(pTooltip);
-	}
+        //noinspection DataFlowIssue
+        for (BigItemStack entry : data.encodedRequest().stacks()) {
+            pTooltip.add(
+                    entry.stack
+                            .getHoverName()
+                            .copy()
+                            .append(" x")
+                            .append(String.valueOf(entry.count))
+                            .withStyle(ChatFormatting.GRAY));
+        }
 
-	@Override
-	public void setPlacedBy(Level pLevel, BlockPos requesterPos, BlockState pState, LivingEntity pPlacer,
-		ItemStack pStack) {
-		Player player = pPlacer instanceof Player ? (Player) pPlacer : null;
-		withBlockEntityDo(pLevel, requesterPos, rrbe -> {
-			AutoRequestData data = AutoRequestData.readFromItem(pLevel, player, requesterPos, pStack);
-			if (data == null)
-				return;
-			rrbe.encodedRequest = data.encodedRequest();
-			rrbe.encodedRequestContext = data.encodedRequestContext();
-			rrbe.encodedTargetAdress = data.encodedTargetAddress();
-		});
-	}
+        CreateLang.translate("logistically_linked.tooltip_clear")
+                .style(ChatFormatting.DARK_GRAY)
+                .addTo(pTooltip);
+    }
 
-	@Override
-	public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock,
-		BlockPos pNeighborPos, boolean pMovedByPiston) {
-		if (pLevel.isClientSide())
-			return;
-		pLevel.setBlockAndUpdate(pPos, pState.setValue(POWERED, pLevel.hasNeighborSignal(pPos)));
-		withBlockEntityDo(pLevel, pPos, RedstoneRequesterBlockEntity::onRedstonePowerChanged);
-	}
+    @Override
+    public void setPlacedBy(
+            Level pLevel,
+            BlockPos requesterPos,
+            BlockState pState,
+            LivingEntity pPlacer,
+            ItemStack pStack) {
+        Player player = pPlacer instanceof Player ? (Player) pPlacer : null;
+        withBlockEntityDo(
+                pLevel,
+                requesterPos,
+                rrbe -> {
+                    AutoRequestData data =
+                            AutoRequestData.readFromItem(pLevel, player, requesterPos, pStack);
+                    if (data == null) return;
+                    rrbe.encodedRequest = data.encodedRequest();
+                    rrbe.encodedRequestContext = data.encodedRequestContext();
+                    rrbe.encodedTargetAdress = data.encodedTargetAddress();
+                });
+    }
 
-	@Override
-	public Class<RedstoneRequesterBlockEntity> getBlockEntityClass() {
-		return RedstoneRequesterBlockEntity.class;
-	}
+    @Override
+    public void neighborChanged(
+            BlockState pState,
+            Level pLevel,
+            BlockPos pPos,
+            Block pNeighborBlock,
+            BlockPos pNeighborPos,
+            boolean pMovedByPiston) {
+        if (pLevel.isClientSide()) return;
+        pLevel.setBlockAndUpdate(pPos, pState.setValue(POWERED, pLevel.hasNeighborSignal(pPos)));
+        withBlockEntityDo(pLevel, pPos, RedstoneRequesterBlockEntity::onRedstonePowerChanged);
+    }
 
-	@Override
-	public BlockEntityType<? extends RedstoneRequesterBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.REDSTONE_REQUESTER.get();
-	}
+    @Override
+    public Class<RedstoneRequesterBlockEntity> getBlockEntityClass() {
+        return RedstoneRequesterBlockEntity.class;
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    public BlockEntityType<? extends RedstoneRequesterBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.REDSTONE_REQUESTER.get();
+    }
 
-	@Override
-	public BlockState rotate(BlockState pState, Rotation pRotation) {
-		return pState.setValue(AXIS, pRotation.rotate(Direction.get(AxisDirection.POSITIVE, pState.getValue(AXIS)))
-			.getAxis());
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
+    @Override
+    public BlockState rotate(BlockState pState, Rotation pRotation) {
+        return pState.setValue(
+                AXIS,
+                pRotation
+                        .rotate(Direction.get(AxisDirection.POSITIVE, pState.getValue(AXIS)))
+                        .getAxis());
+    }
 }

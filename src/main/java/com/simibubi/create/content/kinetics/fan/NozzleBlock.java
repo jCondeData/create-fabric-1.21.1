@@ -1,7 +1,5 @@
 package com.simibubi.create.content.kinetics.fan;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.foundation.block.IBE;
@@ -24,63 +22,69 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class NozzleBlock extends WrenchableDirectionalBlock implements IBE<NozzleBlockEntity> {
 
-	public NozzleBlock(Properties p_i48415_1_) {
-		super(p_i48415_1_);
-	}
+    public NozzleBlock(Properties p_i48415_1_) {
+        super(p_i48415_1_);
+    }
 
-	@Override
-	public InteractionResult onWrenched(BlockState state, UseOnContext context) {
-		return InteractionResult.FAIL;
-	}
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        return InteractionResult.FAIL;
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		return defaultBlockState().setValue(FACING, context.getClickedFace());
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return defaultBlockState().setValue(FACING, context.getClickedFace());
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		return AllShapes.NOZZLE.get(state.getValue(FACING));
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return AllShapes.NOZZLE.get(state.getValue(FACING));
+    }
 
-	@Override
-	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
-			boolean isMoving) {
-		if (worldIn.isClientSide)
-			return;
+    @Override
+    public void neighborChanged(
+            BlockState state,
+            Level worldIn,
+            BlockPos pos,
+            Block blockIn,
+            BlockPos fromPos,
+            boolean isMoving) {
+        if (worldIn.isClientSide) return;
 
-		if (fromPos.equals(pos.relative(state.getValue(FACING).getOpposite())))
-			if (!canSurvive(state, worldIn, pos)) {
-				worldIn.destroyBlock(pos, true);
-				return;
-			}
-	}
+        if (fromPos.equals(pos.relative(state.getValue(FACING).getOpposite())))
+            if (!canSurvive(state, worldIn, pos)) {
+                worldIn.destroyBlock(pos, true);
+                return;
+            }
+    }
 
-	@Override
-	public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
-		Direction towardsFan = state.getValue(FACING).getOpposite();
-		BlockEntity be = worldIn.getBlockEntity(pos.relative(towardsFan));
-		return be instanceof IAirCurrentSource
-				&& ((IAirCurrentSource) be).getAirflowOriginSide() == towardsFan.getOpposite();
-	}
+    @Override
+    public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
+        Direction towardsFan = state.getValue(FACING).getOpposite();
+        BlockEntity be = worldIn.getBlockEntity(pos.relative(towardsFan));
+        return be instanceof IAirCurrentSource
+                && ((IAirCurrentSource) be).getAirflowOriginSide() == towardsFan.getOpposite();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	public Class<NozzleBlockEntity> getBlockEntityClass() {
-		return NozzleBlockEntity.class;
-	}
+    @Override
+    public Class<NozzleBlockEntity> getBlockEntityClass() {
+        return NozzleBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends NozzleBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.NOZZLE.get();
-	}
-
+    @Override
+    public BlockEntityType<? extends NozzleBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.NOZZLE.get();
+    }
 }

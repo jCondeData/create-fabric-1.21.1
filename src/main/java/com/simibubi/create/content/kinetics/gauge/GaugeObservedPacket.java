@@ -10,26 +10,25 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 
 public class GaugeObservedPacket extends BlockEntityConfigurationPacket<StressGaugeBlockEntity> {
-	public static final StreamCodec<ByteBuf, GaugeObservedPacket> STREAM_CODEC = BlockPos.STREAM_CODEC.map(
-			GaugeObservedPacket::new, packet -> packet.pos
-	);
+    public static final StreamCodec<ByteBuf, GaugeObservedPacket> STREAM_CODEC =
+            BlockPos.STREAM_CODEC.map(GaugeObservedPacket::new, packet -> packet.pos);
 
-	public GaugeObservedPacket(BlockPos pos) {
-		super(pos);
-	}
+    public GaugeObservedPacket(BlockPos pos) {
+        super(pos);
+    }
 
-	@Override
-	protected void applySettings(ServerPlayer player, StressGaugeBlockEntity be) {
-		be.onObserved();
-	}
+    @Override
+    protected void applySettings(ServerPlayer player, StressGaugeBlockEntity be) {
+        be.onObserved();
+    }
 
-	@Override
-	protected boolean causeUpdate() {
-		return false;
-	}
+    @Override
+    protected boolean causeUpdate() {
+        return false;
+    }
 
-	@Override
-	public PacketTypeProvider getTypeProvider() {
-		return AllPackets.OBSERVER_STRESSOMETER;
-	}
+    @Override
+    public PacketTypeProvider getTypeProvider() {
+        return AllPackets.OBSERVER_STRESSOMETER;
+    }
 }

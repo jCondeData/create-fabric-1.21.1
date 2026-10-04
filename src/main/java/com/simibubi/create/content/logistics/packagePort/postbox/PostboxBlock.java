@@ -1,7 +1,5 @@
 package com.simibubi.create.content.logistics.packagePort.postbox;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.AllBlockEntityTypes;
@@ -33,95 +31,112 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import org.jetbrains.annotations.NotNull;
+
 public class PostboxBlock extends HorizontalDirectionalBlock
-	implements IBE<PostboxBlockEntity>, IWrenchable, ProperWaterloggedBlock {
-	public static MapCodec<PostboxBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BlockBehaviour.propertiesCodec(),
-		DyeColor.CODEC.fieldOf("color").forGetter(PostboxBlock::getColor)
-	).apply(instance, PostboxBlock::new));
+        implements IBE<PostboxBlockEntity>, IWrenchable, ProperWaterloggedBlock {
+    public static MapCodec<PostboxBlock> CODEC =
+            RecordCodecBuilder.mapCodec(
+                    instance ->
+                            instance.group(
+                                            BlockBehaviour.propertiesCodec(),
+                                            DyeColor.CODEC
+                                                    .fieldOf("color")
+                                                    .forGetter(PostboxBlock::getColor))
+                                    .apply(instance, PostboxBlock::new));
 
-	public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+    public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
-	protected final DyeColor color;
+    protected final DyeColor color;
 
-	public PostboxBlock(Properties properties, DyeColor color) {
-		super(properties);
-		this.color = color;
-		registerDefaultState(defaultBlockState().setValue(OPEN, false)
-			.setValue(WATERLOGGED, false));
-	}
+    public PostboxBlock(Properties properties, DyeColor color) {
+        super(properties);
+        this.color = color;
+        registerDefaultState(
+                defaultBlockState().setValue(OPEN, false).setValue(WATERLOGGED, false));
+    }
 
-	public DyeColor getColor() {
-		return color;
-	}
+    public DyeColor getColor() {
+        return color;
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		Direction facing = pContext.getHorizontalDirection()
-			.getOpposite();
-		return withWater(super.getStateForPlacement(pContext).setValue(FACING, facing), pContext);
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        Direction facing = pContext.getHorizontalDirection().getOpposite();
+        return withWater(super.getStateForPlacement(pContext).setValue(FACING, facing), pContext);
+    }
 
-	@Override
-	public FluidState getFluidState(BlockState pState) {
-		return fluidState(pState);
-	}
+    @Override
+    public FluidState getFluidState(BlockState pState) {
+        return fluidState(pState);
+    }
 
-	@Override
-	public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-		LevelAccessor pLevel, BlockPos pPos, BlockPos pNeighborPos) {
-		updateWater(pLevel, pState, pPos);
-		return pState;
-	}
+    @Override
+    public BlockState updateShape(
+            BlockState pState,
+            Direction pDirection,
+            BlockState pNeighborState,
+            LevelAccessor pLevel,
+            BlockPos pPos,
+            BlockPos pNeighborPos) {
+        updateWater(pLevel, pState, pPos);
+        return pState;
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-		return AllShapes.POSTBOX.get(pState.getValue(FACING));
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AllShapes.POSTBOX.get(pState.getValue(FACING));
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(FACING, OPEN, WATERLOGGED));
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder.add(FACING, OPEN, WATERLOGGED));
+    }
 
-	@Override
-	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		return onBlockEntityUse(level, pos, be -> be.use(player).result());
-	}
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        return onBlockEntityUse(level, pos, be -> be.use(player).result());
+    }
 
-	@Override
-	public Class<PostboxBlockEntity> getBlockEntityClass() {
-		return PostboxBlockEntity.class;
-	}
+    @Override
+    public Class<PostboxBlockEntity> getBlockEntityClass() {
+        return PostboxBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends PostboxBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.PACKAGE_POSTBOX.get();
-	}
+    @Override
+    public BlockEntityType<? extends PostboxBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.PACKAGE_POSTBOX.get();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	public boolean hasAnalogOutputSignal(BlockState pState) {
-		return true;
-	}
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState pState) {
+        return true;
+    }
 
-	@Override
-	public int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
-		return getBlockEntityOptional(pLevel, pPos).map(pbe -> pbe.getComparatorOutput())
-			.orElse(0);
-	}
-	
-	@Override
-	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
-		IBE.onRemove(pState, pLevel, pPos, pNewState);
-	}
+    @Override
+    public int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
+        return getBlockEntityOptional(pLevel, pPos).map(pbe -> pbe.getComparatorOutput()).orElse(0);
+    }
 
-	@Override
-	protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
-		return CODEC;
-	}
+    @Override
+    public void onRemove(
+            BlockState pState,
+            Level pLevel,
+            BlockPos pPos,
+            BlockState pNewState,
+            boolean pMovedByPiston) {
+        IBE.onRemove(pState, pLevel, pPos, pNewState);
+    }
+
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
 }

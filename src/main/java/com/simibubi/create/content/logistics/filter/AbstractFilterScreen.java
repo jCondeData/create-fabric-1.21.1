@@ -2,9 +2,6 @@ package com.simibubi.create.content.logistics.filter;
 
 import static com.simibubi.create.foundation.gui.AllGuiTextures.PLAYER_INVENTORY;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.logistics.filter.FilterScreenPacket.Option;
@@ -13,10 +10,10 @@ import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.item.TooltipHelper;
-import net.createmod.catnip.platform.CatnipServices;
 
 import net.createmod.catnip.gui.element.GuiGameElement;
 import net.createmod.catnip.lang.FontHelper.Palette;
+import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
@@ -24,128 +21,150 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class AbstractFilterScreen<F extends AbstractFilterMenu> extends AbstractSimiContainerScreen<F> {
+import java.util.Collections;
+import java.util.List;
 
-	protected AllGuiTextures background;
-	private List<Rect2i> extraAreas = Collections.emptyList();
+public abstract class AbstractFilterScreen<F extends AbstractFilterMenu>
+        extends AbstractSimiContainerScreen<F> {
 
-	private IconButton resetButton;
-	private IconButton confirmButton;
+    protected AllGuiTextures background;
+    private List<Rect2i> extraAreas = Collections.emptyList();
 
-	protected AbstractFilterScreen(F menu, Inventory inv, Component title, AllGuiTextures background) {
-		super(menu, inv, title);
-		this.background = background;
-	}
+    private IconButton resetButton;
+    private IconButton confirmButton;
 
-	@Override
-	protected void init() {
-		setWindowSize(Math.max(background.getWidth(), PLAYER_INVENTORY.getWidth()),
-			background.getHeight() + 4 + PLAYER_INVENTORY.getHeight());
-		super.init();
+    protected AbstractFilterScreen(
+            F menu, Inventory inv, Component title, AllGuiTextures background) {
+        super(menu, inv, title);
+        this.background = background;
+    }
 
-		int x = leftPos;
-		int y = topPos;
+    @Override
+    protected void init() {
+        setWindowSize(
+                Math.max(background.getWidth(), PLAYER_INVENTORY.getWidth()),
+                background.getHeight() + 4 + PLAYER_INVENTORY.getHeight());
+        super.init();
 
-		resetButton = new IconButton(x + background.getWidth() - 62, y + background.getHeight() - 24, AllIcons.I_TRASH);
-		resetButton.withCallback(() -> {
-			menu.clearContents();
-			contentsCleared();
-			menu.sendClearPacket();
-		});
-		confirmButton = new IconButton(x + background.getWidth() - 33, y + background.getHeight() - 24, AllIcons.I_CONFIRM);
-		confirmButton.withCallback(() -> {
-			minecraft.player.closeContainer();
-		});
+        int x = leftPos;
+        int y = topPos;
 
-		addRenderableWidget(resetButton);
-		addRenderableWidget(confirmButton);
+        resetButton =
+                new IconButton(
+                        x + background.getWidth() - 62,
+                        y + background.getHeight() - 24,
+                        AllIcons.I_TRASH);
+        resetButton.withCallback(
+                () -> {
+                    menu.clearContents();
+                    contentsCleared();
+                    menu.sendClearPacket();
+                });
+        confirmButton =
+                new IconButton(
+                        x + background.getWidth() - 33,
+                        y + background.getHeight() - 24,
+                        AllIcons.I_CONFIRM);
+        confirmButton.withCallback(
+                () -> {
+                    minecraft.player.closeContainer();
+                });
 
-		extraAreas = ImmutableList.of(new Rect2i(x + background.getWidth(), y + background.getHeight() - 40, 80, 48));
-	}
+        addRenderableWidget(resetButton);
+        addRenderableWidget(confirmButton);
 
-	@Override
-	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-		int invX = getLeftOfCentered(PLAYER_INVENTORY.getWidth());
-		int invY = topPos + background.getHeight() + 4;
-		renderPlayerInventory(graphics, invX, invY);
+        extraAreas =
+                ImmutableList.of(
+                        new Rect2i(
+                                x + background.getWidth(),
+                                y + background.getHeight() - 40,
+                                80,
+                                48));
+    }
 
-		int x = leftPos;
-		int y = topPos;
+    @Override
+    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
+        int invX = getLeftOfCentered(PLAYER_INVENTORY.getWidth());
+        int invY = topPos + background.getHeight() + 4;
+        renderPlayerInventory(graphics, invX, invY);
 
-		background.render(graphics, x, y);
-		graphics.drawString(font, title, x + (background.getWidth() - 8) / 2 - font.width(title) / 2, y + 4,
-			AllItems.PACKAGE_FILTER.isIn(menu.contentHolder) ? 0x3D3C48
-				: AllItems.FILTER.isIn(menu.contentHolder) ? 0x303030 : 0x592424,
-			false);
+        int x = leftPos;
+        int y = topPos;
 
-		GuiGameElement.of(menu.contentHolder).<GuiGameElement
-			.GuiRenderBuilder>at(x + background.getWidth() + 8, y + background.getHeight() - 52, -200)
-			.scale(4)
-			.render(graphics);
-	}
+        background.render(graphics, x, y);
+        graphics.drawString(
+                font,
+                title,
+                x + (background.getWidth() - 8) / 2 - font.width(title) / 2,
+                y + 4,
+                AllItems.PACKAGE_FILTER.isIn(menu.contentHolder)
+                        ? 0x3D3C48
+                        : AllItems.FILTER.isIn(menu.contentHolder) ? 0x303030 : 0x592424,
+                false);
 
-	@Override
-	protected void containerTick() {
-		if (!ItemStack.matches(menu.player.getMainHandItem(), menu.contentHolder))
-			menu.player.closeContainer();
+        GuiGameElement.of(menu.contentHolder)
+                .<GuiGameElement.GuiRenderBuilder>at(
+                        x + background.getWidth() + 8, y + background.getHeight() - 52, -200)
+                .scale(4)
+                .render(graphics);
+    }
 
-		super.containerTick();
+    @Override
+    protected void containerTick() {
+        if (!ItemStack.matches(menu.player.getMainHandItem(), menu.contentHolder))
+            menu.player.closeContainer();
 
-		handleTooltips();
-		handleIndicators();
-	}
+        super.containerTick();
 
-	protected void handleTooltips() {
-		List<IconButton> tooltipButtons = getTooltipButtons();
+        handleTooltips();
+        handleIndicators();
+    }
 
-		for (IconButton button : tooltipButtons) {
-			if (!button.getToolTip()
-				.isEmpty()) {
-				button.setToolTip(button.getToolTip()
-					.get(0));
-				button.getToolTip()
-					.add(TooltipHelper.holdShift(Palette.YELLOW, hasShiftDown()));
-			}
-		}
+    protected void handleTooltips() {
+        List<IconButton> tooltipButtons = getTooltipButtons();
 
-		if (hasShiftDown()) {
-			List<MutableComponent> tooltipDescriptions = getTooltipDescriptions();
-			for (int i = 0; i < tooltipButtons.size(); i++)
-				fillToolTip(tooltipButtons.get(i), tooltipDescriptions.get(i));
-		}
-	}
+        for (IconButton button : tooltipButtons) {
+            if (!button.getToolTip().isEmpty()) {
+                button.setToolTip(button.getToolTip().get(0));
+                button.getToolTip().add(TooltipHelper.holdShift(Palette.YELLOW, hasShiftDown()));
+            }
+        }
 
-	public void handleIndicators() {
-		for (IconButton button : getTooltipButtons())
-			button.green = !isButtonEnabled(button);
-	}
+        if (hasShiftDown()) {
+            List<MutableComponent> tooltipDescriptions = getTooltipDescriptions();
+            for (int i = 0; i < tooltipButtons.size(); i++)
+                fillToolTip(tooltipButtons.get(i), tooltipDescriptions.get(i));
+        }
+    }
 
-	protected abstract boolean isButtonEnabled(IconButton button);
+    public void handleIndicators() {
+        for (IconButton button : getTooltipButtons()) button.green = !isButtonEnabled(button);
+    }
 
-	protected List<IconButton> getTooltipButtons() {
-		return Collections.emptyList();
-	}
+    protected abstract boolean isButtonEnabled(IconButton button);
 
-	protected List<MutableComponent> getTooltipDescriptions() {
-		return Collections.emptyList();
-	}
+    protected List<IconButton> getTooltipButtons() {
+        return Collections.emptyList();
+    }
 
-	private void fillToolTip(IconButton button, Component tooltip) {
-		if (!button.isHoveredOrFocused())
-			return;
-		List<Component> tip = button.getToolTip();
-		tip.addAll(TooltipHelper.cutTextComponent(tooltip, Palette.ALL_GRAY));
-	}
+    protected List<MutableComponent> getTooltipDescriptions() {
+        return Collections.emptyList();
+    }
 
-	protected void contentsCleared() {}
+    private void fillToolTip(IconButton button, Component tooltip) {
+        if (!button.isHoveredOrFocused()) return;
+        List<Component> tip = button.getToolTip();
+        tip.addAll(TooltipHelper.cutTextComponent(tooltip, Palette.ALL_GRAY));
+    }
 
-	protected void sendOptionUpdate(Option option) {
-		CatnipServices.NETWORK.sendToServer(new FilterScreenPacket(option));
-	}
+    protected void contentsCleared() {}
 
-	@Override
-	public List<Rect2i> getExtraAreas() {
-		return extraAreas;
-	}
+    protected void sendOptionUpdate(Option option) {
+        CatnipServices.NETWORK.sendToServer(new FilterScreenPacket(option));
+    }
 
+    @Override
+    public List<Rect2i> getExtraAreas() {
+        return extraAreas;
+    }
 }

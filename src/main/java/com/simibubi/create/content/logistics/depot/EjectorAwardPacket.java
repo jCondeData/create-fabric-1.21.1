@@ -11,21 +11,20 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 
 public class EjectorAwardPacket extends BlockEntityConfigurationPacket<EjectorBlockEntity> {
-	public static final StreamCodec<ByteBuf, EjectorAwardPacket> STREAM_CODEC = BlockPos.STREAM_CODEC.map(
-			EjectorAwardPacket::new, packet -> packet.pos
-	);
+    public static final StreamCodec<ByteBuf, EjectorAwardPacket> STREAM_CODEC =
+            BlockPos.STREAM_CODEC.map(EjectorAwardPacket::new, packet -> packet.pos);
 
-	public EjectorAwardPacket(BlockPos pos) {
-		super(pos);
-	}
+    public EjectorAwardPacket(BlockPos pos) {
+        super(pos);
+    }
 
-	@Override
-	protected void applySettings(ServerPlayer player, EjectorBlockEntity be) {
-		AllAdvancements.EJECTOR_MAXED.awardTo(player);
-	}
+    @Override
+    protected void applySettings(ServerPlayer player, EjectorBlockEntity be) {
+        AllAdvancements.EJECTOR_MAXED.awardTo(player);
+    }
 
-	@Override
-	public PacketTypeProvider getTypeProvider() {
-		return AllPackets.EJECTOR_AWARD;
-	}
+    @Override
+    public PacketTypeProvider getTypeProvider() {
+        return AllPackets.EJECTOR_AWARD;
+    }
 }

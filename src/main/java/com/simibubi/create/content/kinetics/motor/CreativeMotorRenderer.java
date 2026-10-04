@@ -10,13 +10,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class CreativeMotorRenderer extends KineticBlockEntityRenderer<CreativeMotorBlockEntity> {
 
-	public CreativeMotorRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public CreativeMotorRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected SuperByteBuffer getRotatedModel(CreativeMotorBlockEntity be, BlockState state) {
-		return CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, state);
-	}
-
+    @Override
+    protected SuperByteBuffer getRotatedModel(CreativeMotorBlockEntity be, BlockState state) {
+        return CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, state);
+    }
 }

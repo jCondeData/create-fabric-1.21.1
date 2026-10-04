@@ -31,142 +31,154 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class LargeWaterWheelBlock extends RotatedPillarKineticBlock implements IBE<LargeWaterWheelBlockEntity> {
+public class LargeWaterWheelBlock extends RotatedPillarKineticBlock
+        implements IBE<LargeWaterWheelBlockEntity> {
 
-	public static final BooleanProperty EXTENSION = BooleanProperty.create("extension");
+    public static final BooleanProperty EXTENSION = BooleanProperty.create("extension");
 
-	public LargeWaterWheelBlock(Properties properties) {
-		super(properties);
-		registerDefaultState(defaultBlockState().setValue(EXTENSION, false));
-	}
+    public LargeWaterWheelBlock(Properties properties) {
+        super(properties);
+        registerDefaultState(defaultBlockState().setValue(EXTENSION, false));
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-		super.createBlockStateDefinition(builder.add(EXTENSION));
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder.add(EXTENSION));
+    }
 
-	public Axis getAxisForPlacement(BlockPlaceContext context) {
-		return super.getStateForPlacement(context).getValue(AXIS);
-	}
+    public Axis getAxisForPlacement(BlockPlaceContext context) {
+        return super.getStateForPlacement(context).getValue(AXIS);
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		BlockState stateForPlacement = super.getStateForPlacement(context);
-		BlockPos pos = context.getClickedPos();
-		Axis axis = stateForPlacement.getValue(AXIS);
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockState stateForPlacement = super.getStateForPlacement(context);
+        BlockPos pos = context.getClickedPos();
+        Axis axis = stateForPlacement.getValue(AXIS);
 
-		for (int x = -1; x <= 1; x++) {
-			for (int y = -1; y <= 1; y++) {
-				for (int z = -1; z <= 1; z++) {
-					if (axis.choose(x, y, z) != 0)
-						continue;
-					BlockPos offset = new BlockPos(x, y, z);
-					if (offset.equals(BlockPos.ZERO))
-						continue;
-					BlockState occupiedState = context.getLevel()
-						.getBlockState(pos.offset(offset));
-					if (!occupiedState.canBeReplaced())
-						return null;
-				}
-			}
-		}
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (axis.choose(x, y, z) != 0) continue;
+                    BlockPos offset = new BlockPos(x, y, z);
+                    if (offset.equals(BlockPos.ZERO)) continue;
+                    BlockState occupiedState = context.getLevel().getBlockState(pos.offset(offset));
+                    if (!occupiedState.canBeReplaced()) return null;
+                }
+            }
+        }
 
-		if (context.getLevel()
-			.getBlockState(pos.relative(Direction.fromAxisAndDirection(axis, AxisDirection.NEGATIVE)))
-			.is(this))
-			stateForPlacement = stateForPlacement.setValue(EXTENSION, true);
+        if (context.getLevel()
+                .getBlockState(
+                        pos.relative(Direction.fromAxisAndDirection(axis, AxisDirection.NEGATIVE)))
+                .is(this)) stateForPlacement = stateForPlacement.setValue(EXTENSION, true);
 
-		return stateForPlacement;
-	}
+        return stateForPlacement;
+    }
 
-	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		return onBlockEntityUseItemOn(level, pos, wwt -> wwt.applyMaterialIfValid(stack));
-	}
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult) {
+        return onBlockEntityUseItemOn(level, pos, wwt -> wwt.applyMaterialIfValid(stack));
+    }
 
-	@Override
-	public InteractionResult onWrenched(BlockState state, UseOnContext context) {
-		return InteractionResult.PASS;
-	}
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        return InteractionResult.PASS;
+    }
 
-	@Override
-	public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-		LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-		if (pDirection != Direction.fromAxisAndDirection(pState.getValue(AXIS), AxisDirection.NEGATIVE))
-			return pState;
-		return pState.setValue(EXTENSION, pNeighborState.is(this));
-	}
+    @Override
+    public BlockState updateShape(
+            BlockState pState,
+            Direction pDirection,
+            BlockState pNeighborState,
+            LevelAccessor pLevel,
+            BlockPos pCurrentPos,
+            BlockPos pNeighborPos) {
+        if (pDirection
+                != Direction.fromAxisAndDirection(pState.getValue(AXIS), AxisDirection.NEGATIVE))
+            return pState;
+        return pState.setValue(EXTENSION, pNeighborState.is(this));
+    }
 
-	@Override
-	public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
-		super.onPlace(state, level, pos, oldState, isMoving);
-		if (!level.getBlockTicks()
-			.hasScheduledTick(pos, this))
-			level.scheduleTick(pos, this, 1);
-	}
+    @Override
+    public void onPlace(
+            BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        super.onPlace(state, level, pos, oldState, isMoving);
+        if (!level.getBlockTicks().hasScheduledTick(pos, this)) level.scheduleTick(pos, this, 1);
+    }
 
-	@Override
-	public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
-		Axis axis = pState.getValue(AXIS);
-		for (Direction side : Iterate.directions) {
-			if (side.getAxis() == axis)
-				continue;
-			for (boolean secondary : Iterate.falseAndTrue) {
-				Direction targetSide = secondary ? side.getClockWise(axis) : side;
-				BlockPos structurePos = (secondary ? pPos.relative(side) : pPos).relative(targetSide);
-				BlockState occupiedState = pLevel.getBlockState(structurePos);
-				BlockState requiredStructure = AllBlocks.WATER_WHEEL_STRUCTURAL.getDefaultState()
-					.setValue(WaterWheelStructuralBlock.FACING, targetSide.getOpposite());
-				if (occupiedState == requiredStructure)
-					continue;
-				if (!occupiedState.canBeReplaced()) {
-					pLevel.destroyBlock(pPos, false);
-					return;
-				}
-				pLevel.setBlockAndUpdate(structurePos, requiredStructure);
-			}
-		}
-		withBlockEntityDo(pLevel, pPos, WaterWheelBlockEntity::determineAndApplyFlowScore);
-	}
+    @Override
+    public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        Axis axis = pState.getValue(AXIS);
+        for (Direction side : Iterate.directions) {
+            if (side.getAxis() == axis) continue;
+            for (boolean secondary : Iterate.falseAndTrue) {
+                Direction targetSide = secondary ? side.getClockWise(axis) : side;
+                BlockPos structurePos =
+                        (secondary ? pPos.relative(side) : pPos).relative(targetSide);
+                BlockState occupiedState = pLevel.getBlockState(structurePos);
+                BlockState requiredStructure =
+                        AllBlocks.WATER_WHEEL_STRUCTURAL
+                                .getDefaultState()
+                                .setValue(
+                                        WaterWheelStructuralBlock.FACING, targetSide.getOpposite());
+                if (occupiedState == requiredStructure) continue;
+                if (!occupiedState.canBeReplaced()) {
+                    pLevel.destroyBlock(pPos, false);
+                    return;
+                }
+                pLevel.setBlockAndUpdate(structurePos, requiredStructure);
+            }
+        }
+        withBlockEntityDo(pLevel, pPos, WaterWheelBlockEntity::determineAndApplyFlowScore);
+    }
 
-	@Override
-	public RenderShape getRenderShape(BlockState pState) {
-		return RenderShape.ENTITYBLOCK_ANIMATED;
-	}
+    @Override
+    public RenderShape getRenderShape(BlockState pState) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
 
-	@Override
-	public BlockEntityType<? extends LargeWaterWheelBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.LARGE_WATER_WHEEL.get();
-	}
+    @Override
+    public BlockEntityType<? extends LargeWaterWheelBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.LARGE_WATER_WHEEL.get();
+    }
 
-	@Override
-	public Class<LargeWaterWheelBlockEntity> getBlockEntityClass() {
-		return LargeWaterWheelBlockEntity.class;
-	}
+    @Override
+    public Class<LargeWaterWheelBlockEntity> getBlockEntityClass() {
+        return LargeWaterWheelBlockEntity.class;
+    }
 
-	@Override
-	public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-		return face.getAxis() == getRotationAxis(state);
-	}
+    @Override
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return face.getAxis() == getRotationAxis(state);
+    }
 
-	@Override
-	public Axis getRotationAxis(BlockState state) {
-		return state.getValue(AXIS);
-	}
+    @Override
+    public Axis getRotationAxis(BlockState state) {
+        return state.getValue(AXIS);
+    }
 
-	@Override
-	public float getParticleTargetRadius() {
-		return 2.5f;
-	}
+    @Override
+    public float getParticleTargetRadius() {
+        return 2.5f;
+    }
 
-	@Override
-	public float getParticleInitialRadius() {
-		return 2.25f;
-	}
+    @Override
+    public float getParticleInitialRadius() {
+        return 2.25f;
+    }
 
-	@Override
-	public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-		return false;
-	}
-
+    @Override
+    public boolean isFlammable(
+            BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return false;
+    }
 }

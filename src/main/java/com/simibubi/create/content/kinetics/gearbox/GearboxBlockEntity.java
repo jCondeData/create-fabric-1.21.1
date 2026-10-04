@@ -8,13 +8,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class GearboxBlockEntity extends DirectionalShaftHalvesBlockEntity {
 
-	public GearboxBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
-	
-	@Override
-	protected boolean isNoisy() {
-		return false;
-	}
-	
+    public GearboxBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    @Override
+    protected boolean isNoisy() {
+        return false;
+    }
 }

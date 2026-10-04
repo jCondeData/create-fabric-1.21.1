@@ -9,25 +9,28 @@ import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 
 public class SawActorVisual extends ActorVisual {
-	private final RotatingInstance shaft;
+    private final RotatingInstance shaft;
 
-	public SawActorVisual(VisualizationContext visualizationContext, VirtualRenderWorld simulationWorld, MovementContext movementContext) {
-		super(visualizationContext, simulationWorld, movementContext);
+    public SawActorVisual(
+            VisualizationContext visualizationContext,
+            VirtualRenderWorld simulationWorld,
+            MovementContext movementContext) {
+        super(visualizationContext, simulationWorld, movementContext);
 
-		var state = movementContext.state;
-		var localPos = movementContext.localPos;
-		shaft = SawVisual.shaft(instancerProvider, state);
+        var state = movementContext.state;
+        var localPos = movementContext.localPos;
+        shaft = SawVisual.shaft(instancerProvider, state);
 
-		var axis = KineticBlockEntityVisual.rotationAxis(state);
-		shaft.setRotationAxis(axis)
-			.setRotationOffset(KineticBlockEntityVisual.rotationOffset(state, axis, localPos))
-			.setPosition(localPos)
-			.light(localBlockLight(), 0)
-			.setChanged();
-	}
+        var axis = KineticBlockEntityVisual.rotationAxis(state);
+        shaft.setRotationAxis(axis)
+                .setRotationOffset(KineticBlockEntityVisual.rotationOffset(state, axis, localPos))
+                .setPosition(localPos)
+                .light(localBlockLight(), 0)
+                .setChanged();
+    }
 
-	@Override
-	protected void _delete() {
-		shaft.delete();
-	}
+    @Override
+    protected void _delete() {
+        shaft.delete();
+    }
 }

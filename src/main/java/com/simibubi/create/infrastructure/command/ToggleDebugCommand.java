@@ -5,12 +5,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class ToggleDebugCommand extends ConfigureConfigCommand {
 
-	public ToggleDebugCommand() {
-		super("rainbowDebug");
-	}
+    public ToggleDebugCommand() {
+        super("rainbowDebug");
+    }
 
-	@Override
-	protected void sendPacket(ServerPlayer player, String option) {
-		CatnipServices.NETWORK.simpleActionToClient(player, "rainbowDebug", option);
-	}
+    @Override
+    protected void sendPacket(ServerPlayer player, String option) {
+        CatnipServices.NETWORK.simpleActionToClient(player, "rainbowDebug", option);
+    }
 }

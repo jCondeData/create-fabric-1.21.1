@@ -13,23 +13,18 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 @EventBusSubscriber(value = Dist.CLIENT)
 public class PackageClientInteractionHandler {
 
-	// In vanilla, punching an entity doesnt reset the attack timer. This leads to
-	// accidentally breaking blocks behind an armorstand or package when punching it
-	// in creative mode
+    // In vanilla, punching an entity doesnt reset the attack timer. This leads to
+    // accidentally breaking blocks behind an armorstand or package when punching it
+    // in creative mode
 
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public static void onPlayerPunchPackage(AttackEntityEvent event) {
-		Player attacker = event.getEntity();
-		if (!attacker.level()
-			.isClientSide())
-			return;
-		Minecraft mc = Minecraft.getInstance();
-		if (attacker != mc.player)
-			return;
-		if (!(event.getTarget() instanceof PackageEntity))
-			return;
-		((MinecraftAccessor) mc).create$setMissTime(10);
-	}
-
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onPlayerPunchPackage(AttackEntityEvent event) {
+        Player attacker = event.getEntity();
+        if (!attacker.level().isClientSide()) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (attacker != mc.player) return;
+        if (!(event.getTarget() instanceof PackageEntity)) return;
+        ((MinecraftAccessor) mc).create$setMissTime(10);
+    }
 }

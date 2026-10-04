@@ -1,10 +1,5 @@
 package com.simibubi.create.content.kinetics.drill;
 
-import java.util.List;
-import java.util.function.Predicate;
-
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllShapes;
@@ -21,7 +16,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -48,149 +42,179 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.List;
+import java.util.function.Predicate;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class DrillBlock extends DirectionalKineticBlock implements IBE<DrillBlockEntity>, SimpleWaterloggedBlock {
-	private static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
+public class DrillBlock extends DirectionalKineticBlock
+        implements IBE<DrillBlockEntity>, SimpleWaterloggedBlock {
+    private static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
 
-	public DrillBlock(Properties properties) {
-		super(properties);
-		registerDefaultState(super.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, false));
-	}
+    public DrillBlock(Properties properties) {
+        super(properties);
+        registerDefaultState(
+                super.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, false));
+    }
 
-	@Override
-	public void entityInside(BlockState state, Level worldIn, BlockPos pos, Entity entityIn) {
-		if (entityIn instanceof ItemEntity)
-			return;
-		if (!new AABB(pos).deflate(.1f)
-			.intersects(entityIn.getBoundingBox()))
-			return;
-		withBlockEntityDo(worldIn, pos, be -> {
-			if (be.getSpeed() == 0)
-				return;
-			entityIn.hurt(CreateDamageSources.drill(worldIn), (float) getDamage(be.getSpeed()));
-		});
-	}
+    @Override
+    public void entityInside(BlockState state, Level worldIn, BlockPos pos, Entity entityIn) {
+        if (entityIn instanceof ItemEntity) return;
+        if (!new AABB(pos).deflate(.1f).intersects(entityIn.getBoundingBox())) return;
+        withBlockEntityDo(
+                worldIn,
+                pos,
+                be -> {
+                    if (be.getSpeed() == 0) return;
+                    entityIn.hurt(
+                            CreateDamageSources.drill(worldIn), (float) getDamage(be.getSpeed()));
+                });
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		return AllShapes.CASING_12PX.get(state.getValue(FACING));
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return AllShapes.CASING_12PX.get(state.getValue(FACING));
+    }
 
-	@Override
-	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
-		boolean isMoving) {
-		withBlockEntityDo(worldIn, pos, DrillBlockEntity::destroyNextTick);
-	}
+    @Override
+    public void neighborChanged(
+            BlockState state,
+            Level worldIn,
+            BlockPos pos,
+            Block blockIn,
+            BlockPos fromPos,
+            boolean isMoving) {
+        withBlockEntityDo(worldIn, pos, DrillBlockEntity::destroyNextTick);
+    }
 
-	@Override
-	public Axis getRotationAxis(BlockState state) {
-		return state.getValue(FACING)
-			.getAxis();
-	}
+    @Override
+    public Axis getRotationAxis(BlockState state) {
+        return state.getValue(FACING).getAxis();
+    }
 
-	@Override
-	public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-		return face == state.getValue(FACING)
-			.getOpposite();
-	}
+    @Override
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return face == state.getValue(FACING).getOpposite();
+    }
 
-	@Override
-	public PushReaction getPistonPushReaction(BlockState state) {
-		return PushReaction.NORMAL;
-	}
+    @Override
+    public PushReaction getPistonPushReaction(BlockState state) {
+        return PushReaction.NORMAL;
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	public FluidState getFluidState(BlockState state) {
-		return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : Fluids.EMPTY.defaultFluidState();
-	}
+    @Override
+    public FluidState getFluidState(BlockState state) {
+        return state.getValue(BlockStateProperties.WATERLOGGED)
+                ? Fluids.WATER.getSource(false)
+                : Fluids.EMPTY.defaultFluidState();
+    }
 
-	@Override
-	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(BlockStateProperties.WATERLOGGED);
-		super.createBlockStateDefinition(builder);
-	}
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(BlockStateProperties.WATERLOGGED);
+        super.createBlockStateDefinition(builder);
+    }
 
-	@Override
-	public BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState,
-								  LevelAccessor world, BlockPos pos, BlockPos neighbourPos) {
-		if (state.getValue(BlockStateProperties.WATERLOGGED))
-			world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
-		return state;
-	}
+    @Override
+    public BlockState updateShape(
+            BlockState state,
+            Direction direction,
+            BlockState neighbourState,
+            LevelAccessor world,
+            BlockPos pos,
+            BlockPos neighbourPos) {
+        if (state.getValue(BlockStateProperties.WATERLOGGED))
+            world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+        return state;
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		FluidState FluidState = context.getLevel().getFluidState(context.getClickedPos());
-		return super.getStateForPlacement(context).setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(FluidState.getType() == Fluids.WATER));
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        FluidState FluidState = context.getLevel().getFluidState(context.getClickedPos());
+        return super.getStateForPlacement(context)
+                .setValue(
+                        BlockStateProperties.WATERLOGGED,
+                        Boolean.valueOf(FluidState.getType() == Fluids.WATER));
+    }
 
-	public static double getDamage(float speed) {
-		float speedAbs = Math.abs(speed);
-		double sub1 = Math.min(speedAbs / 16, 2);
-		double sub2 = Math.min(speedAbs / 32, 4);
-		double sub3 = Math.min(speedAbs / 64, 4);
-		return Mth.clamp(sub1 + sub2 + sub3, 1, 10);
-	}
+    public static double getDamage(float speed) {
+        float speedAbs = Math.abs(speed);
+        double sub1 = Math.min(speedAbs / 16, 2);
+        double sub2 = Math.min(speedAbs / 32, 4);
+        double sub3 = Math.min(speedAbs / 64, 4);
+        return Mth.clamp(sub1 + sub2 + sub3, 1, 10);
+    }
 
-	@Override
-	public Class<DrillBlockEntity> getBlockEntityClass() {
-		return DrillBlockEntity.class;
-	}
+    @Override
+    public Class<DrillBlockEntity> getBlockEntityClass() {
+        return DrillBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends DrillBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.DRILL.get();
-	}
+    @Override
+    public BlockEntityType<? extends DrillBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.DRILL.get();
+    }
 
-	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		IPlacementHelper placementHelper = PlacementHelpers.get(placementHelperId);
-		if (!player.isShiftKeyDown() && player.mayBuild()) {
-			if (placementHelper.matchesItem(stack)) {
-				placementHelper.getOffset(player, level, state, pos, hitResult)
-					.placeInWorld(level, (BlockItem) stack.getItem(), player, hand, hitResult);
-				return ItemInteractionResult.SUCCESS;
-			}
-		}
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult) {
+        IPlacementHelper placementHelper = PlacementHelpers.get(placementHelperId);
+        if (!player.isShiftKeyDown() && player.mayBuild()) {
+            if (placementHelper.matchesItem(stack)) {
+                placementHelper
+                        .getOffset(player, level, state, pos, hitResult)
+                        .placeInWorld(level, (BlockItem) stack.getItem(), player, hand, hitResult);
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
 
-		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-	}
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
 
-	@MethodsReturnNonnullByDefault
-	private static class PlacementHelper implements IPlacementHelper {
+    @MethodsReturnNonnullByDefault
+    private static class PlacementHelper implements IPlacementHelper {
 
-		@Override
-		public Predicate<ItemStack> getItemPredicate() {
-			return AllBlocks.MECHANICAL_DRILL::isIn;
-		}
+        @Override
+        public Predicate<ItemStack> getItemPredicate() {
+            return AllBlocks.MECHANICAL_DRILL::isIn;
+        }
 
-		@Override
-		public Predicate<BlockState> getStatePredicate() {
-			return AllBlocks.MECHANICAL_DRILL::has;
-		}
+        @Override
+        public Predicate<BlockState> getStatePredicate() {
+            return AllBlocks.MECHANICAL_DRILL::has;
+        }
 
-		@Override
-		public PlacementOffset getOffset(Player player, Level world, BlockState state, BlockPos pos,
-			BlockHitResult ray) {
-			List<Direction> directions = IPlacementHelper.orderedByDistanceExceptAxis(pos, ray.getLocation(),
-				state.getValue(FACING)
-					.getAxis(),
-				dir -> world.getBlockState(pos.relative(dir))
-					.canBeReplaced());
+        @Override
+        public PlacementOffset getOffset(
+                Player player, Level world, BlockState state, BlockPos pos, BlockHitResult ray) {
+            List<Direction> directions =
+                    IPlacementHelper.orderedByDistanceExceptAxis(
+                            pos,
+                            ray.getLocation(),
+                            state.getValue(FACING).getAxis(),
+                            dir -> world.getBlockState(pos.relative(dir)).canBeReplaced());
 
-			if (directions.isEmpty())
-				return PlacementOffset.fail();
-			else {
-				return PlacementOffset.success(pos.relative(directions.get(0)),
-					s -> s.setValue(FACING, state.getValue(FACING)));
-			}
-		}
-	}
-
+            if (directions.isEmpty()) return PlacementOffset.fail();
+            else {
+                return PlacementOffset.success(
+                        pos.relative(directions.get(0)),
+                        s -> s.setValue(FACING, state.getValue(FACING)));
+            }
+        }
+    }
 }

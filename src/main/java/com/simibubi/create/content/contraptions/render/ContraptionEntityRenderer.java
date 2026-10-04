@@ -1,7 +1,5 @@
 package com.simibubi.create.content.contraptions.render;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
@@ -13,6 +11,7 @@ import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+
 import net.createmod.catnip.render.SuperByteBuffer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -23,91 +22,105 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
-public class ContraptionEntityRenderer<C extends AbstractContraptionEntity> extends EntityRenderer<C> {
-	public ContraptionEntityRenderer(EntityRendererProvider.Context context) {
-		super(context);
-	}
+import org.apache.commons.lang3.tuple.Pair;
 
-	@Override
-	public ResourceLocation getTextureLocation(C entity) {
-		return null;
-	}
+public class ContraptionEntityRenderer<C extends AbstractContraptionEntity>
+        extends EntityRenderer<C> {
+    public ContraptionEntityRenderer(EntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	public boolean shouldRender(C entity, Frustum frustum, double cameraX, double cameraY,
-		double cameraZ) {
-		if (entity.getContraption() == null)
-			return false;
-		if (!entity.isAliveOrStale())
-			return false;
-		if (!entity.isReadyForRender())
-			return false;
+    @Override
+    public ResourceLocation getTextureLocation(C entity) {
+        return null;
+    }
 
-		return super.shouldRender(entity, frustum, cameraX, cameraY, cameraZ);
-	}
+    @Override
+    public boolean shouldRender(
+            C entity, Frustum frustum, double cameraX, double cameraY, double cameraZ) {
+        if (entity.getContraption() == null) return false;
+        if (!entity.isAliveOrStale()) return false;
+        if (!entity.isReadyForRender()) return false;
 
-	@Override
-	public void render(C entity, float yaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffers,
-		int overlay) {
-		super.render(entity, yaw, partialTicks, poseStack, buffers, overlay);
+        return super.shouldRender(entity, frustum, cameraX, cameraY, cameraZ);
+    }
 
-		Contraption contraption = entity.getContraption();
-		if (contraption == null) {
-			return;
-		}
+    @Override
+    public void render(
+            C entity,
+            float yaw,
+            float partialTicks,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int overlay) {
+        super.render(entity, yaw, partialTicks, poseStack, buffers, overlay);
 
-		Level level = entity.level();
-		ContraptionRenderInfo renderInfo = ContraptionRenderInfo.get(contraption);
-		VirtualRenderWorld renderWorld = renderInfo.getRenderWorld();
-		ContraptionMatrices matrices = renderInfo.getMatrices();
-		matrices.setup(poseStack, entity);
+        Contraption contraption = entity.getContraption();
+        if (contraption == null) {
+            return;
+        }
 
-		if (!VisualizationManager.supportsVisualization(level)) {
-			for (RenderType renderType : RenderType.chunkBufferLayers()) {
-				SuperByteBuffer sbb = renderInfo.getBuffer(renderType);
-				if (!sbb.isEmpty()) {
-					VertexConsumer vc = buffers.getBuffer(renderType);
-					sbb.transform(matrices.getModel())
-						.useLevelLight(level, matrices.getWorld())
-						.renderInto(poseStack, vc);
-				}
-			}
-		}
+        Level level = entity.level();
+        ContraptionRenderInfo renderInfo = ContraptionRenderInfo.get(contraption);
+        VirtualRenderWorld renderWorld = renderInfo.getRenderWorld();
+        ContraptionMatrices matrices = renderInfo.getMatrices();
+        matrices.setup(poseStack, entity);
 
-		renderBlockEntities(level, renderWorld, contraption, matrices, buffers);
-		renderActors(level, renderWorld, contraption, matrices, buffers);
+        if (!VisualizationManager.supportsVisualization(level)) {
+            for (RenderType renderType : RenderType.chunkBufferLayers()) {
+                SuperByteBuffer sbb = renderInfo.getBuffer(renderType);
+                if (!sbb.isEmpty()) {
+                    VertexConsumer vc = buffers.getBuffer(renderType);
+                    sbb.transform(matrices.getModel())
+                            .useLevelLight(level, matrices.getWorld())
+                            .renderInto(poseStack, vc);
+                }
+            }
+        }
 
-		matrices.clear();
-	}
+        renderBlockEntities(level, renderWorld, contraption, matrices, buffers);
+        renderActors(level, renderWorld, contraption, matrices, buffers);
 
-	private static void renderBlockEntities(Level level, VirtualRenderWorld renderWorld, Contraption c,
-		ContraptionMatrices matrices, MultiBufferSource buffer) {
-		BlockEntityRenderHelper.renderBlockEntities(level, renderWorld, c.getRenderedBEs(),
-			matrices.getModelViewProjection(), matrices.getLight(), buffer);
-	}
+        matrices.clear();
+    }
 
-	private static void renderActors(Level level, VirtualRenderWorld renderWorld, Contraption c,
-		ContraptionMatrices matrices, MultiBufferSource buffer) {
-		PoseStack m = matrices.getModel();
+    private static void renderBlockEntities(
+            Level level,
+            VirtualRenderWorld renderWorld,
+            Contraption c,
+            ContraptionMatrices matrices,
+            MultiBufferSource buffer) {
+        BlockEntityRenderHelper.renderBlockEntities(
+                level,
+                renderWorld,
+                c.getRenderedBEs(),
+                matrices.getModelViewProjection(),
+                matrices.getLight(),
+                buffer);
+    }
 
-		for (Pair<StructureTemplate.StructureBlockInfo, MovementContext> actor : c.getActors()) {
-			MovementContext context = actor.getRight();
-			if (context == null)
-				continue;
-			if (context.world == null)
-				context.world = level;
-			StructureTemplate.StructureBlockInfo blockInfo = actor.getLeft();
+    private static void renderActors(
+            Level level,
+            VirtualRenderWorld renderWorld,
+            Contraption c,
+            ContraptionMatrices matrices,
+            MultiBufferSource buffer) {
+        PoseStack m = matrices.getModel();
 
-			MovementBehaviour movementBehaviour = MovementBehaviour.REGISTRY.get(blockInfo.state());
-			if (movementBehaviour != null) {
-				if (c.isHiddenInPortal(blockInfo.pos()))
-					continue;
-				m.pushPose();
-				TransformStack.of(m)
-					.translate(blockInfo.pos());
-				movementBehaviour.renderInContraption(context, renderWorld, matrices, buffer);
-				m.popPose();
-			}
-		}
-	}
+        for (Pair<StructureTemplate.StructureBlockInfo, MovementContext> actor : c.getActors()) {
+            MovementContext context = actor.getRight();
+            if (context == null) continue;
+            if (context.world == null) context.world = level;
+            StructureTemplate.StructureBlockInfo blockInfo = actor.getLeft();
+
+            MovementBehaviour movementBehaviour = MovementBehaviour.REGISTRY.get(blockInfo.state());
+            if (movementBehaviour != null) {
+                if (c.isHiddenInPortal(blockInfo.pos())) continue;
+                m.pushPose();
+                TransformStack.of(m).translate(blockInfo.pos());
+                movementBehaviour.renderInContraption(context, renderWorld, matrices, buffer);
+                m.popPose();
+            }
+        }
+    }
 }

@@ -13,15 +13,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 
 public class BaseArmorItem extends ArmorItem {
-	protected final ResourceLocation textureLoc;
+    protected final ResourceLocation textureLoc;
 
-	public BaseArmorItem(Holder<ArmorMaterial> armorMaterial, ArmorItem.Type type, Properties properties, ResourceLocation textureLoc) {
-		super(armorMaterial, type, properties.stacksTo(1));
-		this.textureLoc = textureLoc;
-	}
+    public BaseArmorItem(
+            Holder<ArmorMaterial> armorMaterial,
+            ArmorItem.Type type,
+            Properties properties,
+            ResourceLocation textureLoc) {
+        super(armorMaterial, type, properties.stacksTo(1));
+        this.textureLoc = textureLoc;
+    }
 
-	@Override
-	public @Nullable ResourceLocation getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, ArmorMaterial.Layer layer, boolean innerModel) {
-		return ResourceLocation.parse(String.format(Locale.ROOT, "%s:textures/models/armor/%s_layer_%d.png", textureLoc.getNamespace(), textureLoc.getPath(), slot == EquipmentSlot.LEGS ? 2 : 1));
-	}
+    @Override
+    public @Nullable ResourceLocation getArmorTexture(
+            ItemStack stack,
+            Entity entity,
+            EquipmentSlot slot,
+            ArmorMaterial.Layer layer,
+            boolean innerModel) {
+        return ResourceLocation.parse(
+                String.format(
+                        Locale.ROOT,
+                        "%s:textures/models/armor/%s_layer_%d.png",
+                        textureLoc.getNamespace(),
+                        textureLoc.getPath(),
+                        slot == EquipmentSlot.LEGS ? 2 : 1));
+    }
 }

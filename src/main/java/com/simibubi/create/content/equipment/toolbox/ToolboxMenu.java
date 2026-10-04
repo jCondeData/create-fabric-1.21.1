@@ -22,141 +22,142 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ToolboxMenu extends MenuBase<ToolboxBlockEntity> {
 
-	public ToolboxMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData) {
-		super(type, id, inv, extraData);
-	}
+    public ToolboxMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData) {
+        super(type, id, inv, extraData);
+    }
 
-	public ToolboxMenu(MenuType<?> type, int id, Inventory inv, ToolboxBlockEntity be) {
-		super(type, id, inv, be);
-		BlockEntityBehaviour.get(be, AnimatedContainerBehaviour.TYPE)
-			.startOpen(player);
-	}
+    public ToolboxMenu(MenuType<?> type, int id, Inventory inv, ToolboxBlockEntity be) {
+        super(type, id, inv, be);
+        BlockEntityBehaviour.get(be, AnimatedContainerBehaviour.TYPE).startOpen(player);
+    }
 
-	public static ToolboxMenu create(int id, Inventory inv, ToolboxBlockEntity be) {
-		return new ToolboxMenu(AllMenuTypes.TOOLBOX.get(), id, inv, be);
-	}
+    public static ToolboxMenu create(int id, Inventory inv, ToolboxBlockEntity be) {
+        return new ToolboxMenu(AllMenuTypes.TOOLBOX.get(), id, inv, be);
+    }
 
-	@Override
-	protected ToolboxBlockEntity createOnClient(RegistryFriendlyByteBuf extraData) {
-		BlockPos readBlockPos = extraData.readBlockPos();
-		CompoundTag readNbt = extraData.readNbt();
+    @Override
+    protected ToolboxBlockEntity createOnClient(RegistryFriendlyByteBuf extraData) {
+        BlockPos readBlockPos = extraData.readBlockPos();
+        CompoundTag readNbt = extraData.readNbt();
 
-		ClientLevel world = Minecraft.getInstance().level;
-		BlockEntity blockEntity = world.getBlockEntity(readBlockPos);
-		if (blockEntity instanceof ToolboxBlockEntity toolbox) {
-			toolbox.readClient(readNbt, extraData.registryAccess());
-			return toolbox;
-		}
+        ClientLevel world = Minecraft.getInstance().level;
+        BlockEntity blockEntity = world.getBlockEntity(readBlockPos);
+        if (blockEntity instanceof ToolboxBlockEntity toolbox) {
+            toolbox.readClient(readNbt, extraData.registryAccess());
+            return toolbox;
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	@Override
-	public ItemStack quickMoveStack(Player player, int index) {
-		Slot clickedSlot = getSlot(index);
-		if (!clickedSlot.hasItem())
-			return ItemStack.EMPTY;
+    @Override
+    public ItemStack quickMoveStack(Player player, int index) {
+        Slot clickedSlot = getSlot(index);
+        if (!clickedSlot.hasItem()) return ItemStack.EMPTY;
 
-		ItemStack stack = clickedSlot.getItem();
-		int size = contentHolder.inventory.getSlots();
-		boolean success = false;
-		if (index < size) {
-			success = !moveItemStackTo(stack, size, slots.size(), false);
-			contentHolder.inventory.onContentsChanged(index);
-		} else {
-			success = !moveItemStackTo(stack, 0, size - 1, false);
-		}
+        ItemStack stack = clickedSlot.getItem();
+        int size = contentHolder.inventory.getSlots();
+        boolean success = false;
+        if (index < size) {
+            success = !moveItemStackTo(stack, size, slots.size(), false);
+            contentHolder.inventory.onContentsChanged(index);
+        } else {
+            success = !moveItemStackTo(stack, 0, size - 1, false);
+        }
 
-		return success ? ItemStack.EMPTY : stack;
-	}
+        return success ? ItemStack.EMPTY : stack;
+    }
 
-	@Override
-	protected void initAndReadInventory(ToolboxBlockEntity contentHolder) {
+    @Override
+    protected void initAndReadInventory(ToolboxBlockEntity contentHolder) {}
 
-	}
+    @Override
+    public void clicked(int index, int flags, ClickType type, Player player) {
+        int size = contentHolder.inventory.getSlots();
 
-	@Override
-	public void clicked(int index, int flags, ClickType type, Player player) {
-		int size = contentHolder.inventory.getSlots();
+        if (index >= 0 && index < size) {
+            ItemStack itemInClickedSlot = getSlot(index).getItem();
+            ItemStack carried = getCarried();
 
-		if (index >= 0 && index < size) {
-			ItemStack itemInClickedSlot = getSlot(index).getItem();
-			ItemStack carried = getCarried();
+            if (type == ClickType.PICKUP
+                    && !carried.isEmpty()
+                    && !itemInClickedSlot.isEmpty()
+                    && ToolboxInventory.canItemsShareCompartment(itemInClickedSlot, carried)) {
+                int subIndex = index % STACKS_PER_COMPARTMENT;
+                if (subIndex != STACKS_PER_COMPARTMENT - 1) {
+                    clicked(index - subIndex + STACKS_PER_COMPARTMENT - 1, flags, type, player);
+                    return;
+                }
+            }
 
-			if (type == ClickType.PICKUP && !carried.isEmpty() && !itemInClickedSlot.isEmpty()
-				&& ToolboxInventory.canItemsShareCompartment(itemInClickedSlot, carried)) {
-				int subIndex = index % STACKS_PER_COMPARTMENT;
-				if (subIndex != STACKS_PER_COMPARTMENT - 1) {
-					clicked(index - subIndex + STACKS_PER_COMPARTMENT - 1, flags, type, player);
-					return;
-				}
-			}
+            if (type == ClickType.PICKUP && carried.isEmpty() && itemInClickedSlot.isEmpty())
+                if (!player.level().isClientSide) {
+                    contentHolder.inventory.filters.set(
+                            index / STACKS_PER_COMPARTMENT, ItemStack.EMPTY);
+                    contentHolder.sendData();
+                }
+        }
+        super.clicked(index, flags, type, player);
+    }
 
-			if (type == ClickType.PICKUP && carried.isEmpty() && itemInClickedSlot.isEmpty())
-				if (!player.level().isClientSide) {
-					contentHolder.inventory.filters.set(index / STACKS_PER_COMPARTMENT, ItemStack.EMPTY);
-					contentHolder.sendData();
-				}
+    @Override
+    public boolean canDragTo(Slot slot) {
+        return slot.index > contentHolder.inventory.getSlots() && super.canDragTo(slot);
+    }
 
-		}
-		super.clicked(index, flags, type, player);
-	}
+    public ItemStack getFilter(int compartment) {
+        return contentHolder.inventory.filters.get(compartment);
+    }
 
-	@Override
-	public boolean canDragTo(Slot slot) {
-		return slot.index > contentHolder.inventory.getSlots() && super.canDragTo(slot);
-	}
+    public int totalCountInCompartment(int compartment) {
+        int count = 0;
+        int baseSlot = compartment * STACKS_PER_COMPARTMENT;
+        for (int i = 0; i < STACKS_PER_COMPARTMENT; i++)
+            count += getSlot(baseSlot + i).getItem().getCount();
+        return count;
+    }
 
-	public ItemStack getFilter(int compartment) {
-		return contentHolder.inventory.filters.get(compartment);
-	}
+    public boolean renderPass;
 
-	public int totalCountInCompartment(int compartment) {
-		int count = 0;
-		int baseSlot = compartment * STACKS_PER_COMPARTMENT;
-		for (int i = 0; i < STACKS_PER_COMPARTMENT; i++)
-			count += getSlot(baseSlot + i).getItem()
-				.getCount();
-		return count;
-	}
+    @Override
+    protected void addSlots() {
+        ToolboxInventory inventory = contentHolder.inventory;
 
-	public boolean renderPass;
+        int x = 79;
+        int y = 37;
 
-	@Override
-	protected void addSlots() {
-		ToolboxInventory inventory = contentHolder.inventory;
+        int[] xOffsets = {x, x + 33, x + 66, x + 66 + 6, x + 66, x + 33, x, x - 6};
+        int[] yOffsets = {y, y - 6, y, y + 33, y + 66, y + 66 + 6, y + 66, y + 33};
 
-		int x = 79;
-		int y = 37;
+        for (int compartment = 0; compartment < 8; compartment++) {
+            int baseIndex = compartment * STACKS_PER_COMPARTMENT;
 
-		int[] xOffsets = {x, x + 33, x + 66, x + 66 + 6, x + 66, x + 33, x, x - 6};
-		int[] yOffsets = {y, y - 6, y, y + 33, y + 66, y + 66 + 6, y + 66, y + 33};
+            // Representative Slots
+            addSlot(
+                    new ToolboxSlot(
+                            this,
+                            inventory,
+                            baseIndex,
+                            xOffsets[compartment],
+                            yOffsets[compartment],
+                            true));
 
-		for (int compartment = 0; compartment < 8; compartment++) {
-			int baseIndex = compartment * STACKS_PER_COMPARTMENT;
+            // Hidden Slots
+            for (int i = 1; i < STACKS_PER_COMPARTMENT; i++)
+                addSlot(new ToolboxSlot(this, inventory, baseIndex + i, -10000, -10000, false));
+        }
 
-			// Representative Slots
-			addSlot(new ToolboxSlot(this, inventory, baseIndex, xOffsets[compartment], yOffsets[compartment], true));
+        addPlayerSlots(8, 165);
+    }
 
-			// Hidden Slots
-			for (int i = 1; i < STACKS_PER_COMPARTMENT; i++)
-				addSlot(new ToolboxSlot(this, inventory, baseIndex + i, -10000, -10000, false));
-		}
+    @Override
+    protected void saveData(ToolboxBlockEntity contentHolder) {}
 
-		addPlayerSlots(8, 165);
-	}
-
-	@Override
-	protected void saveData(ToolboxBlockEntity contentHolder) {
-
-	}
-
-	@Override
-	public void removed(Player playerIn) {
-		super.removed(playerIn);
-		if (!playerIn.level().isClientSide)
-			BlockEntityBehaviour.get(contentHolder, AnimatedContainerBehaviour.TYPE)
-				.stopOpen(playerIn);
-	}
-
+    @Override
+    public void removed(Player playerIn) {
+        super.removed(playerIn);
+        if (!playerIn.level().isClientSide)
+            BlockEntityBehaviour.get(contentHolder, AnimatedContainerBehaviour.TYPE)
+                    .stopOpen(playerIn);
+    }
 }

@@ -7,8 +7,6 @@ import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.item.ItemHelper;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -27,77 +25,78 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import org.jetbrains.annotations.NotNull;
 
-public class SchematicTableBlock extends HorizontalDirectionalBlock implements IBE<SchematicTableBlockEntity> {
+public class SchematicTableBlock extends HorizontalDirectionalBlock
+        implements IBE<SchematicTableBlockEntity> {
 
-	public static final MapCodec<SchematicTableBlock> CODEC = simpleCodec(SchematicTableBlock::new);
+    public static final MapCodec<SchematicTableBlock> CODEC = simpleCodec(SchematicTableBlock::new);
 
-	public SchematicTableBlock(Properties properties) {
-		super(properties);
-	}
+    public SchematicTableBlock(Properties properties) {
+        super(properties);
+    }
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-		builder.add(FACING);
-		super.createBlockStateDefinition(builder);
-	}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+        super.createBlockStateDefinition(builder);
+    }
 
-	@Override
-	public PushReaction getPistonPushReaction(BlockState state) {
-		return PushReaction.BLOCK;
-	}
+    @Override
+    public PushReaction getPistonPushReaction(BlockState state) {
+        return PushReaction.BLOCK;
+    }
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
-	}
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
 
-	@Override
-	public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos,
-			CollisionContext context) {
-		return AllShapes.TABLE_POLE_SHAPE;
-	}
+    @Override
+    public VoxelShape getCollisionShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return AllShapes.TABLE_POLE_SHAPE;
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		return AllShapes.SCHEMATICS_TABLE.get(state.getValue(FACING));
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return AllShapes.SCHEMATICS_TABLE.get(state.getValue(FACING));
+    }
 
-	@Override
-	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		if (level.isClientSide)
-			return InteractionResult.SUCCESS;
-		withBlockEntityDo(level, pos,
-				be -> player.openMenu(be, be::sendToMenu));
-		return InteractionResult.SUCCESS;
-	}
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (level.isClientSide) return InteractionResult.SUCCESS;
+        withBlockEntityDo(level, pos, be -> player.openMenu(be, be::sendToMenu));
+        return InteractionResult.SUCCESS;
+    }
 
-	@Override
-	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		if (!state.hasBlockEntity() || state.getBlock() == newState.getBlock())
-			return;
+    @Override
+    public void onRemove(
+            BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.hasBlockEntity() || state.getBlock() == newState.getBlock()) return;
 
-		withBlockEntityDo(worldIn, pos, be -> ItemHelper.dropContents(worldIn, pos, be.inventory));
-		worldIn.removeBlockEntity(pos);
-	}
+        withBlockEntityDo(worldIn, pos, be -> ItemHelper.dropContents(worldIn, pos, be.inventory));
+        worldIn.removeBlockEntity(pos);
+    }
 
-	@Override
-	public Class<SchematicTableBlockEntity> getBlockEntityClass() {
-		return SchematicTableBlockEntity.class;
-	}
+    @Override
+    public Class<SchematicTableBlockEntity> getBlockEntityClass() {
+        return SchematicTableBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends SchematicTableBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.SCHEMATIC_TABLE.get();
-	}
+    @Override
+    public BlockEntityType<? extends SchematicTableBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.SCHEMATIC_TABLE.get();
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
-		return CODEC;
-	}
-
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
 }

@@ -8,10 +8,9 @@ import net.minecraft.world.item.crafting.RecipeType;
 
 public interface IRecipeTypeInfo {
 
-	ResourceLocation getId();
+    ResourceLocation getId();
 
-	<T extends RecipeSerializer<?>> T getSerializer();
+    <T extends RecipeSerializer<?>> T getSerializer();
 
-	<I extends RecipeInput, R extends Recipe<I>> RecipeType<R> getType();
-
+    <I extends RecipeInput, R extends Recipe<I>> RecipeType<R> getType();
 }

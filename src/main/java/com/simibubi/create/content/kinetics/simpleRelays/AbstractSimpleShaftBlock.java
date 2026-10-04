@@ -1,7 +1,5 @@
 package com.simibubi.create.content.kinetics.simpleRelays;
 
-import java.util.Optional;
-
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.content.decoration.bracket.BracketedBlockEntityBehaviour;
 import com.simibubi.create.content.equipment.wrench.IWrenchableWithBracket;
@@ -19,46 +17,51 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 
-public abstract class AbstractSimpleShaftBlock extends AbstractShaftBlock implements IWrenchableWithBracket {
+import java.util.Optional;
 
-	public AbstractSimpleShaftBlock(Properties properties) {
-		super(properties);
-	}
+public abstract class AbstractSimpleShaftBlock extends AbstractShaftBlock
+        implements IWrenchableWithBracket {
 
-	@Override
-	public InteractionResult onWrenched(BlockState state, UseOnContext context) {
-		return IWrenchableWithBracket.super.onWrenched(state, context);
-	}
+    public AbstractSimpleShaftBlock(Properties properties) {
+        super(properties);
+    }
 
-	@Override
-	public PushReaction getPistonPushReaction(BlockState state) {
-		return PushReaction.NORMAL;
-	}
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        return IWrenchableWithBracket.super.onWrenched(state, context);
+    }
 
-	@Override
-	public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-		boolean wasWaterLogged = state.hasProperty(WATERLOGGED) &&
-				newState.hasProperty(WATERLOGGED) &&
-				(state.getValue(WATERLOGGED) != newState.getValue(WATERLOGGED));
-		if (state != newState && !isMoving && !wasWaterLogged)
-			removeBracket(world, pos, true).ifPresent(stack -> Block.popResource(world, pos, stack));
-		super.onRemove(state, world, pos, newState, isMoving);
-	}
+    @Override
+    public PushReaction getPistonPushReaction(BlockState state) {
+        return PushReaction.NORMAL;
+    }
 
-	@Override
-	public Optional<ItemStack> removeBracket(BlockGetter world, BlockPos pos, boolean inOnReplacedContext) {
-		BracketedBlockEntityBehaviour behaviour = BlockEntityBehaviour.get(world, pos, BracketedBlockEntityBehaviour.TYPE);
-		if (behaviour == null)
-			return Optional.empty();
-		BlockState bracket = behaviour.removeBracket(inOnReplacedContext);
-		if (bracket == null)
-			return Optional.empty();
-		return Optional.of(new ItemStack(bracket.getBlock()));
-	}
+    @Override
+    public void onRemove(
+            BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
+        boolean wasWaterLogged =
+                state.hasProperty(WATERLOGGED)
+                        && newState.hasProperty(WATERLOGGED)
+                        && (state.getValue(WATERLOGGED) != newState.getValue(WATERLOGGED));
+        if (state != newState && !isMoving && !wasWaterLogged)
+            removeBracket(world, pos, true)
+                    .ifPresent(stack -> Block.popResource(world, pos, stack));
+        super.onRemove(state, world, pos, newState, isMoving);
+    }
 
-	@Override
-	public BlockEntityType<? extends KineticBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.BRACKETED_KINETIC.get();
-	}
+    @Override
+    public Optional<ItemStack> removeBracket(
+            BlockGetter world, BlockPos pos, boolean inOnReplacedContext) {
+        BracketedBlockEntityBehaviour behaviour =
+                BlockEntityBehaviour.get(world, pos, BracketedBlockEntityBehaviour.TYPE);
+        if (behaviour == null) return Optional.empty();
+        BlockState bracket = behaviour.removeBracket(inOnReplacedContext);
+        if (bracket == null) return Optional.empty();
+        return Optional.of(new ItemStack(bracket.getBlock()));
+    }
 
+    @Override
+    public BlockEntityType<? extends KineticBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.BRACKETED_KINETIC.get();
+    }
 }

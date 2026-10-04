@@ -41,7 +41,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -50,115 +49,155 @@ import net.neoforged.neoforge.common.NeoForge;
 @Mod(value = Create.ID, dist = Dist.CLIENT)
 public class CreateClient {
 
-	public static final ModelSwapper MODEL_SWAPPER = new ModelSwapper();
-	public static final CasingConnectivity CASING_CONNECTIVITY = new CasingConnectivity();
+    public static final ModelSwapper MODEL_SWAPPER = new ModelSwapper();
+    public static final CasingConnectivity CASING_CONNECTIVITY = new CasingConnectivity();
 
-	public static final ClientSchematicLoader SCHEMATIC_SENDER = new ClientSchematicLoader();
-	public static final SchematicHandler SCHEMATIC_HANDLER = new SchematicHandler();
-	public static final SchematicAndQuillHandler SCHEMATIC_AND_QUILL_HANDLER = new SchematicAndQuillHandler();
-	public static final SuperGlueSelectionHandler GLUE_HANDLER = new SuperGlueSelectionHandler();
+    public static final ClientSchematicLoader SCHEMATIC_SENDER = new ClientSchematicLoader();
+    public static final SchematicHandler SCHEMATIC_HANDLER = new SchematicHandler();
+    public static final SchematicAndQuillHandler SCHEMATIC_AND_QUILL_HANDLER =
+            new SchematicAndQuillHandler();
+    public static final SuperGlueSelectionHandler GLUE_HANDLER = new SuperGlueSelectionHandler();
 
-	public static final ZapperRenderHandler ZAPPER_RENDER_HANDLER = new ZapperRenderHandler();
-	public static final PotatoCannonRenderHandler POTATO_CANNON_RENDER_HANDLER = new PotatoCannonRenderHandler();
-	public static final SoulPulseEffectHandler SOUL_PULSE_EFFECT_HANDLER = new SoulPulseEffectHandler();
-	public static final GlobalRailwayManager RAILWAYS = new GlobalRailwayManager();
-	public static final ValueSettingsClient VALUE_SETTINGS_HANDLER = new ValueSettingsClient();
+    public static final ZapperRenderHandler ZAPPER_RENDER_HANDLER = new ZapperRenderHandler();
+    public static final PotatoCannonRenderHandler POTATO_CANNON_RENDER_HANDLER =
+            new PotatoCannonRenderHandler();
+    public static final SoulPulseEffectHandler SOUL_PULSE_EFFECT_HANDLER =
+            new SoulPulseEffectHandler();
+    public static final GlobalRailwayManager RAILWAYS = new GlobalRailwayManager();
+    public static final ValueSettingsClient VALUE_SETTINGS_HANDLER = new ValueSettingsClient();
 
-	public static final ClientResourceReloadListener RESOURCE_RELOAD_LISTENER = new ClientResourceReloadListener();
+    public static final ClientResourceReloadListener RESOURCE_RELOAD_LISTENER =
+            new ClientResourceReloadListener();
 
-	public CreateClient(net.neoforged.bus.api.IEventBus modEventBus) {
-		onCtorClient(modEventBus);
-	}
+    public CreateClient(net.neoforged.bus.api.IEventBus modEventBus) {
+        onCtorClient(modEventBus);
+    }
 
-	public static void onCtorClient(net.neoforged.bus.api.IEventBus modEventBus) {
-		net.neoforged.bus.api.IEventBus neoEventBus = NeoForge.EVENT_BUS;
+    public static void onCtorClient(net.neoforged.bus.api.IEventBus modEventBus) {
+        net.neoforged.bus.api.IEventBus neoEventBus = NeoForge.EVENT_BUS;
 
-		modEventBus.addListener(CreateClient::clientInit);
-		modEventBus.addListener(AllParticleTypes::registerFactories);
+        modEventBus.addListener(CreateClient::clientInit);
+        modEventBus.addListener(AllParticleTypes::registerFactories);
 
-		AllInstanceTypes.init();
+        AllInstanceTypes.init();
 
-		MODEL_SWAPPER.registerListeners(modEventBus);
+        MODEL_SWAPPER.registerListeners(modEventBus);
 
-		ZAPPER_RENDER_HANDLER.registerListeners(neoEventBus);
-		POTATO_CANNON_RENDER_HANDLER.registerListeners(neoEventBus);
+        ZAPPER_RENDER_HANDLER.registerListeners(neoEventBus);
+        POTATO_CANNON_RENDER_HANDLER.registerListeners(neoEventBus);
 
-		Mods.FTBLIBRARY.executeIfInstalled(() -> () -> FTBIntegration.init(modEventBus, neoEventBus));
-		Mods.SODIUM.executeIfInstalled(() -> () -> SodiumCompat.init(modEventBus, neoEventBus));
-	}
+        Mods.FTBLIBRARY.executeIfInstalled(
+                () -> () -> FTBIntegration.init(modEventBus, neoEventBus));
+        Mods.SODIUM.executeIfInstalled(() -> () -> SodiumCompat.init(modEventBus, neoEventBus));
+    }
 
-	public static void clientInit(final FMLClientSetupEvent event) {
-		//BUFFER_CACHE.registerCompartment(CachedBufferer.GENERIC_BLOCK);
-		//BUFFER_CACHE.registerCompartment(CachedPartialBuffers.partial);
-		//BUFFER_CACHE.registerCompartment(CachedBufferer.DIRECTIONAL_PARTIAL);
-		//BUFFER_CACHE.registerCompartment(KineticBlockEntityRenderer.KINETIC_BLOCK);
-		//BUFFER_CACHE.registerCompartment(WaterWheelRenderer.WATER_WHEEL);
-		//BUFFER_CACHE.registerCompartment(ContraptionRenderInfo.CONTRAPTION, 20);
-		//BUFFER_CACHE.registerCompartment(WorldSectionElement.DOC_WORLD_SECTION, 20);
+    public static void clientInit(final FMLClientSetupEvent event) {
+        // BUFFER_CACHE.registerCompartment(CachedBufferer.GENERIC_BLOCK);
+        // BUFFER_CACHE.registerCompartment(CachedPartialBuffers.partial);
+        // BUFFER_CACHE.registerCompartment(CachedBufferer.DIRECTIONAL_PARTIAL);
+        // BUFFER_CACHE.registerCompartment(KineticBlockEntityRenderer.KINETIC_BLOCK);
+        // BUFFER_CACHE.registerCompartment(WaterWheelRenderer.WATER_WHEEL);
+        // BUFFER_CACHE.registerCompartment(ContraptionRenderInfo.CONTRAPTION, 20);
+        // BUFFER_CACHE.registerCompartment(WorldSectionElement.DOC_WORLD_SECTION, 20);
 
-		SuperByteBufferCache.getInstance().registerCompartment(CachedBuffers.PARTIAL);
-		SuperByteBufferCache.getInstance().registerCompartment(CachedBuffers.DIRECTIONAL_PARTIAL);
-		SuperByteBufferCache.getInstance().registerCompartment(KineticBlockEntityRenderer.KINETIC_BLOCK);
-		SuperByteBufferCache.getInstance().registerCompartment(WaterWheelRenderer.WATER_WHEEL);
-		SuperByteBufferCache.getInstance().registerCompartment(ContraptionRenderInfo.CONTRAPTION, 20);
+        SuperByteBufferCache.getInstance().registerCompartment(CachedBuffers.PARTIAL);
+        SuperByteBufferCache.getInstance().registerCompartment(CachedBuffers.DIRECTIONAL_PARTIAL);
+        SuperByteBufferCache.getInstance()
+                .registerCompartment(KineticBlockEntityRenderer.KINETIC_BLOCK);
+        SuperByteBufferCache.getInstance().registerCompartment(WaterWheelRenderer.WATER_WHEEL);
+        SuperByteBufferCache.getInstance()
+                .registerCompartment(ContraptionRenderInfo.CONTRAPTION, 20);
 
-		AllPartialModels.init();
+        AllPartialModels.init();
 
+        // AllPonderTags.register();
+        // PonderIndex.register();
+        PonderIndex.addPlugin(new CreatePonderPlugin());
 
-		//AllPonderTags.register();
-		//PonderIndex.register();
-		PonderIndex.addPlugin(new CreatePonderPlugin());
+        setupConfigUIBackground();
+    }
 
-		setupConfigUIBackground();
-	}
+    private static void setupConfigUIBackground() {
+        ConfigScreen.backgrounds.put(
+                Create.ID,
+                (screen, graphics, partialTicks) -> {
+                    CreateMainMenuScreen.PANORAMA.render(
+                            graphics, screen.width, screen.height, 1, partialTicks);
 
-	private static void setupConfigUIBackground() {
-		ConfigScreen.backgrounds.put(Create.ID, (screen, graphics, partialTicks) -> {
-			CreateMainMenuScreen.PANORAMA.render(graphics, screen.width, screen.height, 1, partialTicks);
+                    // RenderSystem.setShaderTexture(0,
+                    // CreateMainMenuScreen.PANORAMA_OVERLAY_TEXTURES);
+                    RenderSystem.enableBlend();
+                    RenderSystem.blendFunc(
+                            GlStateManager.SourceFactor.SRC_ALPHA,
+                            GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+                    graphics.blit(
+                            CreateMainMenuScreen.PANORAMA_OVERLAY_TEXTURES,
+                            0,
+                            0,
+                            screen.width,
+                            screen.height,
+                            0.0F,
+                            0.0F,
+                            16,
+                            128,
+                            16,
+                            128);
 
-			//RenderSystem.setShaderTexture(0, CreateMainMenuScreen.PANORAMA_OVERLAY_TEXTURES);
-			RenderSystem.enableBlend();
-			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			graphics.blit(CreateMainMenuScreen.PANORAMA_OVERLAY_TEXTURES, 0, 0, screen.width, screen.height, 0.0F, 0.0F, 16, 128, 16, 128);
+                    graphics.fill(0, 0, screen.width, screen.height, 0x90_282c34);
+                });
 
-			graphics.fill(0, 0, screen.width, screen.height, 0x90_282c34);
-		});
+        ConfigScreen.shadowState =
+                AllBlocks.LARGE_COGWHEEL
+                        .getDefaultState()
+                        .setValue(CogWheelBlock.AXIS, Direction.Axis.Y);
 
-		ConfigScreen.shadowState = AllBlocks.LARGE_COGWHEEL.getDefaultState().setValue(CogWheelBlock.AXIS, Direction.Axis.Y);
+        BaseConfigScreen.setDefaultActionFor(
+                Create.ID,
+                base ->
+                        base.withButtonLabels(
+                                        "Client Settings",
+                                        "World Generation Settings",
+                                        "Gameplay Settings")
+                                .withSpecs(
+                                        AllConfigs.client().specification,
+                                        AllConfigs.common().specification,
+                                        AllConfigs.server().specification));
+    }
 
-		BaseConfigScreen.setDefaultActionFor(Create.ID, base -> base
-				.withButtonLabels("Client Settings", "World Generation Settings", "Gameplay Settings")
-				.withSpecs(AllConfigs.client().specification, AllConfigs.common().specification, AllConfigs.server().specification)
-		);
-	}
+    public static void invalidateRenderers() {
+        SCHEMATIC_HANDLER.updateRenderers();
+        ContraptionRenderInfoManager.resetAll();
+    }
 
-	public static void invalidateRenderers() {
-		SCHEMATIC_HANDLER.updateRenderers();
-		ContraptionRenderInfoManager.resetAll();
-	}
+    public static void checkGraphicsFanciness() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
 
-	public static void checkGraphicsFanciness() {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null)
-			return;
+        if (mc.options.graphicsMode().get() != GraphicsStatus.FABULOUS) return;
 
-		if (mc.options.graphicsMode().get() != GraphicsStatus.FABULOUS)
-			return;
+        if (AllConfigs.client().ignoreFabulousWarning.get()) return;
 
-		if (AllConfigs.client().ignoreFabulousWarning.get())
-			return;
+        MutableComponent text =
+                ComponentUtils.wrapInSquareBrackets(Component.literal("WARN"))
+                        .withStyle(ChatFormatting.GOLD)
+                        .append(
+                                Component.literal(
+                                        " Some of Create's visual features will not be available"
+                                            + " while Fabulous graphics are enabled!"))
+                        .withStyle(
+                                style -> {
+                                    return style.withClickEvent(
+                                                    new ClickEvent(
+                                                            ClickEvent.Action.RUN_COMMAND,
+                                                            "/create dismissFabulousWarning"))
+                                            .withHoverEvent(
+                                                    new HoverEvent(
+                                                            HoverEvent.Action.SHOW_TEXT,
+                                                            Component.literal(
+                                                                    "Click here to disable this"
+                                                                        + " warning")));
+                                });
 
-        MutableComponent text = ComponentUtils.wrapInSquareBrackets(Component.literal("WARN"))
-			.withStyle(ChatFormatting.GOLD)
-			.append(Component.literal(" Some of Create's visual features will not be available while Fabulous graphics are enabled!"))
-			.withStyle(style -> {
-                return style
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/create dismissFabulousWarning"))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            Component.literal("Click here to disable this warning")));
-            });
-
-		mc.player.displayClientMessage(text, false);
-	}
-
+        mc.player.displayClientMessage(text, false);
+    }
 }

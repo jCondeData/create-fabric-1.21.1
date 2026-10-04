@@ -1,7 +1,5 @@
 package com.simibubi.create.content.redstone;
 
-import javax.annotation.Nullable;
-
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.api.contraption.transformable.TransformableBlock;
 import com.simibubi.create.content.contraptions.StructureTransform;
@@ -20,87 +18,96 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 import org.jetbrains.annotations.NotNull;
 
-public class DirectedDirectionalBlock extends HorizontalDirectionalBlock implements IWrenchable, TransformableBlock {
+import javax.annotation.Nullable;
 
-	public static final EnumProperty<AttachFace> TARGET = EnumProperty.create("target", AttachFace.class);
+public class DirectedDirectionalBlock extends HorizontalDirectionalBlock
+        implements IWrenchable, TransformableBlock {
 
-	public static final MapCodec<DirectedDirectionalBlock> CODEC = simpleCodec(DirectedDirectionalBlock::new);
+    public static final EnumProperty<AttachFace> TARGET =
+            EnumProperty.create("target", AttachFace.class);
 
-	public DirectedDirectionalBlock(Properties pProperties) {
-		super(pProperties);
-		registerDefaultState(defaultBlockState().setValue(TARGET, AttachFace.WALL));
-	}
+    public static final MapCodec<DirectedDirectionalBlock> CODEC =
+            simpleCodec(DirectedDirectionalBlock::new);
 
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(TARGET, FACING));
-	}
+    public DirectedDirectionalBlock(Properties pProperties) {
+        super(pProperties);
+        registerDefaultState(defaultBlockState().setValue(TARGET, AttachFace.WALL));
+    }
 
-	@Nullable
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		for (Direction direction : pContext.getNearestLookingDirections()) {
-			BlockState blockstate;
-			if (direction.getAxis() == Direction.Axis.Y) {
-				blockstate = this.defaultBlockState()
-					.setValue(TARGET, direction == Direction.UP ? AttachFace.CEILING : AttachFace.FLOOR)
-					.setValue(FACING, pContext.getHorizontalDirection());
-			} else {
-				blockstate = this.defaultBlockState()
-					.setValue(TARGET, AttachFace.WALL)
-					.setValue(FACING, direction.getOpposite());
-			}
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
+        super.createBlockStateDefinition(pBuilder.add(TARGET, FACING));
+    }
 
-			return blockstate;
-		}
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        for (Direction direction : pContext.getNearestLookingDirections()) {
+            BlockState blockstate;
+            if (direction.getAxis() == Direction.Axis.Y) {
+                blockstate =
+                        this.defaultBlockState()
+                                .setValue(
+                                        TARGET,
+                                        direction == Direction.UP
+                                                ? AttachFace.CEILING
+                                                : AttachFace.FLOOR)
+                                .setValue(FACING, pContext.getHorizontalDirection());
+            } else {
+                blockstate =
+                        this.defaultBlockState()
+                                .setValue(TARGET, AttachFace.WALL)
+                                .setValue(FACING, direction.getOpposite());
+            }
 
-		return null;
-	}
+            return blockstate;
+        }
 
-	public static Direction getTargetDirection(BlockState pState) {
-		switch ((AttachFace) pState.getValue(TARGET)) {
-		case CEILING:
-			return Direction.UP;
-		case FLOOR:
-			return Direction.DOWN;
-		default:
-			return pState.getValue(FACING);
-		}
-	}
+        return null;
+    }
 
-	@Override
-	public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
-		if (targetedFace.getAxis() == Axis.Y)
-			return IWrenchable.super.getRotatedBlockState(originalState, targetedFace);
+    public static Direction getTargetDirection(BlockState pState) {
+        switch ((AttachFace) pState.getValue(TARGET)) {
+            case CEILING:
+                return Direction.UP;
+            case FLOOR:
+                return Direction.DOWN;
+            default:
+                return pState.getValue(FACING);
+        }
+    }
 
-		Direction targetDirection = getTargetDirection(originalState);
-		Direction newFacing = targetDirection.getClockWise(targetedFace.getAxis());
-		if (targetedFace.getAxisDirection() == AxisDirection.NEGATIVE)
-			newFacing = newFacing.getOpposite();
+    @Override
+    public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
+        if (targetedFace.getAxis() == Axis.Y)
+            return IWrenchable.super.getRotatedBlockState(originalState, targetedFace);
 
-		if (newFacing.getAxis() == Axis.Y)
-			return originalState.setValue(TARGET, newFacing == Direction.UP ? AttachFace.CEILING : AttachFace.FLOOR);
-		return originalState.setValue(TARGET, AttachFace.WALL)
-			.setValue(FACING, newFacing);
-	}
+        Direction targetDirection = getTargetDirection(originalState);
+        Direction newFacing = targetDirection.getClockWise(targetedFace.getAxis());
+        if (targetedFace.getAxisDirection() == AxisDirection.NEGATIVE)
+            newFacing = newFacing.getOpposite();
 
-	@Override
-	public BlockState transform(BlockState state, StructureTransform transform) {
-		if (transform.mirror != null)
-			state = mirror(state, transform.mirror);
-		if (transform.rotationAxis == Direction.Axis.Y)
-			return rotate(state, transform.rotation);
+        if (newFacing.getAxis() == Axis.Y)
+            return originalState.setValue(
+                    TARGET, newFacing == Direction.UP ? AttachFace.CEILING : AttachFace.FLOOR);
+        return originalState.setValue(TARGET, AttachFace.WALL).setValue(FACING, newFacing);
+    }
 
-		Direction targetDirection = getTargetDirection(state);
-		Direction newFacing = transform.rotateFacing(targetDirection);
+    @Override
+    public BlockState transform(BlockState state, StructureTransform transform) {
+        if (transform.mirror != null) state = mirror(state, transform.mirror);
+        if (transform.rotationAxis == Direction.Axis.Y) return rotate(state, transform.rotation);
 
-		if (newFacing.getAxis() == Axis.Y)
-			return state.setValue(TARGET, newFacing == Direction.UP ? AttachFace.CEILING : AttachFace.FLOOR);
-		return state.setValue(TARGET, AttachFace.WALL)
-			.setValue(FACING, newFacing);
-	}
+        Direction targetDirection = getTargetDirection(state);
+        Direction newFacing = transform.rotateFacing(targetDirection);
 
-	@Override
-	protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
-		return CODEC;
-	}
+        if (newFacing.getAxis() == Axis.Y)
+            return state.setValue(
+                    TARGET, newFacing == Direction.UP ? AttachFace.CEILING : AttachFace.FLOOR);
+        return state.setValue(TARGET, AttachFace.WALL).setValue(FACING, newFacing);
+    }
+
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
 }

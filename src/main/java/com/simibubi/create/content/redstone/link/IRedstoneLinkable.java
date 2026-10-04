@@ -7,16 +7,15 @@ import net.minecraft.core.BlockPos;
 
 public interface IRedstoneLinkable {
 
-	public int getTransmittedStrength();
+    public int getTransmittedStrength();
 
-	public void setReceivedStrength(int power);
+    public void setReceivedStrength(int power);
 
-	public boolean isListening();
+    public boolean isListening();
 
-	public boolean isAlive();
+    public boolean isAlive();
 
-	public Couple<Frequency> getNetworkKey();
+    public Couple<Frequency> getNetworkKey();
 
-	public BlockPos getLocation();
-
+    public BlockPos getLocation();
 }

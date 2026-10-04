@@ -1,10 +1,5 @@
 package com.simibubi.create.content.contraptions.elevator;
 
-import org.joml.Matrix4f;
-import org.joml.Matrix4fc;
-import org.joml.Quaternionf;
-import org.joml.Quaternionfc;
-
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllSpriteShifts;
 import com.simibubi.create.content.contraptions.pulley.PulleyRenderer;
@@ -21,191 +16,213 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
+
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 
-public class ElevatorPulleyVisual extends ShaftVisual<ElevatorPulleyBlockEntity> implements SimpleDynamicVisual, ShaderLightVisual {
-	private final InstanceRecycler<ScrollInstance> belt;
-	private final ScrollInstance halfBelt;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
-	private final ScrollInstance coil;
+public class ElevatorPulleyVisual extends ShaftVisual<ElevatorPulleyBlockEntity>
+        implements SimpleDynamicVisual, ShaderLightVisual {
+    private final InstanceRecycler<ScrollInstance> belt;
+    private final ScrollInstance halfBelt;
 
-	private final TransformedInstance magnet;
+    private final ScrollInstance coil;
 
-	private final Matrix4fc cachedMagnetTransform;
+    private final TransformedInstance magnet;
 
-	private float lastOffset = Float.NaN;
+    private final Matrix4fc cachedMagnetTransform;
 
-	private final long topSection;
+    private float lastOffset = Float.NaN;
 
-	private long lastBottomSection;
+    private final long topSection;
 
-	public ElevatorPulleyVisual(VisualizationContext context, ElevatorPulleyBlockEntity blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick);
+    private long lastBottomSection;
 
-		float blockStateAngle =
-			AngleHelper.horizontalAngle(blockState.getValue(ElevatorPulleyBlock.HORIZONTAL_FACING));
+    public ElevatorPulleyVisual(
+            VisualizationContext context,
+            ElevatorPulleyBlockEntity blockEntity,
+            float partialTick) {
+        super(context, blockEntity, partialTick);
 
-		Quaternionfc rotation = new Quaternionf().rotationY(Mth.DEG_TO_RAD * blockStateAngle);
+        float blockStateAngle =
+                AngleHelper.horizontalAngle(
+                        blockState.getValue(ElevatorPulleyBlock.HORIZONTAL_FACING));
 
-		topSection = SectionPos.of(pos).asLong();
+        Quaternionfc rotation = new Quaternionf().rotationY(Mth.DEG_TO_RAD * blockStateAngle);
 
-		belt = new InstanceRecycler<>(() -> context.instancerProvider()
-			.instancer(AllInstanceTypes.SCROLLING, SpecialModels.flatLit(AllPartialModels.ELEVATOR_BELT))
-			.createInstance()
-			.rotation(rotation)
-			.setSpriteShift(AllSpriteShifts.ELEVATOR_BELT));
+        topSection = SectionPos.of(pos).asLong();
 
-		halfBelt = context.instancerProvider()
-			.instancer(AllInstanceTypes.SCROLLING, SpecialModels.flatLit(AllPartialModels.ELEVATOR_BELT_HALF))
-			.createInstance()
-			.rotation(rotation)
-			.setSpriteShift(AllSpriteShifts.ELEVATOR_BELT);
+        belt =
+                new InstanceRecycler<>(
+                        () ->
+                                context.instancerProvider()
+                                        .instancer(
+                                                AllInstanceTypes.SCROLLING,
+                                                SpecialModels.flatLit(
+                                                        AllPartialModels.ELEVATOR_BELT))
+                                        .createInstance()
+                                        .rotation(rotation)
+                                        .setSpriteShift(AllSpriteShifts.ELEVATOR_BELT));
 
-		coil = context.instancerProvider()
-			.instancer(AllInstanceTypes.SCROLLING, Models.partial(AllPartialModels.ELEVATOR_COIL))
-			.createInstance()
-			.position(getVisualPosition())
-			.rotation(rotation)
-			.setSpriteShift(AllSpriteShifts.ELEVATOR_COIL);
+        halfBelt =
+                context.instancerProvider()
+                        .instancer(
+                                AllInstanceTypes.SCROLLING,
+                                SpecialModels.flatLit(AllPartialModels.ELEVATOR_BELT_HALF))
+                        .createInstance()
+                        .rotation(rotation)
+                        .setSpriteShift(AllSpriteShifts.ELEVATOR_BELT);
 
-		coil.setChanged();
+        coil =
+                context.instancerProvider()
+                        .instancer(
+                                AllInstanceTypes.SCROLLING,
+                                Models.partial(AllPartialModels.ELEVATOR_COIL))
+                        .createInstance()
+                        .position(getVisualPosition())
+                        .rotation(rotation)
+                        .setSpriteShift(AllSpriteShifts.ELEVATOR_COIL);
 
-		magnet = context.instancerProvider()
-			.instancer(InstanceTypes.TRANSFORMED, SpecialModels.flatLit(AllPartialModels.ELEVATOR_MAGNET))
-			.createInstance();
+        coil.setChanged();
 
-		// Cache the magnet's transform to avoid recalculating this unchanging bit every frame
-		magnet.setIdentityTransform()
-			.translate(getVisualPosition())
-			.center()
-			.rotateYDegrees(blockStateAngle)
-			.uncenter();
+        magnet =
+                context.instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                SpecialModels.flatLit(AllPartialModels.ELEVATOR_MAGNET))
+                        .createInstance();
 
-		cachedMagnetTransform = new Matrix4f(magnet.pose);
+        // Cache the magnet's transform to avoid recalculating this unchanging bit every frame
+        magnet.setIdentityTransform()
+                .translate(getVisualPosition())
+                .center()
+                .rotateYDegrees(blockStateAngle)
+                .uncenter();
 
-		animate(PulleyRenderer.getBlockEntityOffset(partialTick, blockEntity));
-	}
+        cachedMagnetTransform = new Matrix4f(magnet.pose);
 
-	@Override
-	public void updateLight(float partialTick) {
-		super.updateLight(partialTick);
+        animate(PulleyRenderer.getBlockEntityOffset(partialTick, blockEntity));
+    }
 
-		relight(coil);
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        super.updateLight(partialTick);
 
-	@Override
-	public void setSectionCollector(SectionCollector sectionCollector) {
-		super.setSectionCollector(sectionCollector);
+        relight(coil);
+    }
 
-		sectionCollector.sections(getLightSections(lastOffset));
-	}
+    @Override
+    public void setSectionCollector(SectionCollector sectionCollector) {
+        super.setSectionCollector(sectionCollector);
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		animate(PulleyRenderer.getBlockEntityOffset(ctx.partialTick(), blockEntity));
-	}
+        sectionCollector.sections(getLightSections(lastOffset));
+    }
 
-	@Override
-	protected void _delete() {
-		super._delete();
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        animate(PulleyRenderer.getBlockEntityOffset(ctx.partialTick(), blockEntity));
+    }
 
-		belt.delete();
-		halfBelt.delete();
-		coil.delete();
-		magnet.delete();
-	}
+    @Override
+    protected void _delete() {
+        super._delete();
 
-	private void animate(float offset) {
-		if (offset == lastOffset) {
-			return;
-		}
-		lastOffset = offset;
+        belt.delete();
+        halfBelt.delete();
+        coil.delete();
+        magnet.delete();
+    }
 
-		maybeUpdateSections(offset);
+    private void animate(float offset) {
+        if (offset == lastOffset) {
+            return;
+        }
+        lastOffset = offset;
 
-		animateCoil(offset);
+        maybeUpdateSections(offset);
 
-		animateHalfBelt(offset);
+        animateCoil(offset);
 
-		animateBelt(offset);
+        animateHalfBelt(offset);
 
-		animateMagnet(offset);
-	}
+        animateBelt(offset);
 
-	private void maybeUpdateSections(float offset) {
-		if (lightSections == null) {
-			return;
-		}
-		if (lastBottomSection == SectionPos.offset(topSection, 0, -offset2SectionCount(offset), 0)) {
-			return;
-		}
+        animateMagnet(offset);
+    }
 
-		lightSections.sections(getLightSections(offset));
-	}
+    private void maybeUpdateSections(float offset) {
+        if (lightSections == null) {
+            return;
+        }
+        if (lastBottomSection
+                == SectionPos.offset(topSection, 0, -offset2SectionCount(offset), 0)) {
+            return;
+        }
 
-	private void animateMagnet(float offset) {
-		magnet.setTransform(cachedMagnetTransform)
-			.translateY(-offset)
-			.setChanged();
-	}
+        lightSections.sections(getLightSections(offset));
+    }
 
-	private void animateBelt(float offset) {
-		belt.resetCount();
+    private void animateMagnet(float offset) {
+        magnet.setTransform(cachedMagnetTransform).translateY(-offset).setChanged();
+    }
 
-		for (int i = 0; i < offset - .25f; i++) {
-			var segment = belt.get()
-				.position(getVisualPosition())
-				.shift(0, -(offset - i), 0);
+    private void animateBelt(float offset) {
+        belt.resetCount();
 
-			segment.offsetV = offset;
+        for (int i = 0; i < offset - .25f; i++) {
+            var segment = belt.get().position(getVisualPosition()).shift(0, -(offset - i), 0);
 
-			segment.setChanged();
-		}
+            segment.offsetV = offset;
 
-		belt.discardExtra();
-	}
+            segment.setChanged();
+        }
 
-	private void animateHalfBelt(float offset) {
-		float f = offset % 1;
-		if (f < .25f || f > .75f) {
-			halfBelt.setVisible(true);
-			halfBelt.position(getVisualPosition())
-				.shift(0, -(f > .75f ? f - 1 : f), 0);
+        belt.discardExtra();
+    }
 
-			halfBelt.offsetV = offset;
+    private void animateHalfBelt(float offset) {
+        float f = offset % 1;
+        if (f < .25f || f > .75f) {
+            halfBelt.setVisible(true);
+            halfBelt.position(getVisualPosition()).shift(0, -(f > .75f ? f - 1 : f), 0);
 
-			halfBelt.setChanged();
-		} else {
-			halfBelt.setVisible(false);
-		}
-	}
+            halfBelt.offsetV = offset;
 
-	private void animateCoil(float offset) {
-		coil.offsetV = -offset * 2;
+            halfBelt.setChanged();
+        } else {
+            halfBelt.setVisible(false);
+        }
+    }
 
-		coil.setChanged();
-	}
+    private void animateCoil(float offset) {
+        coil.offsetV = -offset * 2;
 
-	private LongSet getLightSections(float offset) {
-		var out = new LongArraySet();
+        coil.setChanged();
+    }
 
-		int sectionCount = offset2SectionCount(offset);
+    private LongSet getLightSections(float offset) {
+        var out = new LongArraySet();
 
-		for (int i = 0; i < sectionCount; i++) {
-			out.add(SectionPos.offset(topSection, 0, -i, 0));
-		}
+        int sectionCount = offset2SectionCount(offset);
 
-		lastBottomSection = SectionPos.offset(topSection, 0, -sectionCount, 0);
+        for (int i = 0; i < sectionCount; i++) {
+            out.add(SectionPos.offset(topSection, 0, -i, 0));
+        }
 
-		return out;
-	}
+        lastBottomSection = SectionPos.offset(topSection, 0, -sectionCount, 0);
 
-	private static int offset2SectionCount(float offset) {
-		return (int) Math.ceil((offset + 1) / 16);
-	}
+        return out;
+    }
 
+    private static int offset2SectionCount(float offset) {
+        return (int) Math.ceil((offset + 1) / 16);
+    }
 }

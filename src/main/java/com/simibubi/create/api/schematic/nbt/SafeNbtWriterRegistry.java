@@ -9,20 +9,23 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
  * Registry for safe NBT writers, used for filtering unsafe BlockEntity data out of schematics.
- * <p>
- * This is used to exclude specific tags that would result in exploits, ex. signs that execute commands when clicked.
- * <p>
- * This is provided as an alternative to {@link PartialSafeNBT}.
+ *
+ * <p>This is used to exclude specific tags that would result in exploits, ex. signs that execute
+ * commands when clicked.
+ *
+ * <p>This is provided as an alternative to {@link PartialSafeNBT}.
  */
 public class SafeNbtWriterRegistry {
-	public static final SimpleRegistry<BlockEntityType<?>, SafeNbtWriter> REGISTRY = SimpleRegistry.create();
+    public static final SimpleRegistry<BlockEntityType<?>, SafeNbtWriter> REGISTRY =
+            SimpleRegistry.create();
 
-	@FunctionalInterface
-	public interface SafeNbtWriter {
-		/**
-		 * Write filtered, safe NBT to the given tag. This is always called on the logical server.
-		 * @param tag the NBT tag to write to
-		 */
-		void writeSafe(BlockEntity be, CompoundTag tag, HolderLookup.Provider registries);
-	}
+    @FunctionalInterface
+    public interface SafeNbtWriter {
+        /**
+         * Write filtered, safe NBT to the given tag. This is always called on the logical server.
+         *
+         * @param tag the NBT tag to write to
+         */
+        void writeSafe(BlockEntity be, CompoundTag tag, HolderLookup.Provider registries);
+    }
 }

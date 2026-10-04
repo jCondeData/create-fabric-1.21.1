@@ -6,10 +6,6 @@ import static com.simibubi.create.content.decoration.palettes.PaletteBlockPatter
 import static com.simibubi.create.content.decoration.palettes.PaletteBlockPattern.PatternNameType.SUFFIX;
 import static com.simibubi.create.content.decoration.palettes.PaletteBlockPattern.PatternNameType.WRAP;
 
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.simibubi.create.Create;
 import com.simibubi.create.foundation.block.connected.AllCTTypes;
 import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
@@ -37,239 +33,277 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public class PaletteBlockPattern {
 
-	public static final PaletteBlockPattern
+    public static final PaletteBlockPattern CUT = create("cut", PREFIX, ALL_PARTIALS),
+            BRICKS = create("cut_bricks", WRAP, ALL_PARTIALS).textures("brick"),
+            SMALL_BRICKS = create("small_bricks", WRAP, ALL_PARTIALS).textures("small_brick"),
+            POLISHED = create("polished_cut", PREFIX, FOR_POLISHED).textures("polished", "slab"),
+            LAYERED =
+                    create("layered", PREFIX)
+                            .blockStateFactory(p -> p::cubeColumn)
+                            .textures("layered", "cap")
+                            .connectedTextures(
+                                    v ->
+                                            new HorizontalCTBehaviour(
+                                                    ct(v, CTs.LAYERED), ct(v, CTs.CAP))),
+            PILLAR =
+                    create("pillar", SUFFIX)
+                            .blockStateFactory(p -> p::pillar)
+                            .block(ConnectedPillarBlock::new)
+                            .textures("pillar", "cap")
+                            .connectedTextures(
+                                    v ->
+                                            new RotatedPillarCTBehaviour(
+                                                    ct(v, CTs.PILLAR), ct(v, CTs.CAP)));
 
-	CUT =
-		create("cut", PREFIX, ALL_PARTIALS),
+    public static final PaletteBlockPattern[] VANILLA_RANGE = {
+        CUT, POLISHED, BRICKS, SMALL_BRICKS, LAYERED, PILLAR
+    };
 
-		BRICKS = create("cut_bricks", WRAP, ALL_PARTIALS).textures("brick"),
+    public static final PaletteBlockPattern[] STANDARD_RANGE = {
+        CUT, POLISHED, BRICKS, SMALL_BRICKS, LAYERED, PILLAR
+    };
 
-		SMALL_BRICKS = create("small_bricks", WRAP, ALL_PARTIALS).textures("small_brick"),
+    static final String TEXTURE_LOCATION = "block/palettes/stone_types/%s/%s";
 
-		POLISHED = create("polished_cut", PREFIX, FOR_POLISHED).textures("polished", "slab"),
+    private PatternNameType nameType;
+    private String[] textures;
+    private String id;
+    private boolean isTranslucent;
+    private TagKey<Block>[] blockTags;
+    private TagKey<Item>[] itemTags;
+    private Optional<Function<String, ConnectedTextureBehaviour>> ctFactory;
 
-		LAYERED = create("layered", PREFIX).blockStateFactory(p -> p::cubeColumn)
-			.textures("layered", "cap")
-			.connectedTextures(v -> new HorizontalCTBehaviour(ct(v, CTs.LAYERED), ct(v, CTs.CAP))),
+    private IPatternBlockStateGenerator blockStateGenerator;
+    private NonNullFunction<Properties, ? extends Block> blockFactory;
+    private NonNullFunction<
+                    NonNullSupplier<Block>,
+                    NonNullBiConsumer<
+                            DataGenContext<Block, ? extends Block>, RegistrateRecipeProvider>>
+            additionalRecipes;
+    private PaletteBlockPartial<? extends Block>[] partials;
 
-		PILLAR = create("pillar", SUFFIX).blockStateFactory(p -> p::pillar)
-			.block(ConnectedPillarBlock::new)
-			.textures("pillar", "cap")
-			.connectedTextures(v -> new RotatedPillarCTBehaviour(ct(v, CTs.PILLAR), ct(v, CTs.CAP)))
+    @OnlyIn(Dist.CLIENT)
+    private RenderType renderType;
 
-	;
+    private static PaletteBlockPattern create(
+            String name, PatternNameType nameType, PaletteBlockPartial<?>... partials) {
+        PaletteBlockPattern pattern = new PaletteBlockPattern();
+        pattern.id = name;
+        pattern.ctFactory = Optional.empty();
+        pattern.nameType = nameType;
+        pattern.partials = partials;
+        pattern.additionalRecipes = $ -> NonNullBiConsumer.noop();
+        pattern.isTranslucent = false;
+        pattern.blockFactory = Block::new;
+        pattern.textures = new String[] {name};
+        pattern.blockStateGenerator = p -> p::cubeAll;
+        return pattern;
+    }
 
-	public static final PaletteBlockPattern[] VANILLA_RANGE = { CUT, POLISHED, BRICKS, SMALL_BRICKS, LAYERED, PILLAR };
+    public IPatternBlockStateGenerator getBlockStateGenerator() {
+        return blockStateGenerator;
+    }
 
-	public static final PaletteBlockPattern[] STANDARD_RANGE = { CUT, POLISHED, BRICKS, SMALL_BRICKS, LAYERED, PILLAR };
+    public boolean isTranslucent() {
+        return isTranslucent;
+    }
 
-	static final String TEXTURE_LOCATION = "block/palettes/stone_types/%s/%s";
+    public TagKey<Block>[] getBlockTags() {
+        return blockTags;
+    }
 
-	private PatternNameType nameType;
-	private String[] textures;
-	private String id;
-	private boolean isTranslucent;
-	private TagKey<Block>[] blockTags;
-	private TagKey<Item>[] itemTags;
-	private Optional<Function<String, ConnectedTextureBehaviour>> ctFactory;
+    public TagKey<Item>[] getItemTags() {
+        return itemTags;
+    }
 
-	private IPatternBlockStateGenerator blockStateGenerator;
-	private NonNullFunction<Properties, ? extends Block> blockFactory;
-	private NonNullFunction<NonNullSupplier<Block>, NonNullBiConsumer<DataGenContext<Block, ? extends Block>, RegistrateRecipeProvider>> additionalRecipes;
-	private PaletteBlockPartial<? extends Block>[] partials;
+    public NonNullFunction<Properties, ? extends Block> getBlockFactory() {
+        return blockFactory;
+    }
 
-	@OnlyIn(Dist.CLIENT)
-	private RenderType renderType;
+    public PaletteBlockPartial<? extends Block>[] getPartials() {
+        return partials;
+    }
 
-	private static PaletteBlockPattern create(String name, PatternNameType nameType,
-		PaletteBlockPartial<?>... partials) {
-		PaletteBlockPattern pattern = new PaletteBlockPattern();
-		pattern.id = name;
-		pattern.ctFactory = Optional.empty();
-		pattern.nameType = nameType;
-		pattern.partials = partials;
-		pattern.additionalRecipes = $ -> NonNullBiConsumer.noop();
-		pattern.isTranslucent = false;
-		pattern.blockFactory = Block::new;
-		pattern.textures = new String[] { name };
-		pattern.blockStateGenerator = p -> p::cubeAll;
-		return pattern;
-	}
+    public String getTexture(int index) {
+        return textures[index];
+    }
 
-	public IPatternBlockStateGenerator getBlockStateGenerator() {
-		return blockStateGenerator;
-	}
+    public void addRecipes(
+            NonNullSupplier<Block> baseBlock,
+            DataGenContext<Block, ? extends Block> c,
+            RegistrateRecipeProvider p) {
+        additionalRecipes.apply(baseBlock).accept(c, p);
+    }
 
-	public boolean isTranslucent() {
-		return isTranslucent;
-	}
+    public Optional<Supplier<ConnectedTextureBehaviour>> createCTBehaviour(String variant) {
+        return ctFactory.map(d -> () -> d.apply(variant));
+    }
 
-	public TagKey<Block>[] getBlockTags() {
-		return blockTags;
-	}
+    // Builder
 
-	public TagKey<Item>[] getItemTags() {
-		return itemTags;
-	}
+    private PaletteBlockPattern blockStateFactory(IPatternBlockStateGenerator factory) {
+        blockStateGenerator = factory;
+        return this;
+    }
 
-	public NonNullFunction<Properties, ? extends Block> getBlockFactory() {
-		return blockFactory;
-	}
+    private PaletteBlockPattern textures(String... textures) {
+        this.textures = textures;
+        return this;
+    }
 
-	public PaletteBlockPartial<? extends Block>[] getPartials() {
-		return partials;
-	}
+    private PaletteBlockPattern block(NonNullFunction<Properties, ? extends Block> blockFactory) {
+        this.blockFactory = blockFactory;
+        return this;
+    }
 
-	public String getTexture(int index) {
-		return textures[index];
-	}
+    private PaletteBlockPattern connectedTextures(
+            Function<String, ConnectedTextureBehaviour> factory) {
+        this.ctFactory = Optional.of(factory);
+        return this;
+    }
 
-	public void addRecipes(NonNullSupplier<Block> baseBlock, DataGenContext<Block, ? extends Block> c,
-		RegistrateRecipeProvider p) {
-		additionalRecipes.apply(baseBlock)
-			.accept(c, p);
-	}
+    // Model generators
 
-	public Optional<Supplier<ConnectedTextureBehaviour>> createCTBehaviour(String variant) {
-		return ctFactory.map(d -> () -> d.apply(variant));
-	}
+    public IBlockStateProvider cubeAll(String variant) {
+        ResourceLocation all = toLocation(variant, textures[0]);
+        return (ctx, prov) ->
+                prov.simpleBlock(ctx.get(), prov.models().cubeAll(createName(variant), all));
+    }
 
-	// Builder
+    public IBlockStateProvider cubeBottomTop(String variant) {
+        ResourceLocation side = toLocation(variant, textures[0]);
+        ResourceLocation bottom = toLocation(variant, textures[1]);
+        ResourceLocation top = toLocation(variant, textures[2]);
+        return (ctx, prov) ->
+                prov.simpleBlock(
+                        ctx.get(),
+                        prov.models().cubeBottomTop(createName(variant), side, bottom, top));
+    }
 
-	private PaletteBlockPattern blockStateFactory(IPatternBlockStateGenerator factory) {
-		blockStateGenerator = factory;
-		return this;
-	}
+    public IBlockStateProvider pillar(String variant) {
+        ResourceLocation side = toLocation(variant, textures[0]);
+        ResourceLocation end = toLocation(variant, textures[1]);
 
-	private PaletteBlockPattern textures(String... textures) {
-		this.textures = textures;
-		return this;
-	}
+        return (ctx, prov) ->
+                prov.getVariantBuilder(ctx.getEntry())
+                        .forAllStatesExcept(
+                                state -> {
+                                    Axis axis = state.getValue(BlockStateProperties.AXIS);
+                                    if (axis == Axis.Y)
+                                        return ConfiguredModel.builder()
+                                                .modelFile(
+                                                        prov.models()
+                                                                .cubeColumn(
+                                                                        createName(variant),
+                                                                        side,
+                                                                        end))
+                                                .uvLock(false)
+                                                .build();
+                                    return ConfiguredModel.builder()
+                                            .modelFile(
+                                                    prov.models()
+                                                            .cubeColumnHorizontal(
+                                                                    createName(variant)
+                                                                            + "_horizontal",
+                                                                    side,
+                                                                    end))
+                                            .uvLock(false)
+                                            .rotationX(90)
+                                            .rotationY(axis == Axis.X ? 90 : 0)
+                                            .build();
+                                },
+                                BlockStateProperties.WATERLOGGED,
+                                ConnectedPillarBlock.NORTH,
+                                ConnectedPillarBlock.SOUTH,
+                                ConnectedPillarBlock.EAST,
+                                ConnectedPillarBlock.WEST);
+    }
 
-	private PaletteBlockPattern block(NonNullFunction<Properties, ? extends Block> blockFactory) {
-		this.blockFactory = blockFactory;
-		return this;
-	}
+    public IBlockStateProvider cubeColumn(String variant) {
+        ResourceLocation side = toLocation(variant, textures[0]);
+        ResourceLocation end = toLocation(variant, textures[1]);
+        return (ctx, prov) ->
+                prov.simpleBlock(
+                        ctx.get(), prov.models().cubeColumn(createName(variant), side, end));
+    }
 
-	private PaletteBlockPattern connectedTextures(Function<String, ConnectedTextureBehaviour> factory) {
-		this.ctFactory = Optional.of(factory);
-		return this;
-	}
+    // Utility
 
-	// Model generators
+    protected String createName(String variant) {
+        if (nameType == WRAP) {
+            String[] split = id.split("_");
+            if (split.length == 2) {
+                String formatString = "%s_%s_%s";
+                return String.format(formatString, split[0], variant, split[1]);
+            }
+        }
+        String formatString = "%s_%s";
+        return nameType == SUFFIX
+                ? String.format(formatString, variant, id)
+                : String.format(formatString, id, variant);
+    }
 
-	public IBlockStateProvider cubeAll(String variant) {
-		ResourceLocation all = toLocation(variant, textures[0]);
-		return (ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models()
-			.cubeAll(createName(variant), all));
-	}
+    protected static ResourceLocation toLocation(String variant, String texture) {
+        return Create.asResource(
+                String.format(
+                        TEXTURE_LOCATION,
+                        texture,
+                        variant + (texture.equals("cut") ? "_" : "_cut_") + texture));
+    }
 
-	public IBlockStateProvider cubeBottomTop(String variant) {
-		ResourceLocation side = toLocation(variant, textures[0]);
-		ResourceLocation bottom = toLocation(variant, textures[1]);
-		ResourceLocation top = toLocation(variant, textures[2]);
-		return (ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models()
-			.cubeBottomTop(createName(variant), side, bottom, top));
-	}
+    protected static CTSpriteShiftEntry ct(String variant, CTs texture) {
+        ResourceLocation resLoc = texture.srcFactory.apply(variant);
+        ResourceLocation resLocTarget = texture.targetFactory.apply(variant);
+        return CTSpriteShifter.getCT(
+                texture.type,
+                resLoc,
+                ResourceLocation.fromNamespaceAndPath(
+                        resLocTarget.getNamespace(), resLocTarget.getPath() + "_connected"));
+    }
 
-	public IBlockStateProvider pillar(String variant) {
-		ResourceLocation side = toLocation(variant, textures[0]);
-		ResourceLocation end = toLocation(variant, textures[1]);
+    @FunctionalInterface
+    static interface IPatternBlockStateGenerator
+            extends Function<PaletteBlockPattern, Function<String, IBlockStateProvider>> {}
 
-		return (ctx, prov) -> prov.getVariantBuilder(ctx.getEntry())
-			.forAllStatesExcept(state -> {
-				Axis axis = state.getValue(BlockStateProperties.AXIS);
-				if (axis == Axis.Y)
-					return ConfiguredModel.builder()
-						.modelFile(prov.models()
-							.cubeColumn(createName(variant), side, end))
-						.uvLock(false)
-						.build();
-				return ConfiguredModel.builder()
-					.modelFile(prov.models()
-						.cubeColumnHorizontal(createName(variant) + "_horizontal", side, end))
-					.uvLock(false)
-					.rotationX(90)
-					.rotationY(axis == Axis.X ? 90 : 0)
-					.build();
-			}, BlockStateProperties.WATERLOGGED, ConnectedPillarBlock.NORTH, ConnectedPillarBlock.SOUTH,
-				ConnectedPillarBlock.EAST, ConnectedPillarBlock.WEST);
-	}
+    @FunctionalInterface
+    static interface IBlockStateProvider
+            extends NonNullBiConsumer<
+                    DataGenContext<Block, ? extends Block>, RegistrateBlockstateProvider> {}
 
-	public IBlockStateProvider cubeColumn(String variant) {
-		ResourceLocation side = toLocation(variant, textures[0]);
-		ResourceLocation end = toLocation(variant, textures[1]);
-		return (ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models()
-			.cubeColumn(createName(variant), side, end));
-	}
+    enum PatternNameType {
+        PREFIX,
+        SUFFIX,
+        WRAP
+    }
 
-	// Utility
+    // Textures with connectability, used by Spriteshifter
 
-	protected String createName(String variant) {
-		if (nameType == WRAP) {
-			String[] split = id.split("_");
-			if (split.length == 2) {
-				String formatString = "%s_%s_%s";
-				return String.format(formatString, split[0], variant, split[1]);
-			}
-		}
-		String formatString = "%s_%s";
-		return nameType == SUFFIX ? String.format(formatString, variant, id) : String.format(formatString, id, variant);
-	}
+    public enum CTs {
+        PILLAR(AllCTTypes.RECTANGLE, s -> toLocation(s, "pillar")),
+        CAP(AllCTTypes.OMNIDIRECTIONAL, s -> toLocation(s, "cap")),
+        LAYERED(AllCTTypes.HORIZONTAL_KRYPPERS, s -> toLocation(s, "layered"));
 
-	protected static ResourceLocation toLocation(String variant, String texture) {
-		return Create.asResource(
-			String.format(TEXTURE_LOCATION, texture, variant + (texture.equals("cut") ? "_" : "_cut_") + texture));
-	}
+        public CTType type;
+        private Function<String, ResourceLocation> srcFactory;
+        private Function<String, ResourceLocation> targetFactory;
 
-	protected static CTSpriteShiftEntry ct(String variant, CTs texture) {
-		ResourceLocation resLoc = texture.srcFactory.apply(variant);
-		ResourceLocation resLocTarget = texture.targetFactory.apply(variant);
-		return CTSpriteShifter.getCT(texture.type, resLoc,
-			ResourceLocation.fromNamespaceAndPath(resLocTarget.getNamespace(), resLocTarget.getPath() + "_connected"));
-	}
+        private CTs(CTType type, Function<String, ResourceLocation> factory) {
+            this(type, factory, factory);
+        }
 
-	@FunctionalInterface
-	static interface IPatternBlockStateGenerator
-		extends Function<PaletteBlockPattern, Function<String, IBlockStateProvider>> {
-	}
-
-	@FunctionalInterface
-	static interface IBlockStateProvider
-		extends NonNullBiConsumer<DataGenContext<Block, ? extends Block>, RegistrateBlockstateProvider> {
-	}
-
-	enum PatternNameType {
-		PREFIX, SUFFIX, WRAP
-	}
-
-	// Textures with connectability, used by Spriteshifter
-
-	public enum CTs {
-
-		PILLAR(AllCTTypes.RECTANGLE, s -> toLocation(s, "pillar")),
-		CAP(AllCTTypes.OMNIDIRECTIONAL, s -> toLocation(s, "cap")),
-		LAYERED(AllCTTypes.HORIZONTAL_KRYPPERS, s -> toLocation(s, "layered"))
-
-		;
-
-		public CTType type;
-		private Function<String, ResourceLocation> srcFactory;
-		private Function<String, ResourceLocation> targetFactory;
-
-		private CTs(CTType type, Function<String, ResourceLocation> factory) {
-			this(type, factory, factory);
-		}
-
-		private CTs(CTType type, Function<String, ResourceLocation> srcFactory,
-			Function<String, ResourceLocation> targetFactory) {
-			this.type = type;
-			this.srcFactory = srcFactory;
-			this.targetFactory = targetFactory;
-		}
-
-	}
-
+        private CTs(
+                CTType type,
+                Function<String, ResourceLocation> srcFactory,
+                Function<String, ResourceLocation> targetFactory) {
+            this.type = type;
+            this.srcFactory = srcFactory;
+            this.targetFactory = targetFactory;
+        }
+    }
 }

@@ -10,12 +10,13 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 public class AllIngredients {
-	public static final DeferredRegister<IngredientType<?>> INGREDIENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, Create.ID);
+    public static final DeferredRegister<IngredientType<?>> INGREDIENT_TYPES =
+            DeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, Create.ID);
 
-	// Unused currently
+    // Unused currently
 
-	@Internal
-	public static void register(IEventBus modEventBus) {
-		INGREDIENT_TYPES.register(modEventBus);
-	}
+    @Internal
+    public static void register(IEventBus modEventBus) {
+        INGREDIENT_TYPES.register(modEventBus);
+    }
 }

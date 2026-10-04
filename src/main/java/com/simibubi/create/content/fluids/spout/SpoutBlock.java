@@ -21,45 +21,52 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SpoutBlock extends Block implements IWrenchable, IBE<SpoutBlockEntity> {
 
-	public SpoutBlock(Properties p_i48440_1_) {
-		super(p_i48440_1_);
-	}
+    public SpoutBlock(Properties p_i48440_1_) {
+        super(p_i48440_1_);
+    }
 
-	@Override
-	public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_,
-		CollisionContext p_220053_4_) {
-		return AllShapes.SPOUT;
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState p_220053_1_,
+            BlockGetter p_220053_2_,
+            BlockPos p_220053_3_,
+            CollisionContext p_220053_4_) {
+        return AllShapes.SPOUT;
+    }
 
-	@Override
-	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
-		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
-		AdvancementBehaviour.setPlacedBy(pLevel, pPos, pPlacer);
-	}
+    @Override
+    public void setPlacedBy(
+            Level pLevel,
+            BlockPos pPos,
+            BlockState pState,
+            LivingEntity pPlacer,
+            ItemStack pStack) {
+        super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
+        AdvancementBehaviour.setPlacedBy(pLevel, pPos, pPlacer);
+    }
 
-	@Override
-	public boolean hasAnalogOutputSignal(BlockState state) {
-		return true;
-	}
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
 
-	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos) {
-		return ComparatorUtil.levelOfSmartFluidTank(worldIn, pos);
-	}
+    @Override
+    public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos) {
+        return ComparatorUtil.levelOfSmartFluidTank(worldIn, pos);
+    }
 
-	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
-		return false;
-	}
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+        return false;
+    }
 
-	@Override
-	public Class<SpoutBlockEntity> getBlockEntityClass() {
-		return SpoutBlockEntity.class;
-	}
+    @Override
+    public Class<SpoutBlockEntity> getBlockEntityClass() {
+        return SpoutBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends SpoutBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.SPOUT.get();
-	}
-
+    @Override
+    public BlockEntityType<? extends SpoutBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.SPOUT.get();
+    }
 }

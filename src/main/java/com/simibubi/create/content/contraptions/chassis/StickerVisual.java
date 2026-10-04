@@ -1,7 +1,5 @@
 package com.simibubi.create.content.contraptions.chassis;
 
-import java.util.function.Consumer;
-
 import com.simibubi.create.AllPartialModels;
 
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -12,71 +10,79 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 
-public class StickerVisual extends AbstractBlockEntityVisual<StickerBlockEntity> implements SimpleDynamicVisual {
+import java.util.function.Consumer;
 
-	float lastOffset = Float.NaN;
-	final Direction facing;
-	final boolean fakeWorld;
-	final int offset;
+public class StickerVisual extends AbstractBlockEntityVisual<StickerBlockEntity>
+        implements SimpleDynamicVisual {
 
-	private final TransformedInstance head;
+    float lastOffset = Float.NaN;
+    final Direction facing;
+    final boolean fakeWorld;
+    final int offset;
 
-	public StickerVisual(VisualizationContext context, StickerBlockEntity blockEntity, float partialTick) {
-		super(context, blockEntity, partialTick);
+    private final TransformedInstance head;
 
-		head = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.STICKER_HEAD)).createInstance();
+    public StickerVisual(
+            VisualizationContext context, StickerBlockEntity blockEntity, float partialTick) {
+        super(context, blockEntity, partialTick);
 
-		fakeWorld = blockEntity.getLevel() != Minecraft.getInstance().level;
-		facing = blockState.getValue(StickerBlock.FACING);
-		offset = blockState.getValue(StickerBlock.EXTENDED) ? 1 : 0;
+        head =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.TRANSFORMED,
+                                Models.partial(AllPartialModels.STICKER_HEAD))
+                        .createInstance();
 
-		animateHead(offset);
-	}
+        fakeWorld = blockEntity.getLevel() != Minecraft.getInstance().level;
+        facing = blockState.getValue(StickerBlock.FACING);
+        offset = blockState.getValue(StickerBlock.EXTENDED) ? 1 : 0;
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		float offset = blockEntity.piston.getValue(ctx.partialTick());
+        animateHead(offset);
+    }
 
-		if (fakeWorld)
-			offset = this.offset;
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        float offset = blockEntity.piston.getValue(ctx.partialTick());
 
-		if (Mth.equal(offset, lastOffset))
-			return;
+        if (fakeWorld) offset = this.offset;
 
-		animateHead(offset);
+        if (Mth.equal(offset, lastOffset)) return;
 
-		lastOffset = offset;
-	}
+        animateHead(offset);
 
-	private void animateHead(float offset) {
-		head.setIdentityTransform()
-				.translate(getVisualPosition())
-				.nudge(blockEntity.hashCode())
-				.center()
-				.rotateYDegrees(AngleHelper.horizontalAngle(facing))
-				.rotateXDegrees(AngleHelper.verticalAngle(facing) + 90)
-				.uncenter()
-				.translate(0, (offset * offset) * 4 / 16f, 0)
-				.setChanged();
-	}
+        lastOffset = offset;
+    }
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(head);
-	}
+    private void animateHead(float offset) {
+        head.setIdentityTransform()
+                .translate(getVisualPosition())
+                .nudge(blockEntity.hashCode())
+                .center()
+                .rotateYDegrees(AngleHelper.horizontalAngle(facing))
+                .rotateXDegrees(AngleHelper.verticalAngle(facing) + 90)
+                .uncenter()
+                .translate(0, (offset * offset) * 4 / 16f, 0)
+                .setChanged();
+    }
 
-	@Override
-	protected void _delete() {
-		head.delete();
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        relight(head);
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		consumer.accept(head);
-	}
+    @Override
+    protected void _delete() {
+        head.delete();
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        consumer.accept(head);
+    }
 }

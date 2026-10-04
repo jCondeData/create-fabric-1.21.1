@@ -14,40 +14,36 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public class ItemCountDisplaySource extends NumericSingleLineDisplaySource {
 
-	@Override
-	protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
-		BlockEntity sourceBE = context.getSourceBlockEntity();
-		if (!(sourceBE instanceof SmartObserverBlockEntity cobe))
-			return ZERO.copy();
+    @Override
+    protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
+        BlockEntity sourceBE = context.getSourceBlockEntity();
+        if (!(sourceBE instanceof SmartObserverBlockEntity cobe)) return ZERO.copy();
 
-		InvManipulationBehaviour invManipulationBehaviour = cobe.getBehaviour(InvManipulationBehaviour.TYPE);
-		FilteringBehaviour filteringBehaviour = cobe.getBehaviour(FilteringBehaviour.TYPE);
-		IItemHandler handler = invManipulationBehaviour.getInventory();
+        InvManipulationBehaviour invManipulationBehaviour =
+                cobe.getBehaviour(InvManipulationBehaviour.TYPE);
+        FilteringBehaviour filteringBehaviour = cobe.getBehaviour(FilteringBehaviour.TYPE);
+        IItemHandler handler = invManipulationBehaviour.getInventory();
 
-		if (handler == null)
-			return ZERO.copy();
+        if (handler == null) return ZERO.copy();
 
-		int collected = 0;
-		for (int i = 0; i < handler.getSlots(); i++) {
-			ItemStack stack = handler.extractItem(i, handler.getSlotLimit(i), true);
-			if (stack.isEmpty())
-				continue;
-			if (!filteringBehaviour.test(stack))
-				continue;
-			collected += stack.getCount();
-		}
+        int collected = 0;
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemStack stack = handler.extractItem(i, handler.getSlotLimit(i), true);
+            if (stack.isEmpty()) continue;
+            if (!filteringBehaviour.test(stack)) continue;
+            collected += stack.getCount();
+        }
 
-		return Component.literal(String.valueOf(collected));
-	}
+        return Component.literal(String.valueOf(collected));
+    }
 
-	@Override
-	protected String getTranslationKey() {
-		return "count_items";
-	}
+    @Override
+    protected String getTranslationKey() {
+        return "count_items";
+    }
 
-	@Override
-	protected boolean allowsLabeling(DisplayLinkContext context) {
-		return true;
-	}
-
+    @Override
+    protected boolean allowsLabeling(DisplayLinkContext context) {
+        return true;
+    }
 }

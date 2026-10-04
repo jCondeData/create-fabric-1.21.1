@@ -11,30 +11,38 @@ import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 
 public class SpecialModels {
-	private static final RendererReloadCache<Key, Model> FLAT = new RendererReloadCache<>(it -> new BakedModelBuilder(it.partial.get())
-		.materialFunc((renderType, aBoolean) -> {
-			var material = ModelUtil.getMaterial(renderType, aBoolean);
-			if (material == null) {
-				return null;
-			}
-			return SimpleMaterial.builderOf(material)
-				.light(it.light)
-				.cardinalLightingMode(it.cardinalLightingMode)
-				.build();
-		})
-		.build());
+    private static final RendererReloadCache<Key, Model> FLAT =
+            new RendererReloadCache<>(
+                    it ->
+                            new BakedModelBuilder(it.partial.get())
+                                    .materialFunc(
+                                            (renderType, aBoolean) -> {
+                                                var material =
+                                                        ModelUtil.getMaterial(renderType, aBoolean);
+                                                if (material == null) {
+                                                    return null;
+                                                }
+                                                return SimpleMaterial.builderOf(material)
+                                                        .light(it.light)
+                                                        .cardinalLightingMode(
+                                                                it.cardinalLightingMode)
+                                                        .build();
+                                            })
+                                    .build());
 
-	public static Model flatLit(PartialModel partial) {
-		return FLAT.get(new Key(partial, LightShaders.FLAT, CardinalLightingMode.ENTITY));
-	}
+    public static Model flatLit(PartialModel partial) {
+        return FLAT.get(new Key(partial, LightShaders.FLAT, CardinalLightingMode.ENTITY));
+    }
 
-	public static Model flatChunk(PartialModel partial) {
-		return FLAT.get(new Key(partial, LightShaders.FLAT, CardinalLightingMode.CHUNK));
-	}
+    public static Model flatChunk(PartialModel partial) {
+        return FLAT.get(new Key(partial, LightShaders.FLAT, CardinalLightingMode.CHUNK));
+    }
 
-	public static Model chunkDiffuse(PartialModel partial) {
-		return FLAT.get(new Key(partial, LightShaders.SMOOTH_WHEN_EMBEDDED, CardinalLightingMode.CHUNK));
-	}
+    public static Model chunkDiffuse(PartialModel partial) {
+        return FLAT.get(
+                new Key(partial, LightShaders.SMOOTH_WHEN_EMBEDDED, CardinalLightingMode.CHUNK));
+    }
 
-	private record Key(PartialModel partial, LightShader light, CardinalLightingMode cardinalLightingMode) {}
+    private record Key(
+            PartialModel partial, LightShader light, CardinalLightingMode cardinalLightingMode) {}
 }

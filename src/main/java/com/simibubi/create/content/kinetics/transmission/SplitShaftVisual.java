@@ -1,8 +1,5 @@
 package com.simibubi.create.content.kinetics.transmission;
 
-import java.util.ArrayList;
-import java.util.function.Consumer;
-
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityVisual;
@@ -14,15 +11,22 @@ import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.AbstractInstance;
 import dev.engine_room.flywheel.lib.instance.FlatLit;
 import dev.engine_room.flywheel.lib.model.Models;
+
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
+
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class SplitShaftVisual extends KineticBlockEntityVisual<SplitShaftBlockEntity> {
 
     protected final ArrayList<RotatingInstance> keys;
 
-    public SplitShaftVisual(VisualizationContext modelManager, SplitShaftBlockEntity blockEntity, float partialTick) {
+    public SplitShaftVisual(
+            VisualizationContext modelManager,
+            SplitShaftBlockEntity blockEntity,
+            float partialTick) {
         super(modelManager, blockEntity, partialTick);
 
         keys = new ArrayList<>(2);
@@ -33,16 +37,20 @@ public class SplitShaftVisual extends KineticBlockEntityVisual<SplitShaftBlockEn
 
             float splitSpeed = speed * blockEntity.getRotationSpeedModifier(dir);
 
-			var instance = instancerProvider().instancer(AllInstanceTypes.ROTATING, Models.partial(AllPartialModels.SHAFT_HALF))
-                .createInstance();
+            var instance =
+                    instancerProvider()
+                            .instancer(
+                                    AllInstanceTypes.ROTATING,
+                                    Models.partial(AllPartialModels.SHAFT_HALF))
+                            .createInstance();
 
-			instance.setup(blockEntity, splitSpeed)
-				.setPosition(getVisualPosition())
-				.rotateToFace(Direction.SOUTH, dir)
-				.setChanged();
+            instance.setup(blockEntity, splitSpeed)
+                    .setPosition(getVisualPosition())
+                    .rotateToFace(Direction.SOUTH, dir)
+                    .setChanged();
 
-			keys.add(instance);
-		}
+            keys.add(instance);
+        }
     }
 
     @Override
@@ -54,8 +62,11 @@ public class SplitShaftVisual extends KineticBlockEntityVisual<SplitShaftBlockEn
 
         for (int i : Iterate.zeroAndOne) {
             keys.get(i)
-				.setup(blockEntity, blockEntity.getSpeed() * blockEntity.getRotationSpeedModifier(directions[i]))
-				.setChanged();
+                    .setup(
+                            blockEntity,
+                            blockEntity.getSpeed()
+                                    * blockEntity.getRotationSpeedModifier(directions[i]))
+                    .setChanged();
         }
     }
 
@@ -70,8 +81,8 @@ public class SplitShaftVisual extends KineticBlockEntityVisual<SplitShaftBlockEn
         keys.clear();
     }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		keys.forEach(consumer);
-	}
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        keys.forEach(consumer);
+    }
 }

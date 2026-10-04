@@ -1,7 +1,5 @@
 package com.simibubi.create.content.kinetics.fan;
 
-import javax.annotation.Nullable;
-
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CKinetics;
 
@@ -11,31 +9,33 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
+
 @MethodsReturnNonnullByDefault
 public interface IAirCurrentSource {
-	@Nullable
-	AirCurrent getAirCurrent();
+    @Nullable
+    AirCurrent getAirCurrent();
 
-	@Nullable
-	Level getAirCurrentWorld();
+    @Nullable
+    Level getAirCurrentWorld();
 
-	BlockPos getAirCurrentPos();
+    BlockPos getAirCurrentPos();
 
-	float getSpeed();
+    float getSpeed();
 
-	Direction getAirflowOriginSide();
+    Direction getAirflowOriginSide();
 
-	@Nullable
-	Direction getAirFlowDirection();
+    @Nullable
+    Direction getAirFlowDirection();
 
-	default float getMaxDistance() {
-		float speed = Math.abs(this.getSpeed());
-		CKinetics config = AllConfigs.server().kinetics;
-		float distanceFactor = Math.min(speed / config.fanRotationArgmax.get(), 1);
-		float pushDistance = Mth.lerp(distanceFactor, 3, config.fanPushDistance.get());
-		float pullDistance = Mth.lerp(distanceFactor, 3f, config.fanPullDistance.get());
-		return this.getSpeed() > 0 ? pushDistance : pullDistance;
-	}
+    default float getMaxDistance() {
+        float speed = Math.abs(this.getSpeed());
+        CKinetics config = AllConfigs.server().kinetics;
+        float distanceFactor = Math.min(speed / config.fanRotationArgmax.get(), 1);
+        float pushDistance = Mth.lerp(distanceFactor, 3, config.fanPushDistance.get());
+        float pullDistance = Mth.lerp(distanceFactor, 3f, config.fanPullDistance.get());
+        return this.getSpeed() > 0 ? pushDistance : pullDistance;
+    }
 
-	boolean isSourceRemoved();
+    boolean isSourceRemoved();
 }

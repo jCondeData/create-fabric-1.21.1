@@ -11,18 +11,17 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 
 public class RepackagerBlock extends PackagerBlock {
 
-	public RepackagerBlock(Properties properties) {
-		super(properties);
-	}
-	
-	@Override
-	public BlockEntityType<? extends PackagerBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.REPACKAGER.get();
-	}
-	
-	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-		builder.add(FACING, POWERED);
-	}
+    public RepackagerBlock(Properties properties) {
+        super(properties);
+    }
 
+    @Override
+    public BlockEntityType<? extends PackagerBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.REPACKAGER.get();
+    }
+
+    @Override
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        builder.add(FACING, POWERED);
+    }
 }

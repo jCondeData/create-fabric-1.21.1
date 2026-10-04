@@ -22,95 +22,109 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ElevatorPulleyRenderer extends KineticBlockEntityRenderer<ElevatorPulleyBlockEntity> {
 
-	public ElevatorPulleyRenderer(BlockEntityRendererProvider.Context context) {
-		super(context);
-	}
+    public ElevatorPulleyRenderer(BlockEntityRendererProvider.Context context) {
+        super(context);
+    }
 
-	@Override
-	protected void renderSafe(ElevatorPulleyBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
-		int light, int overlay) {
-		super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
+    @Override
+    protected void renderSafe(
+            ElevatorPulleyBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
 
-		float offset = PulleyRenderer.getBlockEntityOffset(partialTicks, be);
-		boolean running = PulleyRenderer.isPulleyRunning(be);
+        float offset = PulleyRenderer.getBlockEntityOffset(partialTicks, be);
+        boolean running = PulleyRenderer.isPulleyRunning(be);
 
-		SpriteShiftEntry beltShift = AllSpriteShifts.ELEVATOR_BELT;
-		SpriteShiftEntry coilShift = AllSpriteShifts.ELEVATOR_COIL;
-		VertexConsumer vb = buffer.getBuffer(RenderType.solid());
-		Level world = be.getLevel();
-		BlockState blockState = be.getBlockState();
-		BlockPos pos = be.getBlockPos();
+        SpriteShiftEntry beltShift = AllSpriteShifts.ELEVATOR_BELT;
+        SpriteShiftEntry coilShift = AllSpriteShifts.ELEVATOR_COIL;
+        VertexConsumer vb = buffer.getBuffer(RenderType.solid());
+        Level world = be.getLevel();
+        BlockState blockState = be.getBlockState();
+        BlockPos pos = be.getBlockPos();
 
-		float blockStateAngle =
-			180 + AngleHelper.horizontalAngle(blockState.getValue(ElevatorPulleyBlock.HORIZONTAL_FACING));
+        float blockStateAngle =
+                180
+                        + AngleHelper.horizontalAngle(
+                                blockState.getValue(ElevatorPulleyBlock.HORIZONTAL_FACING));
 
-		SuperByteBuffer magnet = CachedBuffers.partial(AllPartialModels.ELEVATOR_MAGNET, blockState);
-		if (running || offset == 0)
-			AbstractPulleyRenderer.renderAt(world, magnet.center()
-				.rotateYDegrees(blockStateAngle)
-				.uncenter(), offset, pos, ms, vb);
+        SuperByteBuffer magnet =
+                CachedBuffers.partial(AllPartialModels.ELEVATOR_MAGNET, blockState);
+        if (running || offset == 0)
+            AbstractPulleyRenderer.renderAt(
+                    world,
+                    magnet.center().rotateYDegrees(blockStateAngle).uncenter(),
+                    offset,
+                    pos,
+                    ms,
+                    vb);
 
-		SuperByteBuffer rotatedCoil = getRotatedCoil(be);
-		if (offset == 0) {
-			rotatedCoil.light(light)
-				.renderInto(ms, vb);
-			return;
-		}
+        SuperByteBuffer rotatedCoil = getRotatedCoil(be);
+        if (offset == 0) {
+            rotatedCoil.light(light).renderInto(ms, vb);
+            return;
+        }
 
-		AbstractPulleyRenderer.scrollCoil(rotatedCoil, coilShift, offset, 2)
-			.light(light)
-			.renderInto(ms, vb);
+        AbstractPulleyRenderer.scrollCoil(rotatedCoil, coilShift, offset, 2)
+                .light(light)
+                .renderInto(ms, vb);
 
-		float spriteSize = beltShift.getTarget()
-			.getV1()
-			- beltShift.getTarget()
-				.getV0();
+        float spriteSize = beltShift.getTarget().getV1() - beltShift.getTarget().getV0();
 
-		double beltScroll = (-(offset + .5) - Math.floor(-(offset + .5))) / 2;
-		SuperByteBuffer halfRope = CachedBuffers.partial(AllPartialModels.ELEVATOR_BELT_HALF, blockState);
-		SuperByteBuffer rope = CachedBuffers.partial(AllPartialModels.ELEVATOR_BELT, blockState);
+        double beltScroll = (-(offset + .5) - Math.floor(-(offset + .5))) / 2;
+        SuperByteBuffer halfRope =
+                CachedBuffers.partial(AllPartialModels.ELEVATOR_BELT_HALF, blockState);
+        SuperByteBuffer rope = CachedBuffers.partial(AllPartialModels.ELEVATOR_BELT, blockState);
 
-		float f = offset % 1;
-		if (f < .25f || f > .75f) {
-			halfRope.center()
-				.rotateYDegrees(blockStateAngle)
-				.uncenter();
-			AbstractPulleyRenderer.renderAt(world,
-				halfRope.shiftUVScrolling(beltShift, (float) beltScroll * spriteSize), f > .75f ? f - 1 : f, pos, ms,
-				vb);
-		}
+        float f = offset % 1;
+        if (f < .25f || f > .75f) {
+            halfRope.center().rotateYDegrees(blockStateAngle).uncenter();
+            AbstractPulleyRenderer.renderAt(
+                    world,
+                    halfRope.shiftUVScrolling(beltShift, (float) beltScroll * spriteSize),
+                    f > .75f ? f - 1 : f,
+                    pos,
+                    ms,
+                    vb);
+        }
 
-		if (!running)
-			return;
+        if (!running) return;
 
-		for (int i = 0; i < offset - .25f; i++) {
-			rope.center()
-				.rotateYDegrees(blockStateAngle)
-				.uncenter();
-			AbstractPulleyRenderer.renderAt(world, rope.shiftUVScrolling(beltShift, (float) beltScroll * spriteSize),
-				offset - i, pos, ms, vb);
-		}
-	}
+        for (int i = 0; i < offset - .25f; i++) {
+            rope.center().rotateYDegrees(blockStateAngle).uncenter();
+            AbstractPulleyRenderer.renderAt(
+                    world,
+                    rope.shiftUVScrolling(beltShift, (float) beltScroll * spriteSize),
+                    offset - i,
+                    pos,
+                    ms,
+                    vb);
+        }
+    }
 
-	@Override
-	protected BlockState getRenderedBlockState(ElevatorPulleyBlockEntity be) {
-		return shaft(getRotationAxisOf(be));
-	}
+    @Override
+    protected BlockState getRenderedBlockState(ElevatorPulleyBlockEntity be) {
+        return shaft(getRotationAxisOf(be));
+    }
 
-	protected SuperByteBuffer getRotatedCoil(KineticBlockEntity be) {
-		BlockState blockState = be.getBlockState();
-		return CachedBuffers.partialFacing(AllPartialModels.ELEVATOR_COIL, blockState,
-			blockState.getValue(ElevatorPulleyBlock.HORIZONTAL_FACING));
-	}
+    protected SuperByteBuffer getRotatedCoil(KineticBlockEntity be) {
+        BlockState blockState = be.getBlockState();
+        return CachedBuffers.partialFacing(
+                AllPartialModels.ELEVATOR_COIL,
+                blockState,
+                blockState.getValue(ElevatorPulleyBlock.HORIZONTAL_FACING));
+    }
 
-	@Override
-	public int getViewDistance() {
-		return 128;
-	}
+    @Override
+    public int getViewDistance() {
+        return 128;
+    }
 
-	@Override
-	public boolean shouldRenderOffScreen(ElevatorPulleyBlockEntity p_188185_1_) {
-		return true;
-	}
-
+    @Override
+    public boolean shouldRenderOffScreen(ElevatorPulleyBlockEntity p_188185_1_) {
+        return true;
+    }
 }

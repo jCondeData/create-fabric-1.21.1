@@ -1,7 +1,5 @@
 package com.simibubi.create.content.equipment.potatoCannon;
 
-import java.util.UUID;
-
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -40,217 +38,267 @@ import net.minecraft.world.item.component.SuspiciousStewEffects.Entry;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 
+import java.util.UUID;
+
 public class AllPotatoProjectileEntityHitActions {
-	
-	static {
-		register("set_on_fire", SetOnFire.CODEC);
-		register("potion_effect", PotionEffect.CODEC);
-		register("food_effects", FoodEffects.CODEC);
-		register("chorus_teleport", ChorusTeleport.CODEC);
-		register("cure_zombie_villager", CureZombieVillager.CODEC);
-		register("suspicious_stew", SuspiciousStew.CODEC);
-	}
-	
-	public static void init() {
-	}
 
-	private static void register(String name, MapCodec<? extends PotatoProjectileEntityHitAction> codec) {
-		Registry.register(CreateBuiltInRegistries.POTATO_PROJECTILE_ENTITY_HIT_ACTION, Create.asResource(name), codec);
-	}
+    static {
+        register("set_on_fire", SetOnFire.CODEC);
+        register("potion_effect", PotionEffect.CODEC);
+        register("food_effects", FoodEffects.CODEC);
+        register("chorus_teleport", ChorusTeleport.CODEC);
+        register("cure_zombie_villager", CureZombieVillager.CODEC);
+        register("suspicious_stew", SuspiciousStew.CODEC);
+    }
 
-	public record SetOnFire(int ticks) implements PotatoProjectileEntityHitAction {
-		public static final MapCodec<SetOnFire> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			ExtraCodecs.POSITIVE_INT.fieldOf("ticks").forGetter(SetOnFire::ticks)
-		).apply(instance, SetOnFire::new));
+    public static void init() {}
 
-		public static SetOnFire seconds(int seconds) {
-			return new SetOnFire(seconds * 20);
-		}
+    private static void register(
+            String name, MapCodec<? extends PotatoProjectileEntityHitAction> codec) {
+        Registry.register(
+                CreateBuiltInRegistries.POTATO_PROJECTILE_ENTITY_HIT_ACTION,
+                Create.asResource(name),
+                codec);
+    }
 
-		@Override
-		public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
-			ray.getEntity()
-				.setRemainingFireTicks(ticks);
-			return false;
-		}
+    public record SetOnFire(int ticks) implements PotatoProjectileEntityHitAction {
+        public static final MapCodec<SetOnFire> CODEC =
+                RecordCodecBuilder.mapCodec(
+                        instance ->
+                                instance.group(
+                                                ExtraCodecs.POSITIVE_INT
+                                                        .fieldOf("ticks")
+                                                        .forGetter(SetOnFire::ticks))
+                                        .apply(instance, SetOnFire::new));
 
-		@Override
-		public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
-			return CODEC;
-		}
-	}
+        public static SetOnFire seconds(int seconds) {
+            return new SetOnFire(seconds * 20);
+        }
 
-	public record PotionEffect(Holder<MobEffect> effect, int level, int ticks,
-							   boolean recoverable) implements PotatoProjectileEntityHitAction {
-		public static final MapCodec<PotionEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("effect").forGetter(PotionEffect::effect),
-			ExtraCodecs.POSITIVE_INT.fieldOf("level").forGetter(PotionEffect::level),
-			ExtraCodecs.POSITIVE_INT.fieldOf("ticks").forGetter(PotionEffect::ticks),
-			Codec.BOOL.fieldOf("recoverable").forGetter(PotionEffect::recoverable)
-		).apply(instance, PotionEffect::new));
+        @Override
+        public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
+            ray.getEntity().setRemainingFireTicks(ticks);
+            return false;
+        }
 
-		@Override
-		public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
-			Entity entity = ray.getEntity();
-			if (entity.level().isClientSide)
-				return true;
-			if (entity instanceof LivingEntity)
-				applyEffect((LivingEntity) entity, new MobEffectInstance(effect, ticks, level - 1));
-			return !recoverable;
-		}
+        @Override
+        public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
+            return CODEC;
+        }
+    }
 
-		@Override
-		public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
-			return CODEC;
-		}
-	}
+    public record PotionEffect(Holder<MobEffect> effect, int level, int ticks, boolean recoverable)
+            implements PotatoProjectileEntityHitAction {
+        public static final MapCodec<PotionEffect> CODEC =
+                RecordCodecBuilder.mapCodec(
+                        instance ->
+                                instance.group(
+                                                BuiltInRegistries.MOB_EFFECT
+                                                        .holderByNameCodec()
+                                                        .fieldOf("effect")
+                                                        .forGetter(PotionEffect::effect),
+                                                ExtraCodecs.POSITIVE_INT
+                                                        .fieldOf("level")
+                                                        .forGetter(PotionEffect::level),
+                                                ExtraCodecs.POSITIVE_INT
+                                                        .fieldOf("ticks")
+                                                        .forGetter(PotionEffect::ticks),
+                                                Codec.BOOL
+                                                        .fieldOf("recoverable")
+                                                        .forGetter(PotionEffect::recoverable))
+                                        .apply(instance, PotionEffect::new));
 
-	public record FoodEffects(FoodProperties foodProperty,
-							  boolean recoverable) implements PotatoProjectileEntityHitAction {
-		public static final MapCodec<FoodEffects> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			FoodProperties.DIRECT_CODEC.fieldOf("food_property").forGetter(FoodEffects::foodProperty),
-			Codec.BOOL.fieldOf("recoverable").forGetter(FoodEffects::recoverable)
-		).apply(instance, FoodEffects::new));
+        @Override
+        public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
+            Entity entity = ray.getEntity();
+            if (entity.level().isClientSide) return true;
+            if (entity instanceof LivingEntity)
+                applyEffect((LivingEntity) entity, new MobEffectInstance(effect, ticks, level - 1));
+            return !recoverable;
+        }
 
-		@Override
-		public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
-			Entity entity = ray.getEntity();
-			if (entity.level().isClientSide)
-				return true;
+        @Override
+        public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
+            return CODEC;
+        }
+    }
 
-			if (entity instanceof LivingEntity livingEntity) {
-				for (PossibleEffect effect : foodProperty.effects()) {
-					if (livingEntity.getRandom().nextFloat() < effect.probability())
-						applyEffect(livingEntity, effect.effect());
-				}
-			}
-			return !recoverable;
-		}
+    public record FoodEffects(FoodProperties foodProperty, boolean recoverable)
+            implements PotatoProjectileEntityHitAction {
+        public static final MapCodec<FoodEffects> CODEC =
+                RecordCodecBuilder.mapCodec(
+                        instance ->
+                                instance.group(
+                                                FoodProperties.DIRECT_CODEC
+                                                        .fieldOf("food_property")
+                                                        .forGetter(FoodEffects::foodProperty),
+                                                Codec.BOOL
+                                                        .fieldOf("recoverable")
+                                                        .forGetter(FoodEffects::recoverable))
+                                        .apply(instance, FoodEffects::new));
 
-		@Override
-		public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
-			return CODEC;
-		}
-	}
+        @Override
+        public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
+            Entity entity = ray.getEntity();
+            if (entity.level().isClientSide) return true;
 
-	public record ChorusTeleport(double teleportDiameter) implements PotatoProjectileEntityHitAction {
-		public static final MapCodec<ChorusTeleport> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			CreateCodecs.POSITIVE_DOUBLE.fieldOf("teleport_diameter").forGetter(ChorusTeleport::teleportDiameter)
-		).apply(instance, ChorusTeleport::new));
+            if (entity instanceof LivingEntity livingEntity) {
+                for (PossibleEffect effect : foodProperty.effects()) {
+                    if (livingEntity.getRandom().nextFloat() < effect.probability())
+                        applyEffect(livingEntity, effect.effect());
+                }
+            }
+            return !recoverable;
+        }
 
-		@Override
-		public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
-			Entity entity = ray.getEntity();
-			Level level = entity.getCommandSenderWorld();
-			if (level.isClientSide)
-				return true;
-			if (!(entity instanceof LivingEntity livingEntity))
-				return false;
+        @Override
+        public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
+            return CODEC;
+        }
+    }
 
-			double entityX = livingEntity.getX();
-			double entityY = livingEntity.getY();
-			double entityZ = livingEntity.getZ();
+    public record ChorusTeleport(double teleportDiameter)
+            implements PotatoProjectileEntityHitAction {
+        public static final MapCodec<ChorusTeleport> CODEC =
+                RecordCodecBuilder.mapCodec(
+                        instance ->
+                                instance.group(
+                                                CreateCodecs.POSITIVE_DOUBLE
+                                                        .fieldOf("teleport_diameter")
+                                                        .forGetter(
+                                                                ChorusTeleport::teleportDiameter))
+                                        .apply(instance, ChorusTeleport::new));
 
-			for (int teleportTry = 0; teleportTry < 16; ++teleportTry) {
-				double teleportX = entityX + (livingEntity.getRandom()
-					.nextDouble() - 0.5D) * teleportDiameter;
-				double teleportY = Mth.clamp(entityY + (livingEntity.getRandom()
-					.nextInt((int) teleportDiameter) - (int) (teleportDiameter / 2)), 0.0D, level.getHeight() - 1);
-				double teleportZ = entityZ + (livingEntity.getRandom()
-					.nextDouble() - 0.5D) * teleportDiameter;
+        @Override
+        public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
+            Entity entity = ray.getEntity();
+            Level level = entity.getCommandSenderWorld();
+            if (level.isClientSide) return true;
+            if (!(entity instanceof LivingEntity livingEntity)) return false;
 
-				EntityTeleportEvent.ChorusFruit event =
-					EventHooks.onChorusFruitTeleport(livingEntity, teleportX, teleportY, teleportZ);
-				if (event.isCanceled())
-					return false;
-				if (livingEntity.randomTeleport(event.getTargetX(), event.getTargetY(), event.getTargetZ(), true)) {
-					if (livingEntity.isPassenger())
-						livingEntity.stopRiding();
+            double entityX = livingEntity.getX();
+            double entityY = livingEntity.getY();
+            double entityZ = livingEntity.getZ();
 
-					SoundEvent soundevent =
-						livingEntity instanceof Fox ? SoundEvents.FOX_TELEPORT : SoundEvents.CHORUS_FRUIT_TELEPORT;
-					level.playSound(null, entityX, entityY, entityZ, soundevent, SoundSource.PLAYERS, 1.0F, 1.0F);
-					livingEntity.playSound(soundevent, 1.0F, 1.0F);
-					livingEntity.setDeltaMovement(Vec3.ZERO);
-					return true;
-				}
-			}
+            for (int teleportTry = 0; teleportTry < 16; ++teleportTry) {
+                double teleportX =
+                        entityX + (livingEntity.getRandom().nextDouble() - 0.5D) * teleportDiameter;
+                double teleportY =
+                        Mth.clamp(
+                                entityY
+                                        + (livingEntity.getRandom().nextInt((int) teleportDiameter)
+                                                - (int) (teleportDiameter / 2)),
+                                0.0D,
+                                level.getHeight() - 1);
+                double teleportZ =
+                        entityZ + (livingEntity.getRandom().nextDouble() - 0.5D) * teleportDiameter;
 
-			return false;
-		}
+                EntityTeleportEvent.ChorusFruit event =
+                        EventHooks.onChorusFruitTeleport(
+                                livingEntity, teleportX, teleportY, teleportZ);
+                if (event.isCanceled()) return false;
+                if (livingEntity.randomTeleport(
+                        event.getTargetX(), event.getTargetY(), event.getTargetZ(), true)) {
+                    if (livingEntity.isPassenger()) livingEntity.stopRiding();
 
-		@Override
-		public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
-			return CODEC;
-		}
-	}
+                    SoundEvent soundevent =
+                            livingEntity instanceof Fox
+                                    ? SoundEvents.FOX_TELEPORT
+                                    : SoundEvents.CHORUS_FRUIT_TELEPORT;
+                    level.playSound(
+                            null,
+                            entityX,
+                            entityY,
+                            entityZ,
+                            soundevent,
+                            SoundSource.PLAYERS,
+                            1.0F,
+                            1.0F);
+                    livingEntity.playSound(soundevent, 1.0F, 1.0F);
+                    livingEntity.setDeltaMovement(Vec3.ZERO);
+                    return true;
+                }
+            }
 
-	public enum CureZombieVillager implements PotatoProjectileEntityHitAction {
-		INSTANCE;
+            return false;
+        }
 
-		private static final FoodEffects EFFECT = new FoodEffects(Foods.GOLDEN_APPLE, false);
-		private static final GameProfile ZOMBIE_CONVERTER_NAME =
-			new GameProfile(UUID.fromString("be12d3dc-27d3-4992-8c97-66be53fd49c5"), "Converter");
-		private static final WorldAttached<FakePlayer> ZOMBIE_CONVERTERS =
-			new WorldAttached<>(w -> new FakePlayer((ServerLevel) w, ZOMBIE_CONVERTER_NAME));
+        @Override
+        public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
+            return CODEC;
+        }
+    }
 
-		public static final MapCodec<CureZombieVillager> CODEC = MapCodec.unit(INSTANCE);
+    public enum CureZombieVillager implements PotatoProjectileEntityHitAction {
+        INSTANCE;
 
-		@Override
-		public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
-			Entity entity = ray.getEntity();
-			Level world = entity.level();
+        private static final FoodEffects EFFECT = new FoodEffects(Foods.GOLDEN_APPLE, false);
+        private static final GameProfile ZOMBIE_CONVERTER_NAME =
+                new GameProfile(
+                        UUID.fromString("be12d3dc-27d3-4992-8c97-66be53fd49c5"), "Converter");
+        private static final WorldAttached<FakePlayer> ZOMBIE_CONVERTERS =
+                new WorldAttached<>(w -> new FakePlayer((ServerLevel) w, ZOMBIE_CONVERTER_NAME));
 
-			if (!(entity instanceof ZombieVillager zombieVillager) || !zombieVillager.hasEffect(MobEffects.WEAKNESS))
-				return EFFECT.execute(projectile, ray, type);
-			if (world.isClientSide)
-				return false;
+        public static final MapCodec<CureZombieVillager> CODEC = MapCodec.unit(INSTANCE);
 
-			FakePlayer dummy = ZOMBIE_CONVERTERS.get(world);
-			dummy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GOLDEN_APPLE, 1));
-			zombieVillager.mobInteract(dummy, InteractionHand.MAIN_HAND);
-			return true;
-		}
+        @Override
+        public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
+            Entity entity = ray.getEntity();
+            Level world = entity.level();
 
-		@Override
-		public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
-			return CODEC;
-		}
-	}
+            if (!(entity instanceof ZombieVillager zombieVillager)
+                    || !zombieVillager.hasEffect(MobEffects.WEAKNESS))
+                return EFFECT.execute(projectile, ray, type);
+            if (world.isClientSide) return false;
 
-	public enum SuspiciousStew implements PotatoProjectileEntityHitAction {
-		INSTANCE;
+            FakePlayer dummy = ZOMBIE_CONVERTERS.get(world);
+            dummy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GOLDEN_APPLE, 1));
+            zombieVillager.mobInteract(dummy, InteractionHand.MAIN_HAND);
+            return true;
+        }
 
-		public static final MapCodec<SuspiciousStew> CODEC = MapCodec.unit(INSTANCE);
+        @Override
+        public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
+            return CODEC;
+        }
+    }
 
-		@Override
-		public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
-			if (ray.getEntity() instanceof LivingEntity livingEntity) {
-				SuspiciousStewEffects stew = projectile.getOrDefault(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY);
-				for (Entry effect : stew.effects())
-					livingEntity.addEffect(effect.createEffectInstance());
-			}
+    public enum SuspiciousStew implements PotatoProjectileEntityHitAction {
+        INSTANCE;
 
-			return false;
-		}
+        public static final MapCodec<SuspiciousStew> CODEC = MapCodec.unit(INSTANCE);
 
-		@Override
-		public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
-			return CODEC;
-		}
-	}
+        @Override
+        public boolean execute(ItemStack projectile, EntityHitResult ray, Type type) {
+            if (ray.getEntity() instanceof LivingEntity livingEntity) {
+                SuspiciousStewEffects stew =
+                        projectile.getOrDefault(
+                                DataComponents.SUSPICIOUS_STEW_EFFECTS,
+                                SuspiciousStewEffects.EMPTY);
+                for (Entry effect : stew.effects())
+                    livingEntity.addEffect(effect.createEffectInstance());
+            }
 
-	private static void applyEffect(LivingEntity entity, MobEffectInstance effect) {
-		if (effect.getEffect().value().isInstantenous()) {
-			effect.getEffect().value()
-				.applyInstantenousEffect(null, null, entity, effect.getDuration(), 1.0);
-		} else {
-			entity.addEffect(effect);
-		}
-	}
+            return false;
+        }
+
+        @Override
+        public MapCodec<? extends PotatoProjectileEntityHitAction> codec() {
+            return CODEC;
+        }
+    }
+
+    private static void applyEffect(LivingEntity entity, MobEffectInstance effect) {
+        if (effect.getEffect().value().isInstantenous()) {
+            effect.getEffect()
+                    .value()
+                    .applyInstantenousEffect(null, null, entity, effect.getDuration(), 1.0);
+        } else {
+            entity.addEffect(effect);
+        }
+    }
 }

@@ -1,7 +1,5 @@
 package com.simibubi.create.content.contraptions.actors.psi;
 
-import java.util.function.Consumer;
-
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
 import dev.engine_room.flywheel.api.visual.TickableVisual;
@@ -10,43 +8,54 @@ import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 
-public class PSIVisual extends AbstractBlockEntityVisual<PortableStorageInterfaceBlockEntity> implements SimpleDynamicVisual, SimpleTickableVisual {
+import java.util.function.Consumer;
 
-	private final PIInstance instance;
+public class PSIVisual extends AbstractBlockEntityVisual<PortableStorageInterfaceBlockEntity>
+        implements SimpleDynamicVisual, SimpleTickableVisual {
 
-	public PSIVisual(VisualizationContext visualizationContext, PortableStorageInterfaceBlockEntity blockEntity, float partialTick) {
-		super(visualizationContext, blockEntity, partialTick);
+    private final PIInstance instance;
 
-		instance = new PIInstance(visualizationContext.instancerProvider(), blockState, getVisualPosition(), isLit());
-		instance.beginFrame(blockEntity.getExtensionDistance(partialTick));
-	}
+    public PSIVisual(
+            VisualizationContext visualizationContext,
+            PortableStorageInterfaceBlockEntity blockEntity,
+            float partialTick) {
+        super(visualizationContext, blockEntity, partialTick);
 
-	@Override
-	public void tick(TickableVisual.Context ctx) {
-		instance.tick(isLit());
-	}
+        instance =
+                new PIInstance(
+                        visualizationContext.instancerProvider(),
+                        blockState,
+                        getVisualPosition(),
+                        isLit());
+        instance.beginFrame(blockEntity.getExtensionDistance(partialTick));
+    }
 
-	@Override
-	public void beginFrame(DynamicVisual.Context ctx) {
-		instance.beginFrame(blockEntity.getExtensionDistance(ctx.partialTick()));
-	}
+    @Override
+    public void tick(TickableVisual.Context ctx) {
+        instance.tick(isLit());
+    }
 
-	@Override
-	public void updateLight(float partialTick) {
-		relight(instance.middle, instance.top);
-	}
+    @Override
+    public void beginFrame(DynamicVisual.Context ctx) {
+        instance.beginFrame(blockEntity.getExtensionDistance(ctx.partialTick()));
+    }
 
-	@Override
-	protected void _delete() {
-		instance.remove();
-	}
+    @Override
+    public void updateLight(float partialTick) {
+        relight(instance.middle, instance.top);
+    }
 
-	private boolean isLit() {
-		return blockEntity.isConnected();
-	}
+    @Override
+    protected void _delete() {
+        instance.remove();
+    }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		instance.collectCrumblingInstances(consumer);
-	}
+    private boolean isLit() {
+        return blockEntity.isConnected();
+    }
+
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        instance.collectCrumblingInstances(consumer);
+    }
 }

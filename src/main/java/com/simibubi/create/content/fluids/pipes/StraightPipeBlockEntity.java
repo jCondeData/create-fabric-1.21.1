@@ -1,7 +1,5 @@
 package com.simibubi.create.content.fluids.pipes;
 
-import java.util.List;
-
 import com.simibubi.create.content.decoration.bracket.BracketedBlockEntityBehaviour;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
@@ -16,57 +14,59 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
+
 public class StraightPipeBlockEntity extends SmartBlockEntity {
 
-	public StraightPipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-	}
+    public StraightPipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-		behaviours.add(new StraightPipeFluidTransportBehaviour(this));
-		behaviours.add(new BracketedBlockEntityBehaviour(this));
-		registerAwardables(behaviours, FluidPropagator.getSharedTriggers());
-	}
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        behaviours.add(new StraightPipeFluidTransportBehaviour(this));
+        behaviours.add(new BracketedBlockEntityBehaviour(this));
+        registerAwardables(behaviours, FluidPropagator.getSharedTriggers());
+    }
 
-	public static class StraightPipeFluidTransportBehaviour extends FluidTransportBehaviour {
+    public static class StraightPipeFluidTransportBehaviour extends FluidTransportBehaviour {
 
-		public StraightPipeFluidTransportBehaviour(SmartBlockEntity be) {
-			super(be);
-		}
+        public StraightPipeFluidTransportBehaviour(SmartBlockEntity be) {
+            super(be);
+        }
 
-		@Override
-		public boolean canHaveFlowToward(BlockState state, Direction direction) {
-			return state.hasProperty(AxisPipeBlock.AXIS) && state.getValue(AxisPipeBlock.AXIS) == direction.getAxis();
-		}
+        @Override
+        public boolean canHaveFlowToward(BlockState state, Direction direction) {
+            return state.hasProperty(AxisPipeBlock.AXIS)
+                    && state.getValue(AxisPipeBlock.AXIS) == direction.getAxis();
+        }
 
-		@Override
-		public AttachmentTypes getRenderedRimAttachment(BlockAndTintGetter world, BlockPos pos, BlockState state,
-			Direction direction) {
-			AttachmentTypes attachment = super.getRenderedRimAttachment(world, pos, state, direction);
-			BlockState otherState = world.getBlockState(pos.relative(direction));
+        @Override
+        public AttachmentTypes getRenderedRimAttachment(
+                BlockAndTintGetter world, BlockPos pos, BlockState state, Direction direction) {
+            AttachmentTypes attachment =
+                    super.getRenderedRimAttachment(world, pos, state, direction);
+            BlockState otherState = world.getBlockState(pos.relative(direction));
 
-			Axis axis = IAxisPipe.getAxisOf(state);
-			Axis otherAxis = IAxisPipe.getAxisOf(otherState);
+            Axis axis = IAxisPipe.getAxisOf(state);
+            Axis otherAxis = IAxisPipe.getAxisOf(otherState);
 
-			if (attachment == AttachmentTypes.RIM && state.getBlock() instanceof FluidValveBlock)
-				return AttachmentTypes.NONE;
-			if (attachment == AttachmentTypes.RIM && !(state.getBlock() instanceof GlassFluidPipeBlock)
-				&& otherState.getBlock() instanceof GlassFluidPipeBlock)
-				return AttachmentTypes.PARTIAL_RIM;
+            if (attachment == AttachmentTypes.RIM && state.getBlock() instanceof FluidValveBlock)
+                return AttachmentTypes.NONE;
+            if (attachment == AttachmentTypes.RIM
+                    && !(state.getBlock() instanceof GlassFluidPipeBlock)
+                    && otherState.getBlock() instanceof GlassFluidPipeBlock)
+                return AttachmentTypes.PARTIAL_RIM;
 
-			if (attachment == AttachmentTypes.RIM && FluidPipeBlock.isPipe(otherState))
-				return AttachmentTypes.NONE;
-			if (axis == otherAxis && axis != null)
-				return AttachmentTypes.NONE;
+            if (attachment == AttachmentTypes.RIM && FluidPipeBlock.isPipe(otherState))
+                return AttachmentTypes.NONE;
+            if (axis == otherAxis && axis != null) return AttachmentTypes.NONE;
 
-			if (otherState.getBlock() instanceof FluidValveBlock
-				&& FluidValveBlock.getPipeAxis(otherState) == direction.getAxis())
-				return AttachmentTypes.NONE;
+            if (otherState.getBlock() instanceof FluidValveBlock
+                    && FluidValveBlock.getPipeAxis(otherState) == direction.getAxis())
+                return AttachmentTypes.NONE;
 
-			return attachment.withoutConnector();
-		}
-
-	}
-
+            return attachment.withoutConnector();
+        }
+    }
 }

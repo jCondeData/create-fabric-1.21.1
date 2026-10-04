@@ -22,68 +22,64 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 public class DrillBlockEntity extends BlockBreakingKineticBlockEntity {
 
-	private CobbleGenBlockConfiguration currentConfig;
-	private BlockState currentOutput;
+    private CobbleGenBlockConfiguration currentConfig;
+    private BlockState currentOutput;
 
-	public DrillBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-		currentOutput = Blocks.AIR.defaultBlockState();
-	}
+    public DrillBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        currentOutput = Blocks.AIR.defaultBlockState();
+    }
 
-	@Override
-	protected BlockPos getBreakingPos() {
-		return getBlockPos().relative(getBlockState().getValue(DrillBlock.FACING));
-	}
+    @Override
+    protected BlockPos getBreakingPos() {
+        return getBlockPos().relative(getBlockState().getValue(DrillBlock.FACING));
+    }
 
-	@Override
-	public void onBlockBroken(BlockState stateToBreak) {
-		if (!optimiseCobbleGen(stateToBreak))
-			super.onBlockBroken(stateToBreak);
-	}
+    @Override
+    public void onBlockBroken(BlockState stateToBreak) {
+        if (!optimiseCobbleGen(stateToBreak)) super.onBlockBroken(stateToBreak);
+    }
 
-	public boolean optimiseCobbleGen(BlockState stateToBreak) {
-		DirectBeltInputBehaviour inv =
-			BlockEntityBehaviour.get(level, breakingPos.below(), DirectBeltInputBehaviour.TYPE);
-		BlockEntity blockEntityBelow = level.getBlockEntity(breakingPos.below());
-		BlockEntity blockEntityAbove = level.getBlockEntity(breakingPos.above());
+    public boolean optimiseCobbleGen(BlockState stateToBreak) {
+        DirectBeltInputBehaviour inv =
+                BlockEntityBehaviour.get(level, breakingPos.below(), DirectBeltInputBehaviour.TYPE);
+        BlockEntity blockEntityBelow = level.getBlockEntity(breakingPos.below());
+        BlockEntity blockEntityAbove = level.getBlockEntity(breakingPos.above());
 
-		if (inv == null && !(blockEntityBelow instanceof HopperBlockEntity)
-			&& !(blockEntityAbove instanceof ChuteBlockEntity chute && chute.getItemMotion() > 0))
-			return false;
-		
-		CobbleGenBlockConfiguration config =
-			CobbleGenOptimisation.getConfig(level, worldPosition, getBlockState().getValue(DrillBlock.FACING));
-		if (config == null)
-			return false;
-		if (!(level instanceof ServerLevel sl))
-			return false;
+        if (inv == null
+                && !(blockEntityBelow instanceof HopperBlockEntity)
+                && !(blockEntityAbove instanceof ChuteBlockEntity chute
+                        && chute.getItemMotion() > 0)) return false;
 
-		BlockPos breakingPos = getBreakingPos();
-		if (!config.equals(currentConfig)) {
-			currentConfig = config;
-			currentOutput = CobbleGenOptimisation.determineOutput(sl, breakingPos, config);
-		}
+        CobbleGenBlockConfiguration config =
+                CobbleGenOptimisation.getConfig(
+                        level, worldPosition, getBlockState().getValue(DrillBlock.FACING));
+        if (config == null) return false;
+        if (!(level instanceof ServerLevel sl)) return false;
 
-		if (currentOutput.isAir() || !currentOutput.equals(stateToBreak))
-			return false;
+        BlockPos breakingPos = getBreakingPos();
+        if (!config.equals(currentConfig)) {
+            currentConfig = config;
+            currentOutput = CobbleGenOptimisation.determineOutput(sl, breakingPos, config);
+        }
 
-		if (inv != null)
-			for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
-				inv.handleInsertion(stack, Direction.UP, false);
-		else if (blockEntityBelow instanceof HopperBlockEntity hbe) {
-			IItemHandler handler = level.getCapability(ItemHandler.BLOCK, hbe.getBlockPos(), null);
-			if (handler != null)
-				for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
-					ItemHandlerHelper.insertItemStacked(handler, stack, false);
-		} else if (blockEntityAbove instanceof ChuteBlockEntity chute && chute.getItemMotion() > 0) {
-			for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
-				if (chute.getItem()
-					.isEmpty())
-					chute.setItem(stack, 0);
-		}
+        if (currentOutput.isAir() || !currentOutput.equals(stateToBreak)) return false;
 
-		level.levelEvent(2001, breakingPos, Block.getId(stateToBreak));
-		return true;
-	}
+        if (inv != null)
+            for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
+                inv.handleInsertion(stack, Direction.UP, false);
+        else if (blockEntityBelow instanceof HopperBlockEntity hbe) {
+            IItemHandler handler = level.getCapability(ItemHandler.BLOCK, hbe.getBlockPos(), null);
+            if (handler != null)
+                for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
+                    ItemHandlerHelper.insertItemStacked(handler, stack, false);
+        } else if (blockEntityAbove instanceof ChuteBlockEntity chute
+                && chute.getItemMotion() > 0) {
+            for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
+                if (chute.getItem().isEmpty()) chute.setItem(stack, 0);
+        }
 
+        level.levelEvent(2001, breakingPos, Block.getId(stateToBreak));
+        return true;
+    }
 }

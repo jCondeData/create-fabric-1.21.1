@@ -1,7 +1,5 @@
 package com.simibubi.create.content.trains.observer;
 
-import java.util.UUID;
-
 import com.simibubi.create.Create;
 import com.simibubi.create.content.logistics.filter.FilterItemStack;
 import com.simibubi.create.content.trains.entity.Train;
@@ -20,94 +18,94 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import java.util.UUID;
+
 public class TrackObserver extends SingleBlockEntityEdgePoint {
 
-	private int activated;
-	private FilterItemStack filter;
-	private UUID currentTrain;
+    private int activated;
+    private FilterItemStack filter;
+    private UUID currentTrain;
 
-	public TrackObserver() {
-		activated = 0;
-		filter = FilterItemStack.empty();
-		currentTrain = null;
-	}
+    public TrackObserver() {
+        activated = 0;
+        filter = FilterItemStack.empty();
+        currentTrain = null;
+    }
 
-	@Override
-	public void blockEntityAdded(BlockEntity blockEntity, boolean front) {
-		super.blockEntityAdded(blockEntity, front);
-		FilteringBehaviour filteringBehaviour = BlockEntityBehaviour.get(blockEntity, FilteringBehaviour.TYPE);
-		if (filteringBehaviour != null)
-			setFilterAndNotify(blockEntity.getLevel(), filteringBehaviour.getFilter());
-	}
+    @Override
+    public void blockEntityAdded(BlockEntity blockEntity, boolean front) {
+        super.blockEntityAdded(blockEntity, front);
+        FilteringBehaviour filteringBehaviour =
+                BlockEntityBehaviour.get(blockEntity, FilteringBehaviour.TYPE);
+        if (filteringBehaviour != null)
+            setFilterAndNotify(blockEntity.getLevel(), filteringBehaviour.getFilter());
+    }
 
-	@Override
-	public void tick(TrackGraph graph, boolean preTrains) {
-		super.tick(graph, preTrains);
-		if (isActivated())
-			activated--;
-		if (!isActivated())
-			currentTrain = null;
-	}
+    @Override
+    public void tick(TrackGraph graph, boolean preTrains) {
+        super.tick(graph, preTrains);
+        if (isActivated()) activated--;
+        if (!isActivated()) currentTrain = null;
+    }
 
-	public void setFilterAndNotify(Level level, ItemStack filter) {
-		this.filter = FilterItemStack.of(filter.copy());
-		notifyTrains(level);
-	}
+    public void setFilterAndNotify(Level level, ItemStack filter) {
+        this.filter = FilterItemStack.of(filter.copy());
+        notifyTrains(level);
+    }
 
-	private void notifyTrains(Level level) {
-		TrackGraph graph = Create.RAILWAYS.sided(level)
-			.getGraph(level, edgeLocation.getFirst());
-		if (graph == null)
-			return;
-		TrackEdge edge = graph.getConnection(edgeLocation.map(graph::locateNode));
-		if (edge == null)
-			return;
-		SignalPropagator.notifyTrains(graph, edge);
-	}
+    private void notifyTrains(Level level) {
+        TrackGraph graph = Create.RAILWAYS.sided(level).getGraph(level, edgeLocation.getFirst());
+        if (graph == null) return;
+        TrackEdge edge = graph.getConnection(edgeLocation.map(graph::locateNode));
+        if (edge == null) return;
+        SignalPropagator.notifyTrains(graph, edge);
+    }
 
-	public FilterItemStack getFilter() {
-		return filter;
-	}
+    public FilterItemStack getFilter() {
+        return filter;
+    }
 
-	public UUID getCurrentTrain() {
-		return currentTrain;
-	}
+    public UUID getCurrentTrain() {
+        return currentTrain;
+    }
 
-	public boolean isActivated() {
-		return activated > 0;
-	}
+    public boolean isActivated() {
+        return activated > 0;
+    }
 
-	public void keepAlive(Train train) {
-		activated = 8;
-		currentTrain = train.id;
-	}
+    public void keepAlive(Train train) {
+        activated = 8;
+        currentTrain = train.id;
+    }
 
-	@Override
-	public void read(CompoundTag nbt, HolderLookup.Provider registries, boolean migration, DimensionPalette dimensions) {
-		super.read(nbt, registries, migration, dimensions);
-		activated = nbt.getInt("Activated");
-		filter = FilterItemStack.of(registries, nbt.getCompound("Filter"));
-		if (nbt.contains("TrainId"))
-			currentTrain = nbt.getUUID("TrainId");
-	}
+    @Override
+    public void read(
+            CompoundTag nbt,
+            HolderLookup.Provider registries,
+            boolean migration,
+            DimensionPalette dimensions) {
+        super.read(nbt, registries, migration, dimensions);
+        activated = nbt.getInt("Activated");
+        filter = FilterItemStack.of(registries, nbt.getCompound("Filter"));
+        if (nbt.contains("TrainId")) currentTrain = nbt.getUUID("TrainId");
+    }
 
-	@Override
-	public void read(FriendlyByteBuf buffer, DimensionPalette dimensions) {
-		super.read(buffer, dimensions);
-	}
+    @Override
+    public void read(FriendlyByteBuf buffer, DimensionPalette dimensions) {
+        super.read(buffer, dimensions);
+    }
 
-	@Override
-	public void write(CompoundTag nbt, HolderLookup.Provider registries, DimensionPalette dimensions) {
-		super.write(nbt, registries, dimensions);
-		nbt.putInt("Activated", activated);
-		nbt.put("Filter", filter.serializeNBT(registries));
-		if (currentTrain != null)
-			nbt.putUUID("TrainId", currentTrain);
-	}
+    @Override
+    public void write(
+            CompoundTag nbt, HolderLookup.Provider registries, DimensionPalette dimensions) {
+        super.write(nbt, registries, dimensions);
+        nbt.putInt("Activated", activated);
+        nbt.put("Filter", filter.serializeNBT(registries));
+        if (currentTrain != null) nbt.putUUID("TrainId", currentTrain);
+    }
 
-	@Override
-	public void write(FriendlyByteBuf buffer, DimensionPalette dimensions) {
-		super.write(buffer, dimensions);
-	}
-
+    @Override
+    public void write(FriendlyByteBuf buffer, DimensionPalette dimensions) {
+        super.write(buffer, dimensions);
+    }
 }

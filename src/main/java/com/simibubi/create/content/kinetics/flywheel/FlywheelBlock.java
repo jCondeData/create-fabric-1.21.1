@@ -18,48 +18,49 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FlywheelBlock extends RotatedPillarKineticBlock implements IBE<FlywheelBlockEntity> {
 
-	public FlywheelBlock(Properties properties) {
-		super(properties);
-	}
+    public FlywheelBlock(Properties properties) {
+        super(properties);
+    }
 
-	@Override
-	public Class<FlywheelBlockEntity> getBlockEntityClass() {
-		return FlywheelBlockEntity.class;
-	}
-	
-	@Override
-	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-		return AllShapes.LARGE_GEAR.get(pState.getValue(AXIS));
-	}
-	
-	@Override
-	public RenderShape getRenderShape(BlockState pState) {
-		return RenderShape.ENTITYBLOCK_ANIMATED;
-	}
+    @Override
+    public Class<FlywheelBlockEntity> getBlockEntityClass() {
+        return FlywheelBlockEntity.class;
+    }
 
-	@Override
-	public BlockEntityType<? extends FlywheelBlockEntity> getBlockEntityType() {
-		return AllBlockEntityTypes.FLYWHEEL.get();
-	}
-	
-	@Override
-	public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-		return face.getAxis() == getRotationAxis(state);
-	}
+    @Override
+    public VoxelShape getShape(
+            BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return AllShapes.LARGE_GEAR.get(pState.getValue(AXIS));
+    }
 
-	@Override
-	public Axis getRotationAxis(BlockState state) {
-		return state.getValue(AXIS);
-	}
+    @Override
+    public RenderShape getRenderShape(BlockState pState) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
 
-	@Override
-	public float getParticleTargetRadius() {
-		return 2f;
-	}
+    @Override
+    public BlockEntityType<? extends FlywheelBlockEntity> getBlockEntityType() {
+        return AllBlockEntityTypes.FLYWHEEL.get();
+    }
 
-	@Override
-	public float getParticleInitialRadius() {
-		return 1.75f;
-	}
-	
+    @Override
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return face.getAxis() == getRotationAxis(state);
+    }
+
+    @Override
+    public Axis getRotationAxis(BlockState state) {
+        return state.getValue(AXIS);
+    }
+
+    @Override
+    public float getParticleTargetRadius() {
+        return 2f;
+    }
+
+    @Override
+    public float getParticleInitialRadius() {
+        return 1.75f;
+    }
 }

@@ -5,8 +5,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public interface ThresholdSwitchCompat {
 
-	boolean isFromThisMod(BlockEntity blockEntity);
+    boolean isFromThisMod(BlockEntity blockEntity);
 
-	long getSpaceInSlot(IItemHandler inv, int slot);
-
+    long getSpaceInSlot(IItemHandler inv, int slot);
 }

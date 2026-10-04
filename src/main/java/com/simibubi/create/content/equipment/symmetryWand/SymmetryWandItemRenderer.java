@@ -8,6 +8,7 @@ import com.simibubi.create.foundation.item.render.CustomRenderedItemModelRendere
 import com.simibubi.create.foundation.item.render.PartialItemModelRenderer;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,27 +18,36 @@ import net.minecraft.world.item.ItemStack;
 
 public class SymmetryWandItemRenderer extends CustomRenderedItemModelRenderer {
 
-	protected static final PartialModel BITS = PartialModel.of(Create.asResource("item/wand_of_symmetry/bits"));
-	protected static final PartialModel CORE = PartialModel.of(Create.asResource("item/wand_of_symmetry/core"));
-	protected static final PartialModel CORE_GLOW = PartialModel.of(Create.asResource("item/wand_of_symmetry/core_glow"));
+    protected static final PartialModel BITS =
+            PartialModel.of(Create.asResource("item/wand_of_symmetry/bits"));
+    protected static final PartialModel CORE =
+            PartialModel.of(Create.asResource("item/wand_of_symmetry/core"));
+    protected static final PartialModel CORE_GLOW =
+            PartialModel.of(Create.asResource("item/wand_of_symmetry/core_glow"));
 
-	@Override
-	protected void render(ItemStack stack, CustomRenderedItemModel model, PartialItemModelRenderer renderer, ItemDisplayContext transformType,
-		PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-		float worldTime = AnimationTickHolder.getRenderTime() / 20;
-		int maxLight = LightTexture.FULL_BRIGHT;
+    @Override
+    protected void render(
+            ItemStack stack,
+            CustomRenderedItemModel model,
+            PartialItemModelRenderer renderer,
+            ItemDisplayContext transformType,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        float worldTime = AnimationTickHolder.getRenderTime() / 20;
+        int maxLight = LightTexture.FULL_BRIGHT;
 
-		renderer.render(model.getOriginalModel(), light);
-		renderer.renderSolidGlowing(CORE.get(), maxLight);
-		renderer.renderGlowing(CORE_GLOW.get(), maxLight);
+        renderer.render(model.getOriginalModel(), light);
+        renderer.renderSolidGlowing(CORE.get(), maxLight);
+        renderer.renderGlowing(CORE_GLOW.get(), maxLight);
 
-		float floating = Mth.sin(worldTime) * .05f;
-		float angle = worldTime * -10 % 360;
+        float floating = Mth.sin(worldTime) * .05f;
+        float angle = worldTime * -10 % 360;
 
-		ms.translate(0, floating, 0);
-		ms.mulPose(Axis.YP.rotationDegrees(angle));
+        ms.translate(0, floating, 0);
+        ms.mulPose(Axis.YP.rotationDegrees(angle));
 
-		renderer.renderGlowing(BITS.get(), maxLight);
-	}
-
+        renderer.renderGlowing(BITS.get(), maxLight);
+    }
 }

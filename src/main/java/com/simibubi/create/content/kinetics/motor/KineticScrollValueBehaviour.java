@@ -16,44 +16,44 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class KineticScrollValueBehaviour extends ScrollValueBehaviour {
 
-	public KineticScrollValueBehaviour(Component label, SmartBlockEntity be, ValueBoxTransform slot) {
-		super(label, be, slot);
-		withFormatter(v -> String.valueOf(Math.abs(v)));
-	}
+    public KineticScrollValueBehaviour(
+            Component label, SmartBlockEntity be, ValueBoxTransform slot) {
+        super(label, be, slot);
+        withFormatter(v -> String.valueOf(Math.abs(v)));
+    }
 
-	@Override
-	public ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult) {
-		ImmutableList<Component> rows = ImmutableList.of(Component.literal("\u27f3")
-			.withStyle(ChatFormatting.BOLD),
-			Component.literal("\u27f2")
-				.withStyle(ChatFormatting.BOLD));
-		ValueSettingsFormatter formatter = new ValueSettingsFormatter(this::formatSettings);
-		return new ValueSettingsBoard(label, 256, 32, rows, formatter);
-	}
+    @Override
+    public ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult) {
+        ImmutableList<Component> rows =
+                ImmutableList.of(
+                        Component.literal("\u27f3").withStyle(ChatFormatting.BOLD),
+                        Component.literal("\u27f2").withStyle(ChatFormatting.BOLD));
+        ValueSettingsFormatter formatter = new ValueSettingsFormatter(this::formatSettings);
+        return new ValueSettingsBoard(label, 256, 32, rows, formatter);
+    }
 
-	@Override
-	public void setValueSettings(Player player, ValueSettings valueSetting, boolean ctrlHeld) {
-		int value = Math.max(1, valueSetting.value());
-		if (!valueSetting.equals(getValueSettings()))
-			playFeedbackSound(this);
-		setValue(valueSetting.row() == 0 ? -value : value);
-	}
+    @Override
+    public void setValueSettings(Player player, ValueSettings valueSetting, boolean ctrlHeld) {
+        int value = Math.max(1, valueSetting.value());
+        if (!valueSetting.equals(getValueSettings())) playFeedbackSound(this);
+        setValue(valueSetting.row() == 0 ? -value : value);
+    }
 
-	@Override
-	public ValueSettings getValueSettings() {
-		return new ValueSettings(value < 0 ? 0 : 1, Math.abs(value));
-	}
+    @Override
+    public ValueSettings getValueSettings() {
+        return new ValueSettings(value < 0 ? 0 : 1, Math.abs(value));
+    }
 
-	public MutableComponent formatSettings(ValueSettings settings) {
-		return CreateLang.number(Math.max(1, Math.abs(settings.value())))
-			.add(CreateLang.text(settings.row() == 0 ? "\u27f3" : "\u27f2")
-				.style(ChatFormatting.BOLD))
-			.component();
-	}
+    public MutableComponent formatSettings(ValueSettings settings) {
+        return CreateLang.number(Math.max(1, Math.abs(settings.value())))
+                .add(
+                        CreateLang.text(settings.row() == 0 ? "\u27f3" : "\u27f2")
+                                .style(ChatFormatting.BOLD))
+                .component();
+    }
 
-	@Override
-	public String getClipboardKey() {
-		return "Speed";
-	}
-
+    @Override
+    public String getClipboardKey() {
+        return "Speed";
+    }
 }

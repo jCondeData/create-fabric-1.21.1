@@ -1,7 +1,6 @@
 package com.simibubi.create.foundation.mixin.accessor;
 
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.EntityType;
 
@@ -12,6 +11,6 @@ import java.util.Map;
 
 @Mixin(EntityRenderDispatcher.class)
 public interface EntityRenderDispatcherAccessor {
-	@Accessor("renderers")
-	Map<EntityType<?>, EntityRenderer<?>> create$getRenderers();
+    @Accessor("renderers")
+    Map<EntityType<?>, EntityRenderer<?>> create$getRenderers();
 }

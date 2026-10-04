@@ -1,7 +1,5 @@
 package com.simibubi.create.content.kinetics.base;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,6 +10,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.PushReaction;
+
+import javax.annotation.Nullable;
 
 @MethodsReturnNonnullByDefault
 public abstract class AbstractEncasedShaftBlock extends RotatedPillarKineticBlock {
@@ -25,10 +25,11 @@ public abstract class AbstractEncasedShaftBlock extends RotatedPillarKineticBloc
     }
 
     @Override
-    public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side) {
+    public boolean shouldCheckWeakPower(
+            BlockState state, SignalGetter level, BlockPos pos, Direction side) {
         return false;
     }
-    
+
     @Override
     public PushReaction getPistonPushReaction(@Nullable BlockState state) {
         return PushReaction.NORMAL;
@@ -36,17 +37,20 @@ public abstract class AbstractEncasedShaftBlock extends RotatedPillarKineticBloc
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        if (context.getPlayer() != null && context.getPlayer()
-                .isShiftKeyDown())
+        if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown())
             return super.getStateForPlacement(context);
         Direction.Axis preferredAxis = getPreferredAxis(context);
         return this.defaultBlockState()
-                .setValue(AXIS, preferredAxis == null ? context.getNearestLookingDirection()
-                        .getAxis() : preferredAxis);
+                .setValue(
+                        AXIS,
+                        preferredAxis == null
+                                ? context.getNearestLookingDirection().getAxis()
+                                : preferredAxis);
     }
 
     @Override
-    public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
+    public boolean hasShaftTowards(
+            LevelReader world, BlockPos pos, BlockState state, Direction face) {
         return face.getAxis() == state.getValue(AXIS);
     }
 

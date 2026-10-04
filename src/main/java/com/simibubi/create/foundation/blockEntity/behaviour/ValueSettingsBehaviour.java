@@ -19,82 +19,94 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ValueSettingsBehaviour extends ClipboardCloneable {
 
-	record ValueSettings(int row, int value) {
-		public MutableComponent format() {
-			return CreateLang.number(value)
-				.component();
-		}
-	}
+    record ValueSettings(int row, int value) {
+        public MutableComponent format() {
+            return CreateLang.number(value).component();
+        }
+    }
 
-	boolean testHit(Vec3 hit);
+    boolean testHit(Vec3 hit);
 
-	boolean isActive();
+    boolean isActive();
 
-	default boolean onlyVisibleWithWrench() {
-		return false;
-	}
+    default boolean onlyVisibleWithWrench() {
+        return false;
+    }
 
-	default void newSettingHovered(ValueSettings valueSetting) {}
+    default void newSettingHovered(ValueSettings valueSetting) {}
 
-	ValueBoxTransform getSlotPositioning();
+    ValueBoxTransform getSlotPositioning();
 
-	ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult);
+    ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult);
 
-	void setValueSettings(Player player, ValueSettings valueSetting, boolean ctrlDown);
+    void setValueSettings(Player player, ValueSettings valueSetting, boolean ctrlDown);
 
-	ValueSettings getValueSettings();
+    ValueSettings getValueSettings();
 
-	default boolean acceptsValueSettings() {
-		return true;
-	}
+    default boolean acceptsValueSettings() {
+        return true;
+    }
 
-	@Override
-	default String getClipboardKey() {
-		return "Settings";
-	}
+    @Override
+    default String getClipboardKey() {
+        return "Settings";
+    }
 
-	@Override
-	default boolean writeToClipboard(HolderLookup.@NotNull Provider registries, CompoundTag tag, Direction side) {
-		if (!acceptsValueSettings())
-			return false;
-		ValueSettings valueSettings = getValueSettings();
-		tag.putInt("Value", valueSettings.value());
-		tag.putInt("Row", valueSettings.row());
-		return true;
-	}
+    @Override
+    default boolean writeToClipboard(
+            HolderLookup.@NotNull Provider registries, CompoundTag tag, Direction side) {
+        if (!acceptsValueSettings()) return false;
+        ValueSettings valueSettings = getValueSettings();
+        tag.putInt("Value", valueSettings.value());
+        tag.putInt("Row", valueSettings.row());
+        return true;
+    }
 
-	@Override
-	default boolean readFromClipboard(HolderLookup.@NotNull Provider registries, CompoundTag tag, Player player, Direction side, boolean simulate) {
-		if (!acceptsValueSettings())
-			return false;
-		if (!tag.contains("Value") || !tag.contains("Row"))
-			return false;
-		if (simulate)
-			return true;
-		setValueSettings(player, new ValueSettings(tag.getInt("Row"), tag.getInt("Value")), false);
-		return true;
-	}
+    @Override
+    default boolean readFromClipboard(
+            HolderLookup.@NotNull Provider registries,
+            CompoundTag tag,
+            Player player,
+            Direction side,
+            boolean simulate) {
+        if (!acceptsValueSettings()) return false;
+        if (!tag.contains("Value") || !tag.contains("Row")) return false;
+        if (simulate) return true;
+        setValueSettings(player, new ValueSettings(tag.getInt("Row"), tag.getInt("Value")), false);
+        return true;
+    }
 
-	default void playFeedbackSound(BlockEntityBehaviour origin) {
-		origin.getWorld()
-			.playSound(null, origin.getPos(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.25f, 2f);
-		origin.getWorld()
-			.playSound(null, origin.getPos(), SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value(), SoundSource.BLOCKS, 0.03f,
-				1.125f);
-	}
+    default void playFeedbackSound(BlockEntityBehaviour origin) {
+        origin.getWorld()
+                .playSound(
+                        null,
+                        origin.getPos(),
+                        SoundEvents.ITEM_FRAME_ADD_ITEM,
+                        SoundSource.BLOCKS,
+                        0.25f,
+                        2f);
+        origin.getWorld()
+                .playSound(
+                        null,
+                        origin.getPos(),
+                        SoundEvents.NOTE_BLOCK_IRON_XYLOPHONE.value(),
+                        SoundSource.BLOCKS,
+                        0.03f,
+                        1.125f);
+    }
 
-	default void onShortInteract(Player player, InteractionHand hand, Direction side, BlockHitResult hitResult) {}
+    default void onShortInteract(
+            Player player, InteractionHand hand, Direction side, BlockHitResult hitResult) {}
 
-	default boolean bypassesInput(ItemStack mainhandItem) {
-		return false;
-	}
+    default boolean bypassesInput(ItemStack mainhandItem) {
+        return false;
+    }
 
-	default boolean mayInteract(Player player) {
-		return true;
-	}
+    default boolean mayInteract(Player player) {
+        return true;
+    }
 
-	default int netId() {
-		return 0;
-	}
-
+    default int netId() {
+        return 0;
+    }
 }

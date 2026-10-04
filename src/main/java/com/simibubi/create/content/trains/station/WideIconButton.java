@@ -8,14 +8,20 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class WideIconButton extends IconButton {
 
-	public WideIconButton(int x, int y, ScreenElement icon) {
-		super(x, y, 26, 18, icon);
-	}
+    public WideIconButton(int x, int y, ScreenElement icon) {
+        super(x, y, 26, 18, icon);
+    }
 
-	@Override
-	protected void drawBg(GuiGraphics graphics, AllGuiTextures button) {
-		super.drawBg(graphics, button);
-		graphics.blit(button.location, getX() + 9, getY(), button.getStartX() + 1, button.getStartY(), button.getWidth() - 1, button.getHeight());
-	}
-
+    @Override
+    protected void drawBg(GuiGraphics graphics, AllGuiTextures button) {
+        super.drawBg(graphics, button);
+        graphics.blit(
+                button.location,
+                getX() + 9,
+                getY(),
+                button.getStartX() + 1,
+                button.getStartY(),
+                button.getWidth() - 1,
+                button.getHeight());
+    }
 }

@@ -1,9 +1,5 @@
 package com.simibubi.create.content.redstone.nixieTube;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-import java.util.Optional;
-
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock;
 import com.simibubi.create.content.trains.signal.SignalBlockEntity;
 import com.simibubi.create.content.trains.signal.SignalBlockEntity.SignalState;
@@ -22,154 +18,155 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.Optional;
+
 public class NixieTubeBlockEntity extends SmartBlockEntity {
 
-	private static final Couple<String> EMPTY = Couple.create("", "");
+    private static final Couple<String> EMPTY = Couple.create("", "");
 
-	private int redstoneStrength;
-	private Optional<DynamicComponent> customText;
-	private int nixieIndex;
-	private Couple<String> displayedStrings;
+    private int redstoneStrength;
+    private Optional<DynamicComponent> customText;
+    private int nixieIndex;
+    private Couple<String> displayedStrings;
 
-	private WeakReference<SignalBlockEntity> cachedSignalTE;
-	public SignalState signalState;
+    private WeakReference<SignalBlockEntity> cachedSignalTE;
+    public SignalState signalState;
 
-	public NixieTubeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-		super(type, pos, state);
-		customText = Optional.empty();
-		redstoneStrength = 0;
-		cachedSignalTE = new WeakReference<>(null);
-	}
+    public NixieTubeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        customText = Optional.empty();
+        redstoneStrength = 0;
+        cachedSignalTE = new WeakReference<>(null);
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
-		if (!level.isClientSide)
-			return;
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level.isClientSide) return;
 
-		signalState = null;
-		SignalBlockEntity signalBlockEntity = cachedSignalTE.get();
+        signalState = null;
+        SignalBlockEntity signalBlockEntity = cachedSignalTE.get();
 
-		if (signalBlockEntity == null || signalBlockEntity.isRemoved()) {
-			Direction facing = NixieTubeBlock.getFacing(getBlockState());
-			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(facing.getOpposite()));
-			if (blockEntity instanceof SignalBlockEntity signal) {
-				signalState = signal.getState();
-				cachedSignalTE = new WeakReference<>(signal);
-			}
-			return;
-		}
+        if (signalBlockEntity == null || signalBlockEntity.isRemoved()) {
+            Direction facing = NixieTubeBlock.getFacing(getBlockState());
+            BlockEntity blockEntity =
+                    level.getBlockEntity(worldPosition.relative(facing.getOpposite()));
+            if (blockEntity instanceof SignalBlockEntity signal) {
+                signalState = signal.getState();
+                cachedSignalTE = new WeakReference<>(signal);
+            }
+            return;
+        }
 
-		signalState = signalBlockEntity.getState();
-	}
+        signalState = signalBlockEntity.getState();
+    }
 
-	@Override
-	public void initialize() {
-		if (level.isClientSide)
-			updateDisplayedStrings();
-	}
+    @Override
+    public void initialize() {
+        if (level.isClientSide) updateDisplayedStrings();
+    }
 
-	//
+    //
 
-	public boolean reactsToRedstone() {
-		return customText.isEmpty();
-	}
+    public boolean reactsToRedstone() {
+        return customText.isEmpty();
+    }
 
-	public Couple<String> getDisplayedStrings() {
-		if (displayedStrings == null)
-			return EMPTY;
-		return displayedStrings;
-	}
+    public Couple<String> getDisplayedStrings() {
+        if (displayedStrings == null) return EMPTY;
+        return displayedStrings;
+    }
 
-	public MutableComponent getFullText() {
-		return customText.map(DynamicComponent::get)
-			.orElse(Component.literal("" + redstoneStrength));
-	}
+    public MutableComponent getFullText() {
+        return customText
+                .map(DynamicComponent::get)
+                .orElse(Component.literal("" + redstoneStrength));
+    }
 
-	public void updateRedstoneStrength(int signalStrength) {
-		clearCustomText();
-		redstoneStrength = signalStrength;
-		DisplayLinkBlock.notifyGatherers(level, worldPosition);
-		notifyUpdate();
-	}
+    public void updateRedstoneStrength(int signalStrength) {
+        clearCustomText();
+        redstoneStrength = signalStrength;
+        DisplayLinkBlock.notifyGatherers(level, worldPosition);
+        notifyUpdate();
+    }
 
-	public void displayCustomText(String tagElement, int nixiePositionInRow) {
-		if (tagElement == null)
-			return;
-		if (customText.filter(d -> d.sameAs(tagElement))
-			.isPresent())
-			return;
+    public void displayCustomText(String tagElement, int nixiePositionInRow) {
+        if (tagElement == null) return;
+        if (customText.filter(d -> d.sameAs(tagElement)).isPresent()) return;
 
-		DynamicComponent component = customText.orElseGet(DynamicComponent::new);
-		component.displayCustomText(level, worldPosition, tagElement);
-		customText = Optional.of(component);
-		nixieIndex = nixiePositionInRow;
-		DisplayLinkBlock.notifyGatherers(level, worldPosition);
-		notifyUpdate();
-	}
+        DynamicComponent component = customText.orElseGet(DynamicComponent::new);
+        component.displayCustomText(level, worldPosition, tagElement);
+        customText = Optional.of(component);
+        nixieIndex = nixiePositionInRow;
+        DisplayLinkBlock.notifyGatherers(level, worldPosition);
+        notifyUpdate();
+    }
 
-	public void updateDisplayedStrings() {
-		if (signalState != null)
-			return;
-		customText.map(DynamicComponent::resolve)
-			.ifPresentOrElse(
-				fullText -> displayedStrings =
-					Couple.create(charOrEmpty(fullText, nixieIndex * 2), charOrEmpty(fullText, nixieIndex * 2 + 1)),
-				() -> displayedStrings =
-					Couple.create(redstoneStrength < 10 ? "0" : "1", String.valueOf(redstoneStrength % 10)));
-	}
+    public void updateDisplayedStrings() {
+        if (signalState != null) return;
+        customText
+                .map(DynamicComponent::resolve)
+                .ifPresentOrElse(
+                        fullText ->
+                                displayedStrings =
+                                        Couple.create(
+                                                charOrEmpty(fullText, nixieIndex * 2),
+                                                charOrEmpty(fullText, nixieIndex * 2 + 1)),
+                        () ->
+                                displayedStrings =
+                                        Couple.create(
+                                                redstoneStrength < 10 ? "0" : "1",
+                                                String.valueOf(redstoneStrength % 10)));
+    }
 
-	public void clearCustomText() {
-		nixieIndex = 0;
-		customText = Optional.empty();
-	}
+    public void clearCustomText() {
+        nixieIndex = 0;
+        customText = Optional.empty();
+    }
 
-	public int getRedstoneStrength() {
-		return redstoneStrength;
-	}
+    public int getRedstoneStrength() {
+        return redstoneStrength;
+    }
 
-	//
+    //
 
-	@Override
-	protected void read(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(nbt, registries, clientPacket);
+    @Override
+    protected void read(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(nbt, registries, clientPacket);
 
-		if (nbt.contains("CustomText")) {
-			DynamicComponent component = customText.orElseGet(DynamicComponent::new);
-			component.read(worldPosition, nbt, registries);
+        if (nbt.contains("CustomText")) {
+            DynamicComponent component = customText.orElseGet(DynamicComponent::new);
+            component.read(worldPosition, nbt, registries);
 
-			if (component.isValid()) {
-				customText = Optional.of(component);
-				nixieIndex = nbt.getInt("CustomTextIndex");
-			} else {
-				customText = Optional.empty();
-				nixieIndex = 0;
-			}
-		}
+            if (component.isValid()) {
+                customText = Optional.of(component);
+                nixieIndex = nbt.getInt("CustomTextIndex");
+            } else {
+                customText = Optional.empty();
+                nixieIndex = 0;
+            }
+        }
 
-		if (customText.isEmpty())
-			redstoneStrength = nbt.getInt("RedstoneStrength");
-		if (clientPacket)
-			updateDisplayedStrings();
-	}
+        if (customText.isEmpty()) redstoneStrength = nbt.getInt("RedstoneStrength");
+        if (clientPacket) updateDisplayedStrings();
+    }
 
-	@Override
-	protected void write(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
-		super.write(nbt, registries, clientPacket);
+    @Override
+    protected void write(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(nbt, registries, clientPacket);
 
-		if (customText.isPresent()) {
-			nbt.putInt("CustomTextIndex", nixieIndex);
-			customText.get()
-				.write(nbt, registries);
-		} else
-			nbt.putInt("RedstoneStrength", redstoneStrength);
-	}
+        if (customText.isPresent()) {
+            nbt.putInt("CustomTextIndex", nixieIndex);
+            customText.get().write(nbt, registries);
+        } else nbt.putInt("RedstoneStrength", redstoneStrength);
+    }
 
-	private String charOrEmpty(String string, int index) {
-		return string.length() <= index ? " " : string.substring(index, index + 1);
-	}
+    private String charOrEmpty(String string, int index) {
+        return string.length() <= index ? " " : string.substring(index, index + 1);
+    }
 
-	@Override
-	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
-
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 }

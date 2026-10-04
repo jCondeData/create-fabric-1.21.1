@@ -18,40 +18,38 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class StationUnloadedCondition extends ScheduleWaitCondition {
-	@Override
-	public Pair<ItemStack, Component> getSummary() {
-		return Pair.of(ItemStack.EMPTY, CreateLang.translateDirect("schedule.condition.unloaded"));
-	}
+    @Override
+    public Pair<ItemStack, Component> getSummary() {
+        return Pair.of(ItemStack.EMPTY, CreateLang.translateDirect("schedule.condition.unloaded"));
+    }
 
-	@Override
-	public boolean tickCompletion(Level level, Train train, CompoundTag context) {
-		GlobalStation currentStation = train.getCurrentStation();
-		if (currentStation == null)
-			return false;
-		ResourceKey<Level> stationDim = currentStation.getBlockEntityDimension();
-		MinecraftServer server = level.getServer();
-		if (server == null)
-			return false;
-		ServerLevel stationLevel = server.getLevel(stationDim);
-		if (stationLevel == null) {
-			return false;
-		}
-		return !stationLevel.isPositionEntityTicking(currentStation.getBlockEntityPos());
-	}
+    @Override
+    public boolean tickCompletion(Level level, Train train, CompoundTag context) {
+        GlobalStation currentStation = train.getCurrentStation();
+        if (currentStation == null) return false;
+        ResourceKey<Level> stationDim = currentStation.getBlockEntityDimension();
+        MinecraftServer server = level.getServer();
+        if (server == null) return false;
+        ServerLevel stationLevel = server.getLevel(stationDim);
+        if (stationLevel == null) {
+            return false;
+        }
+        return !stationLevel.isPositionEntityTicking(currentStation.getBlockEntityPos());
+    }
 
-	@Override
-	protected void writeAdditional(HolderLookup.Provider registries, CompoundTag tag) {}
+    @Override
+    protected void writeAdditional(HolderLookup.Provider registries, CompoundTag tag) {}
 
-	@Override
-	protected void readAdditional(HolderLookup.Provider registries, CompoundTag tag) {}
+    @Override
+    protected void readAdditional(HolderLookup.Provider registries, CompoundTag tag) {}
 
-	@Override
-	public ResourceLocation getId() {
-		return Create.asResource("unloaded");
-	}
+    @Override
+    public ResourceLocation getId() {
+        return Create.asResource("unloaded");
+    }
 
-	@Override
-	public MutableComponent getWaitingStatus(Level level, Train train, CompoundTag tag) {
-		return CreateLang.translateDirect("schedule.condition.unloaded.status");
-	}
+    @Override
+    public MutableComponent getWaitingStatus(Level level, Train train, CompoundTag tag) {
+        return CreateLang.translateDirect("schedule.condition.unloaded.status");
+    }
 }

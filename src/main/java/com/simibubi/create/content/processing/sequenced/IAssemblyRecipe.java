@@ -1,9 +1,5 @@
 package com.simibubi.create.content.processing.sequenced;
 
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 
@@ -13,21 +9,24 @@ import net.minecraft.world.level.ItemLike;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
 public interface IAssemblyRecipe {
 
-	default boolean supportsAssembly() {
-		return true;
-	}
+    default boolean supportsAssembly() {
+        return true;
+    }
 
-	@OnlyIn(Dist.CLIENT)
-	public Component getDescriptionForAssembly();
+    @OnlyIn(Dist.CLIENT)
+    public Component getDescriptionForAssembly();
 
-	public void addRequiredMachines(Set<ItemLike> list);
+    public void addRequiredMachines(Set<ItemLike> list);
 
-	public void addAssemblyIngredients(List<Ingredient> list);
+    public void addAssemblyIngredients(List<Ingredient> list);
 
-	default void addAssemblyFluidIngredients(List<FluidIngredient> list) {}
+    default void addAssemblyFluidIngredients(List<FluidIngredient> list) {}
 
-	public Supplier<Supplier<SequencedAssemblySubCategory>> getJEISubCategory();
-
+    public Supplier<Supplier<SequencedAssemblySubCategory>> getJEISubCategory();
 }

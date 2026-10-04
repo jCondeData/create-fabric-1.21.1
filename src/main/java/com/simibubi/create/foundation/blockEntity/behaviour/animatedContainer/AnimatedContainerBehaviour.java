@@ -1,7 +1,5 @@
 package com.simibubi.create.foundation.blockEntity.behaviour.animatedContainer;
 
-import java.util.function.Consumer;
-
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -13,96 +11,89 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
-public class AnimatedContainerBehaviour<M extends MenuBase<? extends SmartBlockEntity>> extends BlockEntityBehaviour {
+import java.util.function.Consumer;
 
-	public static final BehaviourType<AnimatedContainerBehaviour<?>> TYPE = new BehaviourType<>();
+public class AnimatedContainerBehaviour<M extends MenuBase<? extends SmartBlockEntity>>
+        extends BlockEntityBehaviour {
 
-	public int openCount;
+    public static final BehaviourType<AnimatedContainerBehaviour<?>> TYPE = new BehaviourType<>();
 
-	private Class<M> menuClass;
-	private Consumer<Boolean> openChanged;
+    public int openCount;
 
-	public AnimatedContainerBehaviour(SmartBlockEntity be, Class<M> menuClass) {
-		super(be);
-		this.menuClass = menuClass;
-		openCount = 0;
-	}
+    private Class<M> menuClass;
+    private Consumer<Boolean> openChanged;
 
-	public void onOpenChanged(Consumer<Boolean> openChanged) {
-		this.openChanged = openChanged;
-	}
+    public AnimatedContainerBehaviour(SmartBlockEntity be, Class<M> menuClass) {
+        super(be);
+        this.menuClass = menuClass;
+        openCount = 0;
+    }
 
-	@Override
-	public void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(compound, registries, clientPacket);
-		if (clientPacket)
-			openCount = compound.getInt("OpenCount");
-	}
+    public void onOpenChanged(Consumer<Boolean> openChanged) {
+        this.openChanged = openChanged;
+    }
 
-	@Override
-	public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-		super.write(compound, registries, clientPacket);
-		if (clientPacket)
-			compound.putInt("OpenCount", openCount);
-	}
+    @Override
+    public void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(compound, registries, clientPacket);
+        if (clientPacket) openCount = compound.getInt("OpenCount");
+    }
 
-	@Override
-	public void lazyTick() {
-		updateOpenCount();
-		super.lazyTick();
-	}
+    @Override
+    public void write(
+            CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(compound, registries, clientPacket);
+        if (clientPacket) compound.putInt("OpenCount", openCount);
+    }
 
-	void updateOpenCount() {
-		Level level = getWorld();
-		if (level.isClientSide)
-			return;
-		if (openCount == 0)
-			return;
+    @Override
+    public void lazyTick() {
+        updateOpenCount();
+        super.lazyTick();
+    }
 
-		int prevOpenCount = openCount;
-		openCount = 0;
+    void updateOpenCount() {
+        Level level = getWorld();
+        if (level.isClientSide) return;
+        if (openCount == 0) return;
 
-		for (Player playerentity : level.getEntitiesOfClass(Player.class, new AABB(getPos()).inflate(8)))
-			if (menuClass.isInstance(playerentity.containerMenu)
-				&& menuClass.cast(playerentity.containerMenu).contentHolder == blockEntity)
-				openCount++;
+        int prevOpenCount = openCount;
+        openCount = 0;
 
-		if (prevOpenCount != openCount) {
-			if (openChanged != null && prevOpenCount == 0 && openCount > 0)
-				openChanged.accept(true);
-			if (openChanged != null && prevOpenCount > 0 && openCount == 0)
-				openChanged.accept(false);
-			blockEntity.sendData();
-		}
-	}
+        for (Player playerentity :
+                level.getEntitiesOfClass(Player.class, new AABB(getPos()).inflate(8)))
+            if (menuClass.isInstance(playerentity.containerMenu)
+                    && menuClass.cast(playerentity.containerMenu).contentHolder == blockEntity)
+                openCount++;
 
-	public void startOpen(Player player) {
-		if (player.isSpectator())
-			return;
-		if (getWorld().isClientSide)
-			return;
-		if (openCount < 0)
-			openCount = 0;
-		openCount++;
-		if (openCount == 1 && openChanged != null)
-			openChanged.accept(true);
-		blockEntity.sendData();
-	}
+        if (prevOpenCount != openCount) {
+            if (openChanged != null && prevOpenCount == 0 && openCount > 0)
+                openChanged.accept(true);
+            if (openChanged != null && prevOpenCount > 0 && openCount == 0)
+                openChanged.accept(false);
+            blockEntity.sendData();
+        }
+    }
 
-	public void stopOpen(Player player) {
-		if (player.isSpectator())
-			return;
-		if (getWorld().isClientSide)
-			return;
-		openCount--;
-		if (openCount == 0 && openChanged != null)
-			openChanged.accept(false);
-		blockEntity.sendData();
-	}
+    public void startOpen(Player player) {
+        if (player.isSpectator()) return;
+        if (getWorld().isClientSide) return;
+        if (openCount < 0) openCount = 0;
+        openCount++;
+        if (openCount == 1 && openChanged != null) openChanged.accept(true);
+        blockEntity.sendData();
+    }
 
-	@Override
-	public BehaviourType<?> getType() {
-		return TYPE;
-	}
+    public void stopOpen(Player player) {
+        if (player.isSpectator()) return;
+        if (getWorld().isClientSide) return;
+        openCount--;
+        if (openCount == 0 && openChanged != null) openChanged.accept(false);
+        blockEntity.sendData();
+    }
 
+    @Override
+    public BehaviourType<?> getType() {
+        return TYPE;
+    }
 }

@@ -1,8 +1,5 @@
 package com.simibubi.create.content.redstone.link;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.simibubi.create.CreateClient;
@@ -30,79 +27,84 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LinkRenderer {
 
-	public static void tick() {
-		Minecraft mc = Minecraft.getInstance();
-		HitResult target = mc.hitResult;
-		if (target == null || !(target instanceof BlockHitResult result))
-			return;
+    public static void tick() {
+        Minecraft mc = Minecraft.getInstance();
+        HitResult target = mc.hitResult;
+        if (target == null || !(target instanceof BlockHitResult result)) return;
 
-		ClientLevel world = mc.level;
-		BlockPos pos = result.getBlockPos();
+        ClientLevel world = mc.level;
+        BlockPos pos = result.getBlockPos();
 
-		LinkBehaviour behaviour = BlockEntityBehaviour.get(world, pos, LinkBehaviour.TYPE);
-		if (behaviour == null)
-			return;
+        LinkBehaviour behaviour = BlockEntityBehaviour.get(world, pos, LinkBehaviour.TYPE);
+        if (behaviour == null) return;
 
-		Component freq1 = CreateLang.translateDirect("logistics.firstFrequency");
-		Component freq2 = CreateLang.translateDirect("logistics.secondFrequency");
+        Component freq1 = CreateLang.translateDirect("logistics.firstFrequency");
+        Component freq2 = CreateLang.translateDirect("logistics.secondFrequency");
 
-		for (boolean first : Iterate.trueAndFalse) {
-			AABB bb = new AABB(Vec3.ZERO, Vec3.ZERO).inflate(.25f);
-			Component label = first ? freq1 : freq2;
-			boolean hit = behaviour.testHit(first, target.getLocation());
-			ValueBoxTransform transform = first ? behaviour.firstSlot : behaviour.secondSlot;
+        for (boolean first : Iterate.trueAndFalse) {
+            AABB bb = new AABB(Vec3.ZERO, Vec3.ZERO).inflate(.25f);
+            Component label = first ? freq1 : freq2;
+            boolean hit = behaviour.testHit(first, target.getLocation());
+            ValueBoxTransform transform = first ? behaviour.firstSlot : behaviour.secondSlot;
 
-			ValueBox box = new ValueBox(label, bb, pos).passive(!hit);
-			boolean empty = behaviour.getNetworkKey()
-				.get(first)
-				.getStack()
-				.isEmpty();
+            ValueBox box = new ValueBox(label, bb, pos).passive(!hit);
+            boolean empty = behaviour.getNetworkKey().get(first).getStack().isEmpty();
 
-			if (!empty)
-				box.wideOutline();
+            if (!empty) box.wideOutline();
 
-			Outliner.getInstance().showOutline(Pair.of(Boolean.valueOf(first), pos), box.transform(transform))
-				.highlightFace(result.getDirection());
+            Outliner.getInstance()
+                    .showOutline(Pair.of(Boolean.valueOf(first), pos), box.transform(transform))
+                    .highlightFace(result.getDirection());
 
-			if (!hit)
-				continue;
+            if (!hit) continue;
 
-			List<MutableComponent> tip = new ArrayList<>();
-			tip.add(label.copy());
-			tip.add(
-				CreateLang.translateDirect(empty ? "logistics.filter.click_to_set" : "logistics.filter.click_to_replace"));
-			CreateClient.VALUE_SETTINGS_HANDLER.showHoverTip(tip);
-		}
-	}
+            List<MutableComponent> tip = new ArrayList<>();
+            tip.add(label.copy());
+            tip.add(
+                    CreateLang.translateDirect(
+                            empty
+                                    ? "logistics.filter.click_to_set"
+                                    : "logistics.filter.click_to_replace"));
+            CreateClient.VALUE_SETTINGS_HANDLER.showHoverTip(tip);
+        }
+    }
 
-	public static void renderOnBlockEntity(SmartBlockEntity be, float partialTicks, PoseStack ms,
-										   MultiBufferSource buffer, int light, int overlay) {
+    public static void renderOnBlockEntity(
+            SmartBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
 
-		if (be == null || be.isRemoved())
-			return;
+        if (be == null || be.isRemoved()) return;
 
-		Entity cameraEntity = Minecraft.getInstance().cameraEntity;
-		float max = AllConfigs.client().filterItemRenderDistance.getF();
-		if (!be.isVirtual() && cameraEntity != null && cameraEntity.position()
-			.distanceToSqr(VecHelper.getCenterOf(be.getBlockPos())) > (max * max))
-			return;
+        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        float max = AllConfigs.client().filterItemRenderDistance.getF();
+        if (!be.isVirtual()
+                && cameraEntity != null
+                && cameraEntity.position().distanceToSqr(VecHelper.getCenterOf(be.getBlockPos()))
+                        > (max * max)) return;
 
-		LinkBehaviour behaviour = be.getBehaviour(LinkBehaviour.TYPE);
-		if (behaviour == null)
-			return;
+        LinkBehaviour behaviour = be.getBehaviour(LinkBehaviour.TYPE);
+        if (behaviour == null) return;
 
-		for (boolean first : Iterate.trueAndFalse) {
-			ValueBoxTransform transform = first ? behaviour.firstSlot : behaviour.secondSlot;
-			ItemStack stack = first ? behaviour.frequencyFirst.getStack() : behaviour.frequencyLast.getStack();
+        for (boolean first : Iterate.trueAndFalse) {
+            ValueBoxTransform transform = first ? behaviour.firstSlot : behaviour.secondSlot;
+            ItemStack stack =
+                    first
+                            ? behaviour.frequencyFirst.getStack()
+                            : behaviour.frequencyLast.getStack();
 
-			ms.pushPose();
-			transform.transform(be.getLevel(), be.getBlockPos(), be.getBlockState(), ms);
-			ValueBoxRenderer.renderItemIntoValueBox(stack, ms, buffer, light, overlay);
-			ms.popPose();
-		}
-
-	}
-
+            ms.pushPose();
+            transform.transform(be.getLevel(), be.getBlockPos(), be.getBlockState(), ms);
+            ValueBoxRenderer.renderItemIntoValueBox(stack, ms, buffer, light, overlay);
+            ms.popPose();
+        }
+    }
 }

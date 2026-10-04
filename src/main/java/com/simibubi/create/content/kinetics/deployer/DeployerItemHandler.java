@@ -10,124 +10,107 @@ import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 public class DeployerItemHandler implements IItemHandlerModifiable {
 
-	private DeployerBlockEntity be;
-	private DeployerFakePlayer player;
+    private DeployerBlockEntity be;
+    private DeployerFakePlayer player;
 
-	public DeployerItemHandler(DeployerBlockEntity be) {
-		this.be = be;
-		this.player = be.player;
-	}
+    public DeployerItemHandler(DeployerBlockEntity be) {
+        this.be = be;
+        this.player = be.player;
+    }
 
-	@Override
-	public int getSlots() {
-		return 1 + be.overflowItems.size();
-	}
+    @Override
+    public int getSlots() {
+        return 1 + be.overflowItems.size();
+    }
 
-	@Override
-	public ItemStack getStackInSlot(int slot) {
-		return slot >= be.overflowItems.size() ? getHeld() : be.overflowItems.get(slot);
-	}
+    @Override
+    public ItemStack getStackInSlot(int slot) {
+        return slot >= be.overflowItems.size() ? getHeld() : be.overflowItems.get(slot);
+    }
 
-	public ItemStack getHeld() {
-		if (player == null)
-			return ItemStack.EMPTY;
-		return player.getMainHandItem();
-	}
+    public ItemStack getHeld() {
+        if (player == null) return ItemStack.EMPTY;
+        return player.getMainHandItem();
+    }
 
-	public void set(ItemStack stack) {
-		if (player == null)
-			return;
-		if (be.getLevel().isClientSide)
-			return;
-		player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-		be.setChanged();
-		be.sendData();
-	}
+    public void set(ItemStack stack) {
+        if (player == null) return;
+        if (be.getLevel().isClientSide) return;
+        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        be.setChanged();
+        be.sendData();
+    }
 
-	@Override
-	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		if (slot < be.overflowItems.size())
-			return stack;
-		if (!isItemValid(slot, stack))
-			return stack;
+    @Override
+    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+        if (slot < be.overflowItems.size()) return stack;
+        if (!isItemValid(slot, stack)) return stack;
 
-		ItemStack held = getHeld();
-		if (held.isEmpty()) {
-			ItemStack remainder = ItemHelper.limitCountToMaxStackSize(stack, simulate);
-			if (!simulate)
-				set(stack);
-			return remainder;
-		}
+        ItemStack held = getHeld();
+        if (held.isEmpty()) {
+            ItemStack remainder = ItemHelper.limitCountToMaxStackSize(stack, simulate);
+            if (!simulate) set(stack);
+            return remainder;
+        }
 
-		if (!ItemStack.isSameItemSameComponents(held, stack))
-			return stack;
+        if (!ItemStack.isSameItemSameComponents(held, stack)) return stack;
 
-		int space = held.getOrDefault(DataComponents.MAX_STACK_SIZE, 64) - held.getCount();
-		ItemStack remainder = stack.copy();
-		ItemStack split = remainder.split(space);
+        int space = held.getOrDefault(DataComponents.MAX_STACK_SIZE, 64) - held.getCount();
+        ItemStack remainder = stack.copy();
+        ItemStack split = remainder.split(space);
 
-		if (space == 0)
-			return stack;
-		if (!simulate) {
-			held = held.copy();
-			held.setCount(held.getCount() + split.getCount());
-			set(held);
-		}
+        if (space == 0) return stack;
+        if (!simulate) {
+            held = held.copy();
+            held.setCount(held.getCount() + split.getCount());
+            set(held);
+        }
 
-		return remainder;
-	}
+        return remainder;
+    }
 
-	@Override
-	public ItemStack extractItem(int slot, int amount, boolean simulate) {
-		if (amount == 0)
-			return ItemStack.EMPTY;
+    @Override
+    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        if (amount == 0) return ItemStack.EMPTY;
 
-		if (slot < be.overflowItems.size()) {
-			ItemStack itemStack = be.overflowItems.get(slot);
-			int toExtract = Math.min(amount, itemStack.getCount());
-			ItemStack extracted = simulate ? itemStack.copy() : itemStack.split(toExtract);
-			extracted.setCount(toExtract);
-			if (!simulate && itemStack.isEmpty())
-				be.overflowItems.remove(slot);
-			if (!simulate && !extracted.isEmpty())
-				be.setChanged();
-			return extracted;
-		}
+        if (slot < be.overflowItems.size()) {
+            ItemStack itemStack = be.overflowItems.get(slot);
+            int toExtract = Math.min(amount, itemStack.getCount());
+            ItemStack extracted = simulate ? itemStack.copy() : itemStack.split(toExtract);
+            extracted.setCount(toExtract);
+            if (!simulate && itemStack.isEmpty()) be.overflowItems.remove(slot);
+            if (!simulate && !extracted.isEmpty()) be.setChanged();
+            return extracted;
+        }
 
-		ItemStack held = getHeld();
-		if (amount == 0 || held.isEmpty())
-			return ItemStack.EMPTY;
-		if (!be.filtering.getFilter()
-			.isEmpty() && be.filtering.test(held))
-			return ItemStack.EMPTY;
-		if (simulate)
-			return held.copy()
-				.split(amount);
+        ItemStack held = getHeld();
+        if (amount == 0 || held.isEmpty()) return ItemStack.EMPTY;
+        if (!be.filtering.getFilter().isEmpty() && be.filtering.test(held)) return ItemStack.EMPTY;
+        if (simulate) return held.copy().split(amount);
 
-		ItemStack toReturn = held.split(amount);
-		be.setChanged();
-		be.sendData();
-		return toReturn;
-	}
+        ItemStack toReturn = held.split(amount);
+        be.setChanged();
+        be.sendData();
+        return toReturn;
+    }
 
-	@Override
-	public int getSlotLimit(int slot) {
-		return Math.min(getStackInSlot(slot).getOrDefault(DataComponents.MAX_STACK_SIZE, 64), 64);
-	}
+    @Override
+    public int getSlotLimit(int slot) {
+        return Math.min(getStackInSlot(slot).getOrDefault(DataComponents.MAX_STACK_SIZE, 64), 64);
+    }
 
-	@Override
-	public boolean isItemValid(int slot, ItemStack stack) {
-		FilteringBehaviour filteringBehaviour = be.getBehaviour(FilteringBehaviour.TYPE);
-		return filteringBehaviour == null || filteringBehaviour.test(stack);
-	}
+    @Override
+    public boolean isItemValid(int slot, ItemStack stack) {
+        FilteringBehaviour filteringBehaviour = be.getBehaviour(FilteringBehaviour.TYPE);
+        return filteringBehaviour == null || filteringBehaviour.test(stack);
+    }
 
-	@Override
-	public void setStackInSlot(int slot, ItemStack stack) {
-		if (slot < be.overflowItems.size()) {
-			be.overflowItems.set(slot, stack);
-			return;
-		}
-		set(stack);
-	}
-
+    @Override
+    public void setStackInSlot(int slot, ItemStack stack) {
+        if (slot < be.overflowItems.size()) {
+            be.overflowItems.set(slot, stack);
+            return;
+        }
+        set(stack);
+    }
 }

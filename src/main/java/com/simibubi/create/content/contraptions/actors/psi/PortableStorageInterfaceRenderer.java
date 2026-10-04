@@ -1,7 +1,5 @@
 package com.simibubi.create.content.contraptions.actors.psi;
 
-import java.util.function.Consumer;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.AllBlocks;
@@ -13,6 +11,7 @@ import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.math.AngleHelper;
@@ -25,95 +24,116 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PortableStorageInterfaceRenderer extends SafeBlockEntityRenderer<PortableStorageInterfaceBlockEntity> {
+import java.util.function.Consumer;
 
-	public PortableStorageInterfaceRenderer(BlockEntityRendererProvider.Context context) {}
+public class PortableStorageInterfaceRenderer
+        extends SafeBlockEntityRenderer<PortableStorageInterfaceBlockEntity> {
 
-	@Override
-	protected void renderSafe(PortableStorageInterfaceBlockEntity be, float partialTicks, PoseStack ms,
-		MultiBufferSource buffer, int light, int overlay) {
-		if (VisualizationManager.supportsVisualization(be.getLevel()))
-			return;
+    public PortableStorageInterfaceRenderer(BlockEntityRendererProvider.Context context) {}
 
-		BlockState blockState = be.getBlockState();
-		float progress = be.getExtensionDistance(partialTicks);
-		VertexConsumer vb = buffer.getBuffer(RenderType.solid());
-		render(blockState, be.isConnected(), progress, null, sbb -> sbb.light(light)
-			.renderInto(ms, vb));
-	}
+    @Override
+    protected void renderSafe(
+            PortableStorageInterfaceBlockEntity be,
+            float partialTicks,
+            PoseStack ms,
+            MultiBufferSource buffer,
+            int light,
+            int overlay) {
+        if (VisualizationManager.supportsVisualization(be.getLevel())) return;
 
-	public static void renderInContraption(MovementContext context, VirtualRenderWorld renderWorld,
-		ContraptionMatrices matrices, MultiBufferSource buffer) {
-		BlockState blockState = context.state;
-		VertexConsumer vb = buffer.getBuffer(RenderType.solid());
-		float renderPartialTicks = AnimationTickHolder.getPartialTicks();
+        BlockState blockState = be.getBlockState();
+        float progress = be.getExtensionDistance(partialTicks);
+        VertexConsumer vb = buffer.getBuffer(RenderType.solid());
+        render(
+                blockState,
+                be.isConnected(),
+                progress,
+                null,
+                sbb -> sbb.light(light).renderInto(ms, vb));
+    }
 
-		LerpedFloat animation = PortableStorageInterfaceMovement.getAnimation(context);
-		float progress = animation.getValue(renderPartialTicks);
-		boolean lit = animation.settled();
-		render(blockState, lit, progress, matrices.getModel(),
-			sbb -> sbb.light(LevelRenderer.getLightColor(renderWorld, context.localPos))
-				.useLevelLight(context.world, matrices.getWorld())
-				.renderInto(matrices.getViewProjection(), vb));
-	}
+    public static void renderInContraption(
+            MovementContext context,
+            VirtualRenderWorld renderWorld,
+            ContraptionMatrices matrices,
+            MultiBufferSource buffer) {
+        BlockState blockState = context.state;
+        VertexConsumer vb = buffer.getBuffer(RenderType.solid());
+        float renderPartialTicks = AnimationTickHolder.getPartialTicks();
 
-	private static void render(BlockState blockState, boolean lit, float progress, PoseStack local,
-		Consumer<SuperByteBuffer> drawCallback) {
-		SuperByteBuffer middle = CachedBuffers.partial(getMiddleForState(blockState, lit), blockState);
-		SuperByteBuffer top = CachedBuffers.partial(getTopForState(blockState), blockState);
+        LerpedFloat animation = PortableStorageInterfaceMovement.getAnimation(context);
+        float progress = animation.getValue(renderPartialTicks);
+        boolean lit = animation.settled();
+        render(
+                blockState,
+                lit,
+                progress,
+                matrices.getModel(),
+                sbb ->
+                        sbb.light(LevelRenderer.getLightColor(renderWorld, context.localPos))
+                                .useLevelLight(context.world, matrices.getWorld())
+                                .renderInto(matrices.getViewProjection(), vb));
+    }
 
-		if (local != null) {
-			middle.transform(local);
-			top.transform(local);
-		}
-		Direction facing = blockState.getValue(PortableStorageInterfaceBlock.FACING);
-		rotateToFacing(middle, facing);
-		rotateToFacing(top, facing);
-		middle.translate(0, progress * 0.5f + 0.375f, 0);
-		top.translate(0, progress, 0);
+    private static void render(
+            BlockState blockState,
+            boolean lit,
+            float progress,
+            PoseStack local,
+            Consumer<SuperByteBuffer> drawCallback) {
+        SuperByteBuffer middle =
+                CachedBuffers.partial(getMiddleForState(blockState, lit), blockState);
+        SuperByteBuffer top = CachedBuffers.partial(getTopForState(blockState), blockState);
 
-		drawCallback.accept(middle);
-		drawCallback.accept(top);
-	}
+        if (local != null) {
+            middle.transform(local);
+            top.transform(local);
+        }
+        Direction facing = blockState.getValue(PortableStorageInterfaceBlock.FACING);
+        rotateToFacing(middle, facing);
+        rotateToFacing(top, facing);
+        middle.translate(0, progress * 0.5f + 0.375f, 0);
+        top.translate(0, progress, 0);
 
-	private static void rotateToFacing(SuperByteBuffer buffer, Direction facing) {
-		buffer.center()
-			.rotateYDegrees(AngleHelper.horizontalAngle(facing))
-			.rotateXDegrees(facing == Direction.UP ? 0 : facing == Direction.DOWN ? 180 : 90)
-			.uncenter();
-	}
+        drawCallback.accept(middle);
+        drawCallback.accept(top);
+    }
 
-	static PortableStorageInterfaceBlockEntity getTargetPSI(MovementContext context) {
-		String _workingPos_ = PortableStorageInterfaceMovement._workingPos_;
-		if (!context.data.contains(_workingPos_))
-			return null;
+    private static void rotateToFacing(SuperByteBuffer buffer, Direction facing) {
+        buffer.center()
+                .rotateYDegrees(AngleHelper.horizontalAngle(facing))
+                .rotateXDegrees(facing == Direction.UP ? 0 : facing == Direction.DOWN ? 180 : 90)
+                .uncenter();
+    }
 
-		BlockPos pos = NBTHelper.readBlockPos(context.data, _workingPos_);
-		BlockEntity blockEntity = context.world.getBlockEntity(pos);
-		if (!(blockEntity instanceof PortableStorageInterfaceBlockEntity psi))
-			return null;
+    static PortableStorageInterfaceBlockEntity getTargetPSI(MovementContext context) {
+        String _workingPos_ = PortableStorageInterfaceMovement._workingPos_;
+        if (!context.data.contains(_workingPos_)) return null;
 
-		if (!psi.isTransferring())
-			return null;
-		return psi;
-	}
+        BlockPos pos = NBTHelper.readBlockPos(context.data, _workingPos_);
+        BlockEntity blockEntity = context.world.getBlockEntity(pos);
+        if (!(blockEntity instanceof PortableStorageInterfaceBlockEntity psi)) return null;
 
-	static PartialModel getMiddleForState(BlockState state, boolean lit) {
-		if (AllBlocks.PORTABLE_FLUID_INTERFACE.has(state))
-			return lit ? AllPartialModels.PORTABLE_FLUID_INTERFACE_MIDDLE_POWERED
-				: AllPartialModels.PORTABLE_FLUID_INTERFACE_MIDDLE;
-		return lit ? AllPartialModels.PORTABLE_STORAGE_INTERFACE_MIDDLE_POWERED
-			: AllPartialModels.PORTABLE_STORAGE_INTERFACE_MIDDLE;
-	}
+        if (!psi.isTransferring()) return null;
+        return psi;
+    }
 
-	static PartialModel getTopForState(BlockState state) {
-		if (AllBlocks.PORTABLE_FLUID_INTERFACE.has(state))
-			return AllPartialModels.PORTABLE_FLUID_INTERFACE_TOP;
-		return AllPartialModels.PORTABLE_STORAGE_INTERFACE_TOP;
-	}
+    static PartialModel getMiddleForState(BlockState state, boolean lit) {
+        if (AllBlocks.PORTABLE_FLUID_INTERFACE.has(state))
+            return lit
+                    ? AllPartialModels.PORTABLE_FLUID_INTERFACE_MIDDLE_POWERED
+                    : AllPartialModels.PORTABLE_FLUID_INTERFACE_MIDDLE;
+        return lit
+                ? AllPartialModels.PORTABLE_STORAGE_INTERFACE_MIDDLE_POWERED
+                : AllPartialModels.PORTABLE_STORAGE_INTERFACE_MIDDLE;
+    }
 
+    static PartialModel getTopForState(BlockState state) {
+        if (AllBlocks.PORTABLE_FLUID_INTERFACE.has(state))
+            return AllPartialModels.PORTABLE_FLUID_INTERFACE_TOP;
+        return AllPartialModels.PORTABLE_STORAGE_INTERFACE_TOP;
+    }
 }

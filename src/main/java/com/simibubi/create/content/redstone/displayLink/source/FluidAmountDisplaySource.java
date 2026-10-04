@@ -15,39 +15,36 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 public class FluidAmountDisplaySource extends SingleLineDisplaySource {
 
-	@Override
-	protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
-		BlockEntity sourceBE = context.getSourceBlockEntity();
-		if (!(sourceBE instanceof SmartObserverBlockEntity cobe))
-			return EMPTY_LINE;
+    @Override
+    protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
+        BlockEntity sourceBE = context.getSourceBlockEntity();
+        if (!(sourceBE instanceof SmartObserverBlockEntity cobe)) return EMPTY_LINE;
 
-		TankManipulationBehaviour tankManipulationBehaviour = cobe.getBehaviour(TankManipulationBehaviour.OBSERVE);
-		FilteringBehaviour filteringBehaviour = cobe.getBehaviour(FilteringBehaviour.TYPE);
-		IFluidHandler handler = tankManipulationBehaviour.getInventory();
+        TankManipulationBehaviour tankManipulationBehaviour =
+                cobe.getBehaviour(TankManipulationBehaviour.OBSERVE);
+        FilteringBehaviour filteringBehaviour = cobe.getBehaviour(FilteringBehaviour.TYPE);
+        IFluidHandler handler = tankManipulationBehaviour.getInventory();
 
-		if (handler == null)
-			return EMPTY_LINE;
+        if (handler == null) return EMPTY_LINE;
 
-		long collected = 0;
-		for (int i = 0; i < handler.getTanks(); i++) {
-			FluidStack stack = handler.getFluidInTank(i);
-			if (stack.isEmpty())
-				continue;
-			if (!filteringBehaviour.test(stack))
-				continue;
-			collected += stack.getAmount();
-		}
+        long collected = 0;
+        for (int i = 0; i < handler.getTanks(); i++) {
+            FluidStack stack = handler.getFluidInTank(i);
+            if (stack.isEmpty()) continue;
+            if (!filteringBehaviour.test(stack)) continue;
+            collected += stack.getAmount();
+        }
 
-		return Component.literal(FluidFormatter.asString(collected, false));
-	}
+        return Component.literal(FluidFormatter.asString(collected, false));
+    }
 
-	@Override
-	protected String getTranslationKey() {
-		return "fluid_amount";
-	}
+    @Override
+    protected String getTranslationKey() {
+        return "fluid_amount";
+    }
 
-	@Override
-	protected boolean allowsLabeling(DisplayLinkContext context) {
-		return true;
-	}
+    @Override
+    protected boolean allowsLabeling(DisplayLinkContext context) {
+        return true;
+    }
 }

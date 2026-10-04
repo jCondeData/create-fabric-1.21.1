@@ -3,10 +3,6 @@ package com.simibubi.create.content.kinetics.deployer;
 import static com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock.AXIS_ALONG_FIRST_COORDINATE;
 import static com.simibubi.create.content.kinetics.base.DirectionalKineticBlock.FACING;
 
-import java.util.function.Consumer;
-
-import org.joml.Quaternionf;
-
 import com.mojang.math.Axis;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.ShaftVisual;
@@ -21,13 +17,19 @@ import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
+
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 
-public class DeployerVisual extends ShaftVisual<DeployerBlockEntity> implements SimpleDynamicVisual, SimpleTickableVisual {
+import org.joml.Quaternionf;
+
+import java.util.function.Consumer;
+
+public class DeployerVisual extends ShaftVisual<DeployerBlockEntity>
+        implements SimpleDynamicVisual, SimpleTickableVisual {
 
     final Direction facing;
     final float yRot;
@@ -41,38 +43,50 @@ public class DeployerVisual extends ShaftVisual<DeployerBlockEntity> implements 
     PartialModel currentHand;
     float progress;
 
-    public DeployerVisual(VisualizationContext context, DeployerBlockEntity blockEntity, float partialTick) {
+    public DeployerVisual(
+            VisualizationContext context, DeployerBlockEntity blockEntity, float partialTick) {
         super(context, blockEntity, partialTick);
 
         facing = blockState.getValue(FACING);
 
-        boolean rotatePole = blockState.getValue(AXIS_ALONG_FIRST_COORDINATE) ^ facing.getAxis() == Direction.Axis.Z;
+        boolean rotatePole =
+                blockState.getValue(AXIS_ALONG_FIRST_COORDINATE)
+                        ^ facing.getAxis() == Direction.Axis.Z;
 
         yRot = AngleHelper.horizontalAngle(facing);
         xRot = facing == Direction.UP ? 270 : facing == Direction.DOWN ? 90 : 0;
         zRot = rotatePole ? 90 : 0;
 
-        pole = instancerProvider().instancer(InstanceTypes.ORIENTED, Models.partial(AllPartialModels.DEPLOYER_POLE)).createInstance();
+        pole =
+                instancerProvider()
+                        .instancer(
+                                InstanceTypes.ORIENTED,
+                                Models.partial(AllPartialModels.DEPLOYER_POLE))
+                        .createInstance();
 
-		currentHand = this.blockEntity.getHandPose();
+        currentHand = this.blockEntity.getHandPose();
 
-		hand = instancerProvider().instancer(InstanceTypes.ORIENTED, Models.partial(currentHand)).createInstance();
+        hand =
+                instancerProvider()
+                        .instancer(InstanceTypes.ORIENTED, Models.partial(currentHand))
+                        .createInstance();
 
-		progress = getProgress(partialTick);
-		updateRotation(pole, hand, yRot, xRot, zRot);
-		updatePosition();
+        progress = getProgress(partialTick);
+        updateRotation(pole, hand, yRot, xRot, zRot);
+        updatePosition();
     }
 
-	@Override
+    @Override
     public void tick(TickableVisual.Context context) {
-		PartialModel handPose = blockEntity.getHandPose();
+        PartialModel handPose = blockEntity.getHandPose();
 
-		if (currentHand != handPose) {
-			currentHand = handPose;
-			instancerProvider().instancer(InstanceTypes.ORIENTED, Models.partial(currentHand))
-					.stealInstance(hand);
-		}
-	}
+        if (currentHand != handPose) {
+            currentHand = handPose;
+            instancerProvider()
+                    .instancer(InstanceTypes.ORIENTED, Models.partial(currentHand))
+                    .stealInstance(hand);
+        }
+    }
 
     @Override
     public void beginFrame(DynamicVisual.Context ctx) {
@@ -98,22 +112,24 @@ public class DeployerVisual extends ShaftVisual<DeployerBlockEntity> implements 
         pole.delete();
     }
 
-	private float getProgress(float partialTicks) {
+    private float getProgress(float partialTicks) {
         if (blockEntity.state == DeployerBlockEntity.State.EXPANDING) {
-			float f = 1 - (blockEntity.timer - partialTicks * blockEntity.getTimerSpeed()) / 1000f;
-			if (blockEntity.fistBump)
-				f *= f;
-			return f;
-		}
+            float f = 1 - (blockEntity.timer - partialTicks * blockEntity.getTimerSpeed()) / 1000f;
+            if (blockEntity.fistBump) f *= f;
+            return f;
+        }
         if (blockEntity.state == DeployerBlockEntity.State.RETRACTING)
             return (blockEntity.timer - partialTicks * blockEntity.getTimerSpeed()) / 1000f;
         return 0;
     }
 
     private void updatePosition() {
-        float handLength = currentHand == AllPartialModels.DEPLOYER_HAND_POINTING ? 0
-                : currentHand == AllPartialModels.DEPLOYER_HAND_HOLDING ? 4 / 16f : 3 / 16f;
-        float distance = Math.min(Mth.clamp(progress, 0, 1) * (blockEntity.reach + handLength), 21 / 16f);
+        float handLength =
+                currentHand == AllPartialModels.DEPLOYER_HAND_POINTING
+                        ? 0
+                        : currentHand == AllPartialModels.DEPLOYER_HAND_HOLDING ? 4 / 16f : 3 / 16f;
+        float distance =
+                Math.min(Mth.clamp(progress, 0, 1) * (blockEntity.reach + handLength), 21 / 16f);
         Vec3i facingVec = facing.getNormal();
         BlockPos blockPos = getVisualPosition();
 
@@ -125,24 +141,23 @@ public class DeployerVisual extends ShaftVisual<DeployerBlockEntity> implements 
         hand.position(x, y, z).setChanged();
     }
 
-    static void updateRotation(OrientedInstance pole, OrientedInstance hand, float yRot, float xRot, float zRot) {
+    static void updateRotation(
+            OrientedInstance pole, OrientedInstance hand, float yRot, float xRot, float zRot) {
 
         Quaternionf q = Axis.YP.rotationDegrees(yRot);
         q.mul(Axis.XP.rotationDegrees(xRot));
 
-        hand.rotation(q)
-				.setChanged();
+        hand.rotation(q).setChanged();
 
         q.mul(Axis.ZP.rotationDegrees(zRot));
 
-        pole.rotation(q)
-				.setChanged();
+        pole.rotation(q).setChanged();
     }
 
-	@Override
-	public void collectCrumblingInstances(Consumer<Instance> consumer) {
-		super.collectCrumblingInstances(consumer);
-		consumer.accept(pole);
-		consumer.accept(hand);
-	}
+    @Override
+    public void collectCrumblingInstances(Consumer<Instance> consumer) {
+        super.collectCrumblingInstances(consumer);
+        consumer.accept(pole);
+        consumer.accept(hand);
+    }
 }

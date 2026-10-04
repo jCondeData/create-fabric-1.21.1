@@ -8,19 +8,18 @@ import net.minecraft.core.Direction.Axis;
 
 public interface IBearingBlockEntity extends IControlContraption {
 
-	float getInterpolatedAngle(float partialTicks);
+    float getInterpolatedAngle(float partialTicks);
 
-	boolean isWoodenTop();
+    boolean isWoodenTop();
 
-	default ValueBoxTransform getMovementModeSlot() {
-		return new DirectionalExtenderScrollOptionSlot((state, d) -> {
-			Axis axis = d.getAxis();
-			Axis bearingAxis = state.getValue(BearingBlock.FACING)
-				.getAxis();
-			return bearingAxis != axis;
-		});
-	}
-	
-	void setAngle(float forcedAngle);
+    default ValueBoxTransform getMovementModeSlot() {
+        return new DirectionalExtenderScrollOptionSlot(
+                (state, d) -> {
+                    Axis axis = d.getAxis();
+                    Axis bearingAxis = state.getValue(BearingBlock.FACING).getAxis();
+                    return bearingAxis != axis;
+                });
+    }
 
+    void setAngle(float forcedAngle);
 }
