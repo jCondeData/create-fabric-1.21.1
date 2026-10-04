@@ -298,7 +298,8 @@ tasks.named<ProcessResources>("processResources") {
             "version" to version,
             "minecraft_version" to minecraftVersion,
             "loader_version" to loaderVersion,
-            "fabric_version" to fapiVersion,
+            // the bundled Porting Lib modules need Fabric API >= 0.116.1
+            "fabric_version" to "0.116.1+1.21.1",
             "forge_config_version" to configApiVersion,
             "milk_lib_version" to milkLibVersion,
         )
@@ -370,6 +371,10 @@ dependencies {
     modImplementation(include("io.github.fabricators_of_create.Porting-Lib:tags:3.1.0-beta.90+1.21.1")!!)
     modImplementation(include("io.github.fabricators_of_create.Porting-Lib:transfer:3.1.0-beta.90+1.21.1")!!)
 
+    // Registrate-Fabric nests porting_lib_conditions 3.1.0-beta.39 built in the "named" namespace,
+    // which crashes Fabric Loader in production unless a newer copy is present. beta.55 is the last
+    // published conditions module; bundling it makes the jar boot without other mods' copies.
+    modRuntimeOnly(include("io.github.fabricators_of_create.Porting-Lib:conditions:3.1.0-beta.55+1.21.1")!!)
     modRuntimeOnly(include("io.github.fabricators_of_create.Porting-Lib:registry:3.1.0-beta.90+1.21.1")!!)
     modImplementation(include("io.github.fabricators_of_create.Porting-Lib:resources:3.1.0-beta.90+1.21.1")!!) // data maps
     modRuntimeOnly(include("io.github.fabricators_of_create.Porting-Lib:model_data:3.1.0-beta.90+1.21.1")!!)

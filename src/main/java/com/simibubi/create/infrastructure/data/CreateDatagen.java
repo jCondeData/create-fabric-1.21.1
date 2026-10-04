@@ -72,6 +72,9 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
         pack.addProvider(CreateSequencedAssemblyRecipeGen::new);
         // процессинговые рецепты
         CreateRecipeProvider.registerAllProcessing(pack);
+        // sounds.json (upstream adds this for the client pack; without it every Create sound is
+        // silent)
+        pack.addProvider((FabricDataOutput output) -> AllSoundEvents.provider(output));
         pack.addProvider(GeneratedEntriesProvider::new);
         pack.addProvider(VanillaHatOffsetGenerator::new);
         // fabric: client-only upstream, Fabric datagen runs everything in a single pack

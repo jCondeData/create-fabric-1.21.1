@@ -7,9 +7,13 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.ItemStack;
 
-public class PackagerItemHandler implements SingleSlotStorage<ItemVariant> {
+// fabric: extraction is transactional (snapshot of heldBox) so that simulated or aborted pulls by
+// funnels and hoppers don't delete the held package
+public class PackagerItemHandler extends SnapshotParticipant<ItemStack>
+        implements SingleSlotStorage<ItemVariant> {
 
     private final PackagerBlockEntity blockEntity;
 
@@ -39,9 +43,27 @@ public class PackagerItemHandler implements SingleSlotStorage<ItemVariant> {
         ItemStack box = blockEntity.heldBox;
         if (!resource.matches(box)) return 0;
 
-        blockEntity.heldBox = ItemStack.EMPTY;
-        TransactionSuccessCallback.register(transaction, blockEntity::notifyUpdate);
-        return box.getCount();
+        int extracted = (int) Math.min(maxAmount, box.getCount());
+        if (extracted <= 0) return 0;
+
+        updateSnapshots(transaction);
+        blockEntity.heldBox = box.copyWithCount(box.getCount() - extracted);
+        return extracted;
+    }
+
+    @Override
+    protected ItemStack createSnapshot() {
+        return blockEntity.heldBox.copy();
+    }
+
+    @Override
+    protected void readSnapshot(ItemStack snapshot) {
+        blockEntity.heldBox = snapshot;
+    }
+
+    @Override
+    protected void onFinalCommit() {
+        blockEntity.notifyUpdate();
     }
 
     @Override

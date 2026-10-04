@@ -1467,6 +1467,9 @@ public class AllBlocks {
             REGISTRATE
                     .block("piston_extension_pole", PistonExtensionPoleBlock::new)
                     .initialProperties(() -> Blocks.PISTON_HEAD)
+                    // fabric: Registrate copies with ofFullCopy, which also copies the piston
+                    // head's "no loot table"; the legacy copy keeps the block's own drops
+                    .properties(p -> BlockBehaviour.Properties.ofLegacyCopy(Blocks.PISTON_HEAD))
                     .properties(
                             p ->
                                     p.sound(SoundType.SCAFFOLDING)
@@ -1488,6 +1491,9 @@ public class AllBlocks {
             REGISTRATE
                     .block("mechanical_piston_head", MechanicalPistonHeadBlock::new)
                     .initialProperties(() -> Blocks.PISTON_HEAD)
+                    // fabric: Registrate copies with ofFullCopy, which also copies the piston
+                    // head's "no loot table"; the legacy copy keeps the block's own drops
+                    .properties(p -> BlockBehaviour.Properties.ofLegacyCopy(Blocks.PISTON_HEAD))
                     .properties(p -> p.mapColor(MapColor.DIRT))
                     .properties(
                             p ->
