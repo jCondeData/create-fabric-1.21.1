@@ -44,7 +44,11 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64   # JDK 21, Loom 1.10
   `libs/maven`) — server and clients need only this jar plus Fabric API.
 
 ## Known open items
-- REI compat (Jesse's pack uses REI; Blockfield removed it) — restore from Fabricators branch.
+- REI compat lives in `compat/rei` (client-only `rei_client` entrypoint, mirrors `compat/jei`
+  category by category). Dev-test it with `val recipeViewer = "rei"` in build.gradle.kts.
+  Architectury 13's Fabric `FluidStack#getPatch()` drops components, so never use it there.
+- `FluidUnit.name` uses `generic.unit.*` keys without the `create.` prefix, so goggle fluid
+  tooltips print the raw key; REI compat works around it.
 - Packager unwrap runs nested `Transaction.openOuter()` inside a transaction callback
   (`PackagerBlockEntity.unwrapBox` → `DefaultUnpackingHandler`) — likely runtime exception; verify.
 - Mechanical arm mode message key double-prefixed (`create.create.mechanical_arm…`), also upstream.

@@ -1,0 +1,144 @@
+package com.simibubi.create.compat.rei.category;
+
+import com.google.common.collect.Iterators;
+import com.simibubi.create.Create;
+import com.simibubi.create.compat.rei.CreateREI;
+import com.simibubi.create.compat.rei.category.RecipeLayout.Role;
+import com.simibubi.create.compat.rei.category.animations.AnimatedSpout;
+import com.simibubi.create.content.fluids.potion.PotionFluidHandler;
+import com.simibubi.create.content.fluids.transfer.FillingRecipe;
+import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
+import com.simibubi.create.foundation.fluid.FluidIngredient;
+import com.simibubi.create.foundation.gui.AllGuiTextures;
+import com.simibubi.create.foundation.item.ItemHelper;
+import com.simibubi.create.infrastructure.fabric.transfer.TransferUtil;
+import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack;
+
+import io.github.fabricators_of_create.porting_lib.transfer.MutableContainerItemContext;
+
+import net.createmod.catnip.registry.RegisteredObjectsHelper;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
+
+import java.util.Collection;
+import java.util.function.Consumer;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+public class SpoutCategory extends CreateRecipeCategory<FillingRecipe> {
+
+    private final AnimatedSpout spout = new AnimatedSpout();
+
+    public SpoutCategory(Info<FillingRecipe> info) {
+        super(info);
+    }
+
+    /** Generates filling recipes for every fluid container item, like the JEI category. */
+    public static void consumeRecipes(Consumer<RecipeHolder<FillingRecipe>> consumer) {
+        Collection<FluidStack> fluidStacks = CreateREI.getAllFluids();
+        for (ItemStack stack : CreateREI.getAllItems()) {
+            if (PotionFluidHandler.isPotionItem(stack)) {
+                FluidStack fluidFromPotionItem = PotionFluidHandler.getFluidFromPotionItem(stack);
+                Ingredient bottle = Ingredient.of(Items.GLASS_BOTTLE);
+                ResourceLocation id = Create.asResource("potions");
+                FillingRecipe recipe =
+                        new StandardProcessingRecipe.Builder<>(FillingRecipe::new, id)
+                                .withItemIngredients(bottle)
+                                .withFluidIngredients(
+                                        FluidIngredient.fromFluidStack(fluidFromPotionItem))
+                                .withSingleItemOutput(stack)
+                                .build();
+                consumer.accept(new RecipeHolder<>(id, recipe));
+                continue;
+            }
+
+            Storage<FluidVariant> storage =
+                    ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
+            if (storage == null) continue;
+
+            int numTanks = Iterators.size(storage.iterator());
+            FluidStack existingFluid =
+                    numTanks == 1 ? new FluidStack(storage.iterator().next()) : FluidStack.EMPTY;
+
+            for (FluidStack fluidStack : fluidStacks) {
+                // Hoist the fluid equality check to avoid the work of copying the stack +
+                // populating capabilities when most fluids will not match
+                if (numTanks == 1
+                        && (!existingFluid.isEmpty()
+                                && !FluidStack.isSameFluidSameComponents(
+                                        existingFluid, fluidStack))) continue;
+
+                ItemStack copy = stack.copy();
+                MutableContainerItemContext context = new MutableContainerItemContext(stack);
+                Storage<FluidVariant> copyStorage = context.find(FluidStorage.ITEM);
+                if (copyStorage == null) continue;
+
+                if (!GenericItemFilling.isFluidHandlerValid(copy, copyStorage)) continue;
+                FluidStack fluidCopy = fluidStack.copy();
+                fluidCopy.setAmount(FluidConstants.BUCKET);
+                TransferUtil.insert(copyStorage, fluidStack);
+                ItemStack container =
+                        context.getItemVariant()
+                                .toStack(TransferUtil.truncateLong(context.getAmount()));
+                if (ItemHelper.sameItem(container, copy)) continue;
+                if (container.isEmpty()) continue;
+
+                Ingredient bucket = Ingredient.of(stack);
+                ResourceLocation itemName = RegisteredObjectsHelper.getKeyOrThrow(stack.getItem());
+                ResourceLocation fluidName =
+                        RegisteredObjectsHelper.getKeyOrThrow(fluidCopy.getFluid());
+                ResourceLocation recipeId =
+                        Create.asResource(
+                                "fill_"
+                                        + itemName.getNamespace()
+                                        + "_"
+                                        + itemName.getPath()
+                                        + "_with_"
+                                        + fluidName.getNamespace()
+                                        + "_"
+                                        + fluidName.getPath());
+                consumer.accept(
+                        new RecipeHolder<>(
+                                recipeId,
+                                new StandardProcessingRecipe.Builder<>(FillingRecipe::new, recipeId)
+                                        .withItemIngredients(bucket)
+                                        .withFluidIngredients(
+                                                FluidIngredient.fromFluidStack(fluidCopy))
+                                        .withSingleItemOutput(container)
+                                        .build()));
+            }
+        }
+    }
+
+    @Override
+    public void setRecipe(RecipeLayout builder, FillingRecipe recipe) {
+        builder.addSlot(Role.INPUT, 27, 51)
+                .setBackground(getRenderedSlot(), -1, -1)
+                .addIngredients(recipe.getIngredients().get(0));
+
+        addFluidSlot(builder, 27, 32, recipe.getRequiredFluid());
+
+        builder.addSlot(Role.OUTPUT, 132, 51)
+                .setBackground(getRenderedSlot(), -1, -1)
+                .addItemStack(getResultItem(recipe));
+    }
+
+    @Override
+    public void draw(FillingRecipe recipe, GuiGraphics graphics, double mouseX, double mouseY) {
+        AllGuiTextures.JEI_SHADOW.render(graphics, 62, 57);
+        AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 126, 29);
+        spout.withFluids(recipe.getRequiredFluid().getMatchingFluidStacks())
+                .draw(graphics, getBackgroundWidth() / 2 - 13, 22);
+    }
+}

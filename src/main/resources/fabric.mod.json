@@ -34,6 +34,9 @@
     "jei_mod_plugin": [
       "com.simibubi.create.compat.jei.CreateJEI"
     ],
+    "rei_client": [
+      "com.simibubi.create.compat.rei.CreateREI"
+    ],
     "modmenu": [
       "com.simibubi.create.compat.modmenu.CreateModMenuIntegration"
     ]
