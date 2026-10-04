@@ -74,6 +74,7 @@
     "accessor.MouseHandlerAccessor",
     "accessor.TimerAccessor",
     "client.BlockDestructionProgressMixin",
+    "client.BlockElementDeserializerMixin",
     "client.CameraMixin",
     "client.EntityContraptionInteractionMixin",
     "client.GameRendererMixin",

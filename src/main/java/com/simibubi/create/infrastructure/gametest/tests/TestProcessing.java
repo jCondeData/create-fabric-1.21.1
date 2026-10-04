@@ -9,6 +9,8 @@ import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.infrastructure.gametest.CreateGameTestHelper;
 import com.simibubi.create.infrastructure.gametest.GameTestGroup;
 
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
@@ -20,7 +22,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @GameTestGroup(path = "processing")
 public class TestProcessing {
@@ -128,10 +133,23 @@ public class TestProcessing {
                         .filter(item -> item != result)
                         .toArray(Item[]::new);
 
+        // fabric: upstream also required a junk output, but each sheet rolls junk with p = 0.2 and
+        // all 16 can come out as mechanisms (0.8^16 = 2.8%, more when the run lags). Deterministic
+        // instead: only result-pool items come out, a mechanism among them, and either a junk item
+        // or all 16 sheets accounted for.
+        Set<Item> pool = new HashSet<>(Arrays.asList(possibleResults));
+        pool.add(result);
         helper.succeedWhenWithDiagnostics(
                 () -> {
+                    Object2LongMap<Item> content = helper.getItemContent(output);
+                    for (Item item : content.keySet())
+                        if (!pool.contains(item))
+                            helper.fail("Unexpected output " + item + " in " + content);
                     helper.assertContainerContains(output, result);
-                    helper.assertAnyContained(output, possibleResults);
+                    boolean junk = content.keySet().stream().anyMatch(item -> item != result);
+                    long total = content.values().longStream().sum();
+                    if (!junk && total < 16)
+                        helper.fail("Waiting for all 16 sheets (or a junk roll): " + content);
                 },
                 () ->
                         helper.snapshot(
