@@ -59,8 +59,35 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64   # JDK 21, Loom 1.10
 - Xaero's World Map train map: compile-only Xaero 1.44.2 + XaeroLib unpacked by build.gradle.kts;
   mixins gated in `CreateMixinPlugin`.
 
+## QA
+- GameTests live in `infrastructure/gametest/tests` (`TestPort*` = port QA, `TestPortBug*` = regression
+  tests for bugs found by the independent tester). Keep them green; never weaken one.
+- `scripts/qa/onejar_boot.sh` / `onejar_log_check.sh`: a dedicated server with only the built jar and
+  Fabric API must boot with no ERROR lines (one allowed: Porting Lib's empty
+  `global_loot_modifier_serializers` registry, which only appears with no other Porting Lib mod).
+- Bundled `porting_lib_conditions` stays at 3.1.0-beta.47 (what sophisticatedcore ships in the pack);
+  beta.55 changed the API and logs an empty `condition_codecs` registry.
+- Wide gauge tracks (`railways:*_wide`, from Blockfield) need `BlockElementDeserializerMixin`, which
+  widens vanilla's model element limit to [-32, 48].
+
+## Definition of done: independent testing
+A change isn't done when the build is green; it's done when an independent tester has tried to break it.
+1. When the change is complete and `./gradlew build` passes, launch a fresh tester subagent (Agent tool)
+   with the handoff prompt from the minecraft-mod-tester skill (references/automation.md): tier Check,
+   range = this session's commits, spec = the owner's request / upstream Create behaviour.
+2. Fix what it reports (bugs come back as failing tests), then hand back to a fresh tester; at most 3 rounds,
+   then report what is still open.
+3. Before bumping the version for a release: tier Full.
+4. In the summary for the owner, include the tester's verdict and its "Not tested / risks" list.
+Never delete, skip or weaken a test to get a green build.
+
 ## Known open items
-- Not verified in a real client yet: rendering with Sodium 0.8 / Iris, REI layouts and "+" transfer,
-  copycat emissive/light after reload (no `AuxiliaryLightManager` on Fabric).
+- Last tester verdict (b8dfa78bb3, round 3 Check): PASS WITH RISKS.
+- Needs a real GPU / human playtest: rendering with Sodium 0.8 / Iris, REI animated scenes (black under
+  Sodium on software GL), wide gauge curves (parts vanish from some angles with Flywheel's default backend
+  on software GL; fine with `/flywheel backend flywheel:instancing`), wide trains on curves and slopes,
+  REI "+" transfer, copycat emissive/light after reload (no `AuxiliaryLightManager` on Fabric), sounds.
+- Not covered by tests: belts feeding packagers, threshold switches on packagers, pistons disassembling
+  while obstructed, a client with the full pack, upgrading older Create saves.
 - Ponder (1.0.69) and Flywheel (1.0.6) are older than upstream 6.0.10 bundles (1.0.82 / 1.0.6);
   bumping Ponder means the renamed `ponder-fabric` artifact.
