@@ -3,6 +3,7 @@ package com.simibubi.create.infrastructure.gametest.tests;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
+import com.simibubi.create.Create;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPoint;
 import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
@@ -36,6 +37,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,6 +48,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 import java.util.Locale;
@@ -598,7 +601,9 @@ public class TestItems {
                 });
     }
 
-    @GameTest(template = "fan_processing", timeoutTicks = CreateGameTestHelper.TEN_SECONDS)
+    // fabric: THIRTY_SECONDS instead of upstream's TEN_SECONDS only for extra washing passes; each
+    // pass and every other lamp must still finish within upstream's ten seconds (checked below)
+    @GameTest(template = "fan_processing", timeoutTicks = CreateGameTestHelper.THIRTY_SECONDS)
     public static void fanProcessing(CreateGameTestHelper helper) {
         // why does the redstone explode
         BlockPos.betweenClosed(new BlockPos(2, 7, 3), new BlockPos(11, 7, 3))
@@ -611,6 +616,64 @@ public class TestItems {
                         new BlockPos(7, 2, 1),
                         new BlockPos(9, 2, 1),
                         new BlockPos(11, 2, 1));
+        // fabric: the washing lamp waits for flint from 16 gravel, but each gravel becomes flint
+        // with p = 0.25, so in 0.75^16 = 1% of runs none does and upstream's test fails (tester
+        // round 3: 1 of 44 runs). Made deterministic with more samples, never a looser check: when
+        // a pass has washed all its gravel without any flint, the barrel gets 16 more gravel for
+        // another pass through the same fan (at most 3 passes, so a false failure is 1e-6). Each
+        // pass must finish within upstream's ten seconds, and so must the other four lamps.
+        // TestPortRolls.fanWashingRollsFlintFromGravel checks the chances themselves.
+        BlockPos washLamp = new BlockPos(5, 2, 1);
+        BlockPos washInput = new BlockPos(5, 6, 3);
+        List<BlockPos> washPath =
+                List.of(
+                        washInput,
+                        new BlockPos(5, 5, 3),
+                        new BlockPos(5, 3, 3),
+                        new BlockPos(5, 2, 3));
+        // where this column's gravel falls and is washed (column 3's unwashed gravel lies west)
+        AABB washArea =
+                new AABB(helper.absolutePos(new BlockPos(4, 2, 2)))
+                        .minmax(new AABB(helper.absolutePos(new BlockPos(6, 6, 4))));
+        int maxPasses = 3;
+        long[] pass = {1, 0}; // pass number, tick it started
+        helper.onEachTick(
+                () -> {
+                    if (helper.getBlockState(washLamp).getValue(RedstoneLampBlock.LIT)) return;
+                    boolean washing =
+                            !helper.getLevel()
+                                    .getEntitiesOfClass(
+                                            ItemEntity.class,
+                                            washArea,
+                                            e ->
+                                                    e.getItem().is(Items.GRAVEL)
+                                                            || e.getItem().is(Items.FLINT))
+                                    .isEmpty();
+                    for (BlockPos pos : washPath) washing |= helper.getTotalItems(pos) > 0;
+                    if (washing) {
+                        if (helper.getTick() - pass[1] > CreateGameTestHelper.TEN_SECONDS)
+                            helper.fail(
+                                    "washing pass " + pass[0] + " did not finish in ten seconds");
+                        return;
+                    }
+                    if (pass[0] >= maxPasses) return;
+                    pass[0]++;
+                    pass[1] = helper.getTick();
+                    try (Transaction t = Transaction.openOuter()) {
+                        helper.itemStorageAt(washInput).insert(ItemVariant.of(Items.GRAVEL), 16, t);
+                        t.commit();
+                    }
+                    Create.LOGGER.info(
+                            "[test] fanProcessing: 16 gravel washed without flint, pass {}",
+                            pass[0]);
+                });
+        helper.runAtTickTime(
+                CreateGameTestHelper.TEN_SECONDS,
+                () -> {
+                    for (BlockPos lamp : lamps)
+                        if (!lamp.equals(washLamp))
+                            helper.assertBlockProperty(lamp, RedstoneLampBlock.LIT, true);
+                });
         helper.succeedWhen(
                 () -> {
                     for (BlockPos lamp : lamps) {

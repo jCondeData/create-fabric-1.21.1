@@ -398,7 +398,10 @@ public class TestPortPersistence {
         for (int i = 0; i < blocks.size(); i++)
             helper.setBlock(new BlockPos(1 + 3 * i, 1, 1), blocks.get(i));
         // one block at a time, 10 ticks apart: some (the basin) record the change on their next
-        // tick, so check a few ticks after the insert
+        // tick, so look for the mark until a few ticks after the insert. The flag is read at the
+        // end of every tick: the server may save the chunk (clearing the flag) at the start of
+        // the next one, which made a single late check fail under load (tester round 3).
+        boolean[] marked = new boolean[blocks.size()];
         for (int i = 0; i < blocks.size(); i++) {
             int index = i;
             BlockPos pos = new BlockPos(1 + 3 * i, 1, 1);
@@ -414,14 +417,24 @@ public class TestPortPersistence {
                                     in == 3, blocks.get(index).getBlock() + " took " + in);
                             t.commit();
                         }
+                        marked[index] |=
+                                helper.getLevel().getChunkAt(helper.absolutePos(pos)).isUnsaved();
                     });
+            // (tasks due on the same tick run in no fixed order, so sample from the next tick on
+            // and decide one tick after the last sample)
+            for (int d = 6; d <= 9; d++)
+                helper.runAfterDelay(
+                        d + 10 * i,
+                        () ->
+                                marked[index] |=
+                                        helper.getLevel()
+                                                .getChunkAt(helper.absolutePos(pos))
+                                                .isUnsaved());
             helper.runAfterDelay(
-                    9 + 10 * i,
+                    10 + 10 * i,
                     () ->
                             helper.assertTrue(
-                                    helper.getLevel()
-                                            .getChunkAt(helper.absolutePos(pos))
-                                            .isUnsaved(),
+                                    marked[index],
                                     blocks.get(index).getBlock()
                                             + " changed its items without marking the chunk"
                                             + " unsaved"));
