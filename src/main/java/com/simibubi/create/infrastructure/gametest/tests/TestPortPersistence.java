@@ -125,7 +125,8 @@ public class TestPortPersistence {
                                 continue;
                             }
                             level.removeBlockEntity(abs);
-                            level.setBlockEntity(loaded);
+                            // attach it like chunk loading does, if the block is still there
+                            if (level.getBlockState(abs).is(block)) level.setBlockEntity(loaded);
                             CompoundTag second = loaded.saveWithFullMetadata(registries);
                             // a freshly placed block entity may write extra keys once loaded
                             // (lazily

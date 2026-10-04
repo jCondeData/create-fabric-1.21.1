@@ -106,6 +106,12 @@ public class TestPortData {
                             missing.add(id + " (still has neoforge:conditions, ignored on Fabric)");
                         boolean load = true;
                         JsonElement conditions = json.get(ResourceConditions.CONDITIONS_KEY);
+                        // tags_populated can only be evaluated during a reload: either way is fine
+                        if (conditions != null
+                                && conditions.toString().contains("fabric:tags_populated")) {
+                            conditionedOut++;
+                            continue;
+                        }
                         if (conditions != null) {
                             var parsed =
                                     ResourceCondition.LIST_CODEC.parse(

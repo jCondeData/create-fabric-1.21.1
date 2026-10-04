@@ -181,7 +181,11 @@ public class TestPortFluids {
                     long inDrain = TestPortLogistics.countIn(side, Items.GLASS_BOTTLE);
                     helper.assertTrue(
                             ejected == 1 && inDrain == 0,
-                            "emptied glass bottle: " + ejected + " ejected, " + inDrain + " in the drain");
+                            "emptied glass bottle: "
+                                    + ejected
+                                    + " ejected, "
+                                    + inDrain
+                                    + " in the drain");
                     Create.LOGGER.info("[qa] drained strength potion: {}", contained.getAmount());
                 },
                 () ->
