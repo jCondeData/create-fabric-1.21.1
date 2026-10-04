@@ -58,7 +58,7 @@ plugins {
     id("maven-publish")
 }
 
-version = "6.0.0.0+mc$minecraftVersion"
+version = "6.0.10.0+mc$minecraftVersion"
 
 group = "com.simibubi.create"
 base.archivesName = "create-fabric"
