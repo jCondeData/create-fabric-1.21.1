@@ -60,3 +60,4 @@ Ponder/
 
 .cache/quality/
 __pycache__/
+logs/

@@ -3,8 +3,8 @@ package com.simibubi.create.infrastructure.fabric.util;
 import net.minecraft.network.chat.Component;
 
 public enum FluidUnit {
-    MILLIBUCKETS(81, "generic.unit.millibuckets"),
-    DROPLETS(1, "generic.unit.droplets");
+    MILLIBUCKETS(81, "create.generic.unit.millibuckets"),
+    DROPLETS(1, "create.generic.unit.droplets");
 
     public final Component name;
 

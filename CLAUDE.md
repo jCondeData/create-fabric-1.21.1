@@ -21,9 +21,9 @@ Private build of the Create mod for Fabric 1.21.1, for Jesse's Cobbleverse 1.7.4
 
 ## Upstream steps (end-of-version commits on mc1.21.1/dev)
 - [x] 6.0.4 `b703199f48`
-- [ ] 6.0.6 `fa73b383d5`
-- [ ] 6.0.7 tag `mc1.21.1-6.0.7`
-- [ ] 6.0.10 tag `mc1.21.1-6.0.10` (includes 6.0.8, 6.0.9)
+- [x] 6.0.6 `fa73b383d5`
+- [x] 6.0.7 tag `mc1.21.1-6.0.7`
+- [x] 6.0.10 tag `mc1.21.1-6.0.10` (includes 6.0.8, 6.0.9) — current, version 6.0.10.0+mc1.21.1
 
 Per step: `git remote add upstream https://github.com/Creators-of-Create/Create` (once),
 fetch `mc1.21.1/dev` + tags, run the gjf script, merge, resolve (keep Fabric side, apply upstream's
@@ -43,12 +43,24 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64   # JDK 21, Loom 1.10
 - Output jar `build/libs/create-fabric-*.jar` bundles Porting Lib + Milk Lib (patched copy in
   `libs/maven`) — server and clients need only this jar plus Fabric API.
 
-## Known open items
-- REI compat lives in `compat/rei` (client-only `rei_client` entrypoint, mirrors `compat/jei`
-  category by category). Dev-test it with `val recipeViewer = "rei"` in build.gradle.kts.
+## Port decisions to keep
+- Fluid ingredients: Create's own `foundation.fluid.FluidIngredient` (droplets), never NeoForge's
+  `SizedFluidIngredient`. `FluidStack` writes the Fabric format and also reads NeoForge's.
+- Never `Transaction.openOuter()` where a transaction may be open — nest with
+  `Transaction.openNested(Transaction.getCurrentUnsafe())`.
+- Tags: Fabric v2 convention tags; `AllItemTags.WRENCH`, `AllItemTags.FOODS_DOUGH`,
+  `AllBlockTags.RELOCATION_NOT_SUPPORTED` stand in for NeoForge `Tags` entries Fabric lacks.
+- Diving armor stays untrimmable via `SmithingTrimRecipeMixin` (NeoForge tag `remove` doesn't work).
+- Data maps on Porting Lib (`CreateDataMapsImpl.registerDataMaps()`); furnace fuel via `FuelRegistry`.
+- Removed compat: FTB, Curios, JourneyMap, EMI, ComputerCraft (CC events are no-ops).
+- Recipe viewers: JEI (`compat/jei`) and REI (`compat/rei`, client-only `rei_client` entrypoint,
+  mirrors `compat/jei` category by category; dev-test with `val recipeViewer = "rei"`).
   Architectury 13's Fabric `FluidStack#getPatch()` drops components, so never use it there.
-- `FluidUnit.name` uses `generic.unit.*` keys without the `create.` prefix, so goggle fluid
-  tooltips print the raw key; REI compat works around it.
-- Packager unwrap runs nested `Transaction.openOuter()` inside a transaction callback
-  (`PackagerBlockEntity.unwrapBox` → `DefaultUnpackingHandler`) — likely runtime exception; verify.
-- Mechanical arm mode message key double-prefixed (`create.create.mechanical_arm…`), also upstream.
+- Xaero's World Map train map: compile-only Xaero 1.44.2 + XaeroLib unpacked by build.gradle.kts;
+  mixins gated in `CreateMixinPlugin`.
+
+## Known open items
+- Not verified in a real client yet: rendering with Sodium 0.8 / Iris, REI layouts and "+" transfer,
+  copycat emissive/light after reload (no `AuxiliaryLightManager` on Fabric).
+- Ponder (1.0.69) and Flywheel (1.0.6) are older than upstream 6.0.10 bundles (1.0.82 / 1.0.6);
+  bumping Ponder means the renamed `ponder-fabric` artifact.
