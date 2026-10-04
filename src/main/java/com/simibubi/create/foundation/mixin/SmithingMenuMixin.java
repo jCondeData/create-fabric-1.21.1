@@ -44,7 +44,7 @@ public class SmithingMenuMixin {
                             target =
                                     "Lnet/minecraft/world/item/crafting/SmithingRecipe;assemble(Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack create$preventUnbreakingOnBacktanks(ItemStack original) {
-        if (AllItems.COPPER_BACKTANK.is(original) || AllItems.NETHERITE_BACKTANK.is(original)) {
+        if (AllItems.COPPER_BACKTANK.isIn(original) || AllItems.NETHERITE_BACKTANK.isIn(original)) {
             ItemEnchantments.Mutable mutableEnchantments =
                     new ItemEnchantments.Mutable(
                             EnchantmentHelper.getEnchantmentsForCrafting(original));

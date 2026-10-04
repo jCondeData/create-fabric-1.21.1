@@ -20,6 +20,7 @@ import com.simibubi.create.content.equipment.armor.NetheriteDivingHandler;
 import com.simibubi.create.content.equipment.bell.HauntedBellPulser;
 import com.simibubi.create.content.equipment.clipboard.ClipboardValueSettingsHandler;
 import com.simibubi.create.content.equipment.extendoGrip.ExtendoGripItem;
+import com.simibubi.create.content.equipment.potatoCannon.PotatoCannonItem;
 import com.simibubi.create.content.equipment.symmetryWand.SymmetryHandler;
 import com.simibubi.create.content.equipment.tool.CardboardSwordItem;
 import com.simibubi.create.content.equipment.toolbox.ToolboxHandler;
@@ -82,6 +83,7 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.item.v1.EnchantmentEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -257,6 +259,9 @@ public class CommonEvents {
     public static void register() {
         // Fabric Events
         ServerTickEvents.END_SERVER_TICK.register(CommonEvents::onServerTick);
+        // Fabric: enchanting rules that NeoForge expresses as item hooks
+        EnchantmentEvents.ALLOW_ENCHANTING.register(PotatoCannonItem::alsoAcceptsBowEnchantments);
+        EnchantmentEvents.ALLOW_ENCHANTING.register(CardboardSwordItem::onlyAcceptsKnockback);
         ServerChunkEvents.CHUNK_UNLOAD.register(CommonEvents::onChunkUnloaded);
         ServerTickEvents.END_WORLD_TICK.register(CommonEvents::onServerWorldTick);
         ServerEntityEvents.ENTITY_LOAD.register(CommonEvents::onEntityAdded);

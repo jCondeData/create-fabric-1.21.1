@@ -248,14 +248,12 @@ public class BlockHelper {
                                     enchantmentRegistry.getHolderOrThrow(Enchantments.SILK_TOUCH),
                                     usedTool)
                             == 0) {
-                if (world.dimensionType().ultraWarm()) return;
-
-                BlockState blockstate = world.getBlockState(pos.below());
-                if (blockstate.blocksMotion() || blockstate.liquid()) {
-                    world.setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
-                    afterBreak(world, player, pos, state, blockEntity);
+                if (!world.dimensionType().ultraWarm()) {
+                    BlockState below = world.getBlockState(pos.below());
+                    if (below.blocksMotion() || below.liquid()) {
+                        fluidState = IceBlock.meltsInto().getFluidState();
+                    }
                 }
-                return;
             }
 
             state.spawnAfterBreak((ServerLevel) world, pos, ItemStack.EMPTY, true);

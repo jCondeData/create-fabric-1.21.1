@@ -3,7 +3,6 @@ package com.simibubi.create.foundation.recipe;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.simibubi.create.Create;
-import com.simibubi.create.foundation.utility.RecipeGenericsUtil;
 
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -13,6 +12,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -68,8 +68,9 @@ public class RecipeFinder {
 
     private static List<RecipeHolder<? extends Recipe<?>>> startSearch(
             Level level, Predicate<? super RecipeHolder<? extends Recipe<?>>> conditions) {
-        return RecipeGenericsUtil.specify(level.getRecipeManager().getRecipes()).stream()
-                .filter(conditions)
-                .toList();
+        List<RecipeHolder<? extends Recipe<?>>> recipes = new ArrayList<>();
+        for (RecipeHolder<? extends Recipe<?>> r : level.getRecipeManager().getRecipes())
+            if (conditions.test(r)) recipes.add(r);
+        return recipes;
     }
 }

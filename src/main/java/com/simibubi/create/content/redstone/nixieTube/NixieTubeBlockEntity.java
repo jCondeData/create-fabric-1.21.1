@@ -150,7 +150,7 @@ public class NixieTubeBlockEntity extends SmartBlockEntity {
         }
 
         if (customText.isEmpty()) redstoneStrength = nbt.getInt("RedstoneStrength");
-        if (clientPacket) updateDisplayedStrings();
+        if (clientPacket || isVirtual()) updateDisplayedStrings();
     }
 
     @Override

@@ -15,6 +15,7 @@ import io.github.fabricators_of_create.porting_lib.entity.events.player.AttackEn
 import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerEvents;
 import io.github.fabricators_of_create.porting_lib.entity.events.player.PlayerInteractEvent;
 import io.github.fabricators_of_create.porting_lib.entity.events.tick.EntityTickEvent;
+import io.github.fabricators_of_create.porting_lib.item.extensions.SneakBypassUseItem;
 
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.platform.CatnipServices;
@@ -39,6 +40,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -51,7 +53,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public class ExtendoGripItem extends Item {
+public class ExtendoGripItem extends Item implements SneakBypassUseItem {
     public static final int MAX_DAMAGE = 200;
 
     public static final AttributeModifier singleRangeAttributeModifier =
@@ -225,6 +227,12 @@ public class ExtendoGripItem extends Item {
 
     private static int maxUses() {
         return AllConfigs.server().equipment.maxExtendoGripActions.get();
+    }
+
+    @Override
+    public boolean doesSneakBypassUse(
+            ItemStack stack, LevelReader level, BlockPos pos, Player player) {
+        return true;
     }
 
     public static void bufferLivingAttackEvent(LivingAttackEvent event) {

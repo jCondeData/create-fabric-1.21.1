@@ -76,8 +76,10 @@ public class MetalLadderBlock extends LadderBlock implements IWrenchable {
 
     @Override
     public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockState otherState = pLevel.getBlockState(pPos.relative(Direction.UP));
         return super.canSurvive(pState, pLevel, pPos)
-                || pLevel.getBlockState(pPos.relative(Direction.UP)).is(this);
+                || (otherState.is(this)
+                        && pState.getValue(FACING).equals(otherState.getValue(FACING)));
     }
 
     @Override

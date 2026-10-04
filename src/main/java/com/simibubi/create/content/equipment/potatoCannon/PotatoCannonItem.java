@@ -1,6 +1,5 @@
 package com.simibubi.create.content.equipment.potatoCannon;
 
-import com.simibubi.create.AllEnchantments;
 import com.simibubi.create.AllEntityTypes;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.api.equipment.potatoCannon.PotatoCannonProjectileType;
@@ -294,16 +293,13 @@ public class PotatoCannonItem extends ProjectileWeaponItem
 
     /**
      * Fabric: registered on {@code EnchantmentEvents.ALLOW_ENCHANTING} instead of NeoForge's item
-     * hook.
+     * hook. Bow enchantments come from the {@code minecraft:enchantable/bow} item tag.
      */
     public static TriState alsoAcceptsBowEnchantments(
             Holder<Enchantment> enchantment, ItemStack target, EnchantingContext context) {
         if (!(target.getItem() instanceof PotatoCannonItem)) return TriState.DEFAULT;
-        if (enchantment.is(Enchantments.POWER)
-                || enchantment.is(Enchantments.PUNCH)
-                || enchantment.is(Enchantments.FLAME)
-                || enchantment.is(Enchantments.LOOTING)
-                || enchantment.is(AllEnchantments.POTATO_RECOVERY)) return TriState.TRUE;
+        if (enchantment.is(Enchantments.INFINITY)) return TriState.FALSE;
+        if (enchantment.is(Enchantments.LOOTING)) return TriState.TRUE;
         return TriState.DEFAULT;
     }
 
@@ -328,7 +324,7 @@ public class PotatoCannonItem extends ProjectileWeaponItem
 
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
-        return false;
+        return true;
     }
 
     @Override

@@ -24,6 +24,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
@@ -77,10 +78,10 @@ public class PipeConnection {
         return true;
     }
 
-    public void manageSource(Level world, BlockPos pos) {
+    public void manageSource(Level world, BlockPos pos, BlockEntity blockEntity) {
         if (!source.isPresent() && !determineSource(world, pos)) return;
         FlowSource flowSource = source.get();
-        flowSource.manageSource(world);
+        flowSource.manageSource(world, blockEntity);
     }
 
     public boolean manageFlows(

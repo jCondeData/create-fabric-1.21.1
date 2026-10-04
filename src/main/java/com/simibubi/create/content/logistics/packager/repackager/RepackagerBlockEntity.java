@@ -1,8 +1,8 @@
 package com.simibubi.create.content.logistics.packager.repackager;
 
+import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
-import com.simibubi.create.content.logistics.packager.PackageDefragmenter;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
@@ -24,11 +24,11 @@ import java.util.List;
 
 public class RepackagerBlockEntity extends PackagerBlockEntity {
 
-    public PackageDefragmenter defragmenter;
+    public PackageRepackageHelper repackageHelper;
 
     public RepackagerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
-        defragmenter = new PackageDefragmenter();
+        repackageHelper = new PackageRepackageHelper();
     }
 
     public boolean unwrapBox(ItemStack box, TransactionContext ctx) {
@@ -66,27 +66,28 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
     }
 
     public void attemptToSend(List<PackagingRequest> queuedRequests) {
-        if (queuedRequests == null && (!heldBox.isEmpty() || animationTicks != 0)) return;
+        if (!heldBox.isEmpty() || animationTicks != 0 || buttonCooldown > 0) return;
+        if (!queuedExitingPackages.isEmpty()) return;
 
         Storage<ItemVariant> targetInv = targetInventory.getInventory();
         if (targetInv == null || targetInv instanceof PackagerItemHandler) return;
 
-        attemptToDefrag(targetInv);
+        attemptToRepackage(targetInv);
         if (heldBox.isEmpty()) return;
 
         updateSignAddress();
         if (!signBasedAddress.isBlank()) PackageItem.addAddress(heldBox, signBasedAddress);
     }
 
-    protected void attemptToDefrag(Storage<ItemVariant> targetInv) {
-        defragmenter.clear();
+    protected void attemptToRepackage(Storage<ItemVariant> targetInv) {
+        repackageHelper.clear();
         int completedOrderId = -1;
 
         for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
             ItemVariant resource = view.getResource();
             if (!PackageItem.isPackage(resource)) continue;
 
-            if (!defragmenter.isFragmented(resource.toStack())) {
+            if (!repackageHelper.isFragmented(resource.toStack())) {
                 try (Transaction t = Transaction.openOuter()) {
                     if (view.extract(resource, 1, t) == 1) {
                         t.commit();
@@ -100,13 +101,14 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
             }
 
             ItemStack stack = resource.toStack(TransferUtil.truncateLong(view.getAmount()));
-            completedOrderId = defragmenter.addPackageFragment(stack);
+            completedOrderId = repackageHelper.addPackageFragment(stack);
             if (completedOrderId != -1) break;
         }
 
         if (completedOrderId == -1) return;
 
-        List<ItemStack> boxesToExport = defragmenter.repack(completedOrderId);
+        List<BigItemStack> boxesToExport =
+                repackageHelper.repack(completedOrderId, level.getRandom());
 
         try (Transaction t = Transaction.openOuter()) {
             for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
@@ -116,26 +118,12 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
                 view.extract(resource, view.getAmount(), t);
             }
 
-            if (boxesToExport.isEmpty()) {
-                t.commit();
-                return;
-            }
-
-            heldBox = boxesToExport.get(0).copy();
-            animationInward = false;
-            animationTicks = CYCLE;
-
-            for (int i = 1; i < boxesToExport.size(); i++) {
-                ItemStack stack = boxesToExport.get(i);
-                if (targetInv.insert(ItemVariant.of(stack), stack.getCount(), t)
-                        != stack.getCount()) {
-                    return;
-                }
-            }
-
             t.commit();
         }
 
+        if (boxesToExport.isEmpty()) return;
+
+        queuedExitingPackages.addAll(boxesToExport);
         notifyUpdate();
     }
 }

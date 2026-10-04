@@ -42,7 +42,7 @@ public class ProcessingInventory extends ItemStackHandlerContainer {
     }
 
     public ProcessingInventory(Consumer<ItemStack> callback) {
-        super(16);
+        super(32);
         this.callback = callback;
     }
 

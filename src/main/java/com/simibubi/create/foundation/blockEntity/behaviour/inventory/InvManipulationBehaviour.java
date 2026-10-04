@@ -1,6 +1,8 @@
 package com.simibubi.create.foundation.blockEntity.behaviour.inventory;
 
 import com.google.common.base.Predicates;
+import com.simibubi.create.api.packager.InventoryIdentifier;
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
@@ -9,6 +11,7 @@ import com.simibubi.create.foundation.item.ItemHelper.ExtractionCountMode;
 
 import io.github.fabricators_of_create.porting_lib.util.StorageProvider;
 
+import net.createmod.catnip.math.BlockFace;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -52,6 +55,19 @@ public class InvManipulationBehaviour
             InterfaceProvider target) {
         super(be, target);
         behaviourType = type;
+    }
+
+    @Nullable
+    public IdentifiedInventory getIdentifiedInventory() {
+        Storage<ItemVariant> inventory = this.getInventory();
+        if (inventory == null) return null;
+
+        BlockFace face = this.getTarget().getOpposite();
+        InventoryIdentifier identifier = InventoryIdentifier.get(this.getWorld(), face);
+        // Fabric: Transfer API views can't be compared by backing stack like NeoForge handlers,
+        // so fall back to identifying the inventory by its block position.
+        if (identifier == null) identifier = new InventoryIdentifier.Single(face.getPos());
+        return new IdentifiedInventory(identifier, inventory);
     }
 
     @Override

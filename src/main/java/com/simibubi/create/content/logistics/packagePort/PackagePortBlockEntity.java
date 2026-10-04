@@ -86,7 +86,8 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity
         if (target != null)
             tag.put(
                     "Target",
-                    CatnipCodecUtils.encode(PackagePortTarget.CODEC, target).orElseThrow());
+                    CatnipCodecUtils.encode(PackagePortTarget.CODEC, registries, target)
+                            .orElseThrow());
         tag.putString("AddressFilter", addressFilter);
         tag.putBoolean("AcceptsPackages", acceptsPackages);
         tag.put("Inventory", inventory.serializeNBT(registries));
@@ -98,7 +99,8 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         PackagePortTarget prevTarget = target;
         target =
-                CatnipCodecUtils.decode(PackagePortTarget.CODEC, tag.getCompound("Target"))
+                CatnipCodecUtils.decode(
+                                PackagePortTarget.CODEC, registries, tag.getCompound("Target"))
                         .orElse(null);
         addressFilter = tag.getString("AddressFilter");
         acceptsPackages = tag.getBoolean("AcceptsPackages");

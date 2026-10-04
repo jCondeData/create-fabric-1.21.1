@@ -3,13 +3,17 @@ package com.simibubi.create.foundation.data.recipe;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllTags;
-import com.simibubi.create.Create;
+import com.simibubi.create.api.data.recipe.ProcessingRecipeGen;
 
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
 
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -17,15 +21,22 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class CreateRecipeProvider extends FabricRecipeProvider {
+/**
+ * The class that handles gathering Create's generated recipes for most types. Data here is only
+ * generated when running server dategen
+ *
+ * @see com.simibubi.create.infrastructure.data.CreateDatagen
+ */
+public final class CreateRecipeProvider extends FabricRecipeProvider {
 
-    protected final List<GeneratedRecipe> all = new ArrayList<>();
+    static final List<ProcessingRecipeGen> GENERATORS = new ArrayList<>();
+    // fabric: fluid amounts are in droplets
+    static final long BUCKET = FluidConstants.BUCKET;
+    static final long BOTTLE = FluidConstants.BOTTLE;
 
     public CreateRecipeProvider(
             FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -33,23 +44,43 @@ public abstract class CreateRecipeProvider extends FabricRecipeProvider {
     }
 
     @Override
-    public void buildRecipes(@NotNull RecipeOutput pRecipeOutput) {
-        all.forEach(c -> c.register(pRecipeOutput));
-        Create.LOGGER.info(
-                "{} registered {} recipe{}", getName(), all.size(), all.size() == 1 ? "" : "s");
-    }
+    public void buildRecipes(RecipeOutput recipeOutput) {}
 
-    protected GeneratedRecipe register(GeneratedRecipe recipe) {
-        all.add(recipe);
-        return recipe;
-    }
+    // fabric: registered on the FabricDataGenerator pack instead of a NeoForge DataGenerator
+    public static void registerAllProcessing(FabricDataGenerator.Pack pack) {
+        pack.addProvider(
+                (FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) -> {
+                    GENERATORS.add(new CreateCrushingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateMillingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateCuttingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateWashingRecipeGen(output, registries));
+                    GENERATORS.add(new CreatePolishingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateDeployingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateMixingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateCompactingRecipeGen(output, registries));
+                    GENERATORS.add(new CreatePressingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateFillingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateEmptyingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateHauntingRecipeGen(output, registries));
+                    GENERATORS.add(new CreateItemApplicationRecipeGen(output, registries));
 
-    @FunctionalInterface
-    public interface GeneratedRecipe {
-        void register(RecipeOutput output);
-    }
+                    return new DataProvider() {
 
-    protected static class Marker {}
+                        @Override
+                        public String getName() {
+                            return "Create's Processing Recipes";
+                        }
+
+                        @Override
+                        public CompletableFuture<?> run(CachedOutput dc) {
+                            return CompletableFuture.allOf(
+                                    GENERATORS.stream()
+                                            .map(gen -> gen.run(dc))
+                                            .toArray(CompletableFuture[]::new));
+                        }
+                    };
+                });
+    }
 
     protected static class I {
 

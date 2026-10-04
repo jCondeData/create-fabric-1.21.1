@@ -16,15 +16,13 @@
   ],
   "results": [
     {
-      "item": {
-        "id": "minecraft:glass_bottle"
-      }
-    },
-    {
       "amount": 27000,
       "fluid": {
         "fluid": "milk-lib:still_milk"
       }
+    },
+    {
+      "id": "minecraft:glass_bottle"
     }
   ]
 }

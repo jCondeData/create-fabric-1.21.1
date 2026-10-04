@@ -104,6 +104,7 @@ public class AddressEditBox extends EditBox {
 
     @Override
     public void setValue(String text) {
+        setHighlightPos(0);
         super.setValue(text);
     }
 

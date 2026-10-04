@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public abstract class BasinOperatingBlockEntity extends KineticBlockEntity {
 
@@ -110,13 +109,14 @@ public abstract class BasinOperatingBlockEntity extends KineticBlockEntity {
     protected List<Recipe<?>> getMatchingRecipes() {
         if (getBasin().map(BasinBlockEntity::isEmpty).orElse(true)) return new ArrayList<>();
 
-        List<RecipeHolder<? extends Recipe<?>>> list =
-                RecipeFinder.get(getRecipeCacheKey(), level, this::matchStaticFilters);
-        return list.stream()
-                .map(RecipeHolder::value)
-                .filter(this::matchBasinRecipe)
-                .sorted((r1, r2) -> r2.getIngredients().size() - r1.getIngredients().size())
-                .collect(Collectors.toList());
+        List<Recipe<?>> list = new ArrayList<>();
+        for (RecipeHolder<? extends Recipe<?>> r :
+                RecipeFinder.get(getRecipeCacheKey(), level, this::matchStaticFilters))
+            if (matchBasinRecipe(r.value())) list.add(r.value());
+
+        list.sort((r1, r2) -> r2.getIngredients().size() - r1.getIngredients().size());
+
+        return list;
     }
 
     protected abstract void onBasinRemoved();

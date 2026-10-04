@@ -1,7 +1,7 @@
 package com.simibubi.create.content.logistics.stockTicker;
 
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.LogisticsManager;
@@ -39,17 +39,20 @@ public abstract class StockCheckingBlockEntity extends SmartBlockEntity {
     }
 
     public boolean broadcastPackageRequest(
-            RequestType type, PackageOrder order, InventoryIdentifier identifier, String address) {
-        return broadcastPackageRequest(type, order, identifier, address, null);
+            RequestType type,
+            PackageOrder order,
+            @Nullable IdentifiedInventory ignoredHandler,
+            String address) {
+        return broadcastPackageRequest(
+                type, PackageOrderWithCrafts.simple(order.stacks()), ignoredHandler, address);
     }
 
     public boolean broadcastPackageRequest(
             RequestType type,
-            PackageOrder order,
-            InventoryIdentifier identifier,
-            String address,
-            @Nullable PackageOrder orderContext) {
+            PackageOrderWithCrafts order,
+            @Nullable IdentifiedInventory ignoredHandler,
+            String address) {
         return LogisticsManager.broadcastPackageRequest(
-                behaviour.freqId, type, order, identifier, address, orderContext);
+                behaviour.freqId, type, order, ignoredHandler, address);
     }
 }

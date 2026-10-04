@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.ResourceAmount;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.lang.ref.WeakReference;
 import java.util.function.Predicate;
@@ -41,7 +42,7 @@ public abstract class FlowSource {
 
     public abstract boolean isEndpoint();
 
-    public void manageSource(Level world) {}
+    public void manageSource(Level world, BlockEntity networkBE) {}
 
     public void whileFlowPresent(Level world, boolean pulling) {}
 
@@ -59,10 +60,13 @@ public abstract class FlowSource {
             this.level = null;
         }
 
-        public void manageSource(Level world) {
-            if (world != this.level) {
-                this.level = world;
-                this.provider = StorageProvider.createForFluids(world, location.getConnectedPos());
+        // fabric: StorageProvider handles invalidation itself and also works in non-server levels
+        // (e.g. Ponder), so networkBE is unused here
+        @Override
+        public void manageSource(Level level, BlockEntity networkBE) {
+            if (level != this.level) {
+                this.level = level;
+                this.provider = StorageProvider.createForFluids(level, location.getConnectedPos());
             }
         }
 
@@ -85,7 +89,7 @@ public abstract class FlowSource {
         }
 
         @Override
-        public void manageSource(Level world) {
+        public void manageSource(Level world, BlockEntity networkBE) {
             if (cached != null && cached.get() != null && !cached.get().blockEntity.isRemoved())
                 return;
             cached = null;

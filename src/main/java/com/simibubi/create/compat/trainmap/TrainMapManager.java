@@ -62,12 +62,7 @@ public class TrainMapManager {
     }
 
     public static List<FormattedText> renderAndPick(
-            GuiGraphics graphics,
-            int mouseX,
-            int mouseY,
-            float pt,
-            boolean linearFiltering,
-            Rect2i bounds) {
+            GuiGraphics graphics, int mouseX, int mouseY, boolean linearFiltering, Rect2i bounds) {
         Object hoveredElement = null;
 
         int offScreenMargin = 32;
@@ -76,9 +71,9 @@ public class TrainMapManager {
         bounds.setWidth(bounds.getWidth() + 2 * offScreenMargin);
         bounds.setHeight(bounds.getHeight() + 2 * offScreenMargin);
 
-        TrainMapRenderer.INSTANCE.render(graphics, mouseX, mouseY, pt, linearFiltering, bounds);
-        hoveredElement = drawTrains(graphics, mouseX, mouseY, pt, hoveredElement, bounds);
-        hoveredElement = drawPoints(graphics, mouseX, mouseY, pt, hoveredElement, bounds);
+        TrainMapRenderer.INSTANCE.render(graphics, linearFiltering, bounds);
+        hoveredElement = drawTrains(graphics, mouseX, mouseY, hoveredElement, bounds);
+        hoveredElement = drawPoints(graphics, mouseX, mouseY, hoveredElement, bounds);
 
         graphics.bufferSource().endBatch();
 
@@ -220,12 +215,7 @@ public class TrainMapManager {
     }
 
     private static Object drawPoints(
-            GuiGraphics graphics,
-            int mouseX,
-            int mouseY,
-            float pt,
-            Object hoveredElement,
-            Rect2i bounds) {
+            GuiGraphics graphics, int mouseX, int mouseY, Object hoveredElement, Rect2i bounds) {
         PoseStack pose = graphics.pose();
         RenderSystem.enableDepthTest();
 
@@ -298,12 +288,7 @@ public class TrainMapManager {
     }
 
     private static Object drawTrains(
-            GuiGraphics graphics,
-            int mouseX,
-            int mouseY,
-            float pt,
-            Object hoveredElement,
-            Rect2i bounds) {
+            GuiGraphics graphics, int mouseX, int mouseY, Object hoveredElement, Rect2i bounds) {
         PoseStack pose = graphics.pose();
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();

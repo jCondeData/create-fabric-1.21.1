@@ -6,7 +6,7 @@ import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.utility.CreateLang;
@@ -96,9 +96,8 @@ public class RedstoneRequesterBlock extends Block
     public static void programRequester(
             ServerPlayer player,
             StockTickerBlockEntity be,
-            PackageOrder order,
-            String address,
-            PackageOrder orderContext) {
+            PackageOrderWithCrafts order,
+            String address) {
         ItemStack stack = player.getMainHandItem();
         boolean isRequester = AllBlocks.REDSTONE_REQUESTER.isIn(stack);
         boolean isShopCloth = AllItemTags.TABLE_CLOTHS.matches(stack);
@@ -106,8 +105,7 @@ public class RedstoneRequesterBlock extends Block
 
         String targetDim = player.level().dimension().location().toString();
         AutoRequestData autoRequestData =
-                new AutoRequestData(
-                        order, orderContext, address, be.getBlockPos(), targetDim, false);
+                new AutoRequestData(order, address, be.getBlockPos(), targetDim, false);
 
         autoRequestData.writeToItem(BlockPos.ZERO, stack);
 
@@ -160,7 +158,6 @@ public class RedstoneRequesterBlock extends Block
                             AutoRequestData.readFromItem(pLevel, player, requesterPos, pStack);
                     if (data == null) return;
                     rrbe.encodedRequest = data.encodedRequest();
-                    rrbe.encodedRequestContext = data.encodedRequestContext();
                     rrbe.encodedTargetAdress = data.encodedTargetAddress();
                 });
     }

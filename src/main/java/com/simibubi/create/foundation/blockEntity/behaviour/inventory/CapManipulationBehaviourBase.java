@@ -1,6 +1,6 @@
 package com.simibubi.create.foundation.blockEntity.behaviour.inventory;
 
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
+import com.simibubi.create.api.packager.InventoryIdentifier;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
@@ -50,17 +50,9 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
         findNewNextTick = true;
     }
 
-    public BlockFace getTarget() {
-        return this.target.getTarget(
-                getWorld(), blockEntity.getBlockPos(), blockEntity.getBlockState());
-    }
-
     @Override
     public void onNeighborChanged(BlockPos neighborPos) {
-        BlockFace targetBlockFace =
-                target.getTarget(
-                        getWorld(), blockEntity.getBlockPos(), blockEntity.getBlockState());
-        if (targetBlockFace.getConnectedPos().equals(neighborPos)) onHandlerInvalidated();
+        if (this.getTarget().getConnectedPos().equals(neighborPos)) onHandlerInvalidated();
     }
 
     @SuppressWarnings("unchecked")
@@ -93,16 +85,27 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
         return this.filter.test(storage, this.targetStorageProvider) ? storage : null;
     }
 
+    // fabric: convenience for callers of the old Fabric InventoryIdentifier API.
+    // Upstream uses InvManipulationBehaviour#getIdentifiedInventory instead.
     @Nullable
     public InventoryIdentifier getIdentifier() {
         return !this.hasInventory()
                 ? null
-                : InventoryIdentifier.get(getWorld(), blockEntity.getBlockPos(), side);
+                : InventoryIdentifier.get(getWorld(), this.getTarget().getOpposite());
+    }
+
+    /**
+     * Get the target of this is behavior, which is the face of the owner BlockEntity that acts as
+     * the interface. To get the BlockFace to use for capability lookup, call getOpposite on the
+     * result.
+     */
+    public BlockFace getTarget() {
+        return this.target.getTarget(
+                this.getWorld(), this.blockEntity.getBlockPos(), this.blockEntity.getBlockState());
     }
 
     protected boolean onHandlerInvalidated() {
         if (this.targetStorageProvider == null) return false;
-
         findNewNextTick = true;
         this.setProvider(null, null);
         return true;
@@ -139,9 +142,7 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
 
     public void findNewCapability() {
         Level world = getWorld();
-        BlockFace targetBlockFace =
-                target.getTarget(world, blockEntity.getBlockPos(), blockEntity.getBlockState())
-                        .getOpposite();
+        BlockFace targetBlockFace = this.getTarget().getOpposite();
         BlockPos pos = targetBlockFace.getPos();
         this.setProvider(null, null);
         if (!world.isLoaded(pos)) return;

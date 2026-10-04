@@ -3,7 +3,7 @@ package com.simibubi.create.content.logistics.packager;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
-import com.simibubi.create.api.unpacking.UnpackingHandler;
+import com.simibubi.create.api.packager.unpacking.UnpackingHandler;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
@@ -12,13 +12,12 @@ import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBehaviour;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlockEntity;
 import com.simibubi.create.content.logistics.packagerLink.RequestPromiseQueue;
 import com.simibubi.create.content.logistics.packagerLink.WiFiEffectPacket;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -78,7 +77,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
     public ItemStack heldBox;
     public ItemStack previouslyUnwrapped;
 
-    public List<ItemStack> queuedExitingPackages;
+    public List<BigItemStack> queuedExitingPackages;
 
     public final PackagerItemHandler inventory;
 
@@ -138,7 +137,12 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
             previouslyUnwrapped = ItemStack.EMPTY;
 
             if (!level.isClientSide() && !queuedExitingPackages.isEmpty() && heldBox.isEmpty()) {
-                heldBox = queuedExitingPackages.remove(0);
+                BigItemStack entry = queuedExitingPackages.get(0);
+                heldBox = entry.stack.copy();
+
+                entry.count--;
+                if (entry.count <= 0) queuedExitingPackages.remove(0);
+
                 animationInward = false;
                 animationTicks = CYCLE;
                 notifyUpdate();
@@ -179,10 +183,6 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
     }
 
     public InventorySummary getAvailableItems() {
-        return getAvailableItems(false);
-    }
-
-    public InventorySummary getAvailableItems(boolean scanInputSlots) {
         if (availableItems != null
                 && invVersionTracker.stillWaiting(targetInventory.getInventory()))
             return availableItems;
@@ -201,15 +201,8 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
             return availableItems;
         }
 
-        try (Transaction t = Transaction.openOuter()) {
-            for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
-                ItemVariant resource = view.getResource();
-                long amount =
-                        scanInputSlots
-                                ? view.getAmount()
-                                : view.extract(resource, view.getAmount(), t);
-                availableItems.add(resource, amount);
-            }
+        for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
+            availableItems.add(view.getResource(), view.getAmount());
         }
 
         invVersionTracker.awaitNewVersion(targetInventory.getInventory());
@@ -335,8 +328,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         List<ItemStack> items = ItemHelper.getNonEmptyStacks(contents);
         if (items.isEmpty()) return true;
 
-        PackageOrder orderContext = PackageItem.getOrderContext(box);
-
+        PackageOrderWithCrafts orderContext = PackageItem.getOrderContext(box);
         Direction facing =
                 getBlockState().getOptionalValue(PackagerBlock.FACING).orElse(Direction.UP);
         BlockPos target = worldPosition.relative(facing.getOpposite());
@@ -386,7 +378,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         boolean finalLinkInOrder = false;
         int packageIndexAtLink = 0;
         boolean finalPackageAtLink = false;
-        PackageOrder orderContext = null;
+        PackageOrderWithCrafts orderContext = null;
         boolean requestQueue = queuedRequests != null;
 
         if (requestQueue && !queuedRequests.isEmpty()) {
@@ -492,7 +484,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
             plbe.behaviour.deductFromAccurateSummary(extractedItems);
 
         if (!heldBox.isEmpty() || animationTicks != 0) {
-            queuedExitingPackages.add(createdBox);
+            queuedExitingPackages.add(new BigItemStack(createdBox, 1));
             return;
         }
 
@@ -519,10 +511,12 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         if (!(blockEntity instanceof SignBlockEntity sign)) return null;
         for (boolean front : Iterate.trueAndFalse) {
             SignText text = sign.getText(front);
+            String address = "";
             for (Component component : text.getMessages(false)) {
-                String address = component.getString();
-                if (!address.isBlank()) return address;
+                String string = component.getString();
+                if (!string.isBlank()) address += string.trim() + " ";
             }
+            if (!address.isBlank()) return address.trim();
         }
         return null;
     }
@@ -545,8 +539,11 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
                 ItemStack.parseOptional(registries, compound.getCompound("InsertedBox"));
         if (clientPacket) return;
         queuedExitingPackages =
-                NBTHelper.readItemList(
-                        compound.getList("QueuedPackages", Tag.TAG_COMPOUND), registries);
+                NBTHelper.readCompoundList(
+                        compound.getList("QueuedExitingPackages", Tag.TAG_COMPOUND),
+                        c ->
+                                CatnipCodecUtils.decode(BigItemStack.CODEC, registries, c)
+                                        .orElseThrow());
         if (compound.contains("LastSummary"))
             availableItems =
                     CatnipCodecUtils.decode(
@@ -567,7 +564,16 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         compound.put("HeldBox", heldBox.saveOptional(registries));
         compound.put("InsertedBox", previouslyUnwrapped.saveOptional(registries));
         if (clientPacket) return;
-        compound.put("QueuedPackages", NBTHelper.writeItemList(queuedExitingPackages, registries));
+        compound.put(
+                "QueuedExitingPackages",
+                NBTHelper.writeCompoundList(
+                        queuedExitingPackages,
+                        bis -> {
+                            if (CatnipCodecUtils.encode(BigItemStack.CODEC, registries, bis)
+                                            .orElse(new CompoundTag())
+                                    instanceof CompoundTag ct) return ct;
+                            return new CompoundTag();
+                        }));
         if (availableItems != null)
             compound.put(
                     "LastSummary",
@@ -580,13 +586,15 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         super.destroy();
         ItemHelper.dropContents(level, worldPosition, inventory);
         queuedExitingPackages.forEach(
-                stack ->
+                bigStack -> {
+                    for (int i = 0; i < bigStack.count; i++)
                         Containers.dropItemStack(
                                 level,
                                 worldPosition.getX(),
                                 worldPosition.getY(),
                                 worldPosition.getZ(),
-                                stack));
+                                bigStack.stack.copy());
+                });
         queuedExitingPackages.clear();
     }
 
@@ -610,10 +618,24 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         return animationTicks >= CYCLE / 2 ? ItemStack.EMPTY : heldBox;
     }
 
-    // fabric: forge's approach is not viable. Introduced InventoryIdentifier. Will upstream soon
-    public boolean isTargetingSameInventory(@Nullable InventoryIdentifier identifier) {
-        if (identifier == null || !this.targetInventory.hasInventory()) return false;
-        BlockFace target = this.targetInventory.getTarget();
-        return identifier.contains(target);
+    public boolean isTargetingSameInventory(@Nullable IdentifiedInventory inventory) {
+        if (inventory == null) return false;
+
+        Storage<ItemVariant> targetHandler = this.targetInventory.getInventory();
+        if (targetHandler == null) return false;
+
+        if (inventory.identifier() != null) {
+            BlockFace face = this.targetInventory.getTarget().getOpposite();
+            return inventory.identifier().contains(face);
+        } else {
+            return isSameInventoryFallback(targetHandler, inventory.handler());
+        }
+    }
+
+    private static boolean isSameInventoryFallback(
+            Storage<ItemVariant> first, Storage<ItemVariant> second) {
+        // fabric: forge's fallback (comparing contained ItemStack instances) is not viable, since
+        // storage views do not expose their backing stacks. Only identity can be compared.
+        return first == second;
     }
 }

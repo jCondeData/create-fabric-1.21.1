@@ -35,6 +35,26 @@ import java.util.List;
 public class CreateRegistrateTags {
     private static final CreateRegistrate REGISTRATE = Create.registrate();
 
+    private static final Block[] SHULKER_BOXES = {
+        Blocks.SHULKER_BOX,
+        Blocks.WHITE_SHULKER_BOX,
+        Blocks.ORANGE_SHULKER_BOX,
+        Blocks.MAGENTA_SHULKER_BOX,
+        Blocks.LIGHT_BLUE_SHULKER_BOX,
+        Blocks.YELLOW_SHULKER_BOX,
+        Blocks.LIME_SHULKER_BOX,
+        Blocks.PINK_SHULKER_BOX,
+        Blocks.GRAY_SHULKER_BOX,
+        Blocks.LIGHT_GRAY_SHULKER_BOX,
+        Blocks.CYAN_SHULKER_BOX,
+        Blocks.PURPLE_SHULKER_BOX,
+        Blocks.BLUE_SHULKER_BOX,
+        Blocks.BROWN_SHULKER_BOX,
+        Blocks.GREEN_SHULKER_BOX,
+        Blocks.RED_SHULKER_BOX,
+        Blocks.BLACK_SHULKER_BOX
+    };
+
     public static void addGenerators() {
         REGISTRATE.addDataGenerator(ProviderType.BLOCK_TAGS, CreateRegistrateTags::genBlockTags);
         REGISTRATE.addDataGenerator(ProviderType.ITEM_TAGS, CreateRegistrateTags::genItemTags);
@@ -157,26 +177,17 @@ public class CreateRegistrateTags {
 
         // tags aren't used here because the implementations of modded entries are unknown
         prov.tag(AllBlockTags.CHEST_MOUNTED_STORAGE.tag).add(Blocks.CHEST, Blocks.TRAPPED_CHEST);
-        prov.tag(AllBlockTags.SIMPLE_MOUNTED_STORAGE.tag)
+        prov.tag(AllBlockTags.SIMPLE_MOUNTED_STORAGE.tag).add(Blocks.BARREL).add(SHULKER_BOXES);
+
+        prov.tag(AllBlockTags.SINGLE_BLOCK_INVENTORIES.tag)
+                .add(SHULKER_BOXES)
                 .add(
-                        Blocks.BARREL,
-                        Blocks.SHULKER_BOX,
-                        Blocks.WHITE_SHULKER_BOX,
-                        Blocks.ORANGE_SHULKER_BOX,
-                        Blocks.MAGENTA_SHULKER_BOX,
-                        Blocks.LIGHT_BLUE_SHULKER_BOX,
-                        Blocks.YELLOW_SHULKER_BOX,
-                        Blocks.LIME_SHULKER_BOX,
-                        Blocks.PINK_SHULKER_BOX,
-                        Blocks.GRAY_SHULKER_BOX,
-                        Blocks.LIGHT_GRAY_SHULKER_BOX,
-                        Blocks.CYAN_SHULKER_BOX,
-                        Blocks.PURPLE_SHULKER_BOX,
-                        Blocks.BLUE_SHULKER_BOX,
-                        Blocks.BROWN_SHULKER_BOX,
-                        Blocks.GREEN_SHULKER_BOX,
-                        Blocks.RED_SHULKER_BOX,
-                        Blocks.BLACK_SHULKER_BOX);
+                        Blocks.HOPPER,
+                        Blocks.DISPENSER,
+                        Blocks.DROPPER,
+                        Blocks.CHISELED_BOOKSHELF,
+                        Blocks.JUKEBOX)
+                .addTag(Tags.Blocks.BARRELS);
 
         prov.tag(AllBlockTags.ROOTS.tag).add(Blocks.MANGROVE_ROOTS);
 
@@ -291,6 +302,8 @@ public class CreateRegistrateTags {
                         Items.CAKE,
                         Items.BOWL,
                         Items.MUSHROOM_STEW,
+                        Items.RABBIT_STEW,
+                        Items.BEETROOT_SOUP,
                         Items.SUSPICIOUS_STEW);
 
         prov.tag(AllItemTags.CONTRAPTION_CONTROLLED.tag)
@@ -313,6 +326,13 @@ public class CreateRegistrateTags {
                         AllBlocks.TRACK_DARK_OAK_WIDE.get().asItem());
 
         prov.tag(ConventionalItemTags.ENCHANTABLES).addTag(AllItemTags.PRESSURIZED_AIR_SOURCES.tag);
+
+        // fabric: upstream removes the diving armor from minecraft:trimmable_armor via NeoForge's
+        // tag "remove" entries, which Fabric tag files do not support. Trimming diving armor has
+        // to be prevented in code instead (the port previously did this in
+        // SmithingTrimRecipeMixin).
+
+        prov.tag(ItemTags.DURABILITY_ENCHANTABLE).addTag(AllItemTags.SANDPAPER.tag);
 
         // COMPAT
 

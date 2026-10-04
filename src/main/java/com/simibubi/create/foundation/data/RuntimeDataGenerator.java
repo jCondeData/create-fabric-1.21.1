@@ -7,11 +7,13 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.simibubi.create.Create;
+import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
 import com.simibubi.create.content.kinetics.saw.CuttingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeSerializer;
 import com.simibubi.create.foundation.data.recipe.Mods;
+import com.simibubi.create.foundation.mixin.accessor.ConcretePowderBlockAccessor;
 import com.simibubi.create.foundation.pack.DynamicPack;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 
@@ -29,6 +31,8 @@ import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ConcretePowderBlock;
 
 import org.jetbrains.annotations.ApiStatus;
 
@@ -76,7 +80,10 @@ public class RuntimeDataGenerator {
                     .build();
 
     public static void insertIntoPack(DynamicPack dynamicPack) {
-        for (ResourceLocation itemId : BuiltInRegistries.ITEM.keySet()) cuttingRecipes(itemId);
+        for (ResourceLocation itemId : BuiltInRegistries.ITEM.keySet()) {
+            cuttingRecipes(itemId);
+            washingRecipes(itemId);
+        }
 
         Create.LOGGER.info(
                 "Created {} recipes which will be injected into the game", JSON_FILES.size());
@@ -184,6 +191,15 @@ public class RuntimeDataGenerator {
         }
     }
 
+    private static void washingRecipes(ResourceLocation itemId) {
+        Block block = BuiltInRegistries.BLOCK.get(itemId);
+        if (block instanceof ConcretePowderBlock concretePowderBlock) {
+            Block concreteBlock =
+                    ((ConcretePowderBlockAccessor) concretePowderBlock).create$getConcrete();
+            simpleSplashingRecipe(itemId, BuiltInRegistries.BLOCK.getKey(concreteBlock));
+        }
+    }
+
     private static void insertIntoTag(ResourceLocation tag, ResourceLocation itemId) {
         if (BuiltInRegistries.ITEM.containsKey(itemId))
             TAGS.put(tag, TagEntry.optionalElement(itemId));
@@ -223,6 +239,13 @@ public class RuntimeDataGenerator {
         }
     }
 
+    private static void simpleSplashingRecipe(ResourceLocation first, ResourceLocation second) {
+        new Builder<>(first.getNamespace(), SplashingRecipe::new, first.getPath(), second.getPath())
+                .require(BuiltInRegistries.BLOCK.get(first))
+                .output(BuiltInRegistries.BLOCK.get(second))
+                .build();
+    }
+
     private static class Builder<T extends ProcessingRecipe<?>> extends ProcessingRecipeBuilder<T> {
         public Builder(
                 String modid,
@@ -242,7 +265,7 @@ public class RuntimeDataGenerator {
             IRecipeTypeInfo recipeType = recipe.getTypeInfo();
             ResourceLocation typeId = recipeType.getId();
 
-            if (!(recipeType.getSerializer() instanceof ProcessingRecipeSerializer))
+            if (!(recipeType.getSerializer() instanceof ProcessingRecipeSerializer<?>))
                 throw new IllegalStateException(
                         "Cannot datagen ProcessingRecipe of type: " + typeId);
 

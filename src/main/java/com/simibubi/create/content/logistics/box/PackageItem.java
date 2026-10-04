@@ -7,7 +7,7 @@ import com.simibubi.create.AllEntityTypes;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.infrastructure.fabric.transfer.TransferUtil;
 import com.simibubi.create.infrastructure.fabric.transfer.item.ItemStackHandler;
@@ -123,7 +123,7 @@ public class PackageItem extends Item {
             boolean isFinalLink,
             int fragmentIndex,
             boolean isFinal,
-            @Nullable PackageOrder orderContext) {
+            @Nullable PackageOrderWithCrafts orderContext) {
         PackageOrderData order =
                 new PackageOrderData(
                         orderId, linkIndex, isFinalLink, fragmentIndex, isFinal, orderContext);
@@ -143,7 +143,7 @@ public class PackageItem extends Item {
         return getOrderId(box.toStack());
     }
 
-    public static PackageOrder getOrderContext(ItemStack box) {
+    public static PackageOrderWithCrafts getOrderContext(ItemStack box) {
         if (box.has(AllDataComponents.PACKAGE_ORDER_DATA)) {
             PackageOrderData data = box.get(AllDataComponents.PACKAGE_ORDER_DATA);
             return data.orderContext();
@@ -154,7 +154,7 @@ public class PackageItem extends Item {
         }
     }
 
-    public static void addOrderContext(ItemStack box, PackageOrder orderContext) {
+    public static void addOrderContext(ItemStack box, PackageOrderWithCrafts orderContext) {
         box.set(AllDataComponents.PACKAGE_ORDER_CONTEXT, orderContext);
     }
 
@@ -424,14 +424,14 @@ public class PackageItem extends Item {
             boolean isFinalLink,
             int fragmentIndex,
             boolean isFinal,
-            @Nullable PackageOrder orderContext) {
+            @Nullable PackageOrderWithCrafts orderContext) {
         public PackageOrderData(
                 int orderId,
                 int linkIndex,
                 boolean isFinalLink,
                 int fragmentIndex,
                 boolean isFinal,
-                Optional<PackageOrder> orderContext) {
+                Optional<PackageOrderWithCrafts> orderContext) {
             this(
                     orderId,
                     linkIndex,
@@ -460,7 +460,7 @@ public class PackageItem extends Item {
                                                 Codec.BOOL
                                                         .fieldOf("is_final")
                                                         .forGetter(PackageOrderData::isFinal),
-                                                PackageOrder.CODEC
+                                                PackageOrderWithCrafts.CODEC
                                                         .optionalFieldOf("order_context")
                                                         .forGetter(
                                                                 i ->
@@ -480,7 +480,7 @@ public class PackageItem extends Item {
                         PackageOrderData::fragmentIndex,
                         ByteBufCodecs.BOOL,
                         PackageOrderData::isFinal,
-                        CatnipStreamCodecBuilders.nullable(PackageOrder.STREAM_CODEC),
+                        CatnipStreamCodecBuilders.nullable(PackageOrderWithCrafts.STREAM_CODEC),
                         PackageOrderData::orderContext,
                         PackageOrderData::new);
     }

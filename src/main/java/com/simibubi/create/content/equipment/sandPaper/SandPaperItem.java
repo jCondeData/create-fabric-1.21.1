@@ -69,7 +69,8 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
             ItemStack item = itemInOtherHand.copy();
             ItemStack toPolish = item.split(1);
             playerIn.startUsingItem(handIn);
-            itemstack.set(AllDataComponents.SAND_PAPER_POLISHING, toPolish);
+            itemstack.set(
+                    AllDataComponents.SAND_PAPER_POLISHING, new SandPaperItemComponent(toPolish));
             playerIn.setItemInHand(otherHand, item);
             return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemstack);
         }
@@ -97,7 +98,8 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
         playerIn.startUsingItem(handIn);
 
         if (!worldIn.isClientSide) {
-            itemstack.set(AllDataComponents.SAND_PAPER_POLISHING, toPolish);
+            itemstack.set(
+                    AllDataComponents.SAND_PAPER_POLISHING, new SandPaperItemComponent(toPolish));
             if (item.isEmpty()) pickUp.discard();
             else pickUp.setItem(item);
         }
@@ -109,7 +111,7 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
     public ItemStack finishUsingItem(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
         if (!(entityLiving instanceof Player player)) return stack;
         if (stack.has(AllDataComponents.SAND_PAPER_POLISHING)) {
-            ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING);
+            ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING).item();
             //noinspection DataFlowIssue - toPolish won't be null as we do call .has before calling
             // .get
             ItemStack polished =
@@ -158,7 +160,7 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
             ItemStack stack, Level worldIn, LivingEntity entityLiving, int timeLeft) {
         if (!(entityLiving instanceof Player player)) return;
         if (stack.has(AllDataComponents.SAND_PAPER_POLISHING)) {
-            ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING);
+            ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING).item();
             //noinspection DataFlowIssue - toPolish won't be null as we do call .has before calling
             // .get
             player.getInventory().placeItemBackInInventory(toPolish);
@@ -221,7 +223,7 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
     public boolean triggerUseEffects(
             ItemStack stack, LivingEntity entity, int count, RandomSource random) {
         if (stack.has(AllDataComponents.SAND_PAPER_POLISHING)) {
-            ItemStack polishing = stack.get(AllDataComponents.SAND_PAPER_POLISHING);
+            ItemStack polishing = stack.get(AllDataComponents.SAND_PAPER_POLISHING).item();
             ((LivingEntityAccessor) entity).create$callSpawnItemParticles(polishing, 1);
         }
 

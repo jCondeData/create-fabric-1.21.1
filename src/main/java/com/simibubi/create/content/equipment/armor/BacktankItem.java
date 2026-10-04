@@ -3,6 +3,7 @@ package com.simibubi.create.content.equipment.armor;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.foundation.item.LayeredArmorItem;
 
+import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -16,6 +17,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +61,15 @@ public class BacktankItem extends BaseArmorItem {
     @Override
     public boolean isEnchantable(ItemStack p_77616_1_) {
         return true;
+    }
+
+    // Fabric: FabricItem#canBeEnchantedWith replaces NeoForge's supportsEnchantment hook
+    @Override
+    public boolean canBeEnchantedWith(
+            ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
+        if (enchantment.is(Enchantments.MENDING) || enchantment.is(Enchantments.UNBREAKING))
+            return false;
+        return super.canBeEnchantedWith(stack, enchantment, context);
     }
 
     @Override

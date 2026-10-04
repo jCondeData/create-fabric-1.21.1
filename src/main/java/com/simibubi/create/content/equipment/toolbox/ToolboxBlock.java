@@ -17,7 +17,6 @@ import io.github.fabricators_of_create.porting_lib.util.TagUtil;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -26,7 +25,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -85,10 +83,7 @@ public class ToolboxBlock extends HorizontalDirectionalBlock
                 worldIn,
                 pos,
                 be -> {
-                    be.readInventory(
-                            stack.getOrDefault(
-                                    AllDataComponents.TOOLBOX_INVENTORY,
-                                    ItemContainerContents.EMPTY));
+                    be.readInventory(stack.get(AllDataComponents.TOOLBOX_INVENTORY));
                     if (stack.has(AllDataComponents.TOOLBOX_UUID))
                         be.setUniqueId(stack.get(AllDataComponents.TOOLBOX_UUID));
                     if (stack.has(DataComponents.CUSTOM_NAME))
@@ -111,19 +106,16 @@ public class ToolboxBlock extends HorizontalDirectionalBlock
         withBlockEntityDo(world, pos, ToolboxBlockEntity::unequipTracked);
         if (world instanceof ServerLevel) {
             ItemStack cloneItemStack = getCloneItemStack(world, pos, state);
+            withBlockEntityDo(
+                    world,
+                    pos,
+                    i -> {
+                        cloneItemStack.applyComponents(i.collectComponents());
+                    });
             world.destroyBlock(pos, false);
             if (world.getBlockState(pos) != state)
                 player.getInventory().placeItemBackInInventory(cloneItemStack);
         }
-    }
-
-    // fabric: Porting Lib's ItemStackHandler keeps no backing NonNullList to reach into, read the
-    // slots instead
-    private static NonNullList<ItemStack> readInventory(ToolboxBlockEntity be) {
-        ToolboxInventory inv = be.inventory;
-        NonNullList<ItemStack> stacks = NonNullList.withSize(inv.getSlotCount(), ItemStack.EMPTY);
-        for (int i = 0; i < inv.getSlotCount(); i++) stacks.set(i, inv.getStackInSlot(i));
-        return stacks;
     }
 
     @Override
@@ -131,9 +123,7 @@ public class ToolboxBlock extends HorizontalDirectionalBlock
         ItemStack item = new ItemStack(this);
         Optional<ToolboxBlockEntity> blockEntityOptional = getBlockEntityOptional(level, pos);
 
-        NonNullList<ItemStack> stacks =
-                blockEntityOptional.map(ToolboxBlock::readInventory).orElse(NonNullList.create());
-        item.set(AllDataComponents.TOOLBOX_INVENTORY, ItemContainerContents.fromItems(stacks));
+        blockEntityOptional.map(tb -> item.set(AllDataComponents.TOOLBOX_INVENTORY, tb.inventory));
 
         blockEntityOptional
                 .map(ToolboxBlockEntity::getUniqueId)

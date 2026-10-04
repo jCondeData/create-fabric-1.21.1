@@ -16,7 +16,6 @@ import com.simibubi.create.foundation.block.connected.ConnectedTextureBehaviour;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.simibubi.create.foundation.item.render.CustomRenderedItemModelRenderer;
 import com.simibubi.create.foundation.item.render.CustomRenderedItems;
-import com.simibubi.create.foundation.mixin.accessor.AbstractRegistrateAccessor;
 import com.simibubi.create.impl.registrate.CreateRegistrateRegistrationCallbackImpl;
 import com.simibubi.create.impl.registrate.CreateRegistrateRegistrationCallbackImpl.CallbackImpl;
 import com.tterrag.registrate.AbstractRegistrate;
@@ -26,7 +25,6 @@ import com.tterrag.registrate.builders.Builder;
 import com.tterrag.registrate.builders.FluidBuilder;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.fabric.SimpleFlowableFluid;
-import com.tterrag.registrate.providers.RegistrateDataProvider;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
@@ -55,7 +53,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -482,12 +479,6 @@ public class CreateRegistrate extends AbstractRegistrate<CreateRegistrate> {
                 .register(
                         RegisteredObjectsHelper.getKeyOrThrow(entry),
                         new CTModelProvider(behavior));
-    }
-
-    @ApiStatus.Internal
-    public RegistrateDataProvider setDataProvider(RegistrateDataProvider provider) {
-        ((AbstractRegistrateAccessor) this).create$setProvider(provider);
-        return provider;
     }
 
     @Environment(EnvType.CLIENT)

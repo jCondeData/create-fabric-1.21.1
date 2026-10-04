@@ -28,6 +28,7 @@ import com.tterrag.registrate.util.nullness.NonNullSupplier;
 
 import net.createmod.catnip.lang.Lang;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalEntityTypeTags;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;
@@ -156,16 +157,18 @@ public class AllEntityTypes {
             int range,
             int updateFrequency,
             boolean sendVelocity) {
-        return register(
-                name,
-                factory,
-                renderer,
-                MobCategory.MISC,
-                range,
-                updateFrequency,
-                sendVelocity,
-                true,
-                AbstractContraptionEntity::build);
+        return (CreateEntityBuilder<T, ?>)
+                register(
+                                name,
+                                factory,
+                                renderer,
+                                MobCategory.MISC,
+                                range,
+                                updateFrequency,
+                                sendVelocity,
+                                true,
+                                AbstractContraptionEntity::build)
+                        .tag(ConventionalEntityTypeTags.TELEPORTING_NOT_SUPPORTED);
     }
 
     private static <T extends Entity> CreateEntityBuilder<T, ?> register(

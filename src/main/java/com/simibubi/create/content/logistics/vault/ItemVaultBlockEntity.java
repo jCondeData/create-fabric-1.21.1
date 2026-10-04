@@ -2,8 +2,7 @@ package com.simibubi.create.content.logistics.vault;
 
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier.MultiBlock;
+import com.simibubi.create.api.packager.InventoryIdentifier;
 import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -27,10 +26,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -65,11 +63,6 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
         itemCapability = null;
         radius = 1;
         length = 1;
-    }
-
-    public InventoryIdentifier getInvId() {
-        this.initCapability();
-        return this.invId;
     }
 
     @Override
@@ -245,6 +238,12 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
         return inventory;
     }
 
+    public InventoryIdentifier getInvId() {
+        // ensure capability is up to date first, which sets the ID
+        this.initCapability();
+        return this.invId;
+    }
+
     public void applyInventoryToBlock(ItemStackHandler handler) {
         for (int i = 0; i < inventory.getSlotCount(); i++)
             inventory.setStackInSlot(
@@ -271,7 +270,6 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
 
         boolean alongZ = ItemVaultBlock.getVaultBlockAxis(getBlockState()) == Axis.Z;
         ItemStackHandler[] invs = new ItemStackHandler[length * radius * radius];
-        Set<BlockPos> vaultPositions = new HashSet<>();
         for (int yOffset = 0; yOffset < length; yOffset++) {
             for (int xOffset = 0; xOffset < radius; xOffset++) {
                 for (int zOffset = 0; zOffset < radius; zOffset++) {
@@ -279,7 +277,6 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
                             alongZ
                                     ? worldPosition.offset(xOffset, zOffset, yOffset)
                                     : worldPosition.offset(yOffset, xOffset, zOffset);
-                    vaultPositions.add(vaultPos);
                     ItemVaultBlockEntity vaultAt =
                             ConnectivityHandler.partAt(
                                     AllBlockEntityTypes.ITEM_VAULT.get(), level, vaultPos);
@@ -292,7 +289,14 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
         Storage<ItemVariant> combinedInvWrapper = new CombinedStorage<>(List.of(invs));
         combinedInvWrapper = new VersionedInventoryWrapper(combinedInvWrapper);
         itemCapability = combinedInvWrapper;
-        this.invId = new MultiBlock(vaultPositions);
+
+        // build an identifier encompassing all component vaults
+        BlockPos farCorner =
+                alongZ
+                        ? worldPosition.offset(radius, radius, length)
+                        : worldPosition.offset(length, radius, radius);
+        BoundingBox bounds = BoundingBox.fromCorners(this.worldPosition, farCorner);
+        this.invId = new InventoryIdentifier.Bounds(bounds);
     }
 
     public static int getMaxLength(int radius) {

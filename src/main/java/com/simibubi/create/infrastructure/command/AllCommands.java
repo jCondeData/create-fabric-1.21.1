@@ -62,6 +62,7 @@ public class AllCommands {
                 .then(CameraAngleCommand.register())
                 // .then(DebugValueCommand.register())
                 // .then(KillTPSCommand.register())
+                // .then(DebugHatsCommand.register())
                 .build();
     }
 }

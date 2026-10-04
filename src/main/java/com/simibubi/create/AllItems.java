@@ -377,6 +377,7 @@ public class AllItems {
             REGISTRATE
                     .item("super_glue", SuperGlueItem::new)
                     .properties(p -> p.stacksTo(1).durability(99))
+                    .tag(ItemTags.DURABILITY_ENCHANTABLE)
                     .register();
 
     public static final ItemEntry<MinecartCouplingItem> MINECART_COUPLING =
@@ -428,10 +429,8 @@ public class AllItems {
                             // enough to disable durability, so we need
                             // to set its maxDamage to -1 as well
                             .model(AssetLookup.customGenericItemModel("_", "item"))
-                            .tag(
-                                    AllItemTags.PRESSURIZED_AIR_SOURCES.tag,
-                                    AllItemTags.DIVING_ARMOR.tag)
-                            .tag(ItemTags.CHEST_ARMOR)
+                            .tag(AllItemTags.PRESSURIZED_AIR_SOURCES.tag)
+                            .tag(ItemTags.CHEST_ARMOR, AllItemTags.DIVING_ARMOR.tag)
                             .register(),
             NETHERITE_BACKTANK =
                     REGISTRATE
@@ -451,10 +450,8 @@ public class AllItems {
                             // isn't enough to disable
                             // durability, so we need to set
                             // its maxDamage to -1 as well
-                            .tag(
-                                    AllItemTags.PRESSURIZED_AIR_SOURCES.tag,
-                                    AllItemTags.DIVING_ARMOR.tag)
-                            .tag(ItemTags.CHEST_ARMOR)
+                            .tag(AllItemTags.PRESSURIZED_AIR_SOURCES.tag)
+                            .tag(ItemTags.CHEST_ARMOR, AllItemTags.DIVING_ARMOR.tag)
                             .register();
     public static final ItemEntry<? extends DivingHelmetItem>
             COPPER_DIVING_HELMET =
@@ -517,7 +514,7 @@ public class AllItems {
                                     "cardboard_helmet",
                                     p -> new CardboardArmorItem(ArmorItem.Type.HELMET, p))
                             .properties(p -> p.durability(Type.HELMET.getDurability(4)))
-                            .tag(ItemTags.HEAD_ARMOR, ItemTags.TRIMMABLE_ARMOR)
+                            .tag(ItemTags.HEAD_ARMOR)
                             .onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
                             .onRegisterAfter(
                                     Registries.ITEM,
@@ -530,7 +527,7 @@ public class AllItems {
                                     "cardboard_chestplate",
                                     p -> new CardboardArmorItem(ArmorItem.Type.CHESTPLATE, p))
                             .properties(p -> p.durability(Type.CHESTPLATE.getDurability(4)))
-                            .tag(ItemTags.CHEST_ARMOR, ItemTags.TRIMMABLE_ARMOR)
+                            .tag(ItemTags.CHEST_ARMOR)
                             .onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
                             .onRegisterAfter(
                                     Registries.ITEM,
@@ -543,7 +540,7 @@ public class AllItems {
                                     "cardboard_leggings",
                                     p -> new CardboardArmorItem(ArmorItem.Type.LEGGINGS, p))
                             .properties(p -> p.durability(Type.LEGGINGS.getDurability(4)))
-                            .tag(ItemTags.LEG_ARMOR, ItemTags.TRIMMABLE_ARMOR)
+                            .tag(ItemTags.LEG_ARMOR)
                             .onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
                             .onRegisterAfter(
                                     Registries.ITEM,
@@ -556,7 +553,7 @@ public class AllItems {
                                     "cardboard_boots",
                                     p -> new CardboardArmorItem(ArmorItem.Type.BOOTS, p))
                             .properties(p -> p.durability(Type.BOOTS.getDurability(4)))
-                            .tag(ItemTags.FOOT_ARMOR, ItemTags.TRIMMABLE_ARMOR)
+                            .tag(ItemTags.FOOT_ARMOR)
                             .onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
                             .onRegisterAfter(
                                     Registries.ITEM,
@@ -623,7 +620,10 @@ public class AllItems {
                             CreateRegistrate.customRenderedItem(
                                     () -> PotatoCannonItemRenderer::new))
                     .model(AssetLookup.itemModelWithPartials())
-                    .tag(Tags.Items.ENCHANTABLES)
+                    .tag(
+                            Tags.Items.ENCHANTABLES,
+                            ItemTags.DURABILITY_ENCHANTABLE,
+                            ItemTags.BOW_ENCHANTABLE)
                     .register();
 
     public static final ItemEntry<ExtendoGripItem> EXTENDO_GRIP =
@@ -632,6 +632,7 @@ public class AllItems {
                     .properties(p -> p.rarity(Rarity.UNCOMMON))
                     .transform(
                             CreateRegistrate.customRenderedItem(() -> ExtendoGripItemRenderer::new))
+                    .tag(ItemTags.DURABILITY_ENCHANTABLE)
                     .model(AssetLookup.itemModelWithPartials())
                     .register();
 

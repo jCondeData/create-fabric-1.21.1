@@ -14,6 +14,7 @@ import net.createmod.catnip.platform.CatnipServices;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -301,6 +302,9 @@ public class PackageEntity extends LivingEntity implements IEntityWithComplexSpa
             return false;
         }
 
+        if (!box.canBeHurtBy(source))
+            return false; // Fabric: vanilla ItemStack check (fire resistance)
+
         if (source.equals(damageSources().inWall()) && (isPassenger() || insertionDelay < 20))
             return false;
 
@@ -459,5 +463,10 @@ public class PackageEntity extends LivingEntity implements IEntityWithComplexSpa
     @Override
     public boolean isAffectedByPotions() {
         return false;
+    }
+
+    @Override
+    public boolean fireImmune() {
+        return box.has(DataComponents.FIRE_RESISTANT) || super.fireImmune();
     }
 }

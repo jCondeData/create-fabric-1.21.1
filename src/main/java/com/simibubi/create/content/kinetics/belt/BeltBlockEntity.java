@@ -480,12 +480,14 @@ public class BeltBlockEntity extends KineticBlockEntity
                 transportedStack.sideOffset = side.getAxisDirection().getStep() * .675f;
                 if (side.getAxis() == Axis.X) transportedStack.sideOffset *= -1;
             } else {
+                // This creates a smoother transition from belt to belt
                 float extraOffset =
-                        BeltHelper.getSegmentBE(
-                                                level,
-                                                worldPosition.relative(
-                                                        movementFacing.getOpposite()))
-                                        != null
+                        transportedStack.prevBeltPosition != 0
+                                        && BeltHelper.getSegmentBE(
+                                                        level,
+                                                        worldPosition.relative(
+                                                                movementFacing.getOpposite()))
+                                                != null
                                 ? .26f
                                 : 0;
                 transportedStack.beltPosition =

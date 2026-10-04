@@ -8,27 +8,14 @@ import com.simibubi.create.Create;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.data.DamageTypeTagGen;
 import com.simibubi.create.foundation.data.TagLangGen;
-import com.simibubi.create.foundation.data.recipe.CompactingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.CrushingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.CuttingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.DeployingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.EmptyingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.FillingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.HauntingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.ItemApplicationRecipeGen;
-import com.simibubi.create.foundation.data.recipe.MechanicalCraftingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.MillingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.MixingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.PolishingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.PressingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.SequencedAssemblyRecipeGen;
-import com.simibubi.create.foundation.data.recipe.StandardRecipeGen;
-import com.simibubi.create.foundation.data.recipe.WashingRecipeGen;
+import com.simibubi.create.foundation.data.recipe.CreateMechanicalCraftingRecipeGen;
+import com.simibubi.create.foundation.data.recipe.CreateRecipeProvider;
+import com.simibubi.create.foundation.data.recipe.CreateSequencedAssemblyRecipeGen;
+import com.simibubi.create.foundation.data.recipe.CreateStandardRecipeGen;
 import com.simibubi.create.foundation.mixin.accessor.LootTableProviderSubProvidersAccessor;
 import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
 import com.simibubi.create.foundation.utility.FilesHelper;
 import com.tterrag.registrate.providers.ProviderType;
-import com.tterrag.registrate.providers.RegistrateDataProvider;
 
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 
@@ -50,26 +37,20 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
         addExtraRegistrateData();
         TagLangGen.datagen(); // тоже addDataGenerator
         FabricDataGenerator.Pack pack = generator.createPack();
-        // Вместо registrate().setupDatagen: у Registrate-Fabric 1.3.77 лут-провайдер сломан — в
-        // LootTableProvider
-        // попадают ванильные сабпровайдеры, а RegistrateBlockLootTables не переопределяет
-        // getKnownBlocks, так что
+        // fabric: upstream 6.0.4 stopped touching Registrate internals (setDataProvider /
+        // AbstractRegistrateAccessor are gone), so use the public setupDatagen. The pack builds the
+        // RegistrateDataProvider immediately, so its sub-providers can be adjusted right after.
+        Create.registrate().setupDatagen(pack, helper);
+        // У Registrate-Fabric 1.3.77 лут-провайдер сломан — в LootTableProvider попадают ванильные
+        // сабпровайдеры, а RegistrateBlockLootTables не переопределяет getKnownBlocks, так что
         // валидация требует таблиц для всего реестра. ponytail: лут-таблицы не регенерируем (лежат
-        // в src/generated),
-        // вернуть, когда Registrate-Fabric починит getKnownBlocks.
-        pack.addProvider(
-                (output, future) -> {
-                    RegistrateDataProvider provider =
-                            new RegistrateDataProvider(
-                                    Create.registrate(), Create.ID, helper, output, future);
-                    Create.registrate().setDataProvider(provider);
-                    provider.getSubProvider(ProviderType.LOOT)
-                            .ifPresent(
-                                    loot ->
-                                            ((LootTableProviderSubProvidersAccessor) loot)
-                                                    .create$setSubProviders(List.of()));
-                    return provider;
-                });
+        // в src/generated), вернуть, когда Registrate-Fabric починит getKnownBlocks.
+        Create.registrate()
+                .getDataProvider(ProviderType.LOOT)
+                .ifPresent(
+                        loot ->
+                                ((LootTableProviderSubProvidersAccessor) loot)
+                                        .create$setSubProviders(List.of()));
         gatherData(pack, helper);
     }
 
@@ -84,23 +65,11 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
         pack.addProvider(CreateEnchantmentTagsProvider::new);
         pack.addProvider(DamageTypeTagGen::new);
         pack.addProvider(AllAdvancements::new);
-        pack.addProvider(StandardRecipeGen::new);
-        pack.addProvider(MechanicalCraftingRecipeGen::new);
-        pack.addProvider(SequencedAssemblyRecipeGen::new);
-        // процессинговые рецепты (аналог ProcessingRecipeGen.registerAll апстрима)
-        pack.addProvider(CompactingRecipeGen::new);
-        pack.addProvider(CrushingRecipeGen::new);
-        pack.addProvider(CuttingRecipeGen::new);
-        pack.addProvider(DeployingRecipeGen::new);
-        pack.addProvider(EmptyingRecipeGen::new);
-        pack.addProvider(FillingRecipeGen::new);
-        pack.addProvider(HauntingRecipeGen::new);
-        pack.addProvider(ItemApplicationRecipeGen::new);
-        pack.addProvider(MillingRecipeGen::new);
-        pack.addProvider(MixingRecipeGen::new);
-        pack.addProvider(PolishingRecipeGen::new);
-        pack.addProvider(PressingRecipeGen::new);
-        pack.addProvider(WashingRecipeGen::new);
+        pack.addProvider(CreateStandardRecipeGen::new);
+        pack.addProvider(CreateMechanicalCraftingRecipeGen::new);
+        pack.addProvider(CreateSequencedAssemblyRecipeGen::new);
+        // процессинговые рецепты
+        CreateRecipeProvider.registerAllProcessing(pack);
         pack.addProvider(GeneratedEntriesProvider::new);
         pack.addProvider(VanillaHatOffsetGenerator::new);
 

@@ -1,7 +1,7 @@
 package com.simibubi.create.impl.unpacking;
 
-import com.simibubi.create.api.unpacking.UnpackingHandler;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.api.packager.unpacking.UnpackingHandler;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -28,7 +28,7 @@ public enum DefaultUnpackingHandler implements UnpackingHandler {
             BlockState state,
             Direction side,
             List<ItemStack> items,
-            @Nullable PackageOrder order,
+            @Nullable PackageOrderWithCrafts orderContext,
             boolean simulate) {
         BlockEntity targetBE = level.getBlockEntity(pos);
 

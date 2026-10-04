@@ -9,6 +9,9 @@ import com.simibubi.create.infrastructure.fabric.transfer.item.SlottedStackStora
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
@@ -31,6 +34,14 @@ public class ItemSlots {
                                                     .fieldOf("size")
                                                     .forGetter(ItemSlots::getSize))
                                     .apply(instance, ItemSlots::deserialize));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemSlots> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.map(HashMap::new, ByteBufCodecs.INT, ItemStack.STREAM_CODEC),
+                    ItemSlots::toBoxedMap,
+                    ByteBufCodecs.INT,
+                    ItemSlots::getSize,
+                    ItemSlots::deserialize);
 
     private final Int2ObjectMap<ItemStack> map;
     private int size;

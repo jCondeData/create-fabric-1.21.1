@@ -1,12 +1,12 @@
 package com.simibubi.create.content.logistics.packagerLink;
 
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.redstone.displayLink.LinkWithBulbBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
@@ -44,10 +44,10 @@ public class PackagerLinkBlockEntity extends LinkWithBulbBlockEntity {
         placedBy = null;
     }
 
-    public InventorySummary fetchSummaryFromPackager(@Nullable InventoryIdentifier identifier) {
+    public InventorySummary fetchSummaryFromPackager(@Nullable IdentifiedInventory ignoredHandler) {
         PackagerBlockEntity packager = getPackager();
         if (packager == null) return InventorySummary.EMPTY;
-        if (packager.isTargetingSameInventory(identifier)) return InventorySummary.EMPTY;
+        if (packager.isTargetingSameInventory(ignoredHandler)) return InventorySummary.EMPTY;
         return packager.getAvailableItems();
     }
 
@@ -88,11 +88,11 @@ public class PackagerLinkBlockEntity extends LinkWithBulbBlockEntity {
             int linkIndex,
             MutableBoolean finalLink,
             int orderId,
-            @Nullable PackageOrder orderContext,
-            @Nullable InventoryIdentifier identifier) {
+            @Nullable PackageOrderWithCrafts context,
+            @Nullable IdentifiedInventory ignoredHandler) {
         PackagerBlockEntity packager = getPackager();
         if (packager == null) return null;
-        if (packager.isTargetingSameInventory(identifier)) return null;
+        if (packager.isTargetingSameInventory(ignoredHandler)) return null;
 
         InventorySummary summary = packager.getAvailableItems();
         int availableCount = summary.getCountOf(stack);
@@ -101,14 +101,7 @@ public class PackagerLinkBlockEntity extends LinkWithBulbBlockEntity {
         return Pair.of(
                 packager,
                 PackagingRequest.create(
-                        stack,
-                        toWithdraw,
-                        address,
-                        linkIndex,
-                        finalLink,
-                        0,
-                        orderId,
-                        orderContext));
+                        stack, toWithdraw, address, linkIndex, finalLink, 0, orderId, context));
     }
 
     @Override

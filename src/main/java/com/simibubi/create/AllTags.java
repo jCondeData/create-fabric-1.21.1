@@ -106,6 +106,7 @@ public class AllTags {
         ROOTS,
         SUGAR_CANE_VARIANTS,
         NON_HARVESTABLE,
+        SINGLE_BLOCK_INVENTORIES,
 
         HAS_REDUCED_DESTROY_EFFECTS,
 

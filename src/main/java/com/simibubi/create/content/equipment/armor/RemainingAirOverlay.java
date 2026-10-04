@@ -2,6 +2,7 @@ package com.simibubi.create.content.equipment.armor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllItems;
+import com.simibubi.create.AllTags.AllFluidTags;
 
 import net.createmod.catnip.gui.element.GuiGameElement;
 import net.createmod.catnip.theme.Color;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
@@ -31,7 +31,9 @@ public class RemainingAirOverlay implements LayeredDraw.Layer {
         if (player == null) return;
         if (player.isCreative()) return;
         if (!player.getCustomData().contains("VisualBacktankAir")) return;
-        if (!player.isEyeInFluid(FluidTags.WATER) && !player.isInLava()) return;
+        // fabric: no fluid types; the diving helmet supplies air in DIVING_FLUIDS, so show the
+        // overlay whenever the player's eyes are in one of those
+        if (!player.isEyeInFluid(AllFluidTags.DIVING_FLUIDS.tag) && !player.isInLava()) return;
 
         int timeLeft = player.getCustomData().getInt("VisualBacktankAir");
 

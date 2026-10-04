@@ -18,8 +18,8 @@ import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes
 import com.simibubi.create.content.kinetics.mechanicalArm.AllArmInteractionPointTypes;
 import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttributeTypes;
 import com.simibubi.create.content.logistics.packagePort.AllPackagePortTargetTypes;
+import com.simibubi.create.content.logistics.packager.AllInventoryIdentifiers;
 import com.simibubi.create.content.logistics.packager.AllUnpackingHandlers;
-import com.simibubi.create.content.logistics.packager.fabric.AllInventoryIdentifiers;
 import com.simibubi.create.content.logistics.packagerLink.GlobalLogisticsManager;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import com.simibubi.create.content.schematics.ServerSchematicLoader;
@@ -160,7 +160,6 @@ public class Create implements ModInitializer {
         FabricStructureProcessing.init();
         AllBiomeModifiers.bootstrap(); // moved out of datagen
         CreateRegistriesImpl.registerDatapackRegistries();
-        AllInventoryIdentifiers.registerDefaults();
     }
 
     public static void init() {
@@ -181,6 +180,7 @@ public class Create implements ModInitializer {
         AllOpenPipeEffectHandlers.registerDefaults();
         AllMountedDispenseItemBehaviors.registerDefaults();
         AllUnpackingHandlers.registerDefaults();
+        AllInventoryIdentifiers.registerDefaults();
         AllFluids.registerFluidInteractions();
         // --
         //		});

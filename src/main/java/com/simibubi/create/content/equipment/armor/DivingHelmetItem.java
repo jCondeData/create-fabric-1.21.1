@@ -66,11 +66,11 @@ public class DivingHelmetItem extends BaseArmorItem {
     }
 
     public static void breatheUnderwater(LivingEntity entity) {
-        Level world = entity.level();
-        boolean second = world.getGameTime() % 20 == 0;
+        Level level = entity.level();
+        boolean second = level.getGameTime() % 20 == 0;
         boolean drowning = entity.getAirSupply() == 0;
 
-        if (world.isClientSide) entity.getCustomData().remove("VisualBacktankAir");
+        if (level.isClientSide) entity.getCustomData().remove("VisualBacktankAir");
 
         ItemStack helmet = getWornItem(entity);
         if (helmet.isEmpty()) return;
@@ -78,7 +78,8 @@ public class DivingHelmetItem extends BaseArmorItem {
         boolean lavaDiving = entity.isInLava();
         if (!helmet.has(DataComponents.FIRE_RESISTANT) && lavaDiving) return;
         if (!entity.isEyeInFluid(AllFluidTags.DIVING_FLUIDS.tag) && !lavaDiving) return;
-        if (entity instanceof Player && ((Player) entity).isCreative()) return;
+        if (entity instanceof Player player && (player.isSpectator() || player.isCreative()))
+            return;
 
         List<ItemStack> backtanks = BacktankUtil.getAllWithAir(entity);
         if (backtanks.isEmpty()) return;
@@ -89,16 +90,13 @@ public class DivingHelmetItem extends BaseArmorItem {
                     .noneMatch(backtank -> backtank.has(DataComponents.FIRE_RESISTANT))) return;
         }
 
+        float visualBacktankAir = 0f;
+        for (ItemStack stack : backtanks) visualBacktankAir += BacktankUtil.getAir(stack);
+
         if (drowning) entity.setAirSupply(10);
 
-        if (world.isClientSide)
-            entity.getCustomData()
-                    .putInt(
-                            "VisualBacktankAir",
-                            Math.round(
-                                    backtanks.stream()
-                                            .map(BacktankUtil::getAir)
-                                            .reduce(0, Integer::sum)));
+        if (level.isClientSide)
+            entity.getCustomData().putInt("VisualBacktankAir", Math.round(visualBacktankAir));
 
         if (!second) return;
 
@@ -108,6 +106,8 @@ public class DivingHelmetItem extends BaseArmorItem {
 
         if (entity instanceof ServerPlayer sp) AllAdvancements.DIVING_SUIT.awardTo(sp);
 
+        // fabric: there is no LivingBreatheEvent, so keep refilling air and granting water
+        // breathing from the entity tick instead of setCanBreathe/setRefillAirAmount
         entity.setAirSupply(Math.min(entity.getMaxAirSupply(), entity.getAirSupply() + 10));
         entity.addEffect(
                 new MobEffectInstance(MobEffects.WATER_BREATHING, 30, 0, true, false, true));

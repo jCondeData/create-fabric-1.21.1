@@ -1,6 +1,6 @@
 package com.simibubi.create.content.kinetics.base;
 
-import com.simibubi.create.infrastructure.config.AllConfigs;
+import com.simibubi.create.content.kinetics.KineticDebugger;
 
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -68,7 +68,7 @@ public class RotatingInstance extends ColoredLitOverlayInstance {
                                 KineticBlockEntityVisual.rotationOffset(blockState, axis, pos)
                                         + blockEntity.getRotationAngleOffset(axis));
 
-        if (AllConfigs.client().rainbowDebug.get()) instance.setColor(blockEntity);
+        if (KineticDebugger.isActive()) instance.setColor(blockEntity);
 
         return instance;
     }

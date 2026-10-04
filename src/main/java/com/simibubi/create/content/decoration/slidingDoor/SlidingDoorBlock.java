@@ -206,9 +206,7 @@ public class SlidingDoorBlock extends DoorBlock
         SlidingDoorBlockEntity be = getBlockEntity(pLevel, lower ? pPos : pPos.below());
         if (be != null && be.deferUpdate) return;
 
-        BlockState changedState =
-                pState.setValue(POWERED, Boolean.valueOf(isPowered))
-                        .setValue(OPEN, Boolean.valueOf(isPowered));
+        BlockState changedState = pState.setValue(POWERED, isPowered).setValue(OPEN, isPowered);
         if (isPowered) changedState = changedState.setValue(VISIBLE, false);
 
         if (isPowered != pState.getValue(OPEN)) {
@@ -225,10 +223,7 @@ public class SlidingDoorBlock extends DoorBlock
             BlockState otherDoor = pLevel.getBlockState(otherPos);
 
             if (isDoubleDoor(changedState, hinge, facing, otherDoor)) {
-                otherDoor =
-                        otherDoor
-                                .setValue(POWERED, Boolean.valueOf(isPowered))
-                                .setValue(OPEN, Boolean.valueOf(isPowered));
+                otherDoor = otherDoor.setValue(POWERED, isPowered).setValue(OPEN, isPowered);
                 if (isPowered) otherDoor = otherDoor.setValue(VISIBLE, false);
                 pLevel.setBlock(otherPos, otherDoor, 2);
             }
@@ -262,7 +257,8 @@ public class SlidingDoorBlock extends DoorBlock
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         state = state.cycle(OPEN);
-        if (state.getValue(OPEN)) state = state.setValue(VISIBLE, false);
+        boolean isOpen = state.getValue(OPEN);
+        if (isOpen) state = state.setValue(VISIBLE, false);
         level.setBlock(pos, state, 10);
         level.gameEvent(player, isOpen(state) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos);
 
@@ -276,7 +272,10 @@ public class SlidingDoorBlock extends DoorBlock
         BlockState otherDoor = level.getBlockState(otherPos);
         if (isDoubleDoor(state, hinge, facing, otherDoor))
             useWithoutItem(otherDoor, level, otherPos, player, hitResult);
-        else if (state.getValue(OPEN)) level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
+        else if (isOpen) {
+            this.playSound(player, level, pos, true);
+            level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
+        }
 
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

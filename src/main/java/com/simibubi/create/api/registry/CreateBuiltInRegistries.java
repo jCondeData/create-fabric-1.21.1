@@ -11,9 +11,11 @@ import com.simibubi.create.api.equipment.potatoCannon.PotatoProjectileBlockHitAc
 import com.simibubi.create.api.equipment.potatoCannon.PotatoProjectileEntityHitAction;
 import com.simibubi.create.api.equipment.potatoCannon.PotatoProjectileRenderMode;
 import com.simibubi.create.content.kinetics.fan.processing.FanProcessingType;
+import com.simibubi.create.content.kinetics.fan.processing.FanProcessingTypeRegistry;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointType;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 import com.simibubi.create.content.logistics.packagePort.PackagePortTargetType;
+import com.simibubi.create.impl.registry.MappedRegistryWithFreezeCallback;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
@@ -22,6 +24,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Static registries added by Create.
@@ -30,9 +33,11 @@ import org.jetbrains.annotations.ApiStatus.Internal;
  */
 public class CreateBuiltInRegistries {
     public static final Registry<ArmInteractionPointType> ARM_INTERACTION_POINT_TYPE =
-            simple(CreateRegistries.ARM_INTERACTION_POINT_TYPE);
+            simpleWithFreezeCallback(
+                    CreateRegistries.ARM_INTERACTION_POINT_TYPE, ArmInteractionPointType::init);
     public static final Registry<FanProcessingType> FAN_PROCESSING_TYPE =
-            simple(CreateRegistries.FAN_PROCESSING_TYPE);
+            simpleWithFreezeCallback(
+                    CreateRegistries.FAN_PROCESSING_TYPE, FanProcessingTypeRegistry::init);
     public static final Registry<ItemAttributeType> ITEM_ATTRIBUTE_TYPE =
             simple(CreateRegistries.ITEM_ATTRIBUTE_TYPE);
     public static final Registry<DisplaySource> DISPLAY_SOURCE =
@@ -57,17 +62,35 @@ public class CreateBuiltInRegistries {
                     simple(CreateRegistries.POTATO_PROJECTILE_BLOCK_HIT_ACTION);
 
     private static <T> Registry<T> simple(ResourceKey<Registry<T>> key) {
-        return register(key, false);
+        return register(key, false, null);
+    }
+
+    private static <T> Registry<T> simpleWithFreezeCallback(
+            ResourceKey<Registry<T>> key, Runnable freezeCallback) {
+        return register(key, false, freezeCallback);
     }
 
     private static <T> Registry<T> withIntrusiveHolders(ResourceKey<Registry<T>> key) {
-        return register(key, true);
+        return register(key, true, null);
     }
 
+    // fabric: NeoForge's RegistryBuilder#onBake is replaced by a MappedRegistry that runs a
+    // callback when frozen. Fabric API freezes BuiltInRegistries after all mod initializers ran.
     private static <T> Registry<T> register(
-            ResourceKey<Registry<T>> key, boolean hasIntrusiveHolders) {
-        return FabricRegistryBuilder.from(
-                        new MappedRegistry<>(key, Lifecycle.stable(), hasIntrusiveHolders))
+            ResourceKey<Registry<T>> key,
+            boolean hasIntrusiveHolders,
+            @Nullable Runnable freezeCallback) {
+        if (hasIntrusiveHolders && freezeCallback != null)
+            throw new IllegalArgumentException(
+                    "Freeze callbacks are not supported for registries with intrusive holders");
+
+        MappedRegistry<T> registry =
+                freezeCallback == null
+                        ? new MappedRegistry<>(key, Lifecycle.stable(), hasIntrusiveHolders)
+                        : new MappedRegistryWithFreezeCallback<>(
+                                key, Lifecycle.stable(), freezeCallback);
+
+        return FabricRegistryBuilder.from(registry)
                 .attribute(RegistryAttribute.SYNCED)
                 .buildAndRegister();
     }

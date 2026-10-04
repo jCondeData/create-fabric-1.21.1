@@ -3,6 +3,7 @@ package com.simibubi.create.content.equipment.tool;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
 
+import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
 import io.github.fabricators_of_create.porting_lib.entity.events.living.LivingAttackEvent;
 
 import net.createmod.catnip.platform.CatnipServices;
@@ -11,6 +12,7 @@ import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
@@ -28,9 +30,10 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 
-public class CardboardSwordItem extends SwordItem {
+public class CardboardSwordItem extends SwordItem implements CustomEnchantingBehaviorItem {
 
     public CardboardSwordItem(Properties pProperties) {
         super(AllToolMaterials.CARDBOARD, pProperties);
@@ -44,6 +47,18 @@ public class CardboardSwordItem extends SwordItem {
             Holder<Enchantment> enchantment, ItemStack target, EnchantingContext context) {
         if (!AllItems.CARDBOARD_SWORD.isIn(target)) return TriState.DEFAULT;
         return enchantment.is(Enchantments.KNOCKBACK) ? TriState.DEFAULT : TriState.FALSE;
+    }
+
+    // fabric: Porting Lib's CustomEnchantingBehaviorItem hook replaces NeoForge's
+    // IItemExtension#isBookEnchantable
+    @Override
+    public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
+        ItemEnchantments enchants =
+                book.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
+        for (Holder<Enchantment> enchantment : enchants.keySet()) {
+            if (!enchantment.is(Enchantments.KNOCKBACK)) return false;
+        }
+        return true;
     }
 
     public static InteractionResult cardboardSwordsMakeNoiseOnClick(

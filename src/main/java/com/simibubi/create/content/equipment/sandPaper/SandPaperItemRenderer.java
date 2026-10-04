@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 public class SandPaperItemRenderer extends CustomRenderedItemModelRenderer {
 
@@ -32,7 +31,6 @@ public class SandPaperItemRenderer extends CustomRenderedItemModelRenderer {
         Minecraft mc = Minecraft.getInstance();
         ItemRenderer itemRenderer = mc.getItemRenderer();
         LocalPlayer player = mc.player;
-        Level level = mc.level;
         float partialTicks = AnimationTickHolder.getPartialTicks();
 
         boolean leftHand = transformType == ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
@@ -70,11 +68,11 @@ public class SandPaperItemRenderer extends CustomRenderedItemModelRenderer {
                 else ms.translate(0.0f, bobbing, 0.0F);
             }
 
-            ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING);
+            ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING).item();
             //noinspection DataFlowIssue - We call .has, toPolish won't be null
             itemRenderer.renderStatic(
                     toPolish,
-                    ItemDisplayContext.NONE,
+                    ItemDisplayContext.GUI,
                     light,
                     overlay,
                     ms,

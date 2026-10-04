@@ -21,8 +21,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 
-import oshi.SystemInfo;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -77,6 +75,8 @@ public class DebugInformation {
                         getVersionOfMod(
                                 "create")) // fabric: We use this here so that we get the full
                 // version
+                // fabric: no "Mod Git Commit" entry, CreateBuildInfo has no GIT_COMMIT on Fabric
+                .put("Ponder Version", getVersionOfMod("ponder"))
                 .put("Fabric API Version", getVersionOfMod("fabric-api"))
                 .put("Minecraft Version", SharedConstants.getCurrentVersion().getName())
                 .buildTo(DebugInformation::registerBothInfo);
@@ -149,7 +149,8 @@ public class DebugInformation {
                             if (!id.equals(Create.ID)
                                     && !id.equals("fabric-api")
                                     && !id.equals("minecraft")
-                                    && !id.equals("flywheel")) {
+                                    && !id.equals("flywheel")
+                                    && !id.equals("ponder")) {
                                 String name = meta.getName();
                                 String version = meta.getVersion().toString();
                                 mods.add(new InfoEntry(name, version));
@@ -173,12 +174,13 @@ public class DebugInformation {
     }
 
     public static String getTotalRam() {
-        long availableMemory = new SystemInfo().getHardware().getMemory().getAvailable();
-        long totalMemory = new SystemInfo().getHardware().getMemory().getTotal();
+        Runtime runtime = Runtime.getRuntime();
+        long availableMemory = runtime.freeMemory();
+        long totalMemory = runtime.totalMemory();
         long usedMemory = totalMemory - availableMemory;
         return String.format(
                 "%s bytes (%s MiB) / %s bytes (%s MiB)",
-                usedMemory, usedMemory / 1049000, totalMemory, totalMemory / 1049000);
+                usedMemory, usedMemory / 1048576L, totalMemory, totalMemory / 1048576L);
     }
 
     public static String getCpuInfo() {

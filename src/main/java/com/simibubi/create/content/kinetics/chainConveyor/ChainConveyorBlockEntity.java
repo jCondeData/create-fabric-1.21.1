@@ -660,7 +660,7 @@ public class ChainConveyorBlockEntity extends KineticBlockEntity
         super.writeSafe(tag, registries);
         tag.put(
                 "Connections",
-                CatnipCodecUtils.encode(CatnipCodecs.set(BlockPos.CODEC), connections)
+                CatnipCodecUtils.encode(CatnipCodecs.set(BlockPos.CODEC), registries, connections)
                         .orElseThrow());
     }
 
@@ -675,7 +675,7 @@ public class ChainConveyorBlockEntity extends KineticBlockEntity
 
         compound.put(
                 "Connections",
-                CatnipCodecUtils.encode(CatnipCodecs.set(BlockPos.CODEC), connections)
+                CatnipCodecUtils.encode(CatnipCodecs.set(BlockPos.CODEC), registries, connections)
                         .orElseThrow());
         compound.put(
                 "TravellingPackages",
@@ -710,7 +710,8 @@ public class ChainConveyorBlockEntity extends KineticBlockEntity
 
         int sizeBefore = connections.size();
         connections.clear();
-        CatnipCodecUtils.decode(CatnipCodecs.set(BlockPos.CODEC), compound.get("Connections"))
+        CatnipCodecUtils.decode(
+                        CatnipCodecs.set(BlockPos.CODEC), registries, compound.get("Connections"))
                 .ifPresent(connections::addAll);
         travellingPackages.clear();
         NBTHelper.iterateCompoundList(

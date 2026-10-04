@@ -15,15 +15,13 @@
     },
     {
       "type": "fluid_stack",
-      "amount": 250,
+      "amount": 27000,
       "fluid": "minecraft:water"
     }
   ],
   "results": [
     {
-      "item": {
-        "id": "create:pulp"
-      }
+      "id": "create:pulp"
     }
   ]
 }

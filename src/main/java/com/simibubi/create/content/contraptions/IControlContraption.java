@@ -29,7 +29,7 @@ public interface IControlContraption {
 
         private MovementMode(AllIcons icon) {
             this.icon = icon;
-            translationKey = "contraptions.movement_mode." + Lang.asId(name());
+            translationKey = "create.contraptions.movement_mode." + Lang.asId(name());
         }
 
         @Override
@@ -54,7 +54,7 @@ public interface IControlContraption {
 
         private RotationMode(AllIcons icon) {
             this.icon = icon;
-            translationKey = "contraptions.movement_mode." + Lang.asId(name());
+            translationKey = "create.contraptions.movement_mode." + Lang.asId(name());
         }
 
         @Override

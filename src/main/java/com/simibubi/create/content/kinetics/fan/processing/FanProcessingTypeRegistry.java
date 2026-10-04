@@ -4,26 +4,23 @@ import com.simibubi.create.api.registry.CreateBuiltInRegistries;
 
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 
+import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
 import java.util.List;
 
 public class FanProcessingTypeRegistry {
-    private static List<FanProcessingType> sortedTypes = null;
-    @UnmodifiableView private static List<FanProcessingType> sortedTypesView = null;
+    private static final List<FanProcessingType> SORTED_TYPES = new ReferenceArrayList<>();
 
     @UnmodifiableView
-    public static List<FanProcessingType> getSortedTypesView() {
-        if (sortedTypes == null || sortedTypesView == null) {
-            sortedTypes = new ReferenceArrayList<>();
+    public static final List<FanProcessingType> SORTED_TYPES_VIEW =
+            Collections.unmodifiableList(SORTED_TYPES);
 
-            CreateBuiltInRegistries.FAN_PROCESSING_TYPE.forEach(sortedTypes::add);
-            sortedTypes.sort((t1, t2) -> t2.getPriority() - t1.getPriority());
-
-            sortedTypesView = Collections.unmodifiableList(sortedTypes);
-        }
-
-        return sortedTypesView;
+    @Internal
+    public static void init() {
+        SORTED_TYPES.clear();
+        CreateBuiltInRegistries.FAN_PROCESSING_TYPE.forEach(SORTED_TYPES::add);
+        SORTED_TYPES.sort((t1, t2) -> t2.getPriority() - t1.getPriority());
     }
 }

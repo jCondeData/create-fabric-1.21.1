@@ -281,6 +281,7 @@ public class BlazeBurnerBlock extends HorizontalDirectionalBlock
         return false;
     }
 
+    @Override
     @Environment(EnvType.CLIENT)
     public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         if (random.nextInt(10) != 0) return;

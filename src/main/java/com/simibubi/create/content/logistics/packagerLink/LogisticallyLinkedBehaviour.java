@@ -2,11 +2,11 @@ package com.simibubi.create.content.logistics.packagerLink;
 
 import com.google.common.cache.Cache;
 import com.simibubi.create.Create;
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -177,26 +177,19 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
             int linkIndex,
             MutableBoolean finalLink,
             int orderId,
-            @Nullable PackageOrder orderContext,
-            @Nullable InventoryIdentifier identifier) {
+            @Nullable PackageOrderWithCrafts context,
+            @Nullable IdentifiedInventory ignoredHandler) {
 
         if (blockEntity instanceof PackagerLinkBlockEntity plbe)
             return plbe.processRequest(
-                    stack,
-                    amount,
-                    address,
-                    linkIndex,
-                    finalLink,
-                    orderId,
-                    orderContext,
-                    identifier);
+                    stack, amount, address, linkIndex, finalLink, orderId, context, ignoredHandler);
 
         return null;
     }
 
-    public InventorySummary getSummary(@Nullable InventoryIdentifier identifier) {
+    public InventorySummary getSummary(@Nullable IdentifiedInventory ignoredHandler) {
         if (blockEntity instanceof PackagerLinkBlockEntity plbe)
-            return plbe.fetchSummaryFromPackager(identifier);
+            return plbe.fetchSummaryFromPackager(ignoredHandler);
         return InventorySummary.EMPTY;
     }
 

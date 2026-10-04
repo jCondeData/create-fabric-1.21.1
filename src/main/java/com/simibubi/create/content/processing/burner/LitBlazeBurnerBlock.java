@@ -107,6 +107,7 @@ public class LitBlazeBurnerBlock extends Block implements IWrenchable, BlockPick
         return AllItems.EMPTY_BLAZE_BURNER.asStack();
     }
 
+    @Override
     @Environment(EnvType.CLIENT)
     public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
         world.addAlwaysVisibleParticle(

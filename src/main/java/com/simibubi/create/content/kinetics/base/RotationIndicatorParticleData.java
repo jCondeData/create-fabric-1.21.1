@@ -33,7 +33,7 @@ public class RotationIndicatorParticleData
                                                     .fieldOf("radius2")
                                                     .forGetter(p -> p.radius2),
                                             Codec.INT
-                                                    .fieldOf("lifeSpan")
+                                                    .fieldOf("life_span")
                                                     .forGetter(p -> p.lifeSpan),
                                             Axis.CODEC.fieldOf("axis").forGetter(p -> p.axis))
                                     .apply(i, RotationIndicatorParticleData::new));

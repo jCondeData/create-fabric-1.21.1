@@ -4,6 +4,7 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllMenuTypes;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.gui.menu.GhostItemMenu;
 import com.simibubi.create.infrastructure.fabric.transfer.item.ItemStackHandler;
 import com.simibubi.create.infrastructure.fabric.transfer.item.SlotItemHandler;
@@ -16,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,13 +78,21 @@ public class RedstoneRequesterMenu extends GhostItemMenu<RedstoneRequesterBlockE
     protected void saveData(RedstoneRequesterBlockEntity contentHolder) {
         List<BigItemStack> stacks = contentHolder.encodedRequest.stacks();
         ArrayList<BigItemStack> list = new ArrayList<>();
-        for (int i = 0; i < ghostInventory.getSlotCount(); i++)
+        for (int i = 0; i < ghostInventory.getSlotCount(); i++) {
+            ItemStack stackInSlot = ghostInventory.getStackInSlot(i);
+            if (stackInSlot.isEmpty()) continue;
             list.add(
                     new BigItemStack(
-                            ghostInventory.getStackInSlot(i).copyWithCount(1),
+                            stackInSlot.copyWithCount(1),
                             i < stacks.size() ? stacks.get(i).count : 1));
+        }
 
-        contentHolder.encodedRequest = new PackageOrder(list);
+        PackageOrderWithCrafts newRequest =
+                new PackageOrderWithCrafts(
+                        new PackageOrder(list), contentHolder.encodedRequest.orderedCrafts());
+        if (!newRequest.orderedStacksMatchOrderedRecipes())
+            newRequest = PackageOrderWithCrafts.simple(newRequest.stacks());
+        contentHolder.encodedRequest = newRequest;
         contentHolder.sendData();
     }
 

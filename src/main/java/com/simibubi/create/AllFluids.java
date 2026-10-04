@@ -45,6 +45,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.MapColor;
 
 import java.util.List;
 
@@ -125,6 +126,9 @@ public class AllFluids {
                     .source(
                             SimpleFlowableFluid.Source
                                     ::new) // TODO: remove when Registrate fixes FluidBuilder
+                    .block()
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW))
+                    .build()
                     .bucket()
                     .tag(AllTags.commonItemTag("buckets/honey"))
                     .build()
@@ -212,6 +216,9 @@ public class AllFluids {
                                                                 source,
                                                                 FluidConstants.BUCKET));
                             })
+                    .block()
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .build()
                     .register();
 
     // Load this class

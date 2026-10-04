@@ -1,5 +1,7 @@
 package com.simibubi.create.foundation.events;
 
+import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.contraptions.elevator.ElevatorControlsHandler;
 import com.simibubi.create.content.contraptions.wrench.RadialWrenchHandler;
@@ -22,6 +24,8 @@ import io.github.fabricators_of_create.porting_lib.event.client.MouseInputEvents
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.HitResult;
 
 public class InputEvents {
@@ -82,7 +86,17 @@ public class InputEvents {
             return InteractionResult.SUCCESS;
         }
 
-        if (ChainPackageInteractionHandler.onUse()) {
+        // wrench, chain and frogport interactions take priority over picking up packages
+        boolean skipPackagePickup = false;
+        if (mc.player != null) {
+            ItemStack itemInHand = mc.player.getItemInHand(hand);
+            skipPackagePickup =
+                    AllItemTags.WRENCH.matches(itemInHand)
+                            || itemInHand.is(Items.CHAIN)
+                            || AllBlocks.PACKAGE_FROGPORT.isIn(itemInHand);
+        }
+
+        if (!skipPackagePickup && ChainPackageInteractionHandler.onUse()) {
             return InteractionResult.SUCCESS;
         }
 

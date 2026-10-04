@@ -43,8 +43,10 @@ public class ProcessingOutputCodecCheck {
 
         String encoded =
                 ProcessingOutput.CODEC.encodeStart(JsonOps.INSTANCE, bare).getOrThrow().toString();
-        if (!encoded.startsWith("{\"item\":{"))
-            throw new AssertionError("encoded not in item form: " + encoded);
+        // Upstream 6.0.4 switched the written form to {"id": ..., "count": ...}; the old
+        // {"item": {...}} form is still accepted when reading (checked above).
+        if (!encoded.startsWith("{\"id\":\"minecraft:stone\""))
+            throw new AssertionError("encoded not in 6.0.4 id form: " + encoded);
 
         System.out.println("OK encoded=" + encoded);
     }
