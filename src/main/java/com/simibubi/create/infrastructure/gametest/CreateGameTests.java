@@ -9,8 +9,10 @@ import com.simibubi.create.infrastructure.gametest.tests.TestPortBugPackager;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortBugSounds;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortContraptions;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortData;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortDrops;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortFluids;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortLogistics;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortPackagerPulls;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortPersistence;
 import com.simibubi.create.infrastructure.gametest.tests.TestPortProcessing;
 import com.simibubi.create.infrastructure.gametest.tests.TestProcessing;
@@ -32,8 +34,10 @@ public class CreateGameTests {
         TestPortBugSounds.class,
         TestPortContraptions.class,
         TestPortData.class,
+        TestPortDrops.class,
         TestPortFluids.class,
         TestPortLogistics.class,
+        TestPortPackagerPulls.class,
         TestPortPersistence.class,
         TestPortProcessing.class,
         TestProcessing.class,
