@@ -268,6 +268,7 @@ import com.simibubi.create.foundation.data.ModelGen;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.UncontainableBlockItem;
+import com.simibubi.create.foundation.mixin.accessor.BlockLootSubProviderAccessor;
 import com.simibubi.create.foundation.utility.DyeHelper;
 import com.simibubi.create.infrastructure.config.CStress;
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
@@ -1024,8 +1025,7 @@ public class AllBlocks {
                                     p.mapColor(MapColor.COLOR_GRAY)
                                             .sound(SoundType.NETHERITE_BLOCK)
                                             .noOcclusion()
-                                            .isSuffocating((level, pos, state) -> false)
-                                            .isRedstoneConductor((level, pos, state) -> false))
+                                            .isSuffocating((state, level, pos) -> false))
                     .transform(pickaxeOnly())
                     .addLayer(() -> RenderType::cutoutMipped)
                     .clientExtension(() -> () -> new ReducedDestroyEffects())
@@ -1043,8 +1043,8 @@ public class AllBlocks {
                                     p.mapColor(MapColor.COLOR_GRAY)
                                             .sound(SoundType.NETHERITE_BLOCK)
                                             .noOcclusion()
-                                            .isSuffocating((level, pos, state) -> false)
-                                            .isRedstoneConductor((level, pos, state) -> false))
+                                            .isSuffocating((state, level, pos) -> false)
+                                            .isRedstoneConductor((state, level, pos) -> false))
                     .addLayer(() -> RenderType::cutoutMipped)
                     .clientExtension(() -> () -> new ReducedDestroyEffects())
                     .transform(pickaxeOnly())
@@ -3626,18 +3626,25 @@ public class AllBlocks {
                                             b,
                                             LootTable.lootTable()
                                                     .withPool(
-                                                            r.applyExplosionCondition(
-                                                                    b,
-                                                                    LootPool.lootPool()
-                                                                            .setRolls(
-                                                                                    ConstantValue
-                                                                                            .exactly(
-                                                                                                    1.0F))
-                                                                            .add(
-                                                                                    LootItem
-                                                                                            .lootTableItem(
-                                                                                                    Items
-                                                                                                            .STRING))))
+                                                            LootPool.lootPool()
+                                                                    .setRolls(
+                                                                            ConstantValue.exactly(
+                                                                                    1.0F))
+                                                                    .add(
+                                                                            LootItem.lootTableItem(
+                                                                                            b)
+                                                                                    .when(
+                                                                                            ((BlockLootSubProviderAccessor)
+                                                                                                            r)
+                                                                                                    .create$hasSilkTouch())
+                                                                                    .otherwise(
+                                                                                            r
+                                                                                                    .applyExplosionCondition(
+                                                                                                            b,
+                                                                                                            LootItem
+                                                                                                                    .lootTableItem(
+                                                                                                                            Items
+                                                                                                                                    .STRING)))))
                                                     .withPool(
                                                             r.applyExplosionCondition(
                                                                     b,
@@ -3651,7 +3658,12 @@ public class AllBlocks {
                                                                                             .lootTableItem(
                                                                                                     AllBlocks
                                                                                                             .CARDBOARD_BLOCK
-                                                                                                            .asItem()))))))
+                                                                                                            .asItem()))
+                                                                            .when(
+                                                                                    ((BlockLootSubProviderAccessor)
+                                                                                                    r)
+                                                                                            .create$hasSilkTouch()
+                                                                                            .invert())))))
                     .item(CardboardBlockItem::new)
                     .build()
                     .lang("Bound Block of Cardboard")

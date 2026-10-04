@@ -181,7 +181,9 @@ public class SchematicannonBlockEntity extends SmartBlockEntity implements MenuP
         // Settings
         SchematicannonOptions options =
                 CatnipCodecUtils.decode(
-                                SchematicannonOptions.CODEC, compound.getCompound("Options"))
+                                SchematicannonOptions.CODEC,
+                                registries,
+                                compound.getCompound("Options"))
                         .orElse(new SchematicannonOptions(2, true, false));
         replaceMode = options.replaceMode;
         skipMissing = options.skipMissing;
@@ -258,6 +260,7 @@ public class SchematicannonBlockEntity extends SmartBlockEntity implements MenuP
         Tag options =
                 CatnipCodecUtils.encode(
                                 SchematicannonOptions.CODEC,
+                                registries,
                                 new SchematicannonOptions(
                                         replaceMode, skipMissing, replaceBlockEntities))
                         .orElseThrow();

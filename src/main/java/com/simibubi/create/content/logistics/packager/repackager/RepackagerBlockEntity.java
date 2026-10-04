@@ -1,9 +1,9 @@
 package com.simibubi.create.content.logistics.packager.repackager;
 
 import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
-import com.simibubi.create.content.logistics.packager.PackageDefragmenter;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
@@ -15,17 +15,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import java.util.List;
 
 public class RepackagerBlockEntity extends PackagerBlockEntity {
 
-    public PackageDefragmenter defragmenter;
+    public PackageRepackageHelper repackageHelper;
 
     public RepackagerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
-        defragmenter = new PackageDefragmenter();
+        repackageHelper = new PackageRepackageHelper();
     }
 
     public boolean unwrapBox(ItemStack box, boolean simulate) {
@@ -63,27 +62,28 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
     }
 
     public void attemptToSend(List<PackagingRequest> queuedRequests) {
-        if (queuedRequests == null && (!heldBox.isEmpty() || animationTicks != 0)) return;
+        if (!heldBox.isEmpty() || animationTicks != 0 || buttonCooldown > 0) return;
+        if (!queuedExitingPackages.isEmpty()) return;
 
         IItemHandler targetInv = targetInventory.getInventory();
         if (targetInv == null || targetInv instanceof PackagerItemHandler) return;
 
-        attemptToDefrag(targetInv);
+        attemptToRepackage(targetInv);
         if (heldBox.isEmpty()) return;
 
         updateSignAddress();
         if (!signBasedAddress.isBlank()) PackageItem.addAddress(heldBox, signBasedAddress);
     }
 
-    protected void attemptToDefrag(IItemHandler targetInv) {
-        defragmenter.clear();
+    protected void attemptToRepackage(IItemHandler targetInv) {
+        repackageHelper.clear();
         int completedOrderId = -1;
 
         for (int slot = 0; slot < targetInv.getSlots(); slot++) {
             ItemStack extracted = targetInv.extractItem(slot, 1, true);
             if (extracted.isEmpty() || !PackageItem.isPackage(extracted)) continue;
 
-            if (!defragmenter.isFragmented(extracted)) {
+            if (!repackageHelper.isFragmented(extracted)) {
                 targetInv.extractItem(slot, 1, false);
                 heldBox = extracted.copy();
                 animationInward = false;
@@ -92,13 +92,14 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
                 return;
             }
 
-            completedOrderId = defragmenter.addPackageFragment(extracted);
+            completedOrderId = repackageHelper.addPackageFragment(extracted);
             if (completedOrderId != -1) break;
         }
 
         if (completedOrderId == -1) return;
 
-        List<ItemStack> boxesToExport = defragmenter.repack(completedOrderId);
+        List<BigItemStack> boxesToExport =
+                repackageHelper.repack(completedOrderId, level.getRandom());
 
         for (int slot = 0; slot < targetInv.getSlots(); slot++) {
             ItemStack extracted = targetInv.extractItem(slot, 1, true);
@@ -109,13 +110,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 
         if (boxesToExport.isEmpty()) return;
 
-        heldBox = boxesToExport.get(0).copy();
-        animationInward = false;
-        animationTicks = CYCLE;
-
-        for (int i = 1; i < boxesToExport.size(); i++)
-            ItemHandlerHelper.insertItem(targetInv, boxesToExport.get(i), false);
-
+        queuedExitingPackages.addAll(boxesToExport);
         notifyUpdate();
     }
 

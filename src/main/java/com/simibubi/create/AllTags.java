@@ -108,6 +108,7 @@ public class AllTags {
         ROOTS,
         SUGAR_CANE_VARIANTS,
         NON_HARVESTABLE,
+        SINGLE_BLOCK_INVENTORIES,
 
         CORALS,
 
@@ -173,7 +174,6 @@ public class AllTags {
         CONTRAPTION_CONTROLLED,
         CREATE_INGOTS,
         CRUSHED_RAW_MATERIALS,
-        DIVING_ARMOR,
         INVALID_FOR_TRACK_PAVING,
         DEPLOYABLE_DRINK,
         PRESSURIZED_AIR_SOURCES,

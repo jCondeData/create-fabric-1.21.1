@@ -33,6 +33,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityType.EntityFactory;
 import net.minecraft.world.entity.MobCategory;
+import net.neoforged.neoforge.common.Tags.EntityTypes;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 
 public class AllEntityTypes {
@@ -156,16 +157,18 @@ public class AllEntityTypes {
             int range,
             int updateFrequency,
             boolean sendVelocity) {
-        return register(
-                name,
-                factory,
-                renderer,
-                MobCategory.MISC,
-                range,
-                updateFrequency,
-                sendVelocity,
-                true,
-                AbstractContraptionEntity::build);
+        return (CreateEntityBuilder<T, ?>)
+                register(
+                                name,
+                                factory,
+                                renderer,
+                                MobCategory.MISC,
+                                range,
+                                updateFrequency,
+                                sendVelocity,
+                                true,
+                                AbstractContraptionEntity::build)
+                        .tag(EntityTypes.TELEPORTING_NOT_SUPPORTED);
     }
 
     private static <T extends Entity> CreateEntityBuilder<T, ?> register(

@@ -14,6 +14,7 @@ import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -229,6 +231,12 @@ public class ExtendoGripItem extends Item {
 
     private static int maxUses() {
         return AllConfigs.server().equipment.maxExtendoGripActions.get();
+    }
+
+    @Override
+    public boolean doesSneakBypassUse(
+            ItemStack stack, LevelReader level, BlockPos pos, Player player) {
+        return true;
     }
 
     @SubscribeEvent

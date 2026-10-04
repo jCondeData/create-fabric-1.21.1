@@ -6,7 +6,6 @@ import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.animatedContainer.AnimatedContainerBehaviour;
-import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.ResetableLazy;
 
 import net.createmod.catnip.animation.LerpedFloat;
@@ -28,13 +27,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -354,8 +353,12 @@ public class ToolboxBlockEntity extends SmartBlockEntity implements MenuProvider
         map.put(player, hotbarSlot);
     }
 
-    public void readInventory(ItemContainerContents contents) {
-        ItemHelper.fillItemStackHandler(contents, inventory);
+    public void readInventory(ToolboxInventory inv) {
+        if (inv != null) {
+            this.inventory.filters = new ArrayList<>(inv.filters);
+            for (int i = 0; i < inv.getSlots(); i++)
+                this.inventory.setStackInSlot(i, inv.getStackInSlot(i));
+        }
     }
 
     public void setUniqueId(UUID uniqueId) {
@@ -407,16 +410,12 @@ public class ToolboxBlockEntity extends SmartBlockEntity implements MenuProvider
     @Override
     protected void applyImplicitComponents(DataComponentInput componentInput) {
         setUniqueId(componentInput.get(AllDataComponents.TOOLBOX_UUID));
-        readInventory(
-                componentInput.getOrDefault(
-                        AllDataComponents.TOOLBOX_INVENTORY, ItemContainerContents.EMPTY));
+        readInventory(componentInput.get(AllDataComponents.TOOLBOX_INVENTORY));
     }
 
     @Override
     protected void collectImplicitComponents(Builder components) {
         components.set(AllDataComponents.TOOLBOX_UUID, uniqueId);
-        components.set(
-                AllDataComponents.TOOLBOX_INVENTORY,
-                ItemHelper.containerContentsFromHandler(inventory));
+        components.set(AllDataComponents.TOOLBOX_INVENTORY, inventory);
     }
 }

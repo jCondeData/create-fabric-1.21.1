@@ -113,12 +113,7 @@ public class FTBChunksTrainMap {
 
         List<FormattedText> tooltip =
                 TrainMapManager.renderAndPick(
-                        graphics,
-                        Mth.floor(mouseX),
-                        Mth.floor(mouseY),
-                        event.getPartialTick(),
-                        linearFiltering,
-                        bounds);
+                        graphics, Mth.floor(mouseX), Mth.floor(mouseY), linearFiltering, bounds);
 
         pose.popPose();
 

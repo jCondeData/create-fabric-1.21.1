@@ -1,6 +1,5 @@
 package com.simibubi.create.content.equipment.potatoCannon;
 
-import com.simibubi.create.AllEnchantments;
 import com.simibubi.create.AllEntityTypes;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.api.equipment.potatoCannon.PotatoCannonProjectileType;
@@ -285,11 +284,8 @@ public class PotatoCannonItem extends ProjectileWeaponItem implements CustomArmP
 
     @Override
     public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-        if (enchantment.is(Enchantments.POWER)) return true;
-        if (enchantment.is(Enchantments.PUNCH)) return true;
-        if (enchantment.is(Enchantments.FLAME)) return true;
+        if (enchantment.is(Enchantments.INFINITY)) return false;
         if (enchantment.is(Enchantments.LOOTING)) return true;
-        if (enchantment.is(AllEnchantments.POTATO_RECOVERY)) return true;
         return super.supportsEnchantment(stack, enchantment);
     }
 
@@ -314,7 +310,7 @@ public class PotatoCannonItem extends ProjectileWeaponItem implements CustomArmP
 
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity, InteractionHand hand) {
-        return false;
+        return true;
     }
 
     @Override

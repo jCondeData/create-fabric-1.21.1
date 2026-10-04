@@ -353,9 +353,37 @@ public class CreateSceneBuilder extends PonderSceneBuilder {
 
         public void flashDisplayLink(BlockPos position) {
             modifyBlockEntity(
-                    position,
-                    LinkWithBulbBlockEntity.class,
-                    linkBlockEntity -> linkBlockEntity.pulse());
+                    position, LinkWithBulbBlockEntity.class, LinkWithBulbBlockEntity::pulse);
+        }
+
+        @Override
+        public void restoreBlocks(Selection selection) {
+            super.restoreBlocks(selection);
+            markSmartBlockEntityVirtual(selection);
+        }
+
+        @Override
+        public void setBlocks(Selection selection, BlockState state, boolean spawnParticles) {
+            super.setBlocks(selection, state, spawnParticles);
+            markSmartBlockEntityVirtual(selection);
+        }
+
+        @Override
+        public void modifyBlocks(
+                Selection selection, UnaryOperator<BlockState> stateFunc, boolean spawnParticles) {
+            super.modifyBlocks(selection, stateFunc, spawnParticles);
+            markSmartBlockEntityVirtual(selection);
+        }
+
+        private void markSmartBlockEntityVirtual(Selection selection) {
+            addInstruction(
+                    scene ->
+                            selection.forEach(
+                                    pos -> {
+                                        if (scene.getWorld().getBlockEntity(pos)
+                                                instanceof SmartBlockEntity smartBlockEntity)
+                                            smartBlockEntity.markVirtual();
+                                    }));
         }
     }
 

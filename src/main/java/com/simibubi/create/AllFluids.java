@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.Tags;
@@ -87,6 +88,9 @@ public class AllFluids {
                     .source(
                             BaseFlowingFluid.Source
                                     ::new) // TODO: remove when Registrate fixes FluidBuilder
+                    .block()
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW))
+                    .build()
                     .bucket()
                     .tag(AllTags.commonItemTag("buckets/honey"))
                     .build()
@@ -113,6 +117,9 @@ public class AllFluids {
                                             .tickRate(25)
                                             .slopeFindDistance(3)
                                             .explosionResistance(100f))
+                    .block()
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .build()
                     .register();
 
     // Load this class

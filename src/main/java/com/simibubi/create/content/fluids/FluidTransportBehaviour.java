@@ -87,7 +87,7 @@ public abstract class FluidTransportBehaviour extends BlockEntityBehaviour {
             boolean sendUpdate = false;
             for (PipeConnection connection : connections) {
                 sendUpdate |= connection.flipFlowsIfPressureReversed();
-                connection.manageSource(world, pos);
+                connection.manageSource(world, pos, blockEntity);
             }
             if (sendUpdate) blockEntity.notifyUpdate();
         }

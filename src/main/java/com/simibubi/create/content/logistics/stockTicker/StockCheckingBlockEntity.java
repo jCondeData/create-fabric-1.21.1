@@ -1,5 +1,6 @@
 package com.simibubi.create.content.logistics.stockTicker;
 
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
@@ -10,7 +11,6 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.List;
 
@@ -39,17 +39,20 @@ public abstract class StockCheckingBlockEntity extends SmartBlockEntity {
     }
 
     public boolean broadcastPackageRequest(
-            RequestType type, PackageOrder order, IItemHandler ignoredHandler, String address) {
-        return broadcastPackageRequest(type, order, ignoredHandler, address, null);
+            RequestType type,
+            PackageOrder order,
+            @Nullable IdentifiedInventory ignoredHandler,
+            String address) {
+        return broadcastPackageRequest(
+                type, PackageOrderWithCrafts.simple(order.stacks()), ignoredHandler, address);
     }
 
     public boolean broadcastPackageRequest(
             RequestType type,
-            PackageOrder order,
-            IItemHandler ignoredHandler,
-            String address,
-            @Nullable PackageOrder orderContext) {
+            PackageOrderWithCrafts order,
+            @Nullable IdentifiedInventory ignoredHandler,
+            String address) {
         return LogisticsManager.broadcastPackageRequest(
-                behaviour.freqId, type, order, ignoredHandler, address, orderContext);
+                behaviour.freqId, type, order, ignoredHandler, address);
     }
 }

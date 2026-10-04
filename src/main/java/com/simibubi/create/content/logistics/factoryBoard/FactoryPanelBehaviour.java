@@ -22,6 +22,7 @@ import com.simibubi.create.content.logistics.packagerLink.LogisticsManager;
 import com.simibubi.create.content.logistics.packagerLink.RequestPromise;
 import com.simibubi.create.content.logistics.packagerLink.RequestPromiseQueue;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -31,6 +32,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsBoard;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsFormatter;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
@@ -87,7 +89,6 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
     public static final BehaviourType<FactoryPanelBehaviour> TOP_RIGHT = new BehaviourType<>();
     public static final BehaviourType<FactoryPanelBehaviour> BOTTOM_LEFT = new BehaviourType<>();
     public static final BehaviourType<FactoryPanelBehaviour> BOTTOM_RIGHT = new BehaviourType<>();
-    public static final int REQUEST_INTERVAL = 100;
 
     public Map<FactoryPanelPosition, FactoryPanelConnection> targetedBy;
     public Map<BlockPos, FactoryPanelConnection> targetedByLinks;
@@ -370,9 +371,10 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
     private void tickRequests() {
         FactoryPanelBlockEntity panelBE = panelBE();
         if (targetedBy.isEmpty() && !panelBE.restocker) return;
+        if (panelBE.restocker) restockerPromises.tick();
         if (satisfied || promisedSatisfied || waitingForNetwork || redstonePowered) return;
         if (timer > 0) {
-            timer = Math.min(timer, REQUEST_INTERVAL);
+            timer = Math.min(timer, getConfigRequestIntervalInTicks());
             timer--;
             return;
         }
@@ -414,21 +416,26 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
 
         // Input items may come from differing networks
         Map<UUID, Collection<BigItemStack>> asMap = toRequest.asMap();
-        PackageOrder requestContext = new PackageOrder(toRequestAsList);
+        PackageOrderWithCrafts craftingContext = PackageOrderWithCrafts.empty();
         List<Multimap<PackagerBlockEntity, PackagingRequest>> requests = new ArrayList<>();
 
         // Panel may enforce item arrangement
         if (!activeCraftingArrangement.isEmpty())
-            requestContext =
-                    new PackageOrder(
-                            activeCraftingArrangement.stream().map(BigItemStack::new).toList());
+            craftingContext =
+                    PackageOrderWithCrafts.singleRecipe(
+                            activeCraftingArrangement.stream()
+                                    .map(stack -> new BigItemStack(stack.copyWithCount(1)))
+                                    .toList());
 
         // Collect request distributions
         for (Entry<UUID, Collection<BigItemStack>> entry : asMap.entrySet()) {
-            PackageOrder order = new PackageOrder(new ArrayList<>(entry.getValue()));
+            PackageOrderWithCrafts order =
+                    new PackageOrderWithCrafts(
+                            new PackageOrder(new ArrayList<>(entry.getValue())),
+                            craftingContext.orderedCrafts());
             Multimap<PackagerBlockEntity, PackagingRequest> request =
                     LogisticsManager.findPackagersForRequest(
-                            entry.getKey(), order, requestContext, null, recipeAddress);
+                            entry.getKey(), order, null, recipeAddress);
             requests.add(request);
         }
 
@@ -458,7 +465,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         if (packager == null || !packager.targetInventory.hasInventory()) return;
 
         int availableOnNetwork =
-                LogisticsManager.getStockOf(network, item, packager.targetInventory.getInventory());
+                LogisticsManager.getStockOf(
+                        network, item, packager.targetInventory.getIdentifiedInventory());
         if (availableOnNetwork == 0) {
             sendEffect(getPanelPosition(), false);
             return;
@@ -472,7 +480,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
 
         BigItemStack orderedItem =
                 new BigItemStack(item, Math.min(amountToOrder, availableOnNetwork));
-        PackageOrder order = new PackageOrder(List.of(orderedItem));
+        PackageOrderWithCrafts order = PackageOrderWithCrafts.simple(List.of(orderedItem));
 
         sendEffect(getPanelPosition(), true);
 
@@ -480,9 +488,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
                 network,
                 RequestType.RESTOCK,
                 order,
-                packager.targetInventory.getInventory(),
-                recipeAddress,
-                null)) return;
+                packager.targetInventory.getIdentifiedInventory(),
+                recipeAddress)) return;
 
         restockerPromises.add(new RequestPromise(orderedItem));
     }
@@ -693,7 +700,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         if (!panelBE.restocker) return LogisticsManager.getSummaryOfNetwork(network, false);
         PackagerBlockEntity packager = panelBE.getRestockedPackager();
         if (packager == null) return InventorySummary.EMPTY;
-        return packager.getAvailableItems(true);
+        return packager.getAvailableItems();
     }
 
     public int getPromised() {
@@ -724,11 +731,15 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
     }
 
     public void resetTimer() {
-        timer = REQUEST_INTERVAL;
+        timer = getConfigRequestIntervalInTicks();
     }
 
     public void resetTimerSlightly() {
-        timer = REQUEST_INTERVAL / 2;
+        timer = getConfigRequestIntervalInTicks() / 2;
+    }
+
+    private int getConfigRequestIntervalInTicks() {
+        return AllConfigs.server().logistics.factoryGaugeTimer.get();
     }
 
     private int getPromiseExpiryTimeInTicks() {
@@ -751,7 +762,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         panelTag.putInt("PromiseClearingInterval", -1);
         panelTag.putInt("RecipeOutput", 1);
 
-        if (panelBE().restocker) panelTag.put("Promises", restockerPromises.write());
+        if (panelBE().restocker) panelTag.put("Promises", restockerPromises.write(registries));
 
         nbt.put(CreateLang.asId(slot.name()), panelTag);
     }
@@ -773,18 +784,21 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         panelTag.putBoolean("RedstonePowered", redstonePowered);
         panelTag.put(
                 "Targeting",
-                CatnipCodecUtils.encode(CatnipCodecs.set(FactoryPanelPosition.CODEC), targeting)
+                CatnipCodecUtils.encode(
+                                CatnipCodecs.set(FactoryPanelPosition.CODEC), registries, targeting)
                         .orElseThrow());
         panelTag.put(
                 "TargetedBy",
                 CatnipCodecUtils.encode(
                                 Codec.list(FactoryPanelConnection.CODEC),
+                                registries,
                                 new ArrayList<>(targetedBy.values()))
                         .orElseThrow());
         panelTag.put(
                 "TargetedByLinks",
                 CatnipCodecUtils.encode(
                                 Codec.list(FactoryPanelConnection.CODEC),
+                                registries,
                                 new ArrayList<>(targetedByLinks.values()))
                         .orElseThrow());
         panelTag.putString("RecipeAddress", recipeAddress);
@@ -794,7 +808,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         panelTag.put("Craft", NBTHelper.writeItemList(activeCraftingArrangement, registries));
 
         if (panelBE().restocker && !clientPacket)
-            panelTag.put("Promises", restockerPromises.write());
+            panelTag.put("Promises", restockerPromises.write(registries));
 
         nbt.put(CreateLang.asId(slot.name()), panelTag);
     }
@@ -826,18 +840,23 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         targeting.addAll(
                 CatnipCodecUtils.decode(
                                 CatnipCodecs.set(FactoryPanelPosition.CODEC),
+                                registries,
                                 panelTag.get("Targeting"))
                         .orElse(Set.of()));
 
         targetedBy.clear();
         CatnipCodecUtils.decode(
-                        Codec.list(FactoryPanelConnection.CODEC), panelTag.get("TargetedBy"))
+                        Codec.list(FactoryPanelConnection.CODEC),
+                        registries,
+                        panelTag.get("TargetedBy"))
                 .orElse(List.of())
                 .forEach(c -> targetedBy.put(c.from, c));
 
         targetedByLinks.clear();
         CatnipCodecUtils.decode(
-                        Codec.list(FactoryPanelConnection.CODEC), panelTag.get("TargetedByLinks"))
+                        Codec.list(FactoryPanelConnection.CODEC),
+                        registries,
+                        panelTag.get("TargetedByLinks"))
                 .orElse(List.of())
                 .forEach(c -> targetedByLinks.put(c.from.pos(), c));
 
@@ -848,7 +867,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
 
         if (nbt.getBoolean("Restocker") && !clientPacket) {
             restockerPromises =
-                    RequestPromiseQueue.read(panelTag.getCompound("Promises"), () -> {});
+                    RequestPromiseQueue.read(
+                            panelTag.getCompound("Promises"), registries, () -> {});
             promisePrimedForMarkDirty = false;
         }
     }

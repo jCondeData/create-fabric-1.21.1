@@ -1,11 +1,11 @@
 package com.simibubi.create.impl.unpacking;
 
-import com.simibubi.create.api.unpacking.UnpackingHandler;
+import com.simibubi.create.api.packager.unpacking.UnpackingHandler;
 import com.simibubi.create.content.kinetics.crafter.ConnectedInputHandler.ConnectedInput;
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity;
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity.Inventory;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,11 +28,13 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
             BlockState state,
             Direction side,
             List<ItemStack> items,
-            @Nullable PackageOrder order,
+            @Nullable PackageOrderWithCrafts orderContext,
             boolean simulate) {
-        if (order == null) {
+        if (!PackageOrderWithCrafts.hasCraftingInformation(orderContext))
             return DEFAULT.unpack(level, pos, state, side, items, null, simulate);
-        }
+
+        // Get item placement
+        List<BigItemStack> craftingContext = orderContext.getCraftingInformation();
 
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof MechanicalCrafterBlockEntity crafter)) return false;
@@ -42,9 +44,10 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
         if (inventories.isEmpty()) return false;
 
         // insert in the order's defined ordering
-        int max = Math.min(inventories.size(), order.stacks().size());
+        int max = Math.min(inventories.size(), craftingContext.size());
+        outer:
         for (int i = 0; i < max; i++) {
-            BigItemStack targetStack = order.stacks().get(i);
+            BigItemStack targetStack = craftingContext.get(i);
             if (targetStack.stack.isEmpty()) continue;
 
             Inventory inventory = inventories.get(i);
@@ -57,6 +60,8 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
                     ItemStack toInsert = stack.copyWithCount(1);
                     if (inventory.insertItem(0, toInsert, simulate).isEmpty()) {
                         stack.shrink(1);
+                        // one item per crafter, move to next once successful
+                        continue outer;
                     }
                 }
             }

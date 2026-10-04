@@ -22,8 +22,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforgespi.language.IModInfo;
 
-import oshi.SystemInfo;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -74,6 +72,8 @@ public class DebugInformation {
     static {
         DebugInfoSection.builder(Create.NAME)
                 .put("Mod Version", CreateBuildInfo.VERSION)
+                .put("Mod Git Commit", CreateBuildInfo.GIT_COMMIT)
+                .put("Ponder Version", getVersionOfMod("ponder"))
                 .put("NeoForge Version", getVersionOfMod("neoforge"))
                 .put("Minecraft Version", SharedConstants.getCurrentVersion().getName())
                 .buildTo(DebugInformation::registerBothInfo);
@@ -143,7 +143,8 @@ public class DebugInformation {
                             if (!id.equals(Create.ID)
                                     && !id.equals("neoforge")
                                     && !id.equals("minecraft")
-                                    && !id.equals("flywheel")) {
+                                    && !id.equals("flywheel")
+                                    && !id.equals("ponder")) {
                                 IModInfo info = mod.getModInfo();
                                 String name = info.getDisplayName();
                                 String version = info.getVersion().toString();
@@ -168,12 +169,13 @@ public class DebugInformation {
     }
 
     public static String getTotalRam() {
-        long availableMemory = new SystemInfo().getHardware().getMemory().getAvailable();
-        long totalMemory = new SystemInfo().getHardware().getMemory().getTotal();
+        Runtime runtime = Runtime.getRuntime();
+        long availableMemory = runtime.freeMemory();
+        long totalMemory = runtime.totalMemory();
         long usedMemory = totalMemory - availableMemory;
         return String.format(
                 "%s bytes (%s MiB) / %s bytes (%s MiB)",
-                usedMemory, usedMemory / 1049000, totalMemory, totalMemory / 1049000);
+                usedMemory, usedMemory / 1048576L, totalMemory, totalMemory / 1048576L);
     }
 
     public static String getCpuInfo() {

@@ -5,7 +5,7 @@ import static net.minecraft.core.Direction.AxisDirection.POSITIVE;
 import static net.minecraft.world.entity.MoverType.SELF;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
+import com.simibubi.create.content.equipment.armor.CardboardArmorHandler;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltPart;
@@ -18,7 +18,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.HangingEntity;
@@ -64,8 +63,7 @@ public class BeltMovementHandler {
         if (!entity.isAlive()) return false;
         if (entity instanceof Player p
                 && p.isShiftKeyDown()
-                && !AllItems.CARDBOARD_BOOTS.isIn(p.getItemBySlot(EquipmentSlot.FEET)))
-            return false;
+                && !CardboardArmorHandler.testForStealth(entity)) return false;
         return true;
     }
 

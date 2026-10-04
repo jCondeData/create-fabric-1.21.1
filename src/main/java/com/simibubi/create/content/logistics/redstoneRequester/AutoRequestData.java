@@ -3,7 +3,7 @@ package com.simibubi.create.content.logistics.redstoneRequester;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.AllDataComponents;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.minecraft.ChatFormatting;
@@ -16,22 +16,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public record AutoRequestData(
-        PackageOrder encodedRequest,
-        PackageOrder encodedRequestContext,
+        PackageOrderWithCrafts encodedRequest,
         String encodedTargetAddress,
         BlockPos targetOffset,
         String targetDim,
         boolean isValid) {
+
     public static final Codec<AutoRequestData> CODEC =
             RecordCodecBuilder.create(
                     instance ->
                             instance.group(
-                                            PackageOrder.CODEC
+                                            PackageOrderWithCrafts.CODEC
                                                     .fieldOf("encoded_request")
                                                     .forGetter(i -> i.encodedRequest),
-                                            PackageOrder.CODEC
-                                                    .fieldOf("encoded_request_context")
-                                                    .forGetter(i -> i.encodedRequestContext),
                                             Codec.STRING
                                                     .fieldOf("encoded_target_address")
                                                     .forGetter(i -> i.encodedTargetAddress),
@@ -48,10 +45,8 @@ public record AutoRequestData(
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AutoRequestData> STREAM_CODEC =
             StreamCodec.composite(
-                    PackageOrder.STREAM_CODEC,
+                    PackageOrderWithCrafts.STREAM_CODEC,
                     i -> i.encodedRequest,
-                    PackageOrder.STREAM_CODEC,
-                    i -> i.encodedRequestContext,
                     ByteBufCodecs.STRING_UTF8,
                     i -> i.encodedTargetAddress,
                     BlockPos.STREAM_CODEC,
@@ -63,7 +58,7 @@ public record AutoRequestData(
                     AutoRequestData::new);
 
     public AutoRequestData() {
-        this(PackageOrder.empty(), PackageOrder.empty(), "", BlockPos.ZERO, "null", false);
+        this(PackageOrderWithCrafts.empty(), "", BlockPos.ZERO, "null", false);
     }
 
     public void writeToItem(BlockPos position, ItemStack itemStack) {
@@ -96,8 +91,7 @@ public record AutoRequestData(
     }
 
     public static class Mutable {
-        public PackageOrder encodedRequest = PackageOrder.empty();
-        public PackageOrder encodedRequestContext = PackageOrder.empty();
+        public PackageOrderWithCrafts encodedRequest = PackageOrderWithCrafts.empty();
         public String encodedTargetAddress = "";
         public BlockPos targetOffset = BlockPos.ZERO;
         public String targetDim = "null";
@@ -107,7 +101,6 @@ public record AutoRequestData(
 
         public Mutable(AutoRequestData data) {
             encodedRequest = data.encodedRequest;
-            encodedRequestContext = data.encodedRequestContext;
             encodedTargetAddress = data.encodedTargetAddress;
             targetOffset = data.targetOffset;
             targetDim = data.targetDim;
@@ -116,12 +109,7 @@ public record AutoRequestData(
 
         public AutoRequestData toImmutable() {
             return new AutoRequestData(
-                    encodedRequest,
-                    encodedRequestContext,
-                    encodedTargetAddress,
-                    targetOffset,
-                    targetDim,
-                    isValid);
+                    encodedRequest, encodedTargetAddress, targetOffset, targetDim, isValid);
         }
     }
 }

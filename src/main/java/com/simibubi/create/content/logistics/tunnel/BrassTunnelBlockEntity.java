@@ -732,7 +732,7 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity
 
         SelectionMode(AllIcons icon) {
             this.icon = icon;
-            this.translationKey = "tunnel.selection_mode." + Lang.asId(name());
+            this.translationKey = "create.tunnel.selection_mode." + Lang.asId(name());
         }
 
         @Override

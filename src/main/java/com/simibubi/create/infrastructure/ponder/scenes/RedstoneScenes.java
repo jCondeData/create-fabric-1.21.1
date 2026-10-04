@@ -596,7 +596,7 @@ public class RedstoneScenes {
                             leverSelection,
                             AnalogLeverBlockEntity.class,
                             nbt -> nbt.putInt("State", state));
-            scene.world().modifyBlock(wireLocations[i], s -> s.setValue(power, 7 - state), false);
+            scene.world().modifyBlock(wireLocations[i], s -> s.setValue(power, 8 - state), false);
             scene.effects().indicateRedstone(wireLocations[i]);
         }
         scene.idle(20);
@@ -614,13 +614,13 @@ public class RedstoneScenes {
         for (int i = 7; i > 0; i--) {
             scene.idle(2);
             final int state = i - 1;
-            if (i > 3) {
+            if (i > 4) {
                 scene.world()
                         .modifyBlockEntityNBT(
                                 leverSelection,
                                 AnalogLeverBlockEntity.class,
                                 nbt -> nbt.putInt("State", state));
-                scene.effects().indicateRedstone(wireLocations[i]);
+                scene.effects().indicateRedstone(wireLocations[state]);
             }
             scene.world()
                     .modifyBlock(
@@ -628,7 +628,7 @@ public class RedstoneScenes {
                             s -> s.setValue(power, state > 2 ? 0 : 3 - state),
                             false);
         }
-        scene.world().modifyBlock(wireLocations[0], s -> s.setValue(power, 3), false);
+        scene.world().modifyBlock(wireLocations[0], s -> s.setValue(power, 4), false);
         scene.idle(20);
 
         scene.overlay()
@@ -652,7 +652,7 @@ public class RedstoneScenes {
                                 nbt -> nbt.putInt("State", state));
                 scene.effects().indicateRedstone(wireLocations[i]);
             }
-            scene.world().modifyBlock(wireLocations[i], s -> s.setValue(power, 15 - state), false);
+            scene.world().modifyBlock(wireLocations[i], s -> s.setValue(power, 16 - state), false);
         }
 
         scene.world().toggleRedstonePower(lamp);

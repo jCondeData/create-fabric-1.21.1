@@ -308,12 +308,13 @@ public class AllArmInteractionPointTypes {
         public void cycleMode() {}
 
         @Override
-        public ItemStack extract(int slot, int amount, boolean simulate) {
+        public ItemStack extract(
+                ArmBlockEntity armBlockEntity, int slot, int amount, boolean simulate) {
             return ItemStack.EMPTY;
         }
 
         @Override
-        public int getSlotCount() {
+        public int getSlotCount(ArmBlockEntity armBlockEntity) {
             return 0;
         }
     }
@@ -362,7 +363,7 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack insert(ItemStack stack, boolean simulate) {
+        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
             ItemStack input = stack.copy();
             InteractionResultHolder<ItemStack> res =
                     BlazeBurnerBlock.tryInsert(
@@ -406,12 +407,13 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack extract(int slot, int amount, boolean simulate) {
+        public ItemStack extract(
+                ArmBlockEntity armBlockEntity, int slot, int amount, boolean simulate) {
             BlockEntity be = level.getBlockEntity(pos);
             if (!(be instanceof MechanicalCrafterBlockEntity crafter)) return ItemStack.EMPTY;
             SmartInventory inventory = crafter.getInventory();
             inventory.allowExtraction();
-            ItemStack extract = super.extract(slot, amount, simulate);
+            ItemStack extract = super.extract(armBlockEntity, slot, amount, simulate);
             inventory.forbidExtraction();
             return extract;
         }
@@ -484,7 +486,7 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack insert(ItemStack stack, boolean simulate) {
+        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
             FilteringBehaviour filtering =
                     BlockEntityBehaviour.get(level, pos, FilteringBehaviour.TYPE);
             InvManipulationBehaviour inserter =
@@ -513,7 +515,7 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack insert(ItemStack stack, boolean simulate) {
+        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (!(blockEntity instanceof CampfireBlockEntity campfireBE)) return stack;
             Optional<RecipeHolder<CampfireCookingRecipe>> recipe =
@@ -553,12 +555,13 @@ public class AllArmInteractionPointTypes {
         public void updateCachedState() {
             BlockState oldState = cachedState;
             super.updateCachedState();
-            if (oldState != cachedState) level.invalidateCapabilities(cachedHandler.pos());
+            if (cachedHandler != null && oldState != cachedState)
+                level.invalidateCapabilities(cachedHandler.pos());
         }
 
         @Nullable
         @Override
-        protected IItemHandler getHandler() {
+        protected IItemHandler getHandler(ArmBlockEntity armBlockEntity) {
             return null;
         }
 
@@ -568,19 +571,20 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack insert(ItemStack stack, boolean simulate) {
+        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
             IItemHandler handler = new SidedInvWrapper(getContainer(), Direction.UP);
             return ItemHandlerHelper.insertItem(handler, stack, simulate);
         }
 
         @Override
-        public ItemStack extract(int slot, int amount, boolean simulate) {
+        public ItemStack extract(
+                ArmBlockEntity armBlockEntity, int slot, int amount, boolean simulate) {
             IItemHandler handler = new SidedInvWrapper(getContainer(), Direction.DOWN);
             return handler.extractItem(slot, amount, simulate);
         }
 
         @Override
-        public int getSlotCount() {
+        public int getSlotCount(ArmBlockEntity armBlockEntity) {
             return 2;
         }
     }
@@ -592,12 +596,12 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public int getSlotCount() {
+        public int getSlotCount(ArmBlockEntity armBlockEntity) {
             return 1;
         }
 
         @Override
-        public ItemStack insert(ItemStack stack, boolean simulate) {
+        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
             if (stack.get(DataComponents.JUKEBOX_PLAYABLE) == null) return stack;
             if (cachedState.getOptionalValue(JukeboxBlock.HAS_RECORD).orElse(true)) return stack;
             if (!(level.getBlockEntity(pos) instanceof JukeboxBlockEntity jukeboxBE)) return stack;
@@ -609,7 +613,8 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack extract(int slot, int amount, boolean simulate) {
+        public ItemStack extract(
+                ArmBlockEntity armBlockEntity, int slot, int amount, boolean simulate) {
             if (!cachedState.getOptionalValue(JukeboxBlock.HAS_RECORD).orElse(false))
                 return ItemStack.EMPTY;
             if (!(level.getBlockEntity(pos) instanceof JukeboxBlockEntity jukeboxBE))
@@ -631,7 +636,7 @@ public class AllArmInteractionPointTypes {
         }
 
         @Override
-        public ItemStack insert(ItemStack stack, boolean simulate) {
+        public ItemStack insert(ArmBlockEntity armBlockEntity, ItemStack stack, boolean simulate) {
             if (!stack.is(Items.GLOWSTONE)) return stack;
             if (cachedState.getOptionalValue(RespawnAnchorBlock.CHARGE).orElse(4) == 4)
                 return stack;

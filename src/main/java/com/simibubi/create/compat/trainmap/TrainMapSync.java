@@ -35,6 +35,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,7 +74,8 @@ public class TrainMapSync {
                         CatnipStreamCodecBuilders.array(ByteBufCodecs.FLOAT, Float.class),
                         packet -> packet.positions,
                         CatnipStreamCodecBuilders.list(
-                                ResourceKey.streamCodec(Registries.DIMENSION)),
+                                CatnipStreamCodecBuilders.nullable(
+                                        ResourceKey.streamCodec(Registries.DIMENSION))),
                         packet -> packet.dimensions,
                         TrainState.STREAM_CODEC,
                         packet -> packet.state,
@@ -213,6 +215,8 @@ public class TrainMapSync {
 
         entry.positions = new Float[train.carriages.size() * 6];
         entry.dimensions = new ArrayList<>();
+
+        Arrays.fill(entry.positions, Float.valueOf(0));
 
         List<Carriage> carriages = train.carriages;
         for (int i = 0; i < carriages.size(); i++) {

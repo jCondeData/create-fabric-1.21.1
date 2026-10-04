@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
+import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
@@ -130,6 +131,6 @@ public abstract class AbstractPulleyRenderer<T extends KineticBlockEntity>
 
     @Override
     public int getViewDistance() {
-        return 256;
+        return AllConfigs.server().kinetics.maxRopeLength.get();
     }
 }

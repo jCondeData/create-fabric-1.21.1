@@ -1,4 +1,48 @@
 ------------------------------------------------------
+Create 6.0.4
+------------------------------------------------------
+
+#### Bug Fixes
+
+- Fixed crash when using mechanical arms with composters #7965
+- Fixed chocolate and honey having the wrong map color #5409
+- Fixed goggles not swapping with helmet when equipped #7977
+- Fixed fluid pipe visuals rendering with incorrect uv scale
+- Fixed Re-packager creating invalid item stacks when factory gauges were assigned larger stacks #7963
+- Fixed nixie tubes not updating their text in ponder scenes #7978
+- Clicking conveyors with chains or the wrench now takes priority over picking up packagers from them
+- Fix Processing recipes ignoring item components (1.21) #7962
+
+------------------------------------------------------
+Create 6.0.3
+------------------------------------------------------
+
+#### Bug Fixes
+
+- Fixed certain block entities not rendering on contraptions #7790 #7782 #7774
+- Fixed sign text and color getting removed by display links #7250
+- Changed sandpaper item rendering to use Gui transform
+- Fixed crash when using or viewing sandpaper polishing recipes (1.21)
+- Fixed crash with recent versions of ftb library
+- Fixed belts interacting with horizontal crushing wheels inconsistently #7445
+- Allow Re-Packager to split packages with multiple crafting recipes into single packages 
+- Fixed contraptions not able to break ice blocks #4415
+- Increased rope pulley view distance #4836
+- Fixed create datagen running in addon workspaces (#7862)
+- Fixed Fluid recipes missing outputs, and crash when using create fluid buckets on basin (#7884)
+- Fixed crash when placing empty linked controllers in lecterns #7876
+- Fixed issues with elevator contact display link behavior
+- Fixed double chest lighting on contraptions
+- Added flywheel optimisations for fluids in windowed pipes
+- Fixed bogey lighting not updating correctly while switching between styles
+- Fixed cardboard sword not being enchantable #7736
+- Fixed crash with redstone requester #7788
+- Fixed being able to enchant cardboard swords with other enchantments when using anvils
+- Fixed metal ladders being able to hang in wrong directions #7395
+- Fixed player chain conveyor animation playing when game is paused #7390
+- Fixed elevator floor description rendering being offset from the controls block
+
+------------------------------------------------------
 Create 6.0.2
 ------------------------------------------------------
 
@@ -10,7 +54,7 @@ Create 6.0.2
 - Fixed Shopping lists disappearing when clicking a different table cloth #7548
 - Fix mixin conflict with immersive portals
 - Fix factory gauge display sources causing crashes #7645
-- Fix BlockEntityRenderHelper ignoring BlockEntityRender#shouldRender #7639
+- Fix Schematics sometimes rendering block entity elements when it shouldn't #7639
 - Fix Chiseled Bookshelves having wrong the blockstates when placed with a schematic cannon #7642
 - Fix horizontal crushing wheels not working properly #7445
 - Fix rotating shader not correctly handling color
@@ -28,10 +72,17 @@ Create 6.0.2
 - Fix rotation keybind not supporting mouse buttons
 - Fixed deployers not being able to harvest honeycomb with modded shears #4570
 - Safety check for schedule pointer exceeding the total count #7492
-- Default packager unwrapping behaviour uses more robust insertion method when not in a simulation #7426
+- Fixed packager unpacking leading to item multiplication in special modded inventories #7426
 - Fixed redstone links not updating neighbours when toggling from receiver to transmitter #7715
 - Fix KineticStressDisplaySource not working properly #7659
 - Fix sequenced assembly not correctly handling errors (1.21.1)
+- The JEI search bar is now synchronised to the stock keeper search bar (configurable)
+- Fixed JEI plugin modifying ingredient fluid amounts for visual purposes
+- Fixed belts moving a sneaking player even when not wearing the full cardboard set #7691
+- Packagers can now read multiple lines on signs for package addressing
+- Factory Gauge request interval is now configurable
+- Fixed train map integration crashing when there are derailed trains or trains in another dimension (1.21.1)
+- Fixed cardboard armor rendering not respecting custom player scaling
 
 #### API Changes
 

@@ -2,10 +2,11 @@ package com.simibubi.create.content.logistics.packagerLink;
 
 import com.google.common.cache.Cache;
 import com.simibubi.create.Create;
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -19,7 +20,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -177,24 +177,17 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
             int linkIndex,
             MutableBoolean finalLink,
             int orderId,
-            @Nullable PackageOrder orderContext,
-            @Nullable IItemHandler ignoredHandler) {
+            @Nullable PackageOrderWithCrafts context,
+            @Nullable IdentifiedInventory ignoredHandler) {
 
         if (blockEntity instanceof PackagerLinkBlockEntity plbe)
             return plbe.processRequest(
-                    stack,
-                    amount,
-                    address,
-                    linkIndex,
-                    finalLink,
-                    orderId,
-                    orderContext,
-                    ignoredHandler);
+                    stack, amount, address, linkIndex, finalLink, orderId, context, ignoredHandler);
 
         return null;
     }
 
-    public InventorySummary getSummary(@Nullable IItemHandler ignoredHandler) {
+    public InventorySummary getSummary(@Nullable IdentifiedInventory ignoredHandler) {
         if (blockEntity instanceof PackagerLinkBlockEntity plbe)
             return plbe.fetchSummaryFromPackager(ignoredHandler);
         return InventorySummary.EMPTY;

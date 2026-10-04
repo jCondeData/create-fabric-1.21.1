@@ -2,26 +2,48 @@ package com.simibubi.create.compat.trainmap;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.simibubi.create.Create;
 import com.simibubi.create.foundation.gui.RemovedGuiUtils;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
-import journeymap.api.v2.client.display.Context;
+import journeymap.api.v2.client.IClientAPI;
+import journeymap.api.v2.client.IClientPlugin;
+import journeymap.api.v2.client.JourneyMapPlugin;
+import journeymap.api.v2.client.display.Context.UI;
+import journeymap.api.v2.client.event.FullscreenRenderEvent;
+import journeymap.api.v2.client.fullscreen.IFullscreen;
 import journeymap.api.v2.client.util.UIState;
+import journeymap.api.v2.common.event.FullscreenEventRegistry;
 import journeymap.client.ui.fullscreen.Fullscreen;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.InputEvent.MouseButton.Pre;
 
 import java.util.List;
 
-public class JourneyTrainMap {
+@JourneyMapPlugin(apiVersion = "2.0.0")
+public class JourneyTrainMap implements IClientPlugin {
 
     private static boolean requesting;
+
+    public JourneyTrainMap() {}
+
+    @Override
+    public void initialize(IClientAPI jmClientApi) {
+        FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(
+                Create.ID, JourneyTrainMap::onRender);
+    }
+
+    @Override
+    public String getModId() {
+        return Create.ID;
+    }
 
     public static void tick() {
         if (!AllConfigs.client().showTrainMapOverlay.get()
@@ -35,7 +57,7 @@ public class JourneyTrainMap {
         TrainMapSyncClient.requestData();
     }
 
-    public static void mouseClick(InputEvent.MouseButton.Pre event) {
+    public static void mouseClick(Pre event) {
         Minecraft mc = Minecraft.getInstance();
         if (!(mc.screen instanceof Fullscreen screen)) return;
 
@@ -47,12 +69,20 @@ public class JourneyTrainMap {
             event.setCanceled(true);
     }
 
-    // Called by JourneyFullscreenMapMixin
-    public static void onRender(
-            GuiGraphics graphics, Fullscreen screen, double x, double z, int mX, int mY, float pt) {
-        UIState state = screen.getUiState();
+    // GuiGraphics graphics, Fullscreen screen, double x, double z, int mX, int mY, float pt
+    public static void onRender(FullscreenRenderEvent event) {
+        GuiGraphics graphics = event.getGraphics();
+        IFullscreen fullscreen = event.getFullscreen();
+        Screen screen = fullscreen.getScreen();
+        double x = fullscreen.getCenterBlockX(true);
+        double z = fullscreen.getCenterBlockZ(true);
+        int mX = event.getMouseX();
+        int mY = event.getMouseY();
+        float pt = event.getPartialTicks();
+
+        UIState state = fullscreen.getUiState();
         if (state == null) return;
-        if (state.ui != Context.UI.Fullscreen) return;
+        if (state.ui != UI.Fullscreen) return;
         if (!state.active) return;
         if (!AllConfigs.client().showTrainMapOverlay.get()) {
             renderToggleWidgetAndTooltip(graphics, screen, mX, mY);
@@ -74,10 +104,8 @@ public class JourneyTrainMap {
 
         float mouseX = mX - screen.width / 2.0f;
         float mouseY = mY - screen.height / 2.0f;
-        mouseX /= scale;
-        mouseY /= scale;
-        mouseX += x;
-        mouseY += z;
+        mouseX /= (float) scale;
+        mouseY /= (float) scale;
 
         Rect2i bounds =
                 new Rect2i(
@@ -88,7 +116,7 @@ public class JourneyTrainMap {
 
         List<FormattedText> tooltip =
                 TrainMapManager.renderAndPick(
-                        graphics, Mth.floor(mouseX), Mth.floor(mouseY), pt, false, bounds);
+                        graphics, Mth.floor(mouseX), Mth.floor(mouseY), false, bounds);
 
         pose.popPose();
 
@@ -98,7 +126,7 @@ public class JourneyTrainMap {
     }
 
     private static boolean renderToggleWidgetAndTooltip(
-            GuiGraphics graphics, Fullscreen screen, int mouseX, int mouseY) {
+            GuiGraphics graphics, Screen screen, int mouseX, int mouseY) {
         TrainMapManager.renderToggleWidget(graphics, 3, 30);
         if (!TrainMapManager.isToggleWidgetHovered(mouseX, mouseY, 3, 30)) return false;
 

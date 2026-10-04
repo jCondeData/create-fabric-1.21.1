@@ -2,6 +2,7 @@ package com.simibubi.create.infrastructure.command;
 
 import com.simibubi.create.Create;
 import com.simibubi.create.content.equipment.goggles.GoggleConfigScreen;
+import com.simibubi.create.content.kinetics.KineticDebugger;
 import com.simibubi.create.content.trains.CameraDistanceModifier;
 import com.simibubi.create.foundation.utility.CameraAngleAnimationService;
 import com.simibubi.create.infrastructure.config.AllConfigs;
@@ -23,14 +24,14 @@ public class SimpleCreateActions {
         if (value.equals("info")) {
             Component text =
                     Component.literal("Rainbow Debug Utility is currently: ")
-                            .append(boolToText(AllConfigs.client().rainbowDebug.get()));
+                            .append(boolToText(KineticDebugger.rainbowDebug));
             player.displayClientMessage(text, false);
             return;
         }
 
-        AllConfigs.client().rainbowDebug.set(Boolean.parseBoolean(value));
+        KineticDebugger.rainbowDebug = Boolean.parseBoolean(value);
         Component text =
-                boolToText(AllConfigs.client().rainbowDebug.get())
+                boolToText(KineticDebugger.rainbowDebug)
                         .append(
                                 Component.literal(" Rainbow Debug Utility")
                                         .withStyle(ChatFormatting.WHITE));

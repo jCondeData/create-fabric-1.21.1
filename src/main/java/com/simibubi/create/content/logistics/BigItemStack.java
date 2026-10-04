@@ -9,7 +9,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class BigItemStack {
     public static final Codec<BigItemStack> CODEC =
@@ -78,5 +80,12 @@ public class BigItemStack {
     @Override
     public String toString() {
         return "(" + stack.getHoverName().getString() + " x" + count + ")";
+    }
+
+    public static List<BigItemStack> duplicateWrappers(List<BigItemStack> list) {
+        List<BigItemStack> copy = new ArrayList<>();
+        for (BigItemStack bigItemStack : list)
+            copy.add(new BigItemStack(bigItemStack.stack, bigItemStack.count));
+        return copy;
     }
 }

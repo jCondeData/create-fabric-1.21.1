@@ -7,6 +7,7 @@ import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.filter.FilterItem;
 import com.simibubi.create.content.logistics.filter.FilterItemStack;
+import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
@@ -39,7 +40,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,8 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.IntStream;
-
-import javax.annotation.Nullable;
 
 public class StockTickerBlockEntity extends StockCheckingBlockEntity
         implements IHaveHoveringInformation {
@@ -102,12 +100,10 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity
     @Override
     public boolean broadcastPackageRequest(
             RequestType type,
-            PackageOrder order,
-            IItemHandler ignoredHandler,
-            String address,
-            @Nullable PackageOrder orderContext) {
-        boolean result =
-                super.broadcastPackageRequest(type, order, ignoredHandler, address, orderContext);
+            PackageOrderWithCrafts order,
+            IdentifiedInventory ignoredHandler,
+            String address) {
+        boolean result = super.broadcastPackageRequest(type, order, ignoredHandler, address);
         previouslyUsedAddress = address;
         notifyUpdate();
         return result;

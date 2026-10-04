@@ -169,7 +169,7 @@ public class ContraptionControlsRenderer
             float heightCentering = (width - 8f) / 2;
 
             ms.pushPose();
-            ms.translate(-.0635f, 0.06f, buttondepth);
+            ms.translate(-.0635f, 0.06f, buttondepth - .25f);
             ms.scale(scale, -scale, scale);
             ms.translate((float) Math.max(0, width - actualWidth) / 2, heightCentering, 0);
             NixieTubeRenderer.drawInWorldString(ms, buffer, description, flickeringBrightColor);

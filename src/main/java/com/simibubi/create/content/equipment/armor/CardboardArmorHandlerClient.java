@@ -11,8 +11,10 @@ import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -53,7 +55,11 @@ public class CardboardArmorHandlerClient {
 
         PoseStack ms = event.getPoseStack();
         ms.pushPose();
-        ms.translate(0, 2 / 16f, 0);
+
+        Vec3 renderOffset =
+                event.getRenderer()
+                        .getRenderOffset((AbstractClientPlayer) player, event.getPartialTick());
+        ms.translate(0, -renderOffset.y, 0);
 
         float movement =
                 (float) player.position().subtract(player.xo, player.yo, player.zo).length();
@@ -63,12 +69,14 @@ public class CardboardArmorHandlerClient {
                     0,
                     Math.min(
                             Math.abs(Mth.cos((AnimationTickHolder.getRenderTime() % 256) / 2.0f))
-                                    * 2
-                                    / 16f,
+                                    * -renderOffset.y,
                             movement * 5),
                     0);
 
         float interpolatedYaw = Mth.lerp(event.getPartialTick(), player.yRotO, player.getYRot());
+
+        float scale = player.getScale();
+        ms.scale(scale, scale, scale);
 
         try {
             PartialModel model =

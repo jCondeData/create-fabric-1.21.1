@@ -11,7 +11,6 @@ import dev.engine_room.flywheel.lib.visualization.VisualizationHelper;
 
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.registry.RegisteredObjectsHelper;
-import net.createmod.catnip.render.SuperByteBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,7 +23,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -65,17 +65,30 @@ public class BlockEntityRenderHelper {
     }
 
     public static void renderBlockEntities(
-            Level world,
-            @Nullable VirtualRenderWorld renderWorld,
+            Level realLevel,
+            @Nullable VirtualRenderWorld renderLevel,
             Iterable<BlockEntity> customRenderBEs,
             PoseStack ms,
             @Nullable Matrix4f lightTransform,
             MultiBufferSource buffer,
             float pt) {
-        Iterator<BlockEntity> iterator = customRenderBEs.iterator();
-        while (iterator.hasNext()) {
-            BlockEntity blockEntity = iterator.next();
-            if (VisualizationManager.supportsVisualization(world)
+        // First, make sure all BEs have the render level.
+        // Need to do this outside of the main loop in case BEs query the level from other virtual
+        // BEs.
+        // e.g. double chests specifically fetch light from both their own and their neighbor's
+        // level,
+        // which is honestly kind of silly, but easy to work around here.
+        if (renderLevel != null) {
+            for (var be : customRenderBEs) {
+                be.setLevel(renderLevel);
+            }
+        }
+
+        Set<BlockEntity> toRemove = new HashSet<>();
+
+        // Main loop, time to render.
+        for (BlockEntity blockEntity : customRenderBEs) {
+            if (VisualizationManager.supportsVisualization(realLevel)
                     && VisualizationHelper.skipVanillaRender(blockEntity)) continue;
 
             BlockEntityRenderer<BlockEntity> renderer =
@@ -83,36 +96,38 @@ public class BlockEntityRenderHelper {
                             .getBlockEntityRenderDispatcher()
                             .getRenderer(blockEntity);
             if (renderer == null) {
-                iterator.remove();
+                // Don't bother looping over it again if we can't do anything with it.
+                toRemove.add(blockEntity);
                 continue;
             }
 
-            if (!renderer.shouldRender(
-                    blockEntity,
-                    Minecraft.getInstance().gameRenderer.getMainCamera().getPosition())) continue;
+            if (renderLevel == null
+                    && !renderer.shouldRender(
+                            blockEntity,
+                            Minecraft.getInstance().gameRenderer.getMainCamera().getPosition()))
+                continue;
 
             BlockPos pos = blockEntity.getBlockPos();
             ms.pushPose();
             TransformStack.of(ms).translate(pos);
 
             try {
-                int worldLight =
-                        getCombinedLight(world, getLightPos(lightTransform, pos), renderWorld, pos);
+                int realLevelLight =
+                        LevelRenderer.getLightColor(realLevel, getLightPos(lightTransform, pos));
 
-                if (renderWorld != null) {
-                    // Swap the real world for the render world so that the renderer gets
-                    // contraption-local information
-                    blockEntity.setLevel(renderWorld);
-                    renderer.render(
-                            blockEntity, pt, ms, buffer, worldLight, OverlayTexture.NO_OVERLAY);
-                    blockEntity.setLevel(world);
+                int light;
+                if (renderLevel != null) {
+                    renderLevel.setExternalLight(realLevelLight);
+                    light = LevelRenderer.getLightColor(renderLevel, pos);
                 } else {
-                    renderer.render(
-                            blockEntity, pt, ms, buffer, worldLight, OverlayTexture.NO_OVERLAY);
+                    light = realLevelLight;
                 }
 
+                renderer.render(blockEntity, pt, ms, buffer, light, OverlayTexture.NO_OVERLAY);
+
             } catch (Exception e) {
-                iterator.remove();
+                // Prevent this BE from causing more issues in the future.
+                toRemove.add(blockEntity);
 
                 String message =
                         "BlockEntity "
@@ -124,6 +139,25 @@ public class BlockEntityRenderHelper {
             }
 
             ms.popPose();
+        }
+
+        // Now reset all the BEs' levels.
+        if (renderLevel != null) {
+            renderLevel.resetExternalLight();
+
+            for (var be : customRenderBEs) {
+                be.setLevel(realLevel);
+            }
+        }
+
+        // And finally, cull any BEs that misbehaved.
+        if (!toRemove.isEmpty()) {
+            var it = customRenderBEs.iterator();
+            while (it.hasNext()) {
+                if (toRemove.contains(it.next())) {
+                    it.remove();
+                }
+            }
         }
     }
 
@@ -141,20 +175,5 @@ public class BlockEntityRenderHelper {
         } else {
             return contraptionPos;
         }
-    }
-
-    public static int getCombinedLight(
-            Level world,
-            BlockPos worldPos,
-            @Nullable VirtualRenderWorld renderWorld,
-            BlockPos renderWorldPos) {
-        int worldLight = LevelRenderer.getLightColor(world, worldPos);
-
-        if (renderWorld != null) {
-            int renderWorldLight = LevelRenderer.getLightColor(renderWorld, renderWorldPos);
-            return SuperByteBuffer.maxLight(worldLight, renderWorldLight);
-        }
-
-        return worldLight;
     }
 }

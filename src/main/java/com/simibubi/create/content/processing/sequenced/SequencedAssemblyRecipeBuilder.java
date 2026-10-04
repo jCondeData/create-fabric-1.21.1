@@ -64,7 +64,7 @@ public class SequencedAssemblyRecipeBuilder {
     }
 
     public SequencedAssemblyRecipeBuilder transitionTo(ItemLike item) {
-        recipe.transitionalItem = new ProcessingOutput(new ItemStack(item), 1);
+        recipe.transitionalItem = new ProcessingOutput(item.asItem(), 1, 1);
         return this;
     }
 
@@ -78,7 +78,9 @@ public class SequencedAssemblyRecipeBuilder {
     }
 
     public SequencedAssemblyRecipeBuilder addOutput(ItemStack item, float weight) {
-        recipe.resultPool.add(new ProcessingOutput(item, weight));
+        recipe.resultPool.add(
+                new ProcessingOutput(
+                        item.getItem(), item.getCount(), item.getComponentsPatch(), weight));
         return this;
     }
 

@@ -2,6 +2,7 @@ package com.simibubi.create.content.logistics.redstoneRequester;
 
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.foundation.networking.BlockEntityConfigurationPacket;
 
 import io.netty.buffer.ByteBuf;
@@ -54,6 +55,8 @@ public class RedstoneRequesterConfigurationPacket
             ItemStack stack = stacks.get(i).stack;
             if (!stack.isEmpty()) stacks.set(i, new BigItemStack(stack, amounts.get(i)));
         }
+        if (!be.encodedRequest.orderedStacksMatchOrderedRecipes())
+            be.encodedRequest = PackageOrderWithCrafts.simple(be.encodedRequest.stacks());
         be.allowPartialRequests = allowPartial;
     }
 }

@@ -3,7 +3,9 @@ package com.simibubi.create;
 import com.mojang.serialization.Codec;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides.ClipboardType;
+import com.simibubi.create.content.equipment.sandPaper.SandPaperItemComponent;
 import com.simibubi.create.content.equipment.symmetryWand.mirror.SymmetryMirror;
+import com.simibubi.create.content.equipment.toolbox.ToolboxInventory;
 import com.simibubi.create.content.equipment.zapper.PlacementPatterns;
 import com.simibubi.create.content.equipment.zapper.terrainzapper.PlacementOptions;
 import com.simibubi.create.content.equipment.zapper.terrainzapper.TerrainBrushes;
@@ -13,7 +15,7 @@ import com.simibubi.create.content.logistics.box.PackageItem.PackageOrderData;
 import com.simibubi.create.content.logistics.filter.AttributeFilterWhitelistMode;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute.ItemAttributeEntry;
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem.ShoppingList;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe.SequencedAssembly;
 import com.simibubi.create.content.redstone.displayLink.ClickToLinkBlockItem.ClickToLinkData;
@@ -34,7 +36,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Unit;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -298,12 +299,12 @@ public class AllDataComponents {
                     builder ->
                             builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT));
 
-    public static final DataComponentType<ItemStack> SAND_PAPER_POLISHING =
+    public static final DataComponentType<SandPaperItemComponent> SAND_PAPER_POLISHING =
             register(
                     "sand_paper_polishing",
                     builder ->
-                            builder.persistent(ItemStack.CODEC)
-                                    .networkSynchronized(ItemStack.STREAM_CODEC));
+                            builder.persistent(SandPaperItemComponent.CODEC)
+                                    .networkSynchronized(SandPaperItemComponent.STREAM_CODEC));
 
     public static final DataComponentType<Unit> SAND_PAPER_JEI =
             register(
@@ -327,12 +328,12 @@ public class AllDataComponents {
                             builder.persistent(ItemContainerContents.CODEC)
                                     .networkSynchronized(ItemContainerContents.STREAM_CODEC));
 
-    public static final DataComponentType<ItemContainerContents> TOOLBOX_INVENTORY =
+    public static final DataComponentType<ToolboxInventory> TOOLBOX_INVENTORY =
             register(
                     "toolbox_inventory",
                     builder ->
-                            builder.persistent(ItemContainerContents.CODEC)
-                                    .networkSynchronized(ItemContainerContents.STREAM_CODEC));
+                            builder.persistent(ToolboxInventory.BACKWARDS_COMPAT_CODEC)
+                                    .networkSynchronized(ToolboxInventory.STREAM_CODEC));
 
     public static final DataComponentType<UUID> TOOLBOX_UUID =
             register(
@@ -430,12 +431,12 @@ public class AllDataComponents {
                             builder.persistent(PackageOrderData.CODEC)
                                     .networkSynchronized(PackageOrderData.STREAM_CODEC));
 
-    public static final DataComponentType<PackageOrder> PACKAGE_ORDER_CONTEXT =
+    public static final DataComponentType<PackageOrderWithCrafts> PACKAGE_ORDER_CONTEXT =
             register(
                     "package_order_context",
                     builder ->
-                            builder.persistent(PackageOrder.CODEC)
-                                    .networkSynchronized(PackageOrder.STREAM_CODEC));
+                            builder.persistent(PackageOrderWithCrafts.CODEC)
+                                    .networkSynchronized(PackageOrderWithCrafts.STREAM_CODEC));
 
     public static final DataComponentType<ClickToLinkData> CLICK_TO_LINK_DATA =
             register(

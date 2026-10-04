@@ -19,6 +19,7 @@ import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes
 import com.simibubi.create.content.kinetics.mechanicalArm.AllArmInteractionPointTypes;
 import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttributeTypes;
 import com.simibubi.create.content.logistics.packagePort.AllPackagePortTargetTypes;
+import com.simibubi.create.content.logistics.packager.AllInventoryIdentifiers;
 import com.simibubi.create.content.logistics.packager.AllUnpackingHandlers;
 import com.simibubi.create.content.logistics.packagerLink.GlobalLogisticsManager;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
@@ -160,6 +161,7 @@ public class Create {
         modEventBus.addListener(Create::init);
         modEventBus.addListener(Create::onRegister);
         modEventBus.addListener(AllEntityTypes::registerEntityAttributes);
+        modEventBus.addListener(EventPriority.HIGHEST, CreateDatagen::gatherDataHighPriority);
         modEventBus.addListener(EventPriority.LOWEST, CreateDatagen::gatherData);
         modEventBus.addListener(AllSoundEvents::register);
 
@@ -188,6 +190,7 @@ public class Create {
                     AllOpenPipeEffectHandlers.registerDefaults();
                     AllMountedDispenseItemBehaviors.registerDefaults();
                     AllUnpackingHandlers.registerDefaults();
+                    AllInventoryIdentifiers.registerDefaults();
                     // --
                 });
     }

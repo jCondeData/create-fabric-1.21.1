@@ -3,6 +3,7 @@ package com.simibubi.create.infrastructure.data;
 import com.simibubi.create.AllEnchantments;
 import com.simibubi.create.Create;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.EnchantmentTagsProvider;
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public class CreateEnchantmentTagsProvider extends EnchantmentTagsProvider {
     public CreateEnchantmentTagsProvider(
             PackOutput output,
-            CompletableFuture<Provider> lookupProvider,
+            CompletableFuture<HolderLookup.Provider> lookupProvider,
             @Nullable ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, Create.ID, existingFileHelper);
     }

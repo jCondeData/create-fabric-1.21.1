@@ -73,24 +73,24 @@ public class ProcessingRecipeSerializer<T extends ProcessingRecipe<?>>
                                                                                                             o)));
                                                             return list;
                                                         }),
-                                        Codec.either(ProcessingOutput.CODEC, FluidStack.CODEC)
+                                        Codec.either(FluidStack.CODEC, ProcessingOutput.CODEC)
                                                 .listOf()
                                                 .fieldOf("results")
                                                 .forGetter(
                                                         i -> {
                                                             List<
                                                                             Either<
-                                                                                    ProcessingOutput,
-                                                                                    FluidStack>>
+                                                                                    FluidStack,
+                                                                                    ProcessingOutput>>
                                                                     list = new ArrayList<>();
-                                                            i.getRollableResults()
+                                                            i.getFluidResults()
                                                                     .forEach(
                                                                             o ->
                                                                                     list.add(
                                                                                             Either
                                                                                                     .left(
                                                                                                             o)));
-                                                            i.getFluidResults()
+                                                            i.getRollableResults()
                                                                     .forEach(
                                                                             o ->
                                                                                     list.add(
@@ -98,7 +98,9 @@ public class ProcessingRecipeSerializer<T extends ProcessingRecipe<?>>
                                                                                                     .right(
                                                                                                             o)));
                                                             return list;
-                                                        }),
+                                                        }), // Fluid and item outputs both using
+                                                            // "id" as key, try deserializing as
+                                                            // fluid first
                                         ExtraCodecs.NON_NEGATIVE_INT
                                                 .optionalFieldOf("processing_time", 0)
                                                 .forGetter(T::getProcessingDuration),
@@ -139,10 +141,10 @@ public class ProcessingRecipeSerializer<T extends ProcessingRecipe<?>>
                                                 either.right().ifPresent(fluidIngredientList::add);
                                             }
 
-                                            for (Either<ProcessingOutput, FluidStack> either :
+                                            for (Either<FluidStack, ProcessingOutput> either :
                                                     results) {
-                                                either.left().ifPresent(processingOutputList::add);
-                                                either.right().ifPresent(fluidStackOutputList::add);
+                                                either.left().ifPresent(fluidStackOutputList::add);
+                                                either.right().ifPresent(processingOutputList::add);
                                             }
 
                                             builder.withItemIngredients(ingredientList)

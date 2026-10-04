@@ -21,8 +21,11 @@ public class CreateCodecs {
                     String::valueOf);
 
     public static final Codec<ItemStackHandler> ITEM_STACK_HANDLER =
-            ItemSlots.CODEC.xmap(
-                    slots -> slots.toHandler(ItemStackHandler::new), ItemSlots::fromHandler);
+            Codec.lazyInitialized(
+                    () ->
+                            ItemSlots.CODEC.xmap(
+                                    slots -> slots.toHandler(ItemStackHandler::new),
+                                    ItemSlots::fromHandler));
 
     public static Codec<Integer> boundedIntStr(int min) {
         return INT_STR.validate(

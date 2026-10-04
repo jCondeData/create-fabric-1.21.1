@@ -6,7 +6,7 @@ import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData.Mutable;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlock;
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
@@ -90,7 +90,7 @@ public class TableClothScenes {
                         be -> {
                             AutoRequestData.Mutable mutable = new Mutable();
                             mutable.encodedRequest =
-                                    new PackageOrder(List.of(new BigItemStack(grass)));
+                                    PackageOrderWithCrafts.simple(List.of(new BigItemStack(grass)));
                             mutable.isValid = true;
                             be.requestData = mutable.toImmutable();
                             be.priceTag.setFilter(new ItemStack(Items.DIAMOND));
@@ -208,7 +208,8 @@ public class TableClothScenes {
                         be -> {
                             AutoRequestData.Mutable mutable = new Mutable();
                             mutable.encodedRequest =
-                                    new PackageOrder(List.of(new BigItemStack(logItem1)));
+                                    PackageOrderWithCrafts.simple(
+                                            List.of(new BigItemStack(logItem1)));
                             mutable.isValid = true;
                             be.requestData = mutable.toImmutable();
                             be.facing = Direction.NORTH;

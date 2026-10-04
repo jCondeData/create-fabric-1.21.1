@@ -4,6 +4,7 @@ import com.simibubi.create.Create;
 
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -35,10 +36,10 @@ public class LogisticsNetwork {
         locked = false;
     }
 
-    public CompoundTag write() {
+    public CompoundTag write(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putUUID("Id", id);
-        tag.put("Promises", panelPromises.write());
+        tag.put("Promises", panelPromises.write(registries));
 
         tag.put(
                 "Links",
@@ -59,10 +60,11 @@ public class LogisticsNetwork {
         return tag;
     }
 
-    public static LogisticsNetwork read(CompoundTag tag) {
+    public static LogisticsNetwork read(CompoundTag tag, HolderLookup.Provider registries) {
         LogisticsNetwork network = new LogisticsNetwork(tag.getUUID("Id"));
         network.panelPromises =
-                RequestPromiseQueue.read(tag.getCompound("Promises"), Create.LOGISTICS::markDirty);
+                RequestPromiseQueue.read(
+                        tag.getCompound("Promises"), registries, Create.LOGISTICS::markDirty);
 
         NBTHelper.iterateCompoundList(
                 tag.getList("Links", Tag.TAG_COMPOUND),

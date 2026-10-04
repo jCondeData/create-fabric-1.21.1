@@ -1,6 +1,6 @@
 package com.simibubi.create.content.logistics.packager;
 
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 
 import net.minecraft.world.item.ItemStack;
 
@@ -17,7 +17,8 @@ public record PackagingRequest(
         MutableBoolean finalLink,
         MutableInt packageCounter,
         int orderId,
-        @Nullable PackageOrder context) {
+        @Nullable PackageOrderWithCrafts context) {
+
     public static PackagingRequest create(
             ItemStack item,
             int count,
@@ -26,7 +27,7 @@ public record PackagingRequest(
             MutableBoolean finalLink,
             int packageCount,
             int orderId,
-            @Nullable PackageOrder context) {
+            @Nullable PackageOrderWithCrafts context) {
         return new PackagingRequest(
                 item,
                 new MutableInt(count),

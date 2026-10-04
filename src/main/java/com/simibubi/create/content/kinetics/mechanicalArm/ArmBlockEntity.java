@@ -268,7 +268,7 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
         for (int i = startIndex; i < scanRange; i++) {
             ArmInteractionPoint armInteractionPoint = inputs.get(i);
             if (!armInteractionPoint.isValid()) continue;
-            for (int j = 0; j < armInteractionPoint.getSlotCount(); j++) {
+            for (int j = 0; j < armInteractionPoint.getSlotCount(this); j++) {
                 if (getDistributableAmount(armInteractionPoint, j) == 0) continue;
 
                 selectIndex(true, i);
@@ -308,7 +308,7 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
             ArmInteractionPoint armInteractionPoint = outputs.get(i);
             if (!armInteractionPoint.isValid()) continue;
 
-            ItemStack remainder = armInteractionPoint.insert(held, true);
+            ItemStack remainder = armInteractionPoint.insert(this, held, true);
             if (ItemStack.matches(remainder, heldItem)) continue;
 
             selectIndex(false, i);
@@ -339,7 +339,7 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
     }
 
     protected int getDistributableAmount(ArmInteractionPoint armInteractionPoint, int i) {
-        ItemStack stack = armInteractionPoint.extract(i, true);
+        ItemStack stack = armInteractionPoint.extract(this, i, true);
         ItemStack remainder = simulateInsertion(stack);
         if (ItemStack.isSameItem(stack, remainder)) {
             return stack.getCount() - remainder.getCount();
@@ -350,7 +350,8 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
 
     private ItemStack simulateInsertion(ItemStack stack) {
         for (ArmInteractionPoint armInteractionPoint : outputs) {
-            if (armInteractionPoint.isValid()) stack = armInteractionPoint.insert(stack, true);
+            if (armInteractionPoint.isValid())
+                stack = armInteractionPoint.insert(this, stack, true);
             if (stack.isEmpty()) break;
         }
         return stack;
@@ -360,7 +361,7 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
         ArmInteractionPoint armInteractionPoint = getTargetedInteractionPoint();
         if (armInteractionPoint != null && armInteractionPoint.isValid()) {
             ItemStack toInsert = heldItem.copy();
-            ItemStack remainder = armInteractionPoint.insert(toInsert, false);
+            ItemStack remainder = armInteractionPoint.insert(this, toInsert, false);
             heldItem = remainder;
 
             if (armInteractionPoint instanceof JukeboxPoint && remainder.isEmpty())
@@ -379,12 +380,12 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
     protected void collectItem() {
         ArmInteractionPoint armInteractionPoint = getTargetedInteractionPoint();
         if (armInteractionPoint != null && armInteractionPoint.isValid())
-            for (int i = 0; i < armInteractionPoint.getSlotCount(); i++) {
+            for (int i = 0; i < armInteractionPoint.getSlotCount(this); i++) {
                 int amountExtracted = getDistributableAmount(armInteractionPoint, i);
                 if (amountExtracted == 0) continue;
 
                 ItemStack prevHeld = heldItem;
-                heldItem = armInteractionPoint.extract(i, amountExtracted, false);
+                heldItem = armInteractionPoint.extract(this, i, amountExtracted, false);
                 phase = Phase.SEARCH_OUTPUTS;
                 chasedPointProgress = 0;
                 chasedPointIndex = -1;
@@ -625,7 +626,7 @@ public class ArmBlockEntity extends KineticBlockEntity implements TransformableB
 
         SelectionMode(AllIcons icon) {
             this.icon = icon;
-            this.translationKey = "mechanical_arm.selection_mode." + Lang.asId(name());
+            this.translationKey = "create.mechanical_arm.selection_mode." + Lang.asId(name());
         }
 
         @Override

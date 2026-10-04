@@ -282,7 +282,7 @@ public class CartAssemblerBlockEntity extends SmartBlockEntity
 
         CartMovementMode(AllIcons icon) {
             this.icon = icon;
-            translationKey = "contraptions.cart_movement_mode." + Lang.asId(name());
+            translationKey = "create.contraptions.cart_movement_mode." + Lang.asId(name());
         }
 
         @Override

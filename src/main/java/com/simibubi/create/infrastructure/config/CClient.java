@@ -17,7 +17,6 @@ public class CClient extends ConfigBase {
             f(.5f, 0, 1, "fanParticleDensity", Comments.fanParticleDensity);
     public final ConfigFloat filterItemRenderDistance =
             f(10f, 1, "filterItemRenderDistance", Comments.filterItemRenderDistance);
-    public final ConfigBool rainbowDebug = b(false, "enableRainbowDebug", Comments.rainbowDebug);
     // no group
     public final ConfigInt mainMenuConfigButtonRow =
             i(2, 0, 4, "mainMenuConfigButtonRow", Comments.mainMenuConfigButtonRow);
@@ -87,6 +86,10 @@ public class CClient extends ConfigBase {
     public final ConfigFloat ambientVolumeCap =
             f(.1f, 0, 1, "ambientVolumeCap", Comments.ambientVolumeCap);
 
+    // integration
+    public final ConfigGroup integration = group(1, "jeiIntegration", Comments.integration);
+    public final ConfigBool syncJeiSearch = b(true, "syncJeiSearch", Comments.syncJeiSearch);
+
     // train group
     public final ConfigGroup trains = group(1, "trains", Comments.trains);
     public final ConfigFloat mountedZoomMultiplier =
@@ -133,8 +136,6 @@ public class CClient extends ConfigBase {
                     "Maximum Distance to the player at which items in Blocks' filter slots will be"
                         + " displayed"
                 };
-        static String rainbowDebug =
-                "Show kinetic debug information on blocks while the F3-Menu is open.";
         static String[] mainMenuConfigButtonRow =
                 new String[] {
                     "Choose the menu row that the Create config button appears on in the main menu",
@@ -212,5 +213,8 @@ public class CClient extends ConfigBase {
                 "The vision range through honey will be multiplied by this factor";
         static String chocolateTransparencyMultiplier =
                 "The vision range though chocolate will be multiplied by this factor";
+        static String integration = "Mod Integration and JEI";
+        static String syncJeiSearch =
+                "Whether to auto-update the JEI search when searching in the stock keeper UI";
     }
 }

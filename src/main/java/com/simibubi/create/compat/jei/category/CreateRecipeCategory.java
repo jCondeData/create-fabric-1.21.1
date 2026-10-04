@@ -12,7 +12,9 @@ import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.neoforge.NeoForgeTypes;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -41,11 +43,12 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IRecipeCategory<T> {
+public abstract class CreateRecipeCategory<T extends Recipe<?>>
+        implements IRecipeCategory<RecipeHolder<T>> {
     private static final IDrawable BASIC_SLOT = asDrawable(AllGuiTextures.JEI_SLOT);
     private static final IDrawable CHANCE_SLOT = asDrawable(AllGuiTextures.JEI_CHANCE_SLOT);
 
-    protected final RecipeType<T> type;
+    protected final RecipeType<RecipeHolder<T>> type;
     protected final Component title;
     protected final IDrawable background;
     protected final IDrawable icon;
@@ -64,7 +67,7 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 
     @NotNull
     @Override
-    public RecipeType<T> getRecipeType() {
+    public RecipeType<RecipeHolder<T>> getRecipeType() {
         return type;
     }
 
@@ -83,8 +86,47 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
         return icon;
     }
 
+    @Override
+    public void setRecipe(
+            IRecipeLayoutBuilder builder, RecipeHolder<T> holder, IFocusGroup focuses) {
+        setRecipe(builder, holder.value(), focuses);
+    }
+
+    @Override
+    public void draw(
+            RecipeHolder<T> holder,
+            IRecipeSlotsView recipeSlotsView,
+            GuiGraphics gui,
+            double mouseX,
+            double mouseY) {
+        draw(holder.value(), recipeSlotsView, gui, mouseX, mouseY);
+    }
+
+    @Override
+    public List<Component> getTooltipStrings(
+            RecipeHolder<T> holder,
+            IRecipeSlotsView recipeSlotsView,
+            double mouseX,
+            double mouseY) {
+        return getTooltipStrings(holder.value(), recipeSlotsView, mouseX, mouseY);
+    }
+
+    protected abstract void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses);
+
+    protected abstract void draw(
+            T recipe,
+            IRecipeSlotsView recipeSlotsView,
+            GuiGraphics gui,
+            double mouseX,
+            double mouseY);
+
+    protected List<Component> getTooltipStrings(
+            T recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+        return List.of();
+    }
+
     public void registerRecipes(IRecipeRegistration registration) {
-        registration.addRecipes(type, recipes.get().stream().map(RecipeHolder::value).toList());
+        registration.addRecipes(type, recipes.get());
     }
 
     public void registerCatalysts(IRecipeCatalystRegistration registration) {
@@ -123,25 +165,24 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
         };
     }
 
-    @SuppressWarnings("removal") // see below
     public static IRecipeSlotBuilder addFluidSlot(
             IRecipeLayoutBuilder builder, int x, int y, FluidIngredient ingredient) {
-        int amount = ingredient.getRequiredAmount();
-        return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
-                .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredients(NeoForgeTypes.FLUID_STACK, ingredient.getMatchingFluidStacks())
-                .setFluidRenderer(amount, false, 16, 16) // make fluid take up the full slot
-                .addTooltipCallback(CreateRecipeCategory::addPotionTooltip);
+        return addFluidSlot(builder, x, y, RecipeIngredientRole.INPUT)
+                .addIngredients(NeoForgeTypes.FLUID_STACK, ingredient.getMatchingFluidStacks());
+    }
+
+    public static IRecipeSlotBuilder addFluidSlot(
+            IRecipeLayoutBuilder builder, int x, int y, FluidStack stack) {
+        return addFluidSlot(builder, x, y, RecipeIngredientRole.OUTPUT)
+                .addIngredient(NeoForgeTypes.FLUID_STACK, stack);
     }
 
     @SuppressWarnings("removal") // see below
     public static IRecipeSlotBuilder addFluidSlot(
-            IRecipeLayoutBuilder builder, int x, int y, FluidStack stack) {
-        return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
+            IRecipeLayoutBuilder builder, int x, int y, RecipeIngredientRole role) {
+        return builder.addSlot(role, x, y)
                 .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredient(NeoForgeTypes.FLUID_STACK, stack)
-                .setFluidRenderer(
-                        stack.getAmount(), false, 16, 16) // make fluid take up the full slot
+                .setFluidRenderer(1, false, 16, 16) // make fluid take up the full slot
                 .addTooltipCallback(CreateRecipeCategory::addPotionTooltip);
     }
 
@@ -183,7 +224,7 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
     }
 
     public record Info<T extends Recipe<?>>(
-            RecipeType<T> recipeType,
+            RecipeType<RecipeHolder<T>> recipeType,
             Component title,
             IDrawable background,
             IDrawable icon,

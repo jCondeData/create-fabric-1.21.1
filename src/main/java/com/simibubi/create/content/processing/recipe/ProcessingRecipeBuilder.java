@@ -7,7 +7,6 @@ import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import com.tterrag.registrate.util.DataIngredient;
 
-import net.createmod.catnip.data.Pair;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.common.conditions.NotCondition;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
@@ -122,6 +122,11 @@ public class ProcessingRecipeBuilder<T extends ProcessingRecipe<?>> {
         return require(Ingredient.of(item));
     }
 
+    public ProcessingRecipeBuilder<T> require(ICustomIngredient ingredient) {
+        params.ingredients.add(ingredient.toVanilla());
+        return this;
+    }
+
     public ProcessingRecipeBuilder<T> require(Ingredient ingredient) {
         params.ingredients.add(ingredient);
         return this;
@@ -175,7 +180,7 @@ public class ProcessingRecipeBuilder<T extends ProcessingRecipe<?>> {
     }
 
     public ProcessingRecipeBuilder<T> output(float chance, Mods mod, String id, int amount) {
-        return output(new ProcessingOutput(Pair.of(mod.asResource(id), amount), chance));
+        return output(new ProcessingOutput(mod.asResource(id), amount, chance));
     }
 
     public ProcessingRecipeBuilder<T> output(ResourceLocation id) {
@@ -188,7 +193,7 @@ public class ProcessingRecipeBuilder<T extends ProcessingRecipe<?>> {
 
     public ProcessingRecipeBuilder<T> output(
             float chance, ResourceLocation registryName, int amount) {
-        return output(new ProcessingOutput(Pair.of(registryName, amount), chance));
+        return output(new ProcessingOutput(registryName, amount, chance));
     }
 
     public ProcessingRecipeBuilder<T> output(ProcessingOutput output) {
