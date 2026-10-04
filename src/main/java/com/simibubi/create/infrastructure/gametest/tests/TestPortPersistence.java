@@ -379,4 +379,94 @@ public class TestPortPersistence {
                     helper.succeed();
                 });
     }
+
+    /**
+     * Changing what a Create inventory holds must mark its chunk as changed, or the change is lost
+     * when the chunk unloads without anything else touching it.
+     */
+    @GameTest(template = "flat_15x6x15")
+    public static void inventoryChangesMarkTheChunkForSaving(CreateGameTestHelper helper) {
+        List<BlockState> blocks =
+                List.of(
+                        AllBlocks.ITEM_VAULT.getDefaultState(),
+                        AllBlocks.DEPOT.getDefaultState(),
+                        AllBlocks.BASIN.getDefaultState(),
+                        AllBlocks.TOOLBOXES
+                                .get(net.minecraft.world.item.DyeColor.BROWN)
+                                .getDefaultState());
+        for (int i = 0; i < blocks.size(); i++)
+            helper.setBlock(new BlockPos(1 + 3 * i, 1, 1), blocks.get(i));
+        // one block at a time, 10 ticks apart: some (the basin) record the change on their next
+        // tick, so check a few ticks after the insert
+        for (int i = 0; i < blocks.size(); i++) {
+            int index = i;
+            BlockPos pos = new BlockPos(1 + 3 * i, 1, 1);
+            helper.runAfterDelay(
+                    5 + 10 * i,
+                    () -> {
+                        helper.getLevel().getChunkAt(helper.absolutePos(pos)).setUnsaved(false);
+                        try (Transaction t = Transaction.openOuter()) {
+                            long in =
+                                    helper.itemStorageAt(pos)
+                                            .insert(ItemVariant.of(Items.APPLE), 3, t);
+                            helper.assertTrue(
+                                    in == 3, blocks.get(index).getBlock() + " took " + in);
+                            t.commit();
+                        }
+                    });
+            helper.runAfterDelay(
+                    9 + 10 * i,
+                    () ->
+                            helper.assertTrue(
+                                    helper.getLevel()
+                                            .getChunkAt(helper.absolutePos(pos))
+                                            .isUnsaved(),
+                                    blocks.get(index).getBlock()
+                                            + " changed its items without marking the chunk"
+                                            + " unsaved"));
+        }
+        helper.runAfterDelay(10 * blocks.size() + 5, helper::succeed);
+    }
+
+    /** Two item vault blocks in a row form one vault: one inventory, twice the capacity. */
+    @GameTest(template = "flat_7x6x7")
+    public static void itemVaultsMergeIntoOneInventory(CreateGameTestHelper helper) {
+        BlockPos a = new BlockPos(2, 1, 2);
+        BlockPos b = new BlockPos(3, 1, 2);
+        var state =
+                AllBlocks.ITEM_VAULT
+                        .getDefaultState()
+                        .setValue(
+                                com.simibubi.create.content.logistics.vault.ItemVaultBlock
+                                        .HORIZONTAL_AXIS,
+                                net.minecraft.core.Direction.Axis.X);
+        helper.setBlock(a, state);
+        helper.setBlock(b, state);
+        helper.runAfterDelay(
+                10,
+                () -> {
+                    int slotsPerBlock =
+                            com.simibubi.create.infrastructure.config.AllConfigs.server()
+                                    .logistics
+                                    .vaultCapacity
+                                    .get();
+                    long accepted;
+                    try (Transaction t = Transaction.openOuter()) {
+                        accepted =
+                                helper.itemStorageAt(a)
+                                        .insert(ItemVariant.of(Items.COBBLESTONE), 100_000, t);
+                        t.commit();
+                    }
+                    helper.assertTrue(
+                            accepted == 2L * slotsPerBlock * 64,
+                            "2-block vault accepted "
+                                    + accepted
+                                    + ", expected "
+                                    + (2L * slotsPerBlock * 64));
+                    helper.assertTrue(
+                            countItem(helper.itemStorageAt(b), Items.COBBLESTONE) == accepted,
+                            "the other vault block sees a different inventory");
+                    helper.succeed();
+                });
+    }
 }

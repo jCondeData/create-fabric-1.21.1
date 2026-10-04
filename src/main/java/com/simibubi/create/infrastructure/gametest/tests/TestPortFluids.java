@@ -152,7 +152,7 @@ public class TestPortFluids {
     /** An item drain empties a potion into its tank: one bottle = 27000 droplets, contents kept. */
     @GameTest(template = "flat_7x6x7", timeoutTicks = CreateGameTestHelper.TEN_SECONDS)
     public static void drainEmptiesPotionKeepingItsEffect(CreateGameTestHelper helper) {
-        BlockPos drain = new BlockPos(2, 1, 2);
+        BlockPos drain = new BlockPos(2, 2, 2); // y=1 is the floor layer; the exit must be open
         helper.setBlock(drain, AllBlocks.ITEM_DRAIN.getDefaultState());
         Storage<ItemVariant> side =
                 ItemStorage.SIDED.find(
@@ -176,6 +176,12 @@ public class TestPortFluids {
                     helper.assertTrue(
                             contained.getAmount() == FluidConstants.BOTTLE,
                             "drain holds " + contained.getAmount() + " droplets, expected 27000");
+                    // the emptied bottle rolls on and is ejected on the far side (nothing there)
+                    long ejected = TestPortLogistics.countInEntities(helper, Items.GLASS_BOTTLE);
+                    long inDrain = TestPortLogistics.countIn(side, Items.GLASS_BOTTLE);
+                    helper.assertTrue(
+                            ejected == 1 && inDrain == 0,
+                            "emptied glass bottle: " + ejected + " ejected, " + inDrain + " in the drain");
                     Create.LOGGER.info("[qa] drained strength potion: {}", contained.getAmount());
                 },
                 () ->
@@ -254,8 +260,14 @@ public class TestPortFluids {
                             new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
                     FluidStack.STREAM_CODEC.encode(buf, potion);
                     FluidStack.STREAM_CODEC.encode(buf, FluidStack.EMPTY);
+                    FluidStack.STREAM_CODEC.encode(buf, new FluidStack(Fluids.WATER, 1));
                     FluidStack net = FluidStack.STREAM_CODEC.decode(buf);
                     FluidStack netEmpty = FluidStack.STREAM_CODEC.decode(buf);
+                    FluidStack oneDroplet = FluidStack.STREAM_CODEC.decode(buf);
+                    helper.assertTrue(
+                            oneDroplet.getFluid() == Fluids.WATER && oneDroplet.getAmount() == 1,
+                            "a 1-droplet stack came back from the network as "
+                                    + oneDroplet.getAmount());
                     helper.assertTrue(
                             FluidStack.isSameFluidSameComponents(potion, net)
                                     && net.getAmount() == 12345,
@@ -287,7 +299,7 @@ public class TestPortFluids {
                                             Direction.DOWN)
                                     == null,
                             "spout must not expose its tank to the block below (it fills items"
-                                + " there)");
+                                    + " there)");
                     helper.assertTrue(
                             TransferUtil.getFluidStorage(
                                             helper.getLevel(),

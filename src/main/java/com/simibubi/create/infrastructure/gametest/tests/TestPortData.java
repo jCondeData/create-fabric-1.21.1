@@ -136,7 +136,7 @@ public class TestPortData {
                     helper.assertTrue(expected > 1500, "only " + expected + " recipe files found");
                     Create.LOGGER.info(
                             "[qa] {} Create recipe files loaded, {} skipped by their load"
-                                + " conditions",
+                                    + " conditions",
                             expected,
                             conditionedOut);
                     helper.succeed();
@@ -443,6 +443,120 @@ public class TestPortData {
                     helper.assertTrue(
                             lava == 3 * FluidConstants.BUCKET,
                             "cloned tank holds " + lava + " lava droplets");
+                    helper.succeed();
+                });
+    }
+
+    /**
+     * Zinc ore and the striated stone layers are added to overworld biomes (and the nether layers
+     * to nether biomes) through Fabric's BiomeModifications, and the zinc ore feature really places
+     * zinc ore into stone.
+     */
+    @GameTest(template = "flat_7x6x7")
+    public static void createOresAreAddedToBiomes(CreateGameTestHelper helper) {
+        helper.runAfterDelay(
+                1,
+                () -> {
+                    var access = helper.getLevel().registryAccess();
+                    var biomes = access.registryOrThrow(Registries.BIOME);
+                    int step =
+                            net.minecraft.world.level.levelgen.GenerationStep.Decoration
+                                    .UNDERGROUND_ORES
+                                    .ordinal();
+                    java.util.function.BiFunction<
+                                    net.minecraft.resources.ResourceKey<
+                                            net.minecraft.world.level.biome.Biome>,
+                                    String,
+                                    Boolean>
+                            has =
+                                    (biome, feature) ->
+                                            biomes
+                                                    .getHolderOrThrow(biome)
+                                                    .value()
+                                                    .getGenerationSettings()
+                                                    .features()
+                                                    .get(step)
+                                                    .stream()
+                                                    .anyMatch(
+                                                            h -> h.is(Create.asResource(feature)));
+                    var plains = net.minecraft.world.level.biome.Biomes.PLAINS;
+
+                    var nether = net.minecraft.world.level.biome.Biomes.NETHER_WASTES;
+                    helper.assertTrue(has.apply(plains, "zinc_ore"), "plains has no zinc ore");
+                    // dripstone caves etc. depend on the world's biome source (the GameTest world
+                    // is flat)
+                    helper.assertTrue(
+                            has.apply(plains, "striated_ores_overworld"),
+                            "plains has no striated ores");
+                    helper.assertTrue(
+                            has.apply(nether, "striated_ores_nether"),
+                            "nether wastes have no striated ores");
+                    helper.assertTrue(!has.apply(nether, "zinc_ore"), "zinc ore in the nether");
+
+                    // the configured feature places zinc ore into a block of stone
+                    BlockPos min = new BlockPos(1, 1, 1);
+                    for (BlockPos p : BlockPos.betweenClosed(min, min.offset(4, 3, 4)))
+                        helper.setBlock(p, Blocks.STONE);
+                    var feature =
+                            access.registryOrThrow(Registries.CONFIGURED_FEATURE)
+                                    .getHolderOrThrow(
+                                            com.simibubi.create.infrastructure.worldgen
+                                                    .AllConfiguredFeatures.ZINC_ORE)
+                                    .value();
+                    RandomSource random = RandomSource.create(1234);
+                    boolean placed = false;
+                    for (int i = 0; i < 20 && !placed; i++)
+                        placed =
+                                feature.place(
+                                        helper.getLevel(),
+                                        helper.getLevel().getChunkSource().getGenerator(),
+                                        random,
+                                        helper.absolutePos(new BlockPos(3, 2, 3)));
+                    long zinc = 0;
+                    for (BlockPos p : BlockPos.betweenClosed(min, min.offset(4, 3, 4)))
+                        if (helper.getBlockState(p).is(AllBlocks.ZINC_ORE.get())) zinc++;
+                    helper.assertTrue(
+                            placed && zinc > 0, "zinc ore feature placed " + zinc + " ores");
+                    Create.LOGGER.info("[qa] zinc ore feature placed {} ores", zinc);
+                    helper.succeed();
+                });
+    }
+
+    /**
+     * Config at its minimum: fluidTankCapacity = 1 bucket makes a new tank hold exactly 81000
+     * droplets; restored afterwards.
+     */
+    @GameTest(template = "flat_7x6x7")
+    public static void fluidTankCapacityConfigIsRespected(CreateGameTestHelper helper) {
+        helper.runAfterDelay(
+                1,
+                () -> {
+                    var capacity =
+                            com.simibubi.create.infrastructure.config.AllConfigs.server()
+                                    .fluids
+                                    .fluidTankCapacity;
+                    int before = capacity.get();
+                    BlockPos tank = new BlockPos(2, 1, 2);
+                    try {
+                        capacity.set(1);
+                        helper.setBlock(tank, AllBlocks.FLUID_TANK.getDefaultState());
+                        long accepted;
+                        try (Transaction t = Transaction.openOuter()) {
+                            accepted =
+                                    helper.fluidStorageAt(tank)
+                                            .insert(
+                                                    FluidVariant.of(Fluids.WATER),
+                                                    5 * FluidConstants.BUCKET,
+                                                    t);
+                            t.commit();
+                        }
+                        helper.assertTrue(
+                                accepted == FluidConstants.BUCKET,
+                                "a 1-bucket tank accepted " + accepted + " droplets");
+                    } finally {
+                        capacity.set(before);
+                        helper.setBlock(tank, Blocks.AIR);
+                    }
                     helper.succeed();
                 });
     }

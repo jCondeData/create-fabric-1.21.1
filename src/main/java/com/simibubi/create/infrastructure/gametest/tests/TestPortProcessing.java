@@ -96,4 +96,39 @@ public class TestPortProcessing {
                 },
                 () -> "hopper: " + ((HopperBlockEntity) helper.getBlockEntity(hopper)).getItem(0));
     }
+
+    /**
+     * A packager with nothing behind it cannot unpack: a package pushed into it by a hopper must
+     * stay in the hopper instead of vanishing.
+     */
+    @GameTest(template = "flat_7x6x7", timeoutTicks = CreateGameTestHelper.TEN_SECONDS)
+    public static void packagerWithoutInventoryRefusesPackages(CreateGameTestHelper helper) {
+        BlockPos hopper = new BlockPos(1, 1, 1);
+        BlockPos packager = new BlockPos(2, 1, 1);
+        helper.setBlock(
+                hopper,
+                Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.EAST));
+        helper.setBlock(
+                packager,
+                AllBlocks.PACKAGER
+                        .getDefaultState()
+                        .setValue(PackagerBlock.FACING, Direction.NORTH));
+        ItemStack box = PackageItem.containing(List.of(new ItemStack(Items.GOLD_NUGGET, 9)));
+        ((HopperBlockEntity) helper.getBlockEntity(hopper)).setItem(0, box);
+        helper.runAfterDelay(
+                60,
+                () -> {
+                    long nuggets =
+                            TestPortLogistics.countInContainer(helper, hopper, Items.GOLD_NUGGET);
+                    helper.assertTrue(
+                            nuggets == 9,
+                            "package should wait in the hopper, hopper holds "
+                                    + nuggets
+                                    + " nuggets");
+                    helper.assertTrue(
+                            TestPortLogistics.countInEntities(helper, Items.GOLD_NUGGET) == 0,
+                            "nuggets dropped");
+                    helper.succeed();
+                });
+    }
 }

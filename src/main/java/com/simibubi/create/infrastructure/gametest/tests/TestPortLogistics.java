@@ -251,4 +251,34 @@ public class TestPortLogistics {
                 },
                 () -> "");
     }
+
+    /**
+     * Offering a depot more than a stack: it accepts exactly one stack (64), holds 64, and the rest
+     * stays with the caller. No duplication through an oversized held stack.
+     */
+    @GameTest(template = "flat_7x6x7")
+    public static void depotTakesAtMostOneStack(CreateGameTestHelper helper) {
+        BlockPos depot = new BlockPos(2, 1, 2);
+        helper.setBlock(depot, AllBlocks.DEPOT.getDefaultState());
+        helper.runAfterDelay(
+                1,
+                () -> {
+                    long accepted;
+                    try (Transaction t = Transaction.openOuter()) {
+                        accepted =
+                                helper.itemStorageAt(depot)
+                                        .insert(ItemVariant.of(Items.COBBLESTONE), 100, t);
+                        t.commit();
+                    }
+                    long held = countIn(helper.itemStorageAt(depot), Items.COBBLESTONE);
+                    helper.assertTrue(
+                            accepted == 64 && held == 64,
+                            "depot accepted "
+                                    + accepted
+                                    + " and holds "
+                                    + held
+                                    + " of 100 cobblestone");
+                    helper.succeed();
+                });
+    }
 }
