@@ -4,6 +4,12 @@ import com.simibubi.create.infrastructure.gametest.tests.TestContraptions;
 import com.simibubi.create.infrastructure.gametest.tests.TestFluids;
 import com.simibubi.create.infrastructure.gametest.tests.TestItems;
 import com.simibubi.create.infrastructure.gametest.tests.TestMisc;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortContraptions;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortData;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortFluids;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortLogistics;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortPersistence;
+import com.simibubi.create.infrastructure.gametest.tests.TestPortProcessing;
 import com.simibubi.create.infrastructure.gametest.tests.TestProcessing;
 import com.simibubi.create.infrastructure.gametest.tests.TestRegressions;
 
@@ -18,6 +24,12 @@ public class CreateGameTests {
         TestFluids.class,
         TestItems.class,
         TestMisc.class,
+        TestPortContraptions.class,
+        TestPortData.class,
+        TestPortFluids.class,
+        TestPortLogistics.class,
+        TestPortPersistence.class,
+        TestPortProcessing.class,
         TestProcessing.class,
         TestRegressions.class
     };
