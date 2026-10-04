@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ContraptionControlsMovingInteraction extends MovingInteractionBehaviour {
-
     @Override
     public boolean handlePlayerInteraction(
             Player player,
@@ -45,7 +44,7 @@ public class ContraptionControlsMovingInteraction extends MovingInteractionBehav
         if (contraption instanceof ElevatorContraption ec)
             return elevatorInteraction(localPos, contraptionEntity, ec, ctx);
         if (contraptionEntity.level().isClientSide()) {
-            if (contraption.presentBlockEntities.get(ctx.localPos)
+            if (contraption.getBlockEntityClientSide(ctx.localPos)
                     instanceof ContraptionControlsBlockEntity cbe) cbe.pressButton();
             return true;
         }
@@ -141,7 +140,7 @@ public class ContraptionControlsMovingInteraction extends MovingInteractionBehav
 
         CatnipServices.NETWORK.sendToServer(
                 new ElevatorTargetFloorPacket(contraptionEntity, efs.currentTargetY));
-        if (contraption.presentBlockEntities.get(ctx.localPos)
+        if (contraption.getBlockEntityClientSide(ctx.localPos)
                 instanceof ContraptionControlsBlockEntity cbe) cbe.pressButton();
         return true;
     }

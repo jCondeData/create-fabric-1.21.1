@@ -63,9 +63,10 @@ public class ContraptionControlsMovement implements MovementBehaviour {
         if (!ctx.world.isClientSide()) return;
 
         Contraption contraption = ctx.contraption;
+        var blockEntity = contraption.getBlockEntityClientSide(ctx.localPos);
+
         if (!(contraption instanceof ElevatorContraption ec)) {
-            if (!(contraption.presentBlockEntities.get(ctx.localPos)
-                    instanceof ContraptionControlsBlockEntity cbe)) return;
+            if (!(blockEntity instanceof ContraptionControlsBlockEntity cbe)) return;
             ItemStack filter = getFilter(ctx);
             int value =
                     contraption.isActorTypeDisabled(filter)
@@ -84,8 +85,7 @@ public class ContraptionControlsMovement implements MovementBehaviour {
         ElevatorFloorSelection efs = (ElevatorFloorSelection) ctx.temporaryData;
         tickFloorSelection(efs, ec);
 
-        if (!(contraption.presentBlockEntities.get(ctx.localPos)
-                instanceof ContraptionControlsBlockEntity cbe)) return;
+        if (!(blockEntity instanceof ContraptionControlsBlockEntity cbe)) return;
 
         cbe.tickAnimations();
 

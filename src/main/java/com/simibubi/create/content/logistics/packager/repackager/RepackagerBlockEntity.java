@@ -1,12 +1,17 @@
 package com.simibubi.create.content.logistics.packager.repackager;
 
 import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.events.PackageEvent;
+import com.simibubi.create.compat.computercraft.events.RepackageEvent;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
+
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -46,6 +51,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
         if (!targetIsCreativeCrate && !anySpace) return false;
         if (simulate) return true;
 
+        computerBehaviour.prepareComputerEvent(new PackageEvent(box, "package_received"));
         previouslyUnwrapped = box;
         animationInward = true;
         animationTicks = CYCLE;
@@ -110,6 +116,11 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 
         if (boxesToExport.isEmpty()) return;
 
+        if (computerBehaviour.hasAttachedComputer()) {
+            for (BigItemStack box : boxesToExport) {
+                computerBehaviour.prepareComputerEvent(new RepackageEvent(box.stack, box.count));
+            }
+        }
         queuedExitingPackages.addAll(boxesToExport);
         notifyUpdate();
     }
@@ -119,5 +130,12 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
                 Capabilities.ItemHandler.BLOCK,
                 AllBlockEntityTypes.REPACKAGER.get(),
                 (be, context) -> be.inventory);
+
+        if (Mods.COMPUTERCRAFT.isLoaded()) {
+            event.registerBlockEntity(
+                    PeripheralCapability.get(),
+                    AllBlockEntityTypes.REPACKAGER.get(),
+                    (be, context) -> be.computerBehaviour.getPeripheralCapability());
+        }
     }
 }

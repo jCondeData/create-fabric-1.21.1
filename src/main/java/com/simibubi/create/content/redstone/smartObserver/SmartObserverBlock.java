@@ -119,7 +119,7 @@ public class SmartObserverBlock extends DirectedDirectionalBlock
 
     @Override
     public void tick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource random) {
-        worldIn.setBlock(pos, state.setValue(POWERED, false), 2);
+        worldIn.setBlock(pos, state.setValue(POWERED, false), Block.UPDATE_CLIENTS);
         worldIn.updateNeighborsAt(pos, this);
     }
 

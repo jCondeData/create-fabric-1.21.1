@@ -1,6 +1,6 @@
 package com.simibubi.create.content.trains.track;
 
-import com.simibubi.create.AllTags;
+import com.simibubi.create.foundation.data.recipe.CommonMetal;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.Tags.Items;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +26,8 @@ public class TrackMaterialFactory {
     private Ingredient railsIngredient =
             Ingredient.fromValues(
                     Stream.of(
-                            new Ingredient.TagValue(Tags.Items.NUGGETS_IRON),
-                            new Ingredient.TagValue(AllTags.commonItemTag("nuggets/zinc"))));
+                            new Ingredient.TagValue(Items.NUGGETS_IRON),
+                            new Ingredient.TagValue(CommonMetal.ZINC.nuggets)));
     private ResourceLocation particle;
     private TrackMaterial.TrackType trackType = TrackMaterial.TrackType.STANDARD;
 

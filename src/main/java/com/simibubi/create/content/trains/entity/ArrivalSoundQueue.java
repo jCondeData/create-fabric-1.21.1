@@ -22,10 +22,10 @@ import net.minecraft.world.level.block.NoteBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import javax.annotation.Nullable;
 
 public class ArrivalSoundQueue {
 

@@ -3,8 +3,8 @@ package com.simibubi.create.content.schematics.cannon;
 import com.google.common.collect.Sets;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.content.equipment.clipboard.ClipboardContent;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
-import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides;
 import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides.ClipboardType;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement.ItemUseType;
@@ -20,7 +20,6 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.network.Filterable;
-import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -153,7 +152,6 @@ public class MaterialChecklist {
     }
 
     public ItemStack createWrittenClipboard() {
-        ItemStack clipboard = AllBlocks.CLIPBOARD.asStack();
         int itemsWritten = 0;
 
         List<List<ClipboardEntry>> pages = new ArrayList<>();
@@ -227,13 +225,15 @@ public class MaterialChecklist {
         }
 
         pages.add(currentPage);
-        ClipboardEntry.saveAll(pages, clipboard);
-        ClipboardOverrides.switchTo(ClipboardType.WRITTEN, clipboard);
+
+        ItemStack clipboard = AllBlocks.CLIPBOARD.asStack();
+        clipboard.set(
+                AllDataComponents.CLIPBOARD_CONTENT,
+                new ClipboardContent(ClipboardType.WRITTEN, pages, true));
         clipboard.set(
                 DataComponents.CUSTOM_NAME,
                 CreateLang.translateDirect("materialChecklist")
                         .setStyle(Style.EMPTY.withItalic(false)));
-        clipboard.set(AllDataComponents.CLIPBOARD_READ_ONLY, Unit.INSTANCE);
         return clipboard;
     }
 
@@ -241,9 +241,10 @@ public class MaterialChecklist {
         int amount = required.getOrDefault(item, 0);
         if (damageRequired.containsKey(item))
             amount +=
-                    Math.ceil(
-                            damageRequired.getInt(item)
-                                    / (float) new ItemStack(item).getMaxDamage());
+                    (int)
+                            Math.ceil(
+                                    damageRequired.getInt(item)
+                                            / (float) new ItemStack(item).getMaxDamage());
         return amount;
     }
 

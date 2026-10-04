@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault

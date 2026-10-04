@@ -8,13 +8,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.settings.KeyModifier;
 
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiConsumer;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD)
 public enum AllKeys {
     TOOL_MENU("toolmenu", GLFW.GLFW_KEY_LEFT_ALT, "Focus Schematic Overlay"),
     ACTIVATE_TOOL(GLFW.GLFW_KEY_LEFT_CONTROL),
@@ -67,8 +69,18 @@ public enum AllKeys {
         return keybind.getTranslatedKeyMessage().getString().toUpperCase();
     }
 
-    public int getBoundCode() {
-        return keybind.getKey().getValue();
+    public boolean doesModifierAndCodeMatch(int code) {
+        boolean codeMatches = code == keybind.getKey().getValue();
+
+        boolean modifierMatches;
+        KeyModifier modifier = keybind.getKeyModifier();
+        if (modifier == KeyModifier.NONE) {
+            modifierMatches = true;
+        } else {
+            modifierMatches = KeyModifier.getActiveModifiers().contains(modifier);
+        }
+
+        return codeMatches && modifierMatches;
     }
 
     public static boolean isKeyDown(int key) {

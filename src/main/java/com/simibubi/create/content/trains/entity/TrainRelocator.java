@@ -44,6 +44,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -51,8 +52,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 public class TrainRelocator {
 

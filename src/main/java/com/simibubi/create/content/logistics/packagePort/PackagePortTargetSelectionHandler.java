@@ -21,6 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.Tags.Items;
 
 public class PackagePortTargetSelectionHandler {
 
@@ -70,7 +71,7 @@ public class PackagePortTargetSelectionHandler {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         boolean isPostbox = AllItemTags.POSTBOXES.matches(player.getMainHandItem());
-        boolean isWrench = AllItemTags.WRENCH.matches(player.getMainHandItem());
+        boolean isWrench = player.getMainHandItem().is(Items.TOOLS_WRENCH);
 
         if (!isWrench) {
             if (activePackageTarget == null) return;

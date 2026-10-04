@@ -58,10 +58,14 @@ public class BasinMovementBehaviour implements MovementBehaviour {
                                     key,
                                     itemStackHandler.serializeNBT(context.world.registryAccess()));
                         });
-        BlockEntity blockEntity = context.contraption.presentBlockEntities.get(context.localPos);
-        if (blockEntity instanceof BasinBlockEntity)
-            ((BasinBlockEntity) blockEntity)
-                    .readOnlyItems(context.blockEntityData, context.world.registryAccess());
-        context.temporaryData = false; // did already dump, so can't any more
+        // FIXME: Why are we setting client-side data here?
+        if (context.contraption.entity.level().isClientSide) {
+            BlockEntity blockEntity =
+                    context.contraption.getBlockEntityClientSide(context.localPos);
+            if (blockEntity instanceof BasinBlockEntity)
+                ((BasinBlockEntity) blockEntity)
+                        .readOnlyItems(context.blockEntityData, context.world.registryAccess());
+        }
+        context.temporaryData = false; // did already dump, so can't anymore
     }
 }

@@ -9,7 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 
-import java.util.Optional;
+import java.util.function.Predicate;
 
 public class EdgeInteractionBehaviour extends BlockEntityBehaviour {
 
@@ -17,12 +17,12 @@ public class EdgeInteractionBehaviour extends BlockEntityBehaviour {
 
     ConnectionCallback connectionCallback;
     ConnectivityPredicate connectivityPredicate;
-    Optional<Item> requiredItem;
+    Predicate<Item> requiredItem;
 
     public EdgeInteractionBehaviour(SmartBlockEntity be, ConnectionCallback callback) {
         super(be);
         this.connectionCallback = callback;
-        requiredItem = Optional.empty();
+        requiredItem = item -> true;
         connectivityPredicate = (world, pos, face, face2) -> true;
     }
 
@@ -31,8 +31,12 @@ public class EdgeInteractionBehaviour extends BlockEntityBehaviour {
         return this;
     }
 
-    public EdgeInteractionBehaviour require(Item item) {
-        this.requiredItem = Optional.of(item);
+    public EdgeInteractionBehaviour require(Item required) {
+        return this.require(item -> item == required);
+    }
+
+    public EdgeInteractionBehaviour require(Predicate<Item> predicate) {
+        this.requiredItem = predicate;
         return this;
     }
 

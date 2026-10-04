@@ -7,10 +7,10 @@ import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class DeployerRecipeSearchEvent extends Event implements ICancellableEvent {
     private final DeployerBlockEntity blockEntity;

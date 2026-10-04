@@ -9,6 +9,8 @@ import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.WrenchableDirectionalBlock;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipulationBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.minecraft.core.BlockPos;
@@ -173,9 +175,14 @@ public class PackagerBlock extends WrenchableDirectionalBlock
             BlockPos fromPos,
             boolean isMoving) {
         if (worldIn.isClientSide) return;
+
+        InvManipulationBehaviour behaviour =
+                BlockEntityBehaviour.get(worldIn, pos, InvManipulationBehaviour.TYPE);
+        if (behaviour != null) behaviour.onNeighborChanged(fromPos);
+
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered == worldIn.hasNeighborSignal(pos)) return;
-        worldIn.setBlock(pos, state.cycle(POWERED), 2);
+        worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
         if (!previouslyPowered) withBlockEntityDo(worldIn, pos, PackagerBlockEntity::activate);
     }
 

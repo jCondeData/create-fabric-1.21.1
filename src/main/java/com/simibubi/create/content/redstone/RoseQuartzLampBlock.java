@@ -74,7 +74,7 @@ public class RoseQuartzLampBlock extends Block implements IWrenchable {
         boolean isPowered = pState.getValue(POWERED);
         if (isPowered == pLevel.hasNeighborSignal(pPos)) return;
         if (isPowered) {
-            pLevel.setBlock(pPos, pState.cycle(POWERED), 2);
+            pLevel.setBlock(pPos, pState.cycle(POWERED), Block.UPDATE_CLIENTS);
             return;
         }
 
@@ -82,14 +82,17 @@ public class RoseQuartzLampBlock extends Block implements IWrenchable {
                 pLevel,
                 pPos,
                 (currentPos, currentState) -> {
-                    pLevel.setBlock(currentPos, currentState.setValue(POWERING, false), 2);
+                    pLevel.setBlock(
+                            currentPos,
+                            currentState.setValue(POWERING, false),
+                            Block.UPDATE_CLIENTS);
                     scheduleActivation(pLevel, currentPos);
                 });
 
         pLevel.setBlock(
                 pPos,
                 pState.setValue(POWERED, true).setValue(POWERING, true).setValue(ACTIVATE, true),
-                2);
+                Block.UPDATE_CLIENTS);
         pLevel.updateNeighborsAt(pPos, this);
         scheduleActivation(pLevel, pPos);
     }
@@ -155,7 +158,9 @@ public class RoseQuartzLampBlock extends Block implements IWrenchable {
 
         if (wasPowering || shouldBePowering) {
             pLevel.setBlock(
-                    pPos, pState.setValue(ACTIVATE, false).setValue(POWERING, shouldBePowering), 2);
+                    pPos,
+                    pState.setValue(ACTIVATE, false).setValue(POWERING, shouldBePowering),
+                    Block.UPDATE_CLIENTS);
         }
 
         pLevel.updateNeighborsAt(pPos, this);

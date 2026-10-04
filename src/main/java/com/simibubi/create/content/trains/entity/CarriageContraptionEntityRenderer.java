@@ -14,8 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Objects;
-
 public class CarriageContraptionEntityRenderer
         extends ContraptionEntityRenderer<CarriageContraptionEntity> {
 
@@ -136,11 +134,13 @@ public class CarriageContraptionEntityRenderer
 
     public static int getBogeyLightCoords(
             CarriageContraptionEntity entity, CarriageBogey bogey, float partialTicks) {
+        var anchorPosition = bogey.getAnchorPosition();
+
         var lightPos =
                 BlockPos.containing(
-                        Objects.requireNonNullElseGet(
-                                bogey.getAnchorPosition(),
-                                () -> entity.getLightProbePosition(partialTicks)));
+                        anchorPosition == null
+                                ? entity.getLightProbePosition(partialTicks)
+                                : anchorPosition);
 
         return LightTexture.pack(
                 entity.level().getBrightness(LightLayer.BLOCK, lightPos),

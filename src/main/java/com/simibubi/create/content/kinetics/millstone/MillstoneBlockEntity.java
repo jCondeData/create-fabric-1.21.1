@@ -141,11 +141,15 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
         }
 
         ItemStack stackInSlot = inputInv.getStackInSlot(0);
+        ItemStack craftingRemainingItem = stackInSlot.getCraftingRemainingItem();
         stackInSlot.shrink(1);
         inputInv.setStackInSlot(0, stackInSlot);
         lastRecipe
-                .rollResults()
+                .rollResults(level.random)
                 .forEach(stack -> ItemHandlerHelper.insertItemStacked(outputInv, stack, false));
+        if (!craftingRemainingItem.isEmpty()) {
+            ItemHandlerHelper.insertItemStacked(outputInv, craftingRemainingItem, false);
+        }
         award(AllAdvancements.MILLSTONE);
 
         sendData();

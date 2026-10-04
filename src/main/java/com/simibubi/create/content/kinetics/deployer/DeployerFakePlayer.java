@@ -35,12 +35,11 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @EventBusSubscriber
 public class DeployerFakePlayer extends FakePlayer {

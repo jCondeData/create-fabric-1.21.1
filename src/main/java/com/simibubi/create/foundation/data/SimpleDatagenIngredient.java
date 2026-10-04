@@ -2,6 +2,7 @@ package com.simibubi.create.foundation.data;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.simibubi.create.api.data.recipe.DatagenMod;
 import com.simibubi.create.foundation.data.recipe.Mods;
 import com.simibubi.create.foundation.mixin.accessor.MappedRegistryAccessor;
 
@@ -20,15 +21,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class SimpleDatagenIngredient implements ICustomIngredient {
-
     /*
-    "ingredients": [
-    	{
-    		"item": "mod:compat_item"
-    	}
-    ]
-     */
-
+     "ingredients": [
+      {
+    	  "item": "mod:compat_item"
+      }
+     ]
+    */
     private static final MapCodec<SimpleDatagenIngredient> INTERNAL_CODEC =
             RecordCodecBuilder.mapCodec(
                     instance ->
@@ -77,10 +76,10 @@ public class SimpleDatagenIngredient implements ICustomIngredient {
                                             }));
     private static final IngredientType<?> INGREDIENT_TYPE = new IngredientType<>(CODEC);
 
-    private final Mods mod;
+    private final DatagenMod mod;
     private final String id;
 
-    public SimpleDatagenIngredient(Mods mod, String id) {
+    public SimpleDatagenIngredient(DatagenMod mod, String id) {
         this.mod = mod;
         this.id = id;
     }

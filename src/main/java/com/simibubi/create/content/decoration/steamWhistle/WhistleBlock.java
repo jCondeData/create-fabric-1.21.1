@@ -243,7 +243,7 @@ public class WhistleBlock extends Block implements IBE<WhistleBlockEntity>, IWre
         if (worldIn.isClientSide) return;
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered != worldIn.hasNeighborSignal(pos))
-            worldIn.setBlock(pos, state.cycle(POWERED), 2);
+            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
     }
 
     public BlockState updateShape(

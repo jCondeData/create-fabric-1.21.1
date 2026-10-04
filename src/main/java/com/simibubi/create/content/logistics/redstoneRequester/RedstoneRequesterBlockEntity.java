@@ -1,12 +1,19 @@
 package com.simibubi.create.content.logistics.redstoneRequester;
 
+import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.stockTicker.StockCheckingBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 
 import net.createmod.catnip.codecs.CatnipCodecUtils;
 import net.createmod.catnip.platform.CatnipServices;
@@ -24,10 +31,14 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.util.FakePlayer;
+
+import java.util.List;
 
 public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity implements MenuProvider {
 
+    public AbstractComputerBehaviour computerBehaviour;
     public boolean allowPartialRequests;
     public PackageOrderWithCrafts encodedRequest = PackageOrderWithCrafts.empty();
     public String encodedTargetAdress = "";
@@ -39,6 +50,27 @@ public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity imple
     public RedstoneRequesterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         allowPartialRequests = false;
+    }
+
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        if (Mods.COMPUTERCRAFT.isLoaded()) {
+            event.registerBlockEntity(
+                    PeripheralCapability.get(),
+                    AllBlockEntityTypes.REDSTONE_REQUESTER.get(),
+                    (be, context) -> be.computerBehaviour.getPeripheralCapability());
+        }
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        super.addBehaviours(behaviours);
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
     }
 
     protected void onRedstonePowerChanged() {

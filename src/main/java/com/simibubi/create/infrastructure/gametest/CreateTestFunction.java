@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,8 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * An extension to game tests implementing functionality for {@link CreateGameTestHelper} and {@link

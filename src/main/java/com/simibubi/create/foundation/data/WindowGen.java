@@ -202,9 +202,7 @@ public class WindowGen {
                                         .define(
                                                 'X',
                                                 DataIngredient.tag(
-                                                                net.neoforged.neoforge.common.Tags
-                                                                        .Items
-                                                                        .GLASS_BLOCKS_COLORLESS)
+                                                                Tags.Items.GLASS_BLOCKS_COLORLESS)
                                                         .toVanilla())
                                         .unlockedBy(
                                                 "has_ingredient",
@@ -239,17 +237,13 @@ public class WindowGen {
                 .recipe(
                         (c, p) ->
                                 p.stonecutting(
-                                        DataIngredient.tag(
-                                                net.neoforged.neoforge.common.Tags.Items
-                                                        .GLASS_BLOCKS_COLORLESS),
+                                        DataIngredient.tag(Tags.Items.GLASS_BLOCKS_COLORLESS),
                                         RecipeCategory.BUILDING_BLOCKS,
                                         c::get))
                 .blockstate((c, p) -> BlockStateGen.cubeAll(c, p, "palettes/", "framed_glass"))
-                .tag(
-                        net.neoforged.neoforge.common.Tags.Blocks.GLASS_BLOCKS_COLORLESS,
-                        BlockTags.IMPERMEABLE)
+                .tag(Tags.Blocks.GLASS_BLOCKS_COLORLESS, BlockTags.IMPERMEABLE)
                 .item()
-                .tag(net.neoforged.neoforge.common.Tags.Items.GLASS_BLOCKS_COLORLESS)
+                .tag(Tags.Items.GLASS_BLOCKS_COLORLESS)
                 .model(
                         (c, p) ->
                                 p.cubeColumn(

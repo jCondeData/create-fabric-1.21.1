@@ -38,11 +38,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FilteringRenderer {
-
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
         HitResult target = mc.hitResult;
-        if (target == null || !(target instanceof BlockHitResult result)) return;
+        if (!(target instanceof BlockHitResult result)) return;
 
         ClientLevel world = mc.level;
         BlockPos pos = result.getBlockPos();
@@ -56,8 +55,8 @@ public class FilteringRenderer {
         for (BlockEntityBehaviour b : sbe.getAllBehaviours()) {
             if (!(b instanceof FilteringBehaviour behaviour)) continue;
 
-            if (behaviour instanceof SidedFilteringBehaviour) {
-                behaviour = ((SidedFilteringBehaviour) behaviour).get(result.getDirection());
+            if (behaviour instanceof SidedFilteringBehaviour sidedFilteringBehaviour) {
+                behaviour = sidedFilteringBehaviour.get(result.getDirection());
                 if (behaviour == null) continue;
             }
 
@@ -157,7 +156,6 @@ public class FilteringRenderer {
                     ms.popPose();
                 }
                 sided.fromSide(side);
-                continue;
             } else if (slotPositioning.shouldRender(level, blockPos, blockState)) {
                 ms.pushPose();
                 slotPositioning.transform(level, blockPos, blockState, ms);

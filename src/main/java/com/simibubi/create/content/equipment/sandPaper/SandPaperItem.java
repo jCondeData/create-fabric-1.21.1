@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +27,7 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,7 +37,6 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
-import net.neoforged.neoforge.common.util.FakePlayer;
 
 import java.util.function.Consumer;
 
@@ -109,7 +110,7 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
     }
 
     @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entityLiving) {
         if (!(entityLiving instanceof Player player)) return stack;
         if (stack.has(AllDataComponents.SAND_PAPER_POLISHING)) {
             ItemStack toPolish = stack.get(AllDataComponents.SAND_PAPER_POLISHING).item();
@@ -117,23 +118,25 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
             // .get
             ItemStack polished =
                     SandPaperPolishingRecipe.applyPolish(
-                            worldIn, entityLiving.position(), toPolish, stack);
+                            level, entityLiving.position(), toPolish, stack);
 
-            if (worldIn.isClientSide) {
+            if (level.isClientSide) {
                 spawnParticles(
                         entityLiving.getEyePosition(1).add(entityLiving.getLookAngle().scale(.5f)),
                         toPolish,
-                        worldIn);
+                        level);
                 return stack;
             }
 
+            Inventory playerInv = player.getInventory();
             if (!polished.isEmpty()) {
-                if (player instanceof FakePlayer) {
-                    player.drop(polished, false, false);
-                } else {
-                    player.getInventory().placeItemBackInInventory(polished);
-                }
+                playerInv.placeItemBackInInventory(polished);
             }
+
+            if (toPolish.hasCraftingRemainingItem()) {
+                playerInv.placeItemBackInInventory(toPolish.getCraftingRemainingItem());
+            }
+
             stack.remove(AllDataComponents.SAND_PAPER_POLISHING);
             stack.hurtAndBreak(
                     1, entityLiving, LivingEntity.getSlotForHand(entityLiving.getUsedItemHand()));
@@ -181,13 +184,13 @@ public class SandPaperItem extends Item implements CustomUseEffectsItem {
         if (newState != null) {
             AllSoundEvents.SANDING_LONG.play(
                     level, player, pos, 1, 1 + (level.random.nextFloat() * 0.5f - 1f) / 5f);
-            level.levelEvent(player, 3005, pos, 0); // Spawn particles
+            level.levelEvent(player, LevelEvent.PARTICLES_SCRAPE, pos, 0); // Spawn particles
         } else {
             newState = state.getToolModifiedState(context, ItemAbilities.AXE_WAX_OFF, false);
             if (newState != null) {
                 AllSoundEvents.SANDING_LONG.play(
                         level, player, pos, 1, 1 + (level.random.nextFloat() * 0.5f - 1f) / 5f);
-                level.levelEvent(player, 3004, pos, 0); // Spawn particles
+                level.levelEvent(player, LevelEvent.PARTICLES_WAX_OFF, pos, 0); // Spawn particles
             }
         }
 

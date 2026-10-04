@@ -2,7 +2,6 @@ package com.simibubi.create.content.logistics.tunnel;
 
 import com.simibubi.create.foundation.item.ItemHelper;
 
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -50,7 +49,7 @@ public class BrassTunnelItemHandler implements IItemHandler {
     public int getSlotLimit(int slot) {
         return blockEntity.stackToDistribute.isEmpty()
                 ? 64
-                : blockEntity.stackToDistribute.getOrDefault(DataComponents.MAX_STACK_SIZE, 64);
+                : blockEntity.stackToDistribute.getMaxStackSize();
     }
 
     @Override

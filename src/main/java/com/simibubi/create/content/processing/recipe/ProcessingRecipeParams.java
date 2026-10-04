@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.simibubi.create.foundation.fluid.FluidIngredient;
+import com.simibubi.create.foundation.codec.CreateCodecs;
 
 import net.createmod.catnip.codecs.stream.CatnipStreamCodecBuilders;
 import net.minecraft.core.NonNullList;
@@ -13,6 +13,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class ProcessingRecipeParams {
 
     protected NonNullList<Ingredient> ingredients;
     protected NonNullList<ProcessingOutput> results;
-    protected NonNullList<FluidIngredient> fluidIngredients;
+    protected NonNullList<SizedFluidIngredient> fluidIngredients;
     protected NonNullList<FluidStack> fluidResults;
     protected int processingDuration;
     protected HeatCondition requiredHeat;
@@ -43,7 +44,9 @@ public class ProcessingRecipeParams {
         return RecordCodecBuilder.mapCodec(
                 instance ->
                         instance.group(
-                                        Codec.either(FluidIngredient.CODEC, Ingredient.CODEC)
+                                        Codec.either(
+                                                        CreateCodecs.SIZED_FLUID_INGREDIENT,
+                                                        Ingredient.CODEC)
                                                 .listOf()
                                                 .fieldOf("ingredients")
                                                 .forGetter(ProcessingRecipeParams::ingredients),
@@ -95,8 +98,8 @@ public class ProcessingRecipeParams {
                 });
     }
 
-    protected final List<Either<FluidIngredient, Ingredient>> ingredients() {
-        List<Either<FluidIngredient, Ingredient>> ingredients =
+    protected final List<Either<SizedFluidIngredient, Ingredient>> ingredients() {
+        List<Either<SizedFluidIngredient, Ingredient>> ingredients =
                 new ArrayList<>(this.ingredients.size() + this.fluidIngredients.size());
         this.ingredients.forEach(ingredient -> ingredients.add(Either.right(ingredient)));
         this.fluidIngredients.forEach(ingredient -> ingredients.add(Either.left(ingredient)));
@@ -122,7 +125,7 @@ public class ProcessingRecipeParams {
     protected void encode(RegistryFriendlyByteBuf buffer) {
         CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC)
                 .encode(buffer, ingredients);
-        CatnipStreamCodecBuilders.nonNullList(FluidIngredient.STREAM_CODEC)
+        CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC)
                 .encode(buffer, fluidIngredients);
         CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC)
                 .encode(buffer, results);
@@ -136,7 +139,8 @@ public class ProcessingRecipeParams {
                 CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC)
                         .decode(buffer);
         fluidIngredients =
-                CatnipStreamCodecBuilders.nonNullList(FluidIngredient.STREAM_CODEC).decode(buffer);
+                CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC)
+                        .decode(buffer);
         results =
                 CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).decode(buffer);
         fluidResults =

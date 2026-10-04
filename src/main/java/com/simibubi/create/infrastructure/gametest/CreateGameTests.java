@@ -14,7 +14,7 @@ import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 
 import java.util.Collection;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public class CreateGameTests {
     private static final Class<?>[] testHolders = {
         TestContraptions.class,

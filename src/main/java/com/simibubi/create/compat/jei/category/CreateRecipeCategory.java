@@ -11,7 +11,6 @@ import com.simibubi.create.compat.jei.EmptyBackground;
 import com.simibubi.create.compat.jei.ItemIcon;
 import com.simibubi.create.content.fluids.potion.PotionFluidHandler;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
-import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import com.simibubi.create.foundation.utility.CreateLang;
@@ -44,10 +43,12 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -185,11 +186,11 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>>
 
     @SuppressWarnings("removal") // see below
     public static IRecipeSlotBuilder addFluidSlot(
-            IRecipeLayoutBuilder builder, int x, int y, FluidIngredient ingredient) {
-        int amount = ingredient.getRequiredAmount();
+            IRecipeLayoutBuilder builder, int x, int y, SizedFluidIngredient ingredient) {
+        int amount = ingredient.amount();
         return builder.addSlot(RecipeIngredientRole.INPUT, x, y)
                 .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredients(NeoForgeTypes.FLUID_STACK, ingredient.getMatchingFluidStacks())
+                .addIngredients(NeoForgeTypes.FLUID_STACK, Arrays.asList(ingredient.getFluids()))
                 .setFluidRenderer(amount, false, 16, 16) // make fluid take up the full slot
                 .addTooltipCallback(CreateRecipeCategory::addPotionTooltip);
     }

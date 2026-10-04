@@ -22,11 +22,10 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class DestinationInstruction extends TextScheduleInstruction {
 

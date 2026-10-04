@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -32,8 +33,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 

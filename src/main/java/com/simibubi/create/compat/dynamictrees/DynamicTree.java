@@ -8,9 +8,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
-import java.util.function.BiConsumer;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.BiConsumer;
 
 public class DynamicTree extends AbstractBlockBreakQueue {
 
@@ -42,7 +42,7 @@ public class DynamicTree extends AbstractBlockBreakQueue {
         //			return;
         //
         //		// Play and render block break sound and particles
-        //		world.levelEvent(null, 2001, startCutPos,
+        //		world.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, startCutPos,
         // Block.getId(world.getBlockState(startCutPos)));
         //
         //		// Actually breaks the tree

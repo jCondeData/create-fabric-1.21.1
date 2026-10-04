@@ -311,7 +311,8 @@ public class ContraptionCollider {
                     slide =
                             Math.max(
                                     0,
-                                    blockState.getFriction(contraption.world, pos, entity) - .6f);
+                                    blockState.getFriction(contraption.collisionLevel, pos, entity)
+                                            - .6f);
                 }
             }
 

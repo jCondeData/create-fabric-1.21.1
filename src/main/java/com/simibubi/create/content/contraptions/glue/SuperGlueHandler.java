@@ -10,9 +10,9 @@ import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -106,8 +106,8 @@ public class SuperGlueHandler {
                 CatnipServices.NETWORK.sendToClientsTrackingEntity(
                         entity, new GlueEffectPacket(gluePos, face, true));
             }
-            if (placer.level() instanceof ServerLevel serverLevel)
-                itemstack.hurtAndBreak(1, serverLevel, placer, $ -> SuperGlueItem.onBroken(placer));
+
+            itemstack.hurtAndBreak(1, placer, EquipmentSlot.MAINHAND);
         }
     }
 }

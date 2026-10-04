@@ -13,9 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 public interface IScheduleInput {
 

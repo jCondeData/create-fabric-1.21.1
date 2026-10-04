@@ -29,10 +29,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.annotation.Nonnull;
 
 public class BeltConnectorItem extends BlockItem {
 
@@ -45,7 +45,7 @@ public class BeltConnectorItem extends BlockItem {
         return getOrCreateDescriptionId();
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Player playerEntity = context.getPlayer();

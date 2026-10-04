@@ -80,7 +80,7 @@ public class Create {
 
     /**
      * <b>Other mods should not use this field!</b> If you are an addon developer, create your own
-     * instance of {@link CreateRegistrate}. </br If you were using this instance to render a
+     * instance of {@link CreateRegistrate}. </br If you were using this instance to register a
      * callback listener use {@link CreateRegistrateRegistrationCallback#register} instead.
      */
     private static final CreateRegistrate REGISTRATE =
@@ -117,7 +117,6 @@ public class Create {
         REGISTRATE.registerEventListeners(modEventBus);
 
         AllSoundEvents.prepare();
-        AllTags.init();
         AllCreativeModeTabs.register(modEventBus);
         AllArmorMaterials.register(modEventBus);
         AllDisplaySources.register();

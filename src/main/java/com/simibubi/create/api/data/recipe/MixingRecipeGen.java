@@ -5,6 +5,7 @@ import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,6 +18,17 @@ import java.util.concurrent.CompletableFuture;
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
 public abstract class MixingRecipeGen extends StandardProcessingRecipeGen<MixingRecipe> {
+
+    protected GeneratedRecipe moddedMud(DatagenMod mod, String name) {
+        String mud = name + "_mud";
+        return create(
+                mod.recipeId(mud),
+                b ->
+                        b.require(Fluids.WATER, 250)
+                                .require(mod, name + "_dirt")
+                                .output(mod, mud)
+                                .whenModLoaded(mod.getId()));
+    }
 
     public MixingRecipeGen(
             PackOutput output,

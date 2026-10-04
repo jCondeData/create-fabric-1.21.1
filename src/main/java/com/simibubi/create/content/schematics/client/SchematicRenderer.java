@@ -3,6 +3,7 @@ package com.simibubi.create.content.schematics.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.render.BlockEntityRenderHelper;
 
+import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.levelWrappers.SchematicLevel;
 import net.createmod.catnip.render.ShadedBlockSbbBuilder;
 import net.createmod.catnip.render.SuperByteBuffer;
@@ -21,7 +22,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SchematicRenderer {
@@ -31,24 +35,22 @@ public class SchematicRenderer {
 
     private final Map<RenderType, SuperByteBuffer> bufferCache =
             new LinkedHashMap<>(getLayerCount());
-    private boolean active;
     private boolean changed;
-    protected SchematicLevel schematic;
-    private BlockPos anchor;
+    protected final SchematicLevel schematic;
+    private final BlockPos anchor;
+    private final List<BlockEntity> renderedBlockEntities = new ArrayList<>();
+    private final BitSet shouldRenderBlockEntities = new BitSet();
+    private final BitSet scratchErroredBlockEntities = new BitSet();
 
-    public SchematicRenderer() {
-        changed = false;
-    }
-
-    public void display(SchematicLevel world) {
+    public SchematicRenderer(SchematicLevel world) {
         this.anchor = world.anchor;
         this.schematic = world;
-        this.active = true;
         this.changed = true;
-    }
 
-    public void setActive(boolean active) {
-        this.active = active;
+        for (var renderedBlockEntity : schematic.getRenderedBlockEntities()) {
+            renderedBlockEntities.add(renderedBlockEntity);
+        }
+        shouldRenderBlockEntities.set(0, renderedBlockEntities.size());
     }
 
     public void update() {
@@ -56,8 +58,6 @@ public class SchematicRenderer {
     }
 
     public void render(PoseStack ms, SuperRenderTypeBuffer buffers) {
-        if (!active) return;
-
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
         if (changed) redraw();
@@ -67,8 +67,20 @@ public class SchematicRenderer {
                 (layer, buffer) -> {
                     buffer.renderInto(ms, buffers.getBuffer(layer));
                 });
+        scratchErroredBlockEntities.clear();
         BlockEntityRenderHelper.renderBlockEntities(
-                schematic, schematic.getRenderedBlockEntities(), ms, buffers);
+                renderedBlockEntities,
+                shouldRenderBlockEntities,
+                scratchErroredBlockEntities,
+                null,
+                schematic,
+                ms,
+                null,
+                buffers,
+                AnimationTickHolder.getPartialTicks());
+
+        // Don't bother looping over errored BEs again.
+        shouldRenderBlockEntities.andNot(scratchErroredBlockEntities);
     }
 
     protected void redraw() {

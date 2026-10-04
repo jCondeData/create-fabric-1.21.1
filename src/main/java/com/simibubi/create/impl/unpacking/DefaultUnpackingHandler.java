@@ -32,7 +32,7 @@ public enum DefaultUnpackingHandler implements UnpackingHandler {
         BlockEntity targetBE = level.getBlockEntity(pos);
         if (targetBE == null) return false;
 
-        IItemHandler targetInv = level.getCapability(ItemHandler.BLOCK, pos, state, targetBE, null);
+        IItemHandler targetInv = level.getCapability(ItemHandler.BLOCK, pos, state, targetBE, side);
         if (targetInv == null) return false;
 
         if (!simulate) {
@@ -75,11 +75,7 @@ public enum DefaultUnpackingHandler implements UnpackingHandler {
                         toInsert.getCount()
                                 - targetInv.insertItem(slot, toInsert, simulate).getCount();
                 int slotLimit =
-                        (int)
-                                ((targetInv.getStackInSlot(slot).isEmpty()
-                                                ? itemInSlot.getMaxStackSize() / 64f
-                                                : 1)
-                                        * targetInv.getSlotLimit(slot));
+                        Math.min(itemInSlot.getMaxStackSize(), targetInv.getSlotLimit(slot));
                 int insertableAmountWithPreviousItems =
                         Math.min(
                                 toInsert.getCount(),

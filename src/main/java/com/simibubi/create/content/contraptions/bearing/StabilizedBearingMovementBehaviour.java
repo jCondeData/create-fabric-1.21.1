@@ -27,9 +27,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
-
-import javax.annotation.Nullable;
 
 public class StabilizedBearingMovementBehaviour implements MovementBehaviour {
 

@@ -21,11 +21,11 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 @EventBusSubscriber
 public class CouplingHandler {

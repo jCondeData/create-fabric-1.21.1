@@ -31,10 +31,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class SteamEngineBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
 

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 public class CreateMixinPlugin implements IMixinConfigPlugin {
-
     @Override
     public void onLoad(String mixinPackage) {}
 
@@ -21,7 +20,8 @@ public class CreateMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.equals("compat/journeymap") && !Mods.JOURNEYMAP.isLoaded()) return false;
+        if (targetClassName.startsWith("com.simibubi.create.foundation.mixin.compat.xaeros")
+                && !Mods.XAEROWORLDMAP.isLoaded()) return false;
         return true;
     }
 

@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ValueSettingsPacket extends BlockEntityConfigurationPacket<SmartBlockEntity> {
     public static final StreamCodec<ByteBuf, ValueSettingsPacket> STREAM_CODEC =

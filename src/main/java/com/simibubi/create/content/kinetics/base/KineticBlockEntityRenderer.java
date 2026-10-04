@@ -122,11 +122,15 @@ public class KineticBlockEntityRenderer<T extends KineticBlockEntity>
             buffer.color(be.hasNetwork() ? Color.generateFromLong(be.network) : Color.WHITE);
         } else {
             float overStressedEffect = be.effects.overStressedEffect;
-            if (overStressedEffect != 0)
-                if (overStressedEffect > 0)
-                    buffer.color(Color.WHITE.mixWith(Color.RED, overStressedEffect));
-                else buffer.color(Color.WHITE.mixWith(Color.SPRING_GREEN, -overStressedEffect));
-            else buffer.color(Color.WHITE);
+            if (overStressedEffect != 0) {
+                boolean overstressed = overStressedEffect > 0;
+                Color color = overstressed ? Color.RED : Color.SPRING_GREEN;
+                float weight = overstressed ? overStressedEffect : -overStressedEffect;
+
+                buffer.color(Color.WHITE.mixWith(color, weight));
+            } else {
+                buffer.color(Color.WHITE);
+            }
         }
 
         return buffer;

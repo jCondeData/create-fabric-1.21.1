@@ -24,9 +24,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Arrays;
-import java.util.List;
-
 public abstract class SchematicToolBase implements ISchematicTool {
 
     protected SchematicHandler schematicHandler;
@@ -40,9 +37,6 @@ public abstract class SchematicToolBase implements ISchematicTool {
     protected boolean schematicSelected;
     protected boolean renderSelectedFace;
     protected Direction selectedFace;
-
-    protected final List<String> mirrors = Arrays.asList("none", "leftRight", "frontBack");
-    protected final List<String> rotations = Arrays.asList("none", "cw90", "cw180", "cw270");
 
     @Override
     public void init() {
@@ -78,7 +72,7 @@ public abstract class SchematicToolBase implements ISchematicTool {
             SchematicTransformation transformation = schematicHandler.getTransformation();
             AABB localBounds = schematicHandler.getBounds();
 
-            Vec3 traceOrigin = RaycastHelper.getTraceOrigin(player);
+            Vec3 traceOrigin = player.getEyePosition();
             Vec3 start = transformation.toLocalSpace(traceOrigin);
             Vec3 end =
                     transformation.toLocalSpace(

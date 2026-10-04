@@ -5,6 +5,7 @@ import com.simibubi.create.content.fluids.transfer.FillingRecipe;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,6 +18,17 @@ import java.util.concurrent.CompletableFuture;
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
 public abstract class FillingRecipeGen extends StandardProcessingRecipeGen<FillingRecipe> {
+
+    protected GeneratedRecipe moddedGrass(DatagenMod mod, String name) {
+        String grass = name + "_grass_block";
+        return create(
+                mod.recipeId(grass),
+                b ->
+                        b.require(Fluids.WATER, 500)
+                                .require(mod, name + "_dirt")
+                                .output(mod, grass)
+                                .whenModLoaded(mod.getId()));
+    }
 
     public FillingRecipeGen(
             PackOutput output,

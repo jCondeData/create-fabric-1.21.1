@@ -18,13 +18,13 @@ import net.neoforged.neoforge.fluids.FluidInteractionRegistry.HasFluidInteractio
 import net.neoforged.neoforge.fluids.FluidInteractionRegistry.InteractionInformation;
 import net.neoforged.neoforge.fluids.FluidType;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.annotation.Nullable;
 
 public class CobbleGenOptimisation {
 

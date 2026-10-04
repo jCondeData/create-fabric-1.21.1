@@ -23,9 +23,9 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
-import java.util.function.Consumer;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
+import java.util.function.Consumer;
 
 public class WrenchItem extends Item {
 
@@ -39,7 +39,7 @@ public class WrenchItem extends Item {
         consumer.accept(SimpleCustomRenderer.create(this, new WrenchItemRenderer()));
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Player player = context.getPlayer();

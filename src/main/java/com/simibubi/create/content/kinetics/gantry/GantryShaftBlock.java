@@ -217,7 +217,7 @@ public class GantryShaftBlock extends DirectionalKineticBlock
                 worldIn.hasNeighborSignal(pos); // shouldBePowered(state, worldIn, pos);
 
         if (!previouslyPowered && !shouldPower && shouldBePowered(state, worldIn, pos)) {
-            worldIn.setBlock(pos, state.setValue(POWERED, true), 3);
+            worldIn.setBlock(pos, state.setValue(POWERED, true), Block.UPDATE_ALL);
             return;
         }
 
@@ -249,7 +249,8 @@ public class GantryShaftBlock extends DirectionalKineticBlock
             BlockEntity be = worldIn.getBlockEntity(blockPos);
             if (be instanceof KineticBlockEntity) ((KineticBlockEntity) be).detachKinetics();
             if (blockState.getBlock() instanceof GantryShaftBlock)
-                worldIn.setBlock(blockPos, blockState.setValue(POWERED, shouldPower), 2);
+                worldIn.setBlock(
+                        blockPos, blockState.setValue(POWERED, shouldPower), Block.UPDATE_CLIENTS);
         }
     }
 

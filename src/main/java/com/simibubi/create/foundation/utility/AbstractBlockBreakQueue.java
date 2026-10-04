@@ -8,10 +8,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.EventHooks;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 public abstract class AbstractBlockBreakQueue {
     protected Consumer<BlockPos> makeCallbackFor(

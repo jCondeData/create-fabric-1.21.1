@@ -2,8 +2,10 @@ package com.simibubi.create.content.logistics.packagePort;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.content.equipment.clipboard.ClipboardContent;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides.ClipboardType;
+import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.animatedContainer.AnimatedContainerBehaviour;
@@ -46,7 +48,7 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
         super(type, pos, state);
         addressFilter = "";
         acceptsPackages = true;
-        inventory = new SmartInventory(18, this);
+        inventory = new SmartInventory(18, this, (slot, stack) -> PackageItem.isPackage(stack));
         itemHandler = new PackagePortAutomationInventoryWrapper(inventory, this);
     }
 
@@ -148,12 +150,14 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
     }
 
     protected void onOpenedManually() {}
-    ;
 
     private void addAddressToClipboard(Player player, ItemStack mainHandItem) {
         if (addressFilter == null || addressFilter.isBlank()) return;
 
-        List<List<ClipboardEntry>> list = ClipboardEntry.readAll(mainHandItem);
+        ClipboardContent clipboard =
+                mainHandItem.getOrDefault(
+                        AllDataComponents.CLIPBOARD_CONTENT, ClipboardContent.EMPTY);
+        List<List<ClipboardEntry>> list = ClipboardEntry.readAll(clipboard);
         for (List<ClipboardEntry> page : list) {
             for (ClipboardEntry entry : page) {
                 String existing = entry.text.getString();
@@ -179,8 +183,8 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
         player.displayClientMessage(
                 CreateLang.translate("clipboard.address_added", addressFilter).component(), true);
 
-        ClipboardEntry.saveAll(list, mainHandItem);
-        mainHandItem.set(AllDataComponents.CLIPBOARD_TYPE, ClipboardType.WRITTEN);
+        clipboard = clipboard.setPages(list).setType(ClipboardType.WRITTEN);
+        mainHandItem.set(AllDataComponents.CLIPBOARD_CONTENT, clipboard);
     }
 
     @Override

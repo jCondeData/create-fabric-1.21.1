@@ -39,11 +39,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import javax.annotation.Nonnull;
 
 public abstract class ZapperItem extends Item implements CustomArmPoseItem {
 
@@ -82,7 +81,7 @@ public abstract class ZapperItem extends Item implements CustomArmPoseItem {
         return newStack.getItem() instanceof ZapperItem;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public InteractionResult useOn(UseOnContext context) {
         // Shift -> open GUI

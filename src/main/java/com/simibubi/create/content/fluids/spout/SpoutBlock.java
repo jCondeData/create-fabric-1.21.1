@@ -69,4 +69,10 @@ public class SpoutBlock extends Block implements IWrenchable, IBE<SpoutBlockEnti
     public BlockEntityType<? extends SpoutBlockEntity> getBlockEntityType() {
         return AllBlockEntityTypes.SPOUT.get();
     }
+
+    @Override
+    public void onRemove(
+            BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        IBE.onRemove(state, level, pos, newState);
+    }
 }

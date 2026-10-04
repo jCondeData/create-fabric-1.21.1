@@ -17,11 +17,10 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public record FluidContentsAttribute(@Nullable Fluid fluid) implements ItemAttribute {
     public static final MapCodec<FluidContentsAttribute> CODEC =

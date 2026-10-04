@@ -3,7 +3,6 @@ package com.simibubi.create.content.logistics.filter;
 import static com.simibubi.create.foundation.gui.AllGuiTextures.PLAYER_INVENTORY;
 
 import com.google.common.collect.ImmutableList;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.content.logistics.filter.FilterScreenPacket.Option;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.gui.AllIcons;
@@ -97,9 +96,7 @@ public abstract class AbstractFilterScreen<F extends AbstractFilterMenu>
                 title,
                 x + (background.getWidth() - 8) / 2 - font.width(title) / 2,
                 y + 4,
-                AllItems.PACKAGE_FILTER.isIn(menu.contentHolder)
-                        ? 0x3D3C48
-                        : AllItems.FILTER.isIn(menu.contentHolder) ? 0x303030 : 0x592424,
+                getTitleColor(),
                 false);
 
         GuiGameElement.of(menu.contentHolder)
@@ -107,6 +104,10 @@ public abstract class AbstractFilterScreen<F extends AbstractFilterMenu>
                         x + background.getWidth() + 8, y + background.getHeight() - 52, -200)
                 .scale(4)
                 .render(graphics);
+    }
+
+    protected int getTitleColor() {
+        return 0x592424;
     }
 
     @Override

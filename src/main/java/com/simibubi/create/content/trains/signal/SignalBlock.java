@@ -25,7 +25,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class SignalBlock extends Block implements IBE<SignalBlockEntity>, IWrenchable {
 
@@ -87,18 +89,26 @@ public class SignalBlock extends Block implements IBE<SignalBlockEntity>, IWrenc
             boolean pIsMoving) {
         if (pLevel.isClientSide) return;
         boolean powered = pState.getValue(POWERED);
-        if (powered == pLevel.hasNeighborSignal(pPos)) return;
+        Optional<SignalBlockEntity> ste = getBlockEntityOptional(pLevel, pPos);
+        boolean neighborPowered = false;
+        if (ste.isEmpty() || !ste.get().computerBehaviour.hasAttachedComputer()) {
+            powered = pLevel.hasNeighborSignal(pPos);
+        }
+        if (powered == neighborPowered) return;
         if (powered) {
             pLevel.scheduleTick(pPos, this, 4);
         } else {
-            pLevel.setBlock(pPos, pState.cycle(POWERED), 2);
+            pLevel.setBlock(pPos, pState.cycle(POWERED), Block.UPDATE_CLIENTS);
         }
     }
 
     @Override
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRand) {
-        if (pState.getValue(POWERED) && !pLevel.hasNeighborSignal(pPos))
-            pLevel.setBlock(pPos, pState.cycle(POWERED), 2);
+        Optional<SignalBlockEntity> ste = getBlockEntityOptional(pLevel, pPos);
+        if ((ste.isEmpty() || !ste.get().computerBehaviour.hasAttachedComputer())
+                && pState.getValue(POWERED)
+                && !pLevel.hasNeighborSignal(pPos))
+            pLevel.setBlock(pPos, pState.cycle(POWERED), Block.UPDATE_CLIENTS);
     }
 
     @Override
@@ -121,8 +131,16 @@ public class SignalBlock extends Block implements IBE<SignalBlockEntity>, IWrenc
                 level,
                 pos,
                 ste -> {
-                    SignalBoundary signal = ste.getSignal();
                     Player player = context.getPlayer();
+                    if (ste.computerBehaviour.hasAttachedComputer()) {
+                        if (player != null)
+                            player.displayClientMessage(
+                                    CreateLang.translateDirect(
+                                            "track_signal.mode_controlled_by_computer"),
+                                    true);
+                        return;
+                    }
+                    SignalBoundary signal = ste.getSignal();
                     if (signal != null) {
                         signal.cycleSignalType(pos);
                         if (player != null)

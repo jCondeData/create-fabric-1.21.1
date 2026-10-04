@@ -15,10 +15,10 @@ import net.minecraft.world.entity.MobCategory;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault

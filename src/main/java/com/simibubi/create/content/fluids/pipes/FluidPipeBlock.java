@@ -52,11 +52,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class FluidPipeBlock extends PipeBlock
         implements SimpleWaterloggedBlock,

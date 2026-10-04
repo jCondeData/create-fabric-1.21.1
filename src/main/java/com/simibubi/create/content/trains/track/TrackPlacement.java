@@ -573,7 +573,7 @@ public class TrackPlacement {
                     level.setBlock(
                             offsetPos,
                             ProperWaterloggedBlock.withWater(level, toPlace, offsetPos),
-                            3);
+                            Block.UPDATE_ALL);
             }
         }
 
@@ -591,7 +591,7 @@ public class TrackPlacement {
                                             : BlockHelper.copyProperties(state1, onto))
                                     .setValue(TrackBlock.HAS_BE, true),
                             targetPos1),
-                    3);
+                    Block.UPDATE_ALL);
 
             stateAtPos = level.getBlockState(targetPos2);
             level.setBlock(
@@ -603,7 +603,7 @@ public class TrackPlacement {
                                             : BlockHelper.copyProperties(state2, onto))
                                     .setValue(TrackBlock.HAS_BE, true),
                             targetPos2),
-                    3);
+                    Block.UPDATE_ALL);
         }
 
         BlockEntity te1 = level.getBlockEntity(targetPos1);

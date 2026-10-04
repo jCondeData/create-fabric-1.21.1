@@ -119,10 +119,7 @@ public record ShulkerFillLevelAttribute(ShulkerLevels levels) implements ItemAtt
                                         itemStack ->
                                                 !itemStack.isEmpty()
                                                         && itemStack.getCount()
-                                                                == itemStack.getOrDefault(
-                                                                        DataComponents
-                                                                                .MAX_STACK_SIZE,
-                                                                        64));
+                                                                == itemStack.getMaxStackSize());
                 return requiredSize.test(isFull ? Integer.MAX_VALUE : rawSize);
             }
             return requiredSize.test(0);

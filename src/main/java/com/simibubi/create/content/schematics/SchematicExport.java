@@ -13,7 +13,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.loading.FMLPaths;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,11 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import javax.annotation.Nullable;
-
 public class SchematicExport {
-    public static final Path SCHEMATICS = FMLPaths.GAMEDIR.get().resolve("schematics");
-
     /**
      * Save a schematic to a file from a world.
      *

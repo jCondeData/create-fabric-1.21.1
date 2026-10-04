@@ -17,9 +17,9 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
-import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class SchematicProcessor extends StructureProcessor {
 

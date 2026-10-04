@@ -19,9 +19,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-import java.util.UUID;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 public abstract class TrainHUDUpdatePacket implements CustomPacketPayload {
     protected final UUID trainId;

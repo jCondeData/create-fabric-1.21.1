@@ -22,6 +22,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,10 +36,10 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 public class FluidTankBlockEntity extends SmartBlockEntity
         implements IHaveGoggleInformation, IMultiBlockEntityContainer.Fluid {
@@ -228,7 +229,13 @@ public class FluidTankBlockEntity extends SmartBlockEntity
             state = state.setValue(FluidTankBlock.BOTTOM, true);
             state = state.setValue(FluidTankBlock.TOP, true);
             state = state.setValue(FluidTankBlock.SHAPE, window ? Shape.WINDOW : Shape.PLAIN);
-            getLevel().setBlock(worldPosition, state, 22);
+            getLevel()
+                    .setBlock(
+                            worldPosition,
+                            state,
+                            Block.UPDATE_CLIENTS
+                                    | Block.UPDATE_INVISIBLE
+                                    | Block.UPDATE_KNOWN_SHAPE);
         }
 
         refreshCapability();
@@ -292,7 +299,12 @@ public class FluidTankBlockEntity extends SmartBlockEntity
                             shape = Shape.WINDOW;
                     }
 
-                    level.setBlock(pos, blockState.setValue(FluidTankBlock.SHAPE, shape), 22);
+                    level.setBlock(
+                            pos,
+                            blockState.setValue(FluidTankBlock.SHAPE, shape),
+                            Block.UPDATE_CLIENTS
+                                    | Block.UPDATE_INVISIBLE
+                                    | Block.UPDATE_KNOWN_SHAPE);
                     level.getChunkSource().getLightEngine().checkBlock(pos);
                 }
             }
@@ -524,7 +536,7 @@ public class FluidTankBlockEntity extends SmartBlockEntity
                     state.setValue(
                             FluidTankBlock.TOP,
                             getController().getY() + height - 1 == getBlockPos().getY());
-            level.setBlock(getBlockPos(), state, 6);
+            level.setBlock(getBlockPos(), state, Block.UPDATE_CLIENTS | Block.UPDATE_INVISIBLE);
         }
         if (isController()) setWindows(window);
         onFluidStackChanged(tankInventory.getFluid());

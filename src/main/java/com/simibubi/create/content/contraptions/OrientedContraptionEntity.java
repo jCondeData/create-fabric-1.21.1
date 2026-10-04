@@ -48,10 +48,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 /**
  * Ex: Minecarts, Couplings <br>

@@ -28,7 +28,7 @@ public record ContraptionSeatMappingPacket(
                     ByteBufCodecs.INT,
                     ContraptionSeatMappingPacket::entityId,
                     ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, ByteBufCodecs.INT),
-                    ContraptionSeatMappingPacket::mapping,
+                    p -> new HashMap<>(p.mapping),
                     ByteBufCodecs.INT,
                     ContraptionSeatMappingPacket::dismountedId,
                     ContraptionSeatMappingPacket::new);

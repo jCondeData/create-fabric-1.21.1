@@ -10,7 +10,6 @@ import com.simibubi.create.foundation.item.ItemSlots;
 import net.createmod.catnip.codecs.stream.CatnipStreamCodecBuilders;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -27,14 +26,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
-
 public class ToolboxInventory extends ItemStackHandler {
+    public static final int STACKS_PER_COMPARTMENT = 4;
     public static final Codec<ToolboxInventory> CODEC =
             RecordCodecBuilder.create(
                     instance ->
                             instance.group(
-                                            ItemSlots.maxSizeCodec(32)
+                                            ItemSlots.maxSizeCodec(8 * STACKS_PER_COMPARTMENT)
                                                     .fieldOf("items")
                                                     .forGetter(ItemSlots::fromHandler),
                                             ItemStack.OPTIONAL_CODEC
@@ -51,7 +49,7 @@ public class ToolboxInventory extends ItemStackHandler {
                     toolbox -> toolbox.filters,
                     ToolboxInventory::deserialize);
 
-    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @ScheduledForRemoval(inVersion = "1.21.1+ Port")
     @Deprecated(since = "6.0.6", forRemoval = true)
     public static final Codec<ToolboxInventory> BACKWARDS_COMPAT_CODEC =
             Codec.withAlternative(
@@ -64,10 +62,9 @@ public class ToolboxInventory extends ItemStackHandler {
                             },
                             ItemHelper::containerContentsFromHandler));
 
-    public static final int STACKS_PER_COMPARTMENT = 4;
     List<ItemStack> filters;
     boolean settling;
-    private ToolboxBlockEntity blockEntity;
+    private final ToolboxBlockEntity blockEntity;
 
     private boolean limitedMode;
 
@@ -98,9 +95,7 @@ public class ToolboxInventory extends ItemStackHandler {
             if (!shouldBeEmpty)
                 shouldBeEmpty =
                         stackInSlot.isEmpty()
-                                || stackInSlot.getCount()
-                                        != stackInSlot.getOrDefault(
-                                                DataComponents.MAX_STACK_SIZE, 64);
+                                || stackInSlot.getCount() != stackInSlot.getMaxStackSize();
             else if (!stackInSlot.isEmpty()) {
                 valid = false;
                 sample = stackInSlot;
@@ -128,10 +123,7 @@ public class ToolboxInventory extends ItemStackHandler {
                         totalCount <= 0
                                 ? ItemStack.EMPTY
                                 : sample.copyWithCount(
-                                        Math.min(
-                                                totalCount,
-                                                sample.getOrDefault(
-                                                        DataComponents.MAX_STACK_SIZE, 64)));
+                                        Math.min(totalCount, sample.getMaxStackSize()));
                 setStackInSlot(compartment * STACKS_PER_COMPARTMENT + i, copy);
                 totalCount -= copy.getCount();
             }
@@ -202,7 +194,7 @@ public class ToolboxInventory extends ItemStackHandler {
     }
 
     public ItemStack distributeToCompartment(
-            @Nonnull ItemStack stack, int compartment, boolean simulate) {
+            @NotNull ItemStack stack, int compartment, boolean simulate) {
         if (stack.isEmpty()) return stack;
         if (filters.get(compartment).isEmpty()) return stack;
 

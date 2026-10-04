@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationBehaviourBase<?, ?>>
         extends BlockEntityBehaviour {

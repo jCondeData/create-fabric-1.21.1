@@ -61,7 +61,7 @@ public class GlassFluidPipeBlock extends AxisPipeBlock
                         .setValue(
                                 BlockStateProperties.WATERLOGGED,
                                 state.getValue(BlockStateProperties.WATERLOGGED));
-        world.setBlock(pos, newState, 3);
+        world.setBlock(pos, newState, Block.UPDATE_ALL);
         FluidTransportBehaviour.loadFlows(world, pos);
         return InteractionResult.SUCCESS;
     }

@@ -25,13 +25,13 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.fluids.FluidStack;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class FluidDrainingBehaviour extends FluidManipulationBehaviour {
 

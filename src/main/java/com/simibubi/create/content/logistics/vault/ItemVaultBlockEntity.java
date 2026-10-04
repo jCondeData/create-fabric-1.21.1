@@ -238,7 +238,13 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
         BlockState state = getBlockState();
         if (ItemVaultBlock.isVault(state)) {
             state = state.setValue(ItemVaultBlock.LARGE, false);
-            getLevel().setBlock(worldPosition, state, 22);
+            getLevel()
+                    .setBlock(
+                            worldPosition,
+                            state,
+                            Block.UPDATE_CLIENTS
+                                    | Block.UPDATE_INVISIBLE
+                                    | Block.UPDATE_KNOWN_SHAPE);
         }
 
         itemCapability = null;
@@ -398,7 +404,10 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
     public void notifyMultiUpdated() {
         BlockState state = this.getBlockState();
         if (ItemVaultBlock.isVault(state)) { // safety
-            level.setBlock(getBlockPos(), state.setValue(ItemVaultBlock.LARGE, radius > 2), 6);
+            level.setBlock(
+                    getBlockPos(),
+                    state.setValue(ItemVaultBlock.LARGE, radius > 2),
+                    Block.UPDATE_CLIENTS | Block.UPDATE_INVISIBLE);
         }
         itemCapability = null;
         invalidateCapabilities();

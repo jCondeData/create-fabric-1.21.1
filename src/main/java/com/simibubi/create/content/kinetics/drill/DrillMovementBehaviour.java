@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class DrillMovementBehaviour extends BlockBreakingMovementBehaviour {
 

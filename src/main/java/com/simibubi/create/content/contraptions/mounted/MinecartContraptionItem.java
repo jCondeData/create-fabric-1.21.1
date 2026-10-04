@@ -38,6 +38,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
@@ -47,10 +48,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @EventBusSubscriber
 public class MinecartContraptionItem extends Item {
@@ -148,7 +148,7 @@ public class MinecartContraptionItem extends Item {
 
                 @Override
                 protected void playSound(BlockSource source) {
-                    source.level().levelEvent(1000, source.pos(), 0);
+                    source.level().levelEvent(LevelEvent.SOUND_DISPENSER_DISPENSE, source.pos(), 0);
                 }
             };
 

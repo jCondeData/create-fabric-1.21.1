@@ -1,6 +1,7 @@
 package com.simibubi.create.content.trains.display;
 
 import net.createmod.catnip.nbt.NBTHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -39,13 +40,12 @@ public class FlapDisplayLayout {
         this.sections = sections;
     }
 
-    public CompoundTag write() {
+    public CompoundTag write(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Key", layoutKey);
-        tag.put("Sections", NBTHelper.writeCompoundList(sections, FlapDisplaySection::write));
+        tag.put("Sections", NBTHelper.writeCompoundList(sections, s -> s.write(registries)));
         return tag;
     }
-    ;
 
     public void read(CompoundTag tag) {
         String prevKey = layoutKey;

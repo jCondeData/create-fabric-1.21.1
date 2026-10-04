@@ -19,13 +19,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class CreateBlockEntityBuilder<T extends BlockEntity, P> extends BlockEntityBuilder<T, P> {
 

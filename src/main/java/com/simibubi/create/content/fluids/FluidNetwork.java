@@ -186,6 +186,7 @@ public class FluidNetwork {
                 if (!FluidStack.isSameFluidSameComponents(contained, fluid)) continue;
                 FluidStack toExtract = FluidHelper.copyStackWithAmount(contained, flowSpeed);
                 transfer = sourceCap.drain(toExtract, action);
+                break;
             }
 
             if (transfer.isEmpty()) {

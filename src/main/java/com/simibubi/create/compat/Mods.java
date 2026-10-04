@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.LoadingModList;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -36,6 +36,7 @@ public enum Mods {
     MODERNUI,
     FTBCHUNKS,
     JOURNEYMAP,
+    XAEROWORLDMAP,
     FTBLIBRARY,
     SODIUM,
     INVENTORYSORTER;
@@ -76,7 +77,7 @@ public enum Mods {
      * @return a boolean of whether the mod is loaded or not based on mod id
      */
     public boolean isLoaded() {
-        return ModList.get().isLoaded(id);
+        return LoadingModList.get().getModFileById(id) != null;
     }
 
     /**

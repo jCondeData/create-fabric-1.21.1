@@ -50,12 +50,11 @@ import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class DeployerMovementBehaviour implements MovementBehaviour {
 
@@ -130,13 +129,13 @@ public class DeployerMovementBehaviour implements MovementBehaviour {
             MovementContext context,
             BlockPos pos,
             DeployerFakePlayer player,
-            Level world,
+            Level level,
             ItemStack filter) {
         if (!filter.has(AllDataComponents.SCHEMATIC_ANCHOR)) return;
-        if (!world.getBlockState(pos).canBeReplaced()) return;
+        if (!level.getBlockState(pos).canBeReplaced()) return;
 
         if (!filter.getOrDefault(AllDataComponents.SCHEMATIC_DEPLOYED, false)) return;
-        SchematicLevel schematicWorld = SchematicInstances.get(world, filter);
+        SchematicLevel schematicWorld = SchematicInstances.get(level, filter);
         if (schematicWorld == null) return;
         if (!schematicWorld.getBounds().isInside(pos.subtract(schematicWorld.anchor))) return;
         BlockState blockState = schematicWorld.getBlockState(pos);
@@ -172,9 +171,10 @@ public class DeployerMovementBehaviour implements MovementBehaviour {
         }
 
         CompoundTag data =
-                BlockHelper.prepareBlockEntityData(blockState, schematicWorld.getBlockEntity(pos));
-        BlockSnapshot blocksnapshot = BlockSnapshot.create(world.dimension(), world, pos);
-        BlockHelper.placeSchematicBlock(world, blockState, pos, contextStack, data);
+                BlockHelper.prepareBlockEntityData(
+                        level, blockState, schematicWorld.getBlockEntity(pos));
+        BlockSnapshot blocksnapshot = BlockSnapshot.create(level.dimension(), level, pos);
+        BlockHelper.placeSchematicBlock(level, blockState, pos, contextStack, data);
 
         if (EventHooks.onBlockPlace(player, blocksnapshot, Direction.UP))
             blocksnapshot.restore(Block.UPDATE_CLIENTS);

@@ -28,7 +28,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class FactoryPanelConnectionHandler {
 

@@ -34,7 +34,7 @@ public class GenericItemEmptying {
     }
 
     public static Pair<FluidStack, ItemStack> emptyItem(
-            Level world, ItemStack stack, boolean simulate) {
+            Level level, ItemStack stack, boolean simulate) {
         FluidStack resultingFluid = FluidStack.EMPTY;
         ItemStack resultingItem = ItemStack.EMPTY;
 
@@ -42,10 +42,10 @@ public class GenericItemEmptying {
             return PotionFluidHandler.emptyPotion(stack, simulate);
 
         Optional<RecipeHolder<Recipe<SingleRecipeInput>>> recipe =
-                AllRecipeTypes.EMPTYING.find(new SingleRecipeInput(stack), world);
+                AllRecipeTypes.EMPTYING.find(new SingleRecipeInput(stack), level);
         if (recipe.isPresent()) {
             EmptyingRecipe emptyingRecipe = (EmptyingRecipe) recipe.get().value();
-            List<ItemStack> results = emptyingRecipe.rollResults();
+            List<ItemStack> results = emptyingRecipe.rollResults(level.random);
             if (!simulate) stack.shrink(1);
             resultingItem = results.isEmpty() ? ItemStack.EMPTY : results.get(0);
             resultingFluid = emptyingRecipe.getResultingFluid();

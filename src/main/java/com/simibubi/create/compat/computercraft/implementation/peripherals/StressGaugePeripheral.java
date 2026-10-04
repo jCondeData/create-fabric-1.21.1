@@ -1,5 +1,7 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
+import com.simibubi.create.compat.computercraft.events.ComputerEvent;
+import com.simibubi.create.compat.computercraft.events.KineticsChangeEvent;
 import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
 
 import dan200.computercraft.api.lua.LuaFunction;
@@ -20,6 +22,14 @@ public class StressGaugePeripheral extends SyncedPeripheral<StressGaugeBlockEnti
     @LuaFunction
     public final float getStressCapacity() {
         return this.blockEntity.getNetworkCapacity();
+    }
+
+    @Override
+    public void prepareComputerEvent(@NotNull ComputerEvent event) {
+        if (event instanceof KineticsChangeEvent kce) {
+            if (kce.overStressed) queueEvent("overstressed");
+            else queueEvent("stress_change", kce.stress, kce.capacity);
+        }
     }
 
     @NotNull

@@ -13,12 +13,12 @@ import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.schematics.SchematicExport;
 import com.simibubi.create.content.schematics.SchematicExport.SchematicExportResult;
 import com.simibubi.create.content.schematics.client.SchematicAndQuillHandler;
+import com.simibubi.create.foundation.utility.CreatePaths;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,8 +32,7 @@ import java.util.stream.Stream;
  */
 public class CreateTestCommand {
     private static final Path gametests =
-            FMLPaths.GAMEDIR
-                    .get()
+            CreatePaths.GAME_DIR
                     .getParent()
                     .resolve("src/main/resources/data/create/structure/gametest")
                     .toAbsolutePath();

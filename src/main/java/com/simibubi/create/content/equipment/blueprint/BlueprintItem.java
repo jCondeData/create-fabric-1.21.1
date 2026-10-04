@@ -3,7 +3,6 @@ package com.simibubi.create.content.equipment.blueprint;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.logistics.filter.AttributeFilterWhitelistMode;
-import com.simibubi.create.content.logistics.filter.FilterItem;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute.ItemAttributeEntry;
 import com.simibubi.create.content.logistics.item.filter.attribute.attributes.InTagAttribute;
@@ -96,14 +95,14 @@ public class BlueprintItem extends Item {
     private static ItemStack convertIngredientToFilter(Ingredient ingredient) {
         boolean isCompoundIngredient =
                 ingredient.getCustomIngredient() instanceof CompoundIngredient;
-        Ingredient.Value[] acceptedItems = ingredient.values;
+        Value[] acceptedItems = ingredient.values;
         if (acceptedItems == null || acceptedItems.length > 18) return ItemStack.EMPTY;
         if (acceptedItems.length == 0) return ItemStack.EMPTY;
         if (acceptedItems.length == 1)
             return convertIItemListToFilter(acceptedItems[0], isCompoundIngredient);
 
         ItemStack result = AllItems.FILTER.asStack();
-        ItemStackHandler filterItems = FilterItem.getFilterItems(result);
+        ItemStackHandler filterItems = AllItems.FILTER.get().getFilterItemHandler(result);
         for (int i = 0; i < acceptedItems.length; i++)
             filterItems.setStackInSlot(
                     i, convertIItemListToFilter(acceptedItems[i], isCompoundIngredient));
@@ -134,7 +133,7 @@ public class BlueprintItem extends Item {
 
         if (isCompoundIngredient) {
             ItemStack result = AllItems.FILTER.asStack();
-            ItemStackHandler filterItems = FilterItem.getFilterItems(result);
+            ItemStackHandler filterItems = AllItems.FILTER.get().getFilterItemHandler(result);
             int i = 0;
             for (ItemStack itemStack : stacks) {
                 if (i >= 18) break;

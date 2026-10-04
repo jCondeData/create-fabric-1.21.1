@@ -15,17 +15,16 @@ import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.extensions.IGuiGraphicsExtension;
 import net.neoforged.neoforge.common.NeoForge;
 
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 public class RemovedGuiUtils {
-    @Nonnull private static ItemStack cachedTooltipStack = ItemStack.EMPTY;
+    @NotNull private static ItemStack cachedTooltipStack = ItemStack.EMPTY;
 
-    public static void preItemToolTip(@Nonnull ItemStack stack) {
+    public static void preItemToolTip(@NotNull ItemStack stack) {
         cachedTooltipStack = stack;
     }
 
@@ -84,7 +83,7 @@ public class RemovedGuiUtils {
     }
 
     public static void drawHoveringText(
-            @Nonnull final ItemStack stack,
+            @NotNull final ItemStack stack,
             GuiGraphics graphics,
             List<? extends FormattedText> textLines,
             int mouseX,
@@ -109,7 +108,7 @@ public class RemovedGuiUtils {
     }
 
     public static void drawHoveringText(
-            @Nonnull final ItemStack stack,
+            @NotNull final ItemStack stack,
             GuiGraphics graphics,
             List<? extends FormattedText> textLines,
             int mouseX,

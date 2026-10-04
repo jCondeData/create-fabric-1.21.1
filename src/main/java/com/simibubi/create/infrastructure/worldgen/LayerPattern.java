@@ -17,12 +17,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 public class LayerPattern {
     public static final Codec<LayerPattern> CODEC =

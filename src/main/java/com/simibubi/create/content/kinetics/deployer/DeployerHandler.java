@@ -13,7 +13,7 @@ import com.simibubi.create.content.trains.track.ITrackBlock;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.BlockHelper;
 
-import net.createmod.catnip.levelWrappers.WrappedServerLevel;
+import net.createmod.catnip.levelWrappers.WrappedLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -45,6 +45,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -65,6 +66,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickB
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,14 +74,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 public class DeployerHandler {
     private static final Map<BlockPos, List<ItemEntity>> CAPTURED_BLOCK_DROPS = new HashMap<>();
     public static final Map<BlockPos, List<ItemEntity>> CAPTURED_BLOCK_DROPS_VIEW =
             Collections.unmodifiableMap(CAPTURED_BLOCK_DROPS);
 
-    private static final class ItemUseWorld extends WrappedServerLevel {
+    private static final class ItemUseWorld extends WrappedLevel implements ServerLevelAccessor {
         private final Direction face;
         private final BlockPos pos;
         boolean rayMode = false;
@@ -88,6 +88,12 @@ public class DeployerHandler {
             super(level);
             this.face = face;
             this.pos = pos;
+        }
+
+        @Override
+        public ServerLevel getLevel() {
+            // This is safe, we always pass ServerLevel in the constructor
+            return (ServerLevel) level;
         }
 
         @Override
@@ -407,8 +413,14 @@ public class DeployerHandler {
                 && stateUp.getBlock() == blockstate.getBlock()
                 && stateUp.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER) {
             // hack to prevent DoublePlantBlock from dropping a duplicate item
-            world.setBlock(pos, Blocks.AIR.defaultBlockState(), 35);
-            world.setBlock(posUp, Blocks.AIR.defaultBlockState(), 35);
+            world.setBlock(
+                    pos,
+                    Blocks.AIR.defaultBlockState(),
+                    Block.UPDATE_ALL | Block.UPDATE_SUPPRESS_DROPS);
+            world.setBlock(
+                    posUp,
+                    Blocks.AIR.defaultBlockState(),
+                    Block.UPDATE_ALL | Block.UPDATE_SUPPRESS_DROPS);
         } else {
             if (!blockstate.onDestroyedByPlayer(
                     world, pos, player, canHarvest, world.getFluidState(pos))) return true;

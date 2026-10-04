@@ -16,6 +16,7 @@ import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -86,7 +87,7 @@ public class Curios {
 
                                             return stacks;
                                         })
-                                .orElse(new ArrayList<>()));
+                                .orElse(Collections.emptyList()));
 
         CatnipServices.PLATFORM.executeOnClientOnly(
                 () -> () -> modEventBus.addListener(CuriosRenderers::onLayerRegister));

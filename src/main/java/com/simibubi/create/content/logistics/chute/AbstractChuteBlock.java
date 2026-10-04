@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractChuteBlock extends Block
         implements IWrenchable, IBE<ChuteBlockEntity> {

@@ -19,9 +19,9 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 /**
  * Behaviour for BlockEntities to which belts can transfer items directly in a backup-friendly

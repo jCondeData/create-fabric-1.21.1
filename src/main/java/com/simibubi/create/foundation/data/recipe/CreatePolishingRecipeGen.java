@@ -4,7 +4,7 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.Create;
 import com.simibubi.create.api.data.recipe.PolishingRecipeGen;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 
 import java.util.concurrent.CompletableFuture;
@@ -20,8 +20,7 @@ public final class CreatePolishingRecipeGen extends PolishingRecipeGen {
     GeneratedRecipe ROSE_QUARTZ =
             create(AllItems.ROSE_QUARTZ::get, b -> b.output(AllItems.POLISHED_ROSE_QUARTZ.get()));
 
-    public CreatePolishingRecipeGen(
-            PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+    public CreatePolishingRecipeGen(PackOutput output, CompletableFuture<Provider> registries) {
         super(output, registries, Create.ID);
     }
 }

@@ -61,7 +61,7 @@ public class BrassDiodeBlock extends AbstractDiodeBlock implements IBE<BrassDiod
         if (AllItems.WRENCH.isIn(player.getItemInHand(pHand)))
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (pLevel.isClientSide) return ItemInteractionResult.SUCCESS;
-        pLevel.setBlock(pPos, pState.cycle(INVERTED), 3);
+        pLevel.setBlock(pPos, pState.cycle(INVERTED), Block.UPDATE_ALL);
         float f = !pState.getValue(INVERTED) ? 0.6F : 0.5F;
         pLevel.playSound(null, pPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, f);
         return ItemInteractionResult.SUCCESS;

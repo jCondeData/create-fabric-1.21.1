@@ -1,7 +1,6 @@
 package com.simibubi.create.foundation.blockEntity.behaviour;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.SidedFilteringBehaviour;
@@ -17,6 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.Tags.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
@@ -57,7 +57,7 @@ public class ValueSettingsInputHandler {
 
             if (!valueSettingsBehaviour.isActive()) continue;
             if (valueSettingsBehaviour.onlyVisibleWithWrench()
-                    && !AllItemTags.WRENCH.matches(player.getItemInHand(hand))) continue;
+                    && !player.getItemInHand(hand).is(Items.TOOLS_WRENCH)) continue;
             if (valueSettingsBehaviour.getSlotPositioning()
                     instanceof ValueBoxTransform.Sided sidedSlot) {
                 if (!sidedSlot.isSideActive(sbe.getBlockState(), ray.getDirection())) continue;

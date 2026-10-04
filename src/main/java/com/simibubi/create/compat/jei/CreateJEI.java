@@ -47,6 +47,7 @@ import com.simibubi.create.content.kinetics.saw.CuttingRecipe;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelSetItemScreen;
 import com.simibubi.create.content.logistics.filter.AbstractFilterScreen;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterScreen;
+import com.simibubi.create.content.logistics.stockTicker.StockKeeperRequestScreen;
 import com.simibubi.create.content.processing.basin.BasinRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import com.simibubi.create.content.redstone.link.controller.LinkedControllerScreen;
@@ -95,6 +96,8 @@ import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.fluids.FluidStack;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -103,7 +106,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @JeiPlugin
@@ -378,7 +380,7 @@ public class CreateJEI implements IModPlugin {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public ResourceLocation getPluginUid() {
         return ID;
     }
@@ -469,6 +471,10 @@ public class CreateJEI implements IModPlugin {
                 RedstoneRequesterScreen.class, new GhostIngredientHandler());
         registration.addGhostIngredientHandler(
                 FactoryPanelSetItemScreen.class, new GhostIngredientHandler());
+
+        registration.addGuiContainerHandler(
+                StockKeeperRequestScreen.class,
+                new StockKeeperGuiContainerHandler(ingredientManager));
     }
 
     private class CategoryBuilder<T extends Recipe<?>> extends CreateRecipeCategory.Builder<T> {

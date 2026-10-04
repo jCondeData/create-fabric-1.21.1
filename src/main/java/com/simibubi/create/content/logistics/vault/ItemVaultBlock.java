@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.common.util.DeferredSoundType;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemVaultBlock extends Block implements IWrenchable, IBE<ItemVaultBlockEntity> {
 

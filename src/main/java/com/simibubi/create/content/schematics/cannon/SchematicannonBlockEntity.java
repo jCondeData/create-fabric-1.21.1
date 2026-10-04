@@ -65,13 +65,13 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 public class SchematicannonBlockEntity extends SmartBlockEntity implements MenuProvider {
 
@@ -810,7 +810,7 @@ public class SchematicannonBlockEntity extends SmartBlockEntity implements MenuP
             return;
         }
 
-        CompoundTag data = BlockHelper.prepareBlockEntityData(blockState, blockEntity);
+        CompoundTag data = BlockHelper.prepareBlockEntityData(level, blockState, blockEntity);
         launchBlock(target, icon, blockState, data);
     }
 

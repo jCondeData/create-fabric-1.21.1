@@ -102,4 +102,9 @@ public class PackageFilterScreen extends AbstractFilterScreen<PackageFilterMenu>
     protected boolean isButtonEnabled(IconButton button) {
         return false;
     }
+
+    @Override
+    protected int getTitleColor() {
+        return 0x3D3C48;
+    }
 }

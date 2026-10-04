@@ -14,13 +14,12 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import org.jetbrains.annotations.ApiStatus.ScheduledForRemoval;
-
-import java.util.Random;
 
 public class ProcessingOutput {
 
@@ -38,7 +37,6 @@ public class ProcessingOutput {
                     i -> i.chance,
                     ProcessingOutput::new);
 
-    private static final Random r = new Random();
     private final Item item;
     private final int count;
     private final DataComponentPatch patch;
@@ -90,10 +88,11 @@ public class ProcessingOutput {
         return chance;
     }
 
-    public ItemStack rollOutput() {
+    public ItemStack rollOutput(RandomSource randomSource) {
         if (chance < 1F) {
             int count = this.count;
-            for (int roll = 0; roll < this.count; roll++) if (r.nextFloat() > chance) count--;
+            for (int roll = 0; roll < this.count; roll++)
+                if (randomSource.nextFloat() > chance) count--;
             if (count == 0) return ItemStack.EMPTY;
             return getStack(count);
         } else {
@@ -101,7 +100,7 @@ public class ProcessingOutput {
         }
     }
 
-    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @ScheduledForRemoval(inVersion = "1.21.1+ Port")
     @Deprecated(since = "6.0.3", forRemoval = true)
     private static final Codec<Either<ItemStack, Pair<ResourceLocation, Integer>>> ITEM_CODEC_OLD =
             Codec.either(
@@ -110,7 +109,7 @@ public class ProcessingOutput {
                             loc -> DataResult.error(() -> "Compat cannot be deserialized"),
                             Pair::getFirst));
 
-    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @ScheduledForRemoval(inVersion = "1.21.1+ Port")
     @Deprecated(since = "6.0.3", forRemoval = true)
     public static final Codec<ProcessingOutput> CODEC_OLD =
             RecordCodecBuilder.create(
@@ -192,7 +191,7 @@ public class ProcessingOutput {
                                                                             compat, count,
                                                                             chance))));
 
-    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @ScheduledForRemoval(inVersion = "1.21.1+ Port")
     @Deprecated(since = "6.0.3", forRemoval = true)
     public static final Codec<ProcessingOutput> CODEC = Codec.withAlternative(CODEC_NEW, CODEC_OLD);
 }

@@ -27,7 +27,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class FluidHelper {
 

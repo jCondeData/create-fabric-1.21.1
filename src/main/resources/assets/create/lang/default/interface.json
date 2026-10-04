@@ -334,6 +334,7 @@
 	"create.gui.stock_keeper.already_ordering_recipe": "Already ordering this recipe",
 	"create.gui.stock_keeper.slots_full": "Order slots already full",
 	"create.gui.stock_keeper.not_in_stock": "Required items are not in Stock",
+  "create.gui.stock_keeper.recipe_result_empty": "This recipe has a empty result, this is not allowed and should be reported to the mod or datapack that adds this recipe.",
 	"create.gui.stock_keeper.schematic_list.no_results": "No items from your checklist are in stock",
 	"create.gui.stock_keeper.schematic_list.requesting": "Click 'Send' to request all available items from your checklist",
 
@@ -998,6 +999,7 @@
 	"create.track_signal.cannot_change_mode": "Unable to switch mode of this Signal",
 	"create.track_signal.mode_change.entry_signal": "-> Allow passage if section unoccupied",
 	"create.track_signal.mode_change.cross_signal": "-> Allow passage if section fully traversable",
+	"create.track_signal.mode_controlled_by_computer": "Signal mode is controlled by computer",
 
 	"create.contraption.controls.start_controlling": "Now controlling: %1$s",
 	"create.contraption.controls.stop_controlling": "Stopped controlling contraption",
@@ -1050,6 +1052,7 @@
 	"create.logistically_linked.tuned": "Tuned to this network",
 	"create.logistically_linked.new_network_started": "New link network started",
 	"create.logistically_linked.connected": "Connected to existing network successfully",
+  "create.logistically_linked.cleared": "Cleared connection to network",
 	"create.logistically_linked.tooltip": "Frequency configured",
 	"create.logistically_linked.tooltip_clear": "Place in crafting grid to reset",
 	"create.logistically_linked.protected": "Logistics Network is Protected",

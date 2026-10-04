@@ -20,7 +20,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * MovementBehaviors, also known as Actors, provide behavior to blocks mounted on contraptions.

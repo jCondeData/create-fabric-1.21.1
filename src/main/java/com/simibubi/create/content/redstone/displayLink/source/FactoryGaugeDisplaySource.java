@@ -11,11 +11,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public class FactoryGaugeDisplaySource extends ValueListDisplaySource {
 

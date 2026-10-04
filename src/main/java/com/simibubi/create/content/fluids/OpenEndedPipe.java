@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -136,7 +137,7 @@ public class OpenEndedPipe extends FlowSource {
             AdvancementBehaviour.tryAward(world, pos, AllAdvancements.WATER_SUPPLY);
 
         if (waterlog) {
-            world.setBlock(outputPos, state.setValue(WATERLOGGED, false), 3);
+            world.setBlock(outputPos, state.setValue(WATERLOGGED, false), Block.UPDATE_ALL);
             world.scheduleTick(outputPos, Fluids.WATER, 1);
         } else {
             var newState = fluidState.createLegacyBlock().setValue(LiquidBlock.LEVEL, 14);
@@ -153,7 +154,7 @@ public class OpenEndedPipe extends FlowSource {
                 }
             }
 
-            world.setBlock(outputPos, newState, 3);
+            world.setBlock(outputPos, newState, Block.UPDATE_ALL);
         }
 
         return stack;
@@ -201,12 +202,15 @@ public class OpenEndedPipe extends FlowSource {
         }
 
         if (waterlog) {
-            world.setBlock(outputPos, state.setValue(WATERLOGGED, true), 3);
+            world.setBlock(outputPos, state.setValue(WATERLOGGED, true), Block.UPDATE_ALL);
             world.scheduleTick(outputPos, Fluids.WATER, 1);
             return true;
         }
 
-        world.setBlock(outputPos, fluid.getFluid().defaultFluidState().createLegacyBlock(), 3);
+        world.setBlock(
+                outputPos,
+                fluid.getFluid().defaultFluidState().createLegacyBlock(),
+                Block.UPDATE_ALL);
         return true;
     }
 

@@ -23,6 +23,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class GlobalRailwayManager {
 

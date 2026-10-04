@@ -28,6 +28,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -51,12 +52,11 @@ public class ChainConveyorInteractionHandler {
         }
 
         Minecraft mc = Minecraft.getInstance();
-        ItemStack mainHandItem = mc.player.getMainHandItem();
-        boolean isWrench = AllItemTags.CHAIN_RIDEABLE.matches(mainHandItem);
+        boolean isWrench = mc.player.isHolding(i -> i.is(Tags.Items.TOOLS_WRENCH));
         boolean dismantling = isWrench && mc.player.isShiftKeyDown();
         double range = mc.player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE) + 1;
 
-        Vec3 from = RaycastHelper.getTraceOrigin(mc.player);
+        Vec3 from = mc.player.getEyePosition();
         Vec3 to = RaycastHelper.getTraceTarget(mc.player, range, from);
         HitResult hitResult = mc.hitResult;
 
@@ -109,7 +109,7 @@ public class ChainConveyorInteractionHandler {
     private static boolean isActive() {
         Minecraft mc = Minecraft.getInstance();
         ItemStack mainHandItem = mc.player.getMainHandItem();
-        return AllItemTags.CHAIN_RIDEABLE.matches(mainHandItem)
+        return mc.player.isHolding(AllItemTags.CHAIN_RIDEABLE::matches)
                 || AllBlocks.PACKAGE_FROGPORT.isIn(mainHandItem)
                 || PackageItem.isPackage(mainHandItem);
     }
@@ -120,7 +120,11 @@ public class ChainConveyorInteractionHandler {
         Minecraft mc = Minecraft.getInstance();
         ItemStack mainHandItem = mc.player.getMainHandItem();
 
-        if (AllItemTags.CHAIN_RIDEABLE.matches(mainHandItem)) {
+        if (mc.player.isHolding(AllItemTags.CHAIN_RIDEABLE::matches)) {
+            ItemStack offHandItem = mc.player.getOffhandItem();
+            ItemStack usedItem =
+                    AllItemTags.CHAIN_RIDEABLE.matches(mainHandItem) ? mainHandItem : offHandItem;
+
             if (!mc.player.isShiftKeyDown()) {
                 ChainConveyorRidingHandler.embark(
                         selectedLift, selectedChainPosition, selectedConnection);
@@ -131,7 +135,7 @@ public class ChainConveyorInteractionHandler {
                     new ChainConveyorConnectionPacket(
                             selectedLift,
                             selectedLift.offset(selectedConnection),
-                            mainHandItem,
+                            usedItem,
                             false));
             return true;
         }

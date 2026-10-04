@@ -1,12 +1,18 @@
 package com.simibubi.create.content.kinetics.motor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollValueBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
+
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 
@@ -19,6 +25,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 import java.util.List;
 
@@ -27,10 +34,20 @@ public class CreativeMotorBlockEntity extends GeneratingKineticBlockEntity {
     public static final int DEFAULT_SPEED = 16;
     public static final int MAX_SPEED = 256;
 
-    protected ScrollValueBehaviour generatedSpeed;
+    public ScrollValueBehaviour generatedSpeed;
+    public AbstractComputerBehaviour computerBehaviour;
 
     public CreativeMotorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        if (Mods.COMPUTERCRAFT.isLoaded()) {
+            event.registerBlockEntity(
+                    PeripheralCapability.get(),
+                    AllBlockEntityTypes.MOTOR.get(),
+                    (be, context) -> be.computerBehaviour.getPeripheralCapability());
+        }
     }
 
     @Override
@@ -46,6 +63,7 @@ public class CreativeMotorBlockEntity extends GeneratingKineticBlockEntity {
         generatedSpeed.value = DEFAULT_SPEED;
         generatedSpeed.withCallback(i -> this.updateGeneratedRotation());
         behaviours.add(generatedSpeed);
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
     }
 
     @Override
@@ -61,8 +79,7 @@ public class CreativeMotorBlockEntity extends GeneratingKineticBlockEntity {
                 generatedSpeed.getValue(), getBlockState().getValue(CreativeMotorBlock.FACING));
     }
 
-    class MotorValueBox extends ValueBoxTransform.Sided {
-
+    static class MotorValueBox extends ValueBoxTransform.Sided {
         @Override
         protected Vec3 getSouthLocation() {
             return VecHelper.voxelSpace(8, 8, 12.5);
@@ -90,5 +107,11 @@ public class CreativeMotorBlockEntity extends GeneratingKineticBlockEntity {
             if (facing.getAxis() != Axis.Y && direction == Direction.DOWN) return false;
             return direction.getAxis() != facing.getAxis();
         }
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
     }
 }

@@ -32,6 +32,12 @@ public abstract class HauntingRecipeGen extends StandardProcessingRecipeGen<Haun
                 p -> p.withItemIngredients(input.get()).output(result.get()));
     }
 
+    protected GeneratedRecipe moddedConversion(DatagenMod mod, String input, String output) {
+        return create(
+                "compat/" + mod.getId() + "/" + output,
+                p -> p.require(mod, input).output(mod, output).whenModLoaded(mod.getId()));
+    }
+
     public HauntingRecipeGen(
             PackOutput output,
             CompletableFuture<HolderLookup.Provider> registries,

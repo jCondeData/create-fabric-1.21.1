@@ -71,6 +71,7 @@ import net.minecraft.world.level.block.state.properties.BellAttachType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.PushReaction;
+import net.neoforged.neoforge.common.Tags.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,7 +174,7 @@ public class BlockMovementChecksImpl {
         Block block = state.getBlock();
         if (block instanceof AbstractChassisBlock) return true;
         if (state.getDestroySpeed(world, pos) == -1) return false;
-        if (AllBlockTags.RELOCATION_NOT_SUPPORTED.matches(state)) return false;
+        if (state.is(Blocks.RELOCATION_NOT_SUPPORTED)) return false;
         if (AllBlockTags.NON_MOVABLE.matches(state)) return false;
         if (ContraptionMovementSetting.get(state) == ContraptionMovementSetting.UNMOVABLE)
             return false;

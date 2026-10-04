@@ -37,6 +37,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -52,8 +53,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public class Carriage {
     public static final StreamCodec<RegistryFriendlyByteBuf, Carriage> STREAM_CODEC =
@@ -883,8 +882,10 @@ public class Carriage {
 
         @OnlyIn(Dist.CLIENT)
         private void invalidate(CarriageContraptionEntity entity) {
-            entity.getContraption().deferInvalidate = true;
+            // Update the portal cutoff first to ensure it's reflected in the updated mesh.
             entity.updateRenderedPortalCutoff();
+            entity.getContraption().invalidateClientContraptionStructure();
+            entity.getContraption().invalidateClientContraptionChildren();
         }
 
         private void createEntity(Level level, boolean loadPassengers) {

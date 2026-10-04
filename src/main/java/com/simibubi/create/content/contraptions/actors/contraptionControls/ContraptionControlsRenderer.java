@@ -33,13 +33,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Random;
-
 public class ContraptionControlsRenderer
         extends SmartBlockEntityRenderer<ContraptionControlsBlockEntity> {
-
-    private static Random r = new Random();
-
     public ContraptionControlsRenderer(Context context) {
         super(context);
     }
@@ -99,7 +94,7 @@ public class ContraptionControlsRenderer
                                 ? 0
                                 : ctx.position.distanceToSqr(cameraEntity.getEyePosition()));
 
-        float flicker = r.nextFloat();
+        float flicker = renderWorld.random.nextFloat();
         Couple<Integer> couple =
                 DyeHelper.getDyeColors(
                         efs.targetYEqualsSelection ? DyeColor.WHITE : DyeColor.ORANGE);
@@ -115,7 +110,7 @@ public class ContraptionControlsRenderer
         var msr = TransformStack.of(ms);
 
         float buttondepth = 0;
-        if (ctx.contraption.presentBlockEntities.get(ctx.localPos)
+        if (ctx.contraption.getBlockEntityClientSide(ctx.localPos)
                 instanceof ContraptionControlsBlockEntity cbe)
             buttondepth =
                     -1

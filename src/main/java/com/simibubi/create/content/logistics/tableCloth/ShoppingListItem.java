@@ -29,13 +29,12 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class ShoppingListItem extends Item {
     public record ShoppingList(

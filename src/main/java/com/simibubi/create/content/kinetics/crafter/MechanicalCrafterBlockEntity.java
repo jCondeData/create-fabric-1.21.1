@@ -4,8 +4,9 @@ import static com.simibubi.create.content.kinetics.base.HorizontalKineticBlock.H
 
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
+import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.crafter.ConnectedInputHandler.ConnectedInput;
@@ -31,11 +32,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.Tags.Items;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,7 +49,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class MechanicalCrafterBlockEntity extends KineticBlockEntity {
+public class MechanicalCrafterBlockEntity extends KineticBlockEntity
+        implements TransformableBlockEntity {
 
     enum Phase {
         IDLE,
@@ -138,10 +142,11 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity {
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         super.addBehaviours(behaviours);
         inserting = new InvManipulationBehaviour(this, this::getTargetFace);
+        //noinspection deprecation
         connectivity =
                 new EdgeInteractionBehaviour(this, ConnectedInputHandler::toggleConnection)
                         .connectivity(ConnectedInputHandler::shouldConnect)
-                        .require(AllItems.WRENCH.get());
+                        .require(item -> item.builtInRegistryHolder().is(Items.TOOLS_WRENCH));
         behaviours.add(inserting);
         behaviours.add(connectivity);
         registerAwardables(behaviours, AllAdvancements.CRAFTER, AllAdvancements.CRAFTER_LAZY);
@@ -555,5 +560,11 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity {
 
     public ConnectedInput getInput() {
         return input;
+    }
+
+    @Override
+    public void transform(BlockEntity be, StructureTransform transform) {
+        input.data.replaceAll(transform::applyWithoutOffset);
+        notifyUpdate();
     }
 }

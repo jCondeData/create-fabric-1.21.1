@@ -68,7 +68,7 @@ public class SchematicannonMenu extends MenuBase<SchematicannonBlockEntity> {
         ItemStack stack = clickedSlot.getItem();
 
         if (index < 5) {
-            moveItemStackTo(stack, 5, slots.size(), false);
+            moveItemStackTo(stack, 5, slots.size(), true);
         } else {
             if (moveItemStackTo(stack, 0, 1, false)
                     || moveItemStackTo(stack, 2, 3, false)

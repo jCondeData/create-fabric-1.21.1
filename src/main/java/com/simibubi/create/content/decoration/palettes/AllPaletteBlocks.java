@@ -47,9 +47,7 @@ public class AllPaletteBlocks {
                     .recipe(
                             (c, p) ->
                                     p.stonecutting(
-                                            DataIngredient.tag(
-                                                    net.neoforged.neoforge.common.Tags.Items
-                                                            .GLASS_BLOCKS_COLORLESS),
+                                            DataIngredient.tag(Tags.Items.GLASS_BLOCKS_COLORLESS),
                                             RecipeCategory.BUILDING_BLOCKS,
                                             c))
                     .blockstate((c, p) -> BlockStateGen.cubeAll(c, p, "palettes/"))

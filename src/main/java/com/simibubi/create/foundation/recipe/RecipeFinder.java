@@ -9,13 +9,13 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 /**
  * Utility for searching through a level's recipe collection. Non-dynamic conditions can be split

@@ -20,11 +20,11 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.data.ModelData.Builder;
 import net.neoforged.neoforge.client.model.data.ModelProperty;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public abstract class CopycatModel extends BakedModelWrapperWithData {
 

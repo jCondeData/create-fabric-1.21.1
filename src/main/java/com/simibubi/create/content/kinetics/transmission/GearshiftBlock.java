@@ -55,7 +55,7 @@ public class GearshiftBlock extends AbstractEncasedShaftBlock
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered != worldIn.hasNeighborSignal(pos)) {
             detachKinetics(worldIn, pos, true);
-            worldIn.setBlock(pos, state.cycle(POWERED), 2);
+            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
         }
     }
 

@@ -8,11 +8,12 @@ import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.server.level.ServerPlayer;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault

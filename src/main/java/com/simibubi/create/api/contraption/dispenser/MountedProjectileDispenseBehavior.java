@@ -13,7 +13,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A parallel to {@link ProjectileDispenseBehavior}, providing a base implementation for

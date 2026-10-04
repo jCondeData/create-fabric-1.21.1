@@ -33,14 +33,13 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 /** Extended code for Minecarts, this allows for handling stalled carts and coupled trains */
 public class MinecartController implements INBTSerializable<CompoundTag> {
@@ -290,6 +289,8 @@ public class MinecartController implements INBTSerializable<CompoundTag> {
         if (isStalled(internal) == stall) return;
 
         @Nullable AbstractMinecart cart = cart();
+        if (cart == null) return;
+
         if (stall && cart != null) {
             stallData.set(internal, Optional.of(new StallData(cart)));
             sendData();

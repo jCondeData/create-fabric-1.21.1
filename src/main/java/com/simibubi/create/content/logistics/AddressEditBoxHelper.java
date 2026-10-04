@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -66,7 +67,7 @@ public class AddressEditBoxHelper {
 
         for (WeakReference<ClipboardBlockEntity> wr : NEARBY_CLIPBOARDS.asMap().values()) {
             ClipboardBlockEntity cbe = wr.get();
-            if (cbe != null) appendAddresses(options, alreadyAdded, cbe.dataContainer);
+            if (cbe != null) appendAddresses(options, alreadyAdded, cbe.components());
         }
 
         return destinationSuggestions;
@@ -76,14 +77,21 @@ public class AddressEditBoxHelper {
             List<IntAttached<String>> options, Set<String> alreadyAdded, ItemStack item) {
         if (item == null || !AllBlocks.CLIPBOARD.isIn(item)) return;
 
-        List<List<ClipboardEntry>> pages = ClipboardEntry.readAll(item);
+        appendAddresses(options, alreadyAdded, item.getComponents());
+    }
+
+    private static void appendAddresses(
+            List<IntAttached<String>> options,
+            Set<String> alreadyAdded,
+            DataComponentMap components) {
+        List<List<ClipboardEntry>> pages = ClipboardEntry.readAll(components);
         pages.forEach(
                 page ->
                         page.forEach(
                                 entry -> {
                                     String string = entry.text.getString();
                                     if (entry.checked) return;
-                                    if (!string.startsWith("#") || string.length() <= 1) return;
+                                    if (!string.startsWith("#") || string.length() == 1) return;
                                     String address = string.substring(1);
                                     if (address.isBlank()) return;
                                     String trim = address.trim();

@@ -9,9 +9,9 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public class HosePulleyFluidHandler implements IFluidHandler {
 

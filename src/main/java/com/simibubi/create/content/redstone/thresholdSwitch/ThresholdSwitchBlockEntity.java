@@ -21,7 +21,6 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import net.createmod.catnip.math.BlockFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
@@ -173,10 +172,8 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
                                                 () ->
                                                         (long)
                                                                 Math.min(
-                                                                        stackInSlot.getOrDefault(
-                                                                                DataComponents
-                                                                                        .MAX_STACK_SIZE,
-                                                                                64),
+                                                                        stackInSlot
+                                                                                .getMaxStackSize(),
                                                                         inv.getSlotLimit(
                                                                                 finalSlot)));
 
@@ -210,7 +207,9 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
             if (currentLevel == -1) return;
 
             level.setBlock(
-                    worldPosition, getBlockState().setValue(ThresholdSwitchBlock.LEVEL, 0), 3);
+                    worldPosition,
+                    getBlockState().setValue(ThresholdSwitchBlock.LEVEL, 0),
+                    Block.UPDATE_ALL);
             currentLevel = -1;
             redstoneState = false;
             sendData();

@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.IFluidTank;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public interface IMultiBlockEntityContainer {
 

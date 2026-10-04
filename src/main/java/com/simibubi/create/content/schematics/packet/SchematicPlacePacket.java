@@ -31,9 +31,9 @@ public record SchematicPlacePacket(ItemStack stack) implements ServerboundPacket
             return;
         }
 
-        Level world = player.level();
+        Level level = player.level();
         SchematicPrinter printer = new SchematicPrinter();
-        printer.loadSchematic(this.stack, world, !player.canUseGameMasterBlocks());
+        printer.loadSchematic(this.stack, level, !player.canUseGameMasterBlocks());
         if (!printer.isLoaded() || printer.isErrored()) {
             return;
         }
@@ -41,7 +41,7 @@ public record SchematicPlacePacket(ItemStack stack) implements ServerboundPacket
         boolean includeAir = AllConfigs.server().schematics.creativePrintIncludesAir.get();
 
         while (printer.advanceCurrentPos()) {
-            if (!printer.shouldPlaceCurrent(world)) {
+            if (!printer.shouldPlaceCurrent(level)) {
                 continue;
             }
 
@@ -52,11 +52,12 @@ public record SchematicPlacePacket(ItemStack stack) implements ServerboundPacket
                             return;
                         }
 
-                        CompoundTag data = BlockHelper.prepareBlockEntityData(state, blockEntity);
-                        BlockHelper.placeSchematicBlock(world, state, pos, null, data);
+                        CompoundTag data =
+                                BlockHelper.prepareBlockEntityData(level, state, blockEntity);
+                        BlockHelper.placeSchematicBlock(level, state, pos, null, data);
                     },
                     (pos, entity) -> {
-                        world.addFreshEntity(entity);
+                        level.addFreshEntity(entity);
                     });
         }
     }

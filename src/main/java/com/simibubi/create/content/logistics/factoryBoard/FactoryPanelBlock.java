@@ -324,18 +324,15 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 
     @Override
     public boolean canBeReplaced(BlockState pState, BlockPlaceContext pUseContext) {
-        if (pUseContext.isSecondaryUseActive()) return false;
         if (!AllBlocks.FACTORY_GAUGE.isIn(pUseContext.getItemInHand())) return false;
         Vec3 location = pUseContext.getClickLocation();
-        if (location == null) return false;
 
         BlockPos pos = pUseContext.getClickedPos();
         PanelSlot slot = getTargetedSlot(pos, pState, location);
         FactoryPanelBlockEntity blockEntity = getBlockEntity(pUseContext.getLevel(), pos);
 
         if (blockEntity == null) return false;
-        if (blockEntity.panels.get(slot).isActive()) return false;
-        return true;
+        return !blockEntity.panels.get(slot).isActive();
     }
 
     @Override

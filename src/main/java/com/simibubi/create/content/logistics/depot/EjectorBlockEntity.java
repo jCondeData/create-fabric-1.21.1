@@ -64,11 +64,11 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class EjectorBlockEntity extends KineticBlockEntity {
 

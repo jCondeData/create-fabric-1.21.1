@@ -2,6 +2,8 @@ package com.simibubi.create;
 
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.simibubi.create.AllTags.AllFluidTags;
+import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
 import com.simibubi.create.content.fluids.VirtualFluid;
 import com.simibubi.create.content.fluids.potion.PotionFluid;
@@ -16,9 +18,18 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer.FogMode;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DispensibleContainerItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -33,12 +44,11 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class AllFluids {
     private static final CreateRegistrate REGISTRATE = Create.registrate();
@@ -61,7 +71,7 @@ public class AllFluids {
             REGISTRATE
                     .virtualFluid("tea")
                     .lang("Builder's Tea")
-                    .tag(AllTags.commonFluidTag("teas"))
+                    .tag(AllFluidTags.TEA.tag)
                     .register();
 
     public static final FluidEntry<BaseFlowingFluid.Flowing> HONEY =
@@ -92,7 +102,8 @@ public class AllFluids {
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW))
                     .build()
                     .bucket()
-                    .tag(AllTags.commonItemTag("buckets/honey"))
+                    .onRegister(AllFluids::registerFluidDispenseBehavior)
+                    .tag(Tags.Items.BUCKETS, AllItemTags.HONEY_BUCKETS.tag)
                     .build()
                     .register();
 
@@ -109,7 +120,7 @@ public class AllFluids {
                                                             .chocolateTransparencyMultiplier
                                                             .getF()))
                     .lang("Chocolate")
-                    .tag(AllTags.commonFluidTag("chocolates"))
+                    .tag(AllFluidTags.CHOCOLATE.tag)
                     .properties(b -> b.viscosity(1500).density(1400))
                     .fluidProperties(
                             p ->
@@ -117,8 +128,13 @@ public class AllFluids {
                                             .tickRate(25)
                                             .slopeFindDistance(3)
                                             .explosionResistance(100f))
+                    .source(BaseFlowingFluid.Source::new)
                     .block()
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .build()
+                    .bucket()
+                    .onRegister(AllFluids::registerFluidDispenseBehavior)
+                    .tag(Tags.Items.BUCKETS, AllItemTags.CHOCOLATE_BUCKETS.tag)
                     .build()
                     .register();
 
@@ -168,11 +184,32 @@ public class AllFluids {
         return null;
     }
 
+    private static final DispenseItemBehavior DEFAULT = new DefaultDispenseItemBehavior();
+    private static final DispenseItemBehavior DISPENSE_FLUID =
+            new DefaultDispenseItemBehavior() {
+                @Override
+                protected ItemStack execute(BlockSource pSource, ItemStack pStack) {
+                    DispensibleContainerItem dispensibleContainerItem =
+                            (DispensibleContainerItem) pStack.getItem();
+                    BlockPos pos =
+                            pSource.pos().relative(pSource.state().getValue(DispenserBlock.FACING));
+                    Level level = pSource.level();
+                    if (dispensibleContainerItem.emptyContents(null, level, pos, null, pStack)) {
+                        return new ItemStack(Items.BUCKET);
+                    }
+                    return DEFAULT.dispense(pSource, pStack);
+                }
+            };
+
+    private static void registerFluidDispenseBehavior(BucketItem bucket) {
+        DispenserBlock.registerBehavior(bucket, DISPENSE_FLUID);
+    }
+
     public abstract static class TintedFluidType extends FluidType {
 
         protected static final int NO_TINT = 0xffffffff;
-        private ResourceLocation stillTexture;
-        private ResourceLocation flowingTexture;
+        private final ResourceLocation stillTexture;
+        private final ResourceLocation flowingTexture;
 
         public TintedFluidType(
                 Properties properties,

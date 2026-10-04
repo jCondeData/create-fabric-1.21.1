@@ -46,14 +46,13 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 public class PackageItem extends Item {
-
     public static final int SLOTS = 9;
 
     public PackageStyle style;
@@ -134,9 +133,49 @@ public class PackageItem extends Item {
         }
     }
 
+    public static boolean hasOrderData(ItemStack box) {
+        return box.has(AllDataComponents.PACKAGE_ORDER_DATA);
+    }
+
+    public static int getIndex(ItemStack box) {
+        if (box.has(AllDataComponents.PACKAGE_ORDER_DATA)) {
+            //noinspection DataFlowIssue
+            return box.get(AllDataComponents.PACKAGE_ORDER_DATA).fragmentIndex();
+        } else {
+            return -1;
+        }
+    }
+
+    public static boolean isFinal(ItemStack box) {
+        //noinspection DataFlowIssue
+        return box.has(AllDataComponents.PACKAGE_ORDER_DATA)
+                && box.get(AllDataComponents.PACKAGE_ORDER_DATA).isFinal();
+    }
+
+    public static int getLinkIndex(ItemStack box) {
+        if (box.has(AllDataComponents.PACKAGE_ORDER_DATA)) {
+            //noinspection DataFlowIssue
+            return box.get(AllDataComponents.PACKAGE_ORDER_DATA).linkIndex();
+        } else {
+            return -1;
+        }
+    }
+
+    public static boolean isFinalLink(ItemStack box) {
+        //noinspection DataFlowIssue
+        return box.has(AllDataComponents.PACKAGE_ORDER_DATA)
+                && box.get(AllDataComponents.PACKAGE_ORDER_DATA).isFinalLink();
+    }
+
+    @Nullable
+    /**
+     * Ordered items and their amount in the original, combined request\n (Present in all
+     * non-redstone packages)
+     */
     public static PackageOrderWithCrafts getOrderContext(ItemStack box) {
         if (box.has(AllDataComponents.PACKAGE_ORDER_DATA)) {
             PackageOrderData data = box.get(AllDataComponents.PACKAGE_ORDER_DATA);
+            //noinspection DataFlowIssue
             return data.orderContext();
         } else if (box.has(AllDataComponents.PACKAGE_ORDER_CONTEXT)) {
             return box.get(AllDataComponents.PACKAGE_ORDER_CONTEXT);
@@ -156,9 +195,9 @@ public class PackageItem extends Item {
     public static boolean matchAddress(String boxAddress, String address) {
         if (address.isBlank()) return boxAddress.isBlank();
         if (address.equals("*") || boxAddress.equals("*")) return true;
-        String matcher = Glob.toRegexPattern(address, "");
-        String boxMatcher = Glob.toRegexPattern(boxAddress, "");
-        return address.matches(boxMatcher) || boxAddress.matches(matcher);
+        if (address.equals(boxAddress)) return true;
+        return address.matches(Glob.toRegexPattern(boxAddress, ""))
+                || boxAddress.matches(Glob.toRegexPattern(address, ""));
     }
 
     public static String getAddress(ItemStack box) {
@@ -202,8 +241,8 @@ public class PackageItem extends Item {
                             .withStyle(ChatFormatting.GOLD));
 
         /*
-         * Debug Fragmentation Data if (compoundnbt.contains("Fragment")) { CompoundTag
-         * fragTag = compoundnbt.getCompound("Fragment");
+         * Debug Fragmentation Data if (tag.contains("Fragment")) { CompoundTag
+         * fragTag = tag.getCompound("Fragment");
          * pTooltipComponents.add(Component.literal("Order Information (Temporary)")
          * .withStyle(ChatFormatting.GREEN)); pTooltipComponents.add(Components
          * .literal(" Link " + fragTag.getInt("LinkIndex") +

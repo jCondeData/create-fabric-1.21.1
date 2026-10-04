@@ -3,7 +3,7 @@ package com.simibubi.create.content.fluids.pipes;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public interface IAxisPipe {
 

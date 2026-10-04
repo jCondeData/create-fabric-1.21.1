@@ -90,7 +90,8 @@ public class CrushingWheelBlock extends RotatedPillarKineticBlock
             if (be != null
                     && otherBE != null
                     && (be.getSpeed() > 0) != (otherBE.getSpeed() > 0)
-                    && be.getSpeed() != 0) {
+                    && be.getSpeed() != 0
+                    && otherBE.getSpeed() != 0) {
                 Axis wheelAxis = state.getValue(AXIS);
                 Axis sideAxis = side.getAxis();
                 int controllerADO =
@@ -140,7 +141,8 @@ public class CrushingWheelBlock extends RotatedPillarKineticBlock
                             .setValue(CrushingWheelControllerBlock.FACING, controllerNewDirection));
         }
 
-        ((CrushingWheelControllerBlock) AllBlocks.CRUSHING_WHEEL_CONTROLLER.get())
+        AllBlocks.CRUSHING_WHEEL_CONTROLLER
+                .get()
                 .updateSpeed(world.getBlockState(controllerPos), world, controllerPos);
     }
 

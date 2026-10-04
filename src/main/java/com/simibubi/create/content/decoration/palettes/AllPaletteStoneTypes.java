@@ -101,8 +101,7 @@ public enum AllPaletteStoneTypes {
 
     public static void register(CreateRegistrate registrate) {
         for (AllPaletteStoneTypes paletteStoneVariants : values()) {
-            NonNullSupplier<Block> baseBlock = paletteStoneVariants.factory.apply(registrate);
-            paletteStoneVariants.baseBlock = baseBlock;
+            paletteStoneVariants.baseBlock = paletteStoneVariants.factory.apply(registrate);
             String id = Lang.asId(paletteStoneVariants.name());
             paletteStoneVariants.materialTag =
                     AllTags.optionalTag(

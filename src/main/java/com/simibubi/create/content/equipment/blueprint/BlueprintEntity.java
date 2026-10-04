@@ -60,13 +60,13 @@ import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class BlueprintEntity extends HangingEntity
         implements IEntityWithComplexSpawn,

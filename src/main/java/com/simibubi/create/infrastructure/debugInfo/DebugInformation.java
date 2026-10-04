@@ -22,14 +22,14 @@ import net.minecraft.client.Minecraft;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforgespi.language.IModInfo;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * Allows for providing easily accessible debugging information. This info can be retrieved with the

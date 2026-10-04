@@ -86,12 +86,12 @@ import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.Tags;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("removal") // addLayer is staying... for now
 public class BuilderTransformers {

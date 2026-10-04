@@ -58,10 +58,9 @@ import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class AllArmInteractionPointTypes {
     static {

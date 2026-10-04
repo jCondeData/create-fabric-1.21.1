@@ -84,6 +84,11 @@ public class CKinetics extends ConfigBase {
                     "syncPlayerPickupHitboxWithContraptionHitbox",
                     Comments.syncPlayerPickupHitboxWithContraptionHitbox,
                     "[Technical]");
+    public final ConfigBool noDropWhenContraptionReplaceBlocks =
+            b(
+                    false,
+                    "noDropWhenContraptionReplaceBlocks",
+                    Comments.noDropWhenContraptionReplaceBlocks);
 
     public final ConfigGroup stats = group(1, "stats", Comments.stats);
     public final ConfigFloat mediumSpeed =
@@ -185,6 +190,9 @@ public class CKinetics extends ConfigBase {
         static String syncPlayerPickupHitboxWithContraptionHitbox =
                 "Whether the players hitbox should be expanded to the size of the contraption"
                     + " hitbox.";
+        static String noDropWhenContraptionReplaceBlocks =
+                "Whether to prevent block dropping when contraption is placed inside in-world"
+                    + " blocks.";
     }
 
     public enum DeployerAggroSetting {

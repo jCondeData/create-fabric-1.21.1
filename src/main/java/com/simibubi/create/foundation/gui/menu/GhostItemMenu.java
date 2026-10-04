@@ -1,6 +1,5 @@
 package com.simibubi.create.foundation.gui.menu;
 
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -62,7 +61,7 @@ public abstract class GhostItemMenu<T> extends MenuBase<T> implements IClearable
         if (clickTypeIn == ClickType.CLONE) {
             if (player.isCreative() && held.isEmpty()) {
                 ItemStack stackInSlot = ghostInventory.getStackInSlot(slot).copy();
-                stackInSlot.setCount(stackInSlot.getOrDefault(DataComponents.MAX_STACK_SIZE, 64));
+                stackInSlot.setCount(stackInSlot.getMaxStackSize());
                 setCarried(stackInSlot);
                 return;
             }
@@ -89,7 +88,8 @@ public abstract class GhostItemMenu<T> extends MenuBase<T> implements IClearable
     @Override
     public ItemStack quickMoveStack(Player playerIn, int index) {
         if (index < 36) {
-            ItemStack stackToInsert = playerInventory.getItem(index);
+            Slot slot = this.slots.get(index);
+            ItemStack stackToInsert = slot.getItem();
             for (int i = 0; i < ghostInventory.getSlots(); i++) {
                 ItemStack stack = ghostInventory.getStackInSlot(i);
                 if (!allowRepeats() && ItemStack.isSameItemSameComponents(stack, stackToInsert))
