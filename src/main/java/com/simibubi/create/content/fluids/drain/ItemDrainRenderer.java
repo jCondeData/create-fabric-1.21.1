@@ -8,12 +8,12 @@ import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour.TankSegment;
 import com.simibubi.create.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
-import com.simibubi.create.foundation.fluid.FluidRenderer;
 import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.platform.FabricCatnipServices;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -156,9 +156,8 @@ public class ItemDrainRenderer extends SmartBlockEntityRenderer<ItemDrainBlockEn
             float yOffset = (7 / 16f) * level;
             ms.pushPose();
             ms.translate(0, yOffset, 0);
-            FluidRenderer.renderFluidBox(
-                    fluidStack.getFluid(),
-                    fluidStack.getAmount(),
+            FabricCatnipServices.FLUID_RENDERER.renderFluidBox(
+                    fluidStack.getVariant(),
                     min,
                     yMin - yOffset,
                     min,
@@ -169,8 +168,7 @@ public class ItemDrainRenderer extends SmartBlockEntityRenderer<ItemDrainBlockEn
                     ms,
                     light,
                     false,
-                    false,
-                    fluidStack.getComponentsPatch());
+                    false);
             ms.popPose();
         }
 
@@ -192,9 +190,8 @@ public class ItemDrainRenderer extends SmartBlockEntityRenderer<ItemDrainBlockEn
         if (processingTicks != -1) {
             radius = (float) (Math.pow(((2 * processingProgress) - 1), 2) - 1);
             AABB bb = new AABB(0.5, 1.0, 0.5, 0.5, 0.25, 0.5).inflate(radius / 32f);
-            FluidRenderer.renderFluidBox(
-                    fluidStack2.getFluid(),
-                    fluidStack2.getAmount(),
+            FabricCatnipServices.FLUID_RENDERER.renderFluidBox(
+                    fluidStack2.getVariant(),
                     (float) bb.minX,
                     (float) bb.minY,
                     (float) bb.minZ,
@@ -205,8 +202,7 @@ public class ItemDrainRenderer extends SmartBlockEntityRenderer<ItemDrainBlockEn
                     ms,
                     light,
                     true,
-                    false,
-                    fluidStack2.getComponentsPatch());
+                    false);
         }
     }
 }

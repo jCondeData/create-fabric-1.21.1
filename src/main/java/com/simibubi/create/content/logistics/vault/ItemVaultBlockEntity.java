@@ -10,18 +10,24 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedI
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.fabric.transfer.item.ItemStackHandler;
 
+import io.github.fabricators_of_create.porting_lib.blocks.extensions.NeighborChangeListeningBlock;
+
 import net.createmod.catnip.nbt.NBTHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -43,7 +49,6 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
     protected boolean updateConnectivity;
     protected int radius;
     protected int length;
-    protected Axis axis;
 
     protected boolean recalculateComparatorsNextTick = false;
 
@@ -84,19 +89,95 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
         level.blockEntityChanged(controllerBE.worldPosition);
 
         BlockPos pos = controllerBE.getBlockPos();
-        for (int y = 0; y < controllerBE.radius; y++) {
-            for (int z = 0;
-                    z < (controllerBE.axis == Axis.X ? controllerBE.radius : controllerBE.length);
-                    z++) {
-                for (int x = 0;
-                        x
-                                < (controllerBE.axis == Axis.Z
-                                        ? controllerBE.radius
-                                        : controllerBE.length);
-                        x++) {
-                    level.updateNeighbourForOutputSignal(
-                            pos.offset(x, y, z), getBlockState().getBlock());
+
+        int radius = controllerBE.radius;
+        int length = controllerBE.length;
+
+        Axis axis = controllerBE.getMainConnectionAxis();
+
+        int zMax = (axis == Axis.X ? radius : length);
+        int xMax = (axis == Axis.Z ? radius : length);
+
+        // Mutable position we'll use for the blocks we poke updates at.
+        MutableBlockPos updatePos = new MutableBlockPos();
+        // Mutable position we'll set to be the vault block next to the update position.
+        MutableBlockPos provokingPos = new MutableBlockPos();
+
+        for (int y = 0; y < radius; y++) {
+            for (int z = 0; z < zMax; z++) {
+                for (int x = 0; x < xMax; x++) {
+                    // Emulate the effect of this line, but only for blocks along the surface of the
+                    // vault:
+                    // level.updateNeighbourForOutputSignal(pos.offset(x, y, z),
+                    // getBlockState().getBlock());
+                    // fabric: unlike NeoForge, vanilla only pokes the 4 horizontal directions, in
+                    // Direction.Plane.HORIZONTAL order. We want to preserve the update order but
+                    // skip the wasted work of checking other blocks that are part of this vault.
+
+                    var sectionX = SectionPos.blockToSectionCoord(pos.getX() + x);
+                    var sectionZ = SectionPos.blockToSectionCoord(pos.getZ() + z);
+                    if (!level.hasChunk(sectionX, sectionZ)) {
+                        continue;
+                    }
+                    provokingPos.setWithOffset(pos, x, y, z);
+
+                    // Technically all this work is wasted for the inner blocks of a long 3x3 vault,
+                    // but
+                    // this is fast enough and relatively simple.
+                    Block provokingBlock = level.getBlockState(provokingPos).getBlock();
+
+                    // fabric: The 4 calls below should match the order of
+                    // Direction.Plane.HORIZONTAL (north, east, south, west).
+                    if (z == 0) {
+                        updateComaratorsInner(
+                                level, provokingBlock, provokingPos, updatePos, Direction.NORTH);
+                    }
+                    if (x == xMax - 1) {
+                        updateComaratorsInner(
+                                level, provokingBlock, provokingPos, updatePos, Direction.EAST);
+                    }
+                    if (z == zMax - 1) {
+                        updateComaratorsInner(
+                                level, provokingBlock, provokingPos, updatePos, Direction.SOUTH);
+                    }
+                    if (x == 0) {
+                        updateComaratorsInner(
+                                level, provokingBlock, provokingPos, updatePos, Direction.WEST);
+                    }
                 }
+            }
+        }
+    }
+
+    /** See {@link Level#updateNeighbourForOutputSignal(BlockPos, Block)}. */
+    private static void updateComaratorsInner(
+            Level level,
+            Block provokingBlock,
+            BlockPos provokingPos,
+            MutableBlockPos updatePos,
+            Direction direction) {
+        updatePos.setWithOffset(provokingPos, direction);
+
+        var sectionX = SectionPos.blockToSectionCoord(updatePos.getX());
+        var sectionZ = SectionPos.blockToSectionCoord(updatePos.getZ());
+        if (!level.hasChunk(sectionX, sectionZ)) {
+            return;
+        }
+
+        BlockState blockstate = level.getBlockState(updatePos);
+        // fabric: mirrors vanilla + Porting Lib's NeighborChangeListeningBlock hook in
+        // Level#updateNeighbourForOutputSignal
+        if (blockstate.getBlock() instanceof NeighborChangeListeningBlock listener) {
+            listener.onNeighborChange(
+                    blockstate, level, updatePos.immutable(), provokingPos.immutable());
+        }
+        if (blockstate.is(Blocks.COMPARATOR)) {
+            level.neighborChanged(blockstate, updatePos, provokingBlock, provokingPos, false);
+        } else if (blockstate.isRedstoneConductor(level, updatePos)) {
+            updatePos.move(direction);
+            blockstate = level.getBlockState(updatePos);
+            if (blockstate.is(Blocks.COMPARATOR)) {
+                level.neighborChanged(blockstate, updatePos, provokingBlock, provokingPos, false);
             }
         }
     }
@@ -286,6 +367,8 @@ public class ItemVaultBlockEntity extends SmartBlockEntity
             }
         }
 
+        // fabric: CombinedStorage has no slot -> inventory lookup, so upstream's
+        // SameSizeCombinedInvWrapper optimization does not apply here
         Storage<ItemVariant> combinedInvWrapper = new CombinedStorage<>(List.of(invs));
         combinedInvWrapper = new VersionedInventoryWrapper(combinedInvWrapper);
         itemCapability = combinedInvWrapper;

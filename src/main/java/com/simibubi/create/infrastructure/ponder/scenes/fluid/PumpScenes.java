@@ -57,6 +57,14 @@ public class PumpScenes {
 
         scene.world().destroyBlock(pumpPos);
         scene.world().restoreBlocks(pump);
+        scene.world()
+                .modifyBlock(
+                        pumpPos,
+                        s ->
+                                s.setValue(
+                                        PumpBlock.FACING,
+                                        s.getValue(PumpBlock.FACING).getOpposite()),
+                        false);
         scene.world().setKineticSpeed(pump, 0);
 
         scene.idle(15);

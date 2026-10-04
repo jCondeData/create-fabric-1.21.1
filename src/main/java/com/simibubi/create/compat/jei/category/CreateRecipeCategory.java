@@ -1,8 +1,17 @@
 package com.simibubi.create.compat.jei.category;
 
+import static mezz.jei.api.recipe.RecipeType.createRecipeHolderType;
+
+import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.Create;
+import com.simibubi.create.compat.jei.CreateJEI;
+import com.simibubi.create.compat.jei.DoubleItemIcon;
+import com.simibubi.create.compat.jei.EmptyBackground;
+import com.simibubi.create.compat.jei.ItemIcon;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
+import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack;
 
@@ -20,6 +29,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 
+import net.createmod.catnip.config.ConfigBase.ConfigBool;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -27,14 +37,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.level.ItemLike;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -165,22 +183,20 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>>
 
     public static IRecipeSlotBuilder addFluidSlot(
             IRecipeLayoutBuilder builder, int x, int y, FluidIngredient ingredient) {
-        return addFluidSlot(builder, x, y, RecipeIngredientRole.INPUT)
-                .addIngredients(
-                        FabricTypes.FLUID_STACK, toJei(ingredient.getMatchingFluidStacks()));
+        long amount = ingredient.getRequiredAmount();
+        return builder.addSlot(RecipeIngredientRole.INPUT, x, y)
+                .setBackground(getRenderedSlot(), -1, -1)
+                .addIngredients(FabricTypes.FLUID_STACK, toJei(ingredient.getMatchingFluidStacks()))
+                .setFluidRenderer(amount, false, 16, 16); // make fluid take up the full slot
     }
 
     public static IRecipeSlotBuilder addFluidSlot(
             IRecipeLayoutBuilder builder, int x, int y, FluidStack stack) {
-        return addFluidSlot(builder, x, y, RecipeIngredientRole.OUTPUT)
-                .addIngredient(FabricTypes.FLUID_STACK, toJei(stack));
-    }
-
-    public static IRecipeSlotBuilder addFluidSlot(
-            IRecipeLayoutBuilder builder, int x, int y, RecipeIngredientRole role) {
-        return builder.addSlot(role, x, y)
+        return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
                 .setBackground(getRenderedSlot(), -1, -1)
-                .setFluidRenderer(1, false, 16, 16); // make fluid take up the full slot
+                .addIngredient(FabricTypes.FLUID_STACK, toJei(stack))
+                .setFluidRenderer(
+                        stack.getAmount(), false, 16, 16); // make fluid take up the full slot
     }
 
     // fabric: don't need potion tooltip stuff, handled by attribute handler
@@ -240,5 +256,235 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>>
 
     public interface Factory<T extends Recipe<?>> {
         CreateRecipeCategory<T> create(Info<T> info);
+    }
+
+    public static class Builder<T extends Recipe<? extends RecipeInput>> {
+        private final Class<? extends T> recipeClass;
+        private Supplier<Boolean> config = () -> true;
+
+        private IDrawable background;
+        private IDrawable icon;
+
+        private final List<Consumer<List<RecipeHolder<T>>>> recipeListConsumers = new ArrayList<>();
+        private final List<Supplier<? extends ItemStack>> catalysts = new ArrayList<>();
+
+        public Builder(Class<? extends T> recipeClass) {
+            this.recipeClass = recipeClass;
+        }
+
+        public Builder<T> enableWhen(Supplier<Boolean> predicate) {
+            this.config = predicate;
+            return this;
+        }
+
+        public Builder<T> enableWhen(ConfigBool configValue) {
+            config = configValue::get;
+            return this;
+        }
+
+        public Builder<T> addRecipeListConsumer(Consumer<List<RecipeHolder<T>>> consumer) {
+            recipeListConsumers.add(consumer);
+            return this;
+        }
+
+        public Builder<T> addRecipes(Supplier<Collection<? extends RecipeHolder<T>>> collection) {
+            return addRecipeListConsumer(recipes -> recipes.addAll(collection.get()));
+        }
+
+        public Builder<T> addAllRecipesIf(Predicate<RecipeHolder<T>> pred) {
+            return addRecipeListConsumer(
+                    recipes ->
+                            consumeAllRecipesOfType(
+                                    recipe -> {
+                                        if (pred.test(recipe)) recipes.add(recipe);
+                                    }));
+        }
+
+        public Builder<T> addAllRecipesIf(
+                Predicate<RecipeHolder<?>> pred,
+                Function<RecipeHolder<?>, RecipeHolder<T>> converter) {
+            return addRecipeListConsumer(
+                    recipes ->
+                            CreateJEI.consumeAllRecipes(
+                                    recipe -> {
+                                        if (pred.test(recipe)) {
+                                            recipes.add(converter.apply(recipe));
+                                        }
+                                    }));
+        }
+
+        public Builder<T> addTypedRecipes(IRecipeTypeInfo recipeTypeEntry) {
+            return addTypedRecipes(recipeTypeEntry::getType);
+        }
+
+        public <I extends RecipeInput, R extends Recipe<I>> Builder<T> addTypedRecipes(
+                Supplier<net.minecraft.world.item.crafting.RecipeType<R>> recipeType) {
+            return addRecipeListConsumer(
+                    recipes ->
+                            CreateJEI.<T>consumeTypedRecipes(
+                                    recipe -> {
+                                        if (recipeClass.isInstance(recipe.value()))
+                                            //noinspection unchecked - checked by if statement above
+                                            recipes.add((RecipeHolder<T>) recipe);
+                                    },
+                                    recipeType.get()));
+        }
+
+        public Builder<T> addTypedRecipes(
+                Supplier<net.minecraft.world.item.crafting.RecipeType<T>> recipeType,
+                Function<RecipeHolder<?>, RecipeHolder<T>> converter) {
+            return addRecipeListConsumer(
+                    recipes ->
+                            CreateJEI.<T>consumeTypedRecipes(
+                                    recipe -> recipes.add(converter.apply(recipe)),
+                                    recipeType.get()));
+        }
+
+        public Builder<T> addTypedRecipesIf(
+                Supplier<net.minecraft.world.item.crafting.RecipeType<? extends T>> recipeType,
+                Predicate<RecipeHolder<?>> pred) {
+            return addRecipeListConsumer(
+                    recipes ->
+                            consumeTypedRecipesTyped(
+                                    recipe -> {
+                                        if (pred.test(recipe)) {
+                                            recipes.add(recipe);
+                                        }
+                                    },
+                                    recipeType.get()));
+        }
+
+        public Builder<T> addTypedRecipesExcluding(
+                Supplier<net.minecraft.world.item.crafting.RecipeType<? extends T>> recipeType,
+                Supplier<net.minecraft.world.item.crafting.RecipeType<? extends T>> excluded) {
+            return addRecipeListConsumer(
+                    recipes -> {
+                        List<RecipeHolder<?>> excludedRecipes =
+                                CreateJEI.getTypedRecipes(excluded.get());
+                        consumeTypedRecipesTyped(
+                                recipe -> {
+                                    for (RecipeHolder<?> excludedRecipe : excludedRecipes) {
+                                        if (CreateJEI.doInputsMatch(
+                                                recipe.value(), excludedRecipe.value())) {
+                                            return;
+                                        }
+                                    }
+                                    recipes.add(recipe);
+                                },
+                                recipeType.get());
+                    });
+        }
+
+        public Builder<T> removeRecipes(
+                Supplier<net.minecraft.world.item.crafting.RecipeType<? extends T>> recipeType) {
+            return addRecipeListConsumer(
+                    recipes -> {
+                        List<RecipeHolder<?>> excludedRecipes =
+                                CreateJEI.getTypedRecipes(recipeType.get());
+                        recipes.removeIf(
+                                recipe -> {
+                                    for (RecipeHolder<?> excludedRecipe : excludedRecipes) {
+                                        if (CreateJEI.doInputsMatch(
+                                                        recipe.value(), excludedRecipe.value())
+                                                && CreateJEI.doOutputsMatch(
+                                                        recipe.value(), excludedRecipe.value()))
+                                            return true;
+                                    }
+                                    return false;
+                                });
+                    });
+        }
+
+        public Builder<T> removeNonAutomation() {
+            return addRecipeListConsumer(
+                    recipes -> recipes.removeIf(AllRecipeTypes.CAN_BE_AUTOMATED.negate()));
+        }
+
+        public Builder<T> catalystStack(Supplier<ItemStack> supplier) {
+            catalysts.add(supplier);
+            return this;
+        }
+
+        public Builder<T> catalyst(Supplier<ItemLike> supplier) {
+            return catalystStack(() -> new ItemStack(supplier.get().asItem()));
+        }
+
+        public Builder<T> icon(IDrawable icon) {
+            this.icon = icon;
+            return this;
+        }
+
+        public Builder<T> itemIcon(ItemLike item) {
+            icon(new ItemIcon(() -> new ItemStack(item)));
+            return this;
+        }
+
+        public Builder<T> doubleItemIcon(ItemLike item1, ItemLike item2) {
+            icon(new DoubleItemIcon(() -> new ItemStack(item1), () -> new ItemStack(item2)));
+            return this;
+        }
+
+        public Builder<T> background(IDrawable background) {
+            this.background = background;
+            return this;
+        }
+
+        public Builder<T> emptyBackground(int width, int height) {
+            background(new EmptyBackground(width, height));
+            return this;
+        }
+
+        public CreateRecipeCategory<T> build(String name, Factory<T> factory) {
+            return build(Create.asResource(name), factory);
+        }
+
+        public CreateRecipeCategory<T> build(ResourceLocation id, Factory<T> factory) {
+            Supplier<List<RecipeHolder<T>>> recipesSupplier;
+            if (config.get()) {
+                recipesSupplier =
+                        () -> {
+                            List<RecipeHolder<T>> recipes = new ArrayList<>();
+                            for (Consumer<List<RecipeHolder<T>>> consumer : recipeListConsumers) {
+                                consumer.accept(recipes);
+                            }
+                            return recipes;
+                        };
+            } else {
+                recipesSupplier = Collections::emptyList;
+            }
+
+            Info<T> info =
+                    new Info<>(
+                            createRecipeHolderType(id),
+                            Component.translatable(id.getNamespace() + ".recipe." + id.getPath()),
+                            background,
+                            icon,
+                            recipesSupplier,
+                            catalysts);
+            return factory.create(info);
+        }
+
+        private void consumeAllRecipesOfType(Consumer<RecipeHolder<T>> consumer) {
+            CreateJEI.consumeAllRecipes(
+                    recipeHolder -> {
+                        if (recipeClass.isInstance(recipeHolder.value())) {
+                            //noinspection unchecked - this is checked by the if statement
+                            consumer.accept((RecipeHolder<T>) recipeHolder);
+                        }
+                    });
+        }
+
+        private void consumeTypedRecipesTyped(
+                Consumer<RecipeHolder<T>> consumer,
+                net.minecraft.world.item.crafting.RecipeType<?> type) {
+            CreateJEI.consumeTypedRecipes(
+                    recipeHolder -> {
+                        if (recipeClass.isInstance(recipeHolder.value())) {
+                            //noinspection unchecked - this is checked by the if statement
+                            consumer.accept((RecipeHolder<T>) recipeHolder);
+                        }
+                    },
+                    type);
+        }
     }
 }

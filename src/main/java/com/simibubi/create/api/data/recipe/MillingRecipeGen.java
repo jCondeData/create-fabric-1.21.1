@@ -2,6 +2,7 @@ package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.AllTags;
+import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.tterrag.registrate.util.entry.ItemEntry;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -19,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class MillingRecipeGen extends ProcessingRecipeGen {
+public abstract class MillingRecipeGen extends StandardProcessingRecipeGen<MillingRecipe> {
 
     protected GeneratedRecipe metalOre(
             String name, ItemEntry<? extends Item> crushed, int duration) {

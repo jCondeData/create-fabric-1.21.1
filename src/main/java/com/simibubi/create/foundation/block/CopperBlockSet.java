@@ -148,16 +148,11 @@ public class CopperBlockSet {
                     entries[index] = entry;
 
                     if (waxed) {
-                        CopperRegistries.addWaxable(
-                                () -> entries[getIndex(state, false)].get(), () -> entry.get());
+                        CopperRegistries.addWaxable(entries[getIndex(state, false)], entry);
                     } else if (state != WeatherState.UNAFFECTED) {
                         CopperRegistries.addWeathering(
-                                () ->
-                                        entries[
-                                                getIndex(
-                                                        WEATHER_STATES[state.ordinal() - 1], false)]
-                                                .get(),
-                                () -> entry.get());
+                                entries[getIndex(WEATHER_STATES[state.ordinal() - 1], false)],
+                                entry);
                     }
                 }
                 if (!waxed) this.entries.put(variant, entries);

@@ -1,6 +1,7 @@
 package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.saw.CuttingRecipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.HolderLookup;
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class CuttingRecipeGen extends ProcessingRecipeGen {
+public abstract class CuttingRecipeGen extends StandardProcessingRecipeGen<CuttingRecipe> {
 
     protected GeneratedRecipe stripAndMakePlanks(Block wood, Block stripped, Block planks) {
         return stripAndMakePlanks(wood, stripped, planks, 6);

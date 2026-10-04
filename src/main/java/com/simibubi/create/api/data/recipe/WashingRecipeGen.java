@@ -1,6 +1,7 @@
 package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
 import com.tterrag.registrate.util.entry.ItemEntry;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class WashingRecipeGen extends ProcessingRecipeGen {
+public abstract class WashingRecipeGen extends StandardProcessingRecipeGen<SplashingRecipe> {
 
     public GeneratedRecipe convert(Block block, Block result) {
         return create(() -> block, b -> b.output(result));

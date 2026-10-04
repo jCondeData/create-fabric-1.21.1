@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-03T23:19:45.172466246	Create/Create's Processing Recipes
+// 1.21.1	2026-10-03T23:44:17.773837061	Create/Create's Processing Recipes
 bb3cdbe78429c50a8db9e7766aa17280462d310d data/create/recipe/crushing/uranium_ore.json
 0d20ef6d4e738841ac27cc9f8b8672acafb14133 data/create/recipe/deploying/waxed_exposed_copper_from_adding_wax.json
 7c226139f9ec1b6c4c1065ee210ad21254b2c226 data/create/recipe/crushing/compat/silentgems/iolite_ore.json
@@ -121,7 +121,7 @@ eab57a3308d42f7877fc61dd395d1ce882786e9d data/create/recipe/milling/compat/byg/f
 8e9bfa7bfcd133e05b692fdccfad2f108e8a4f84 data/create/recipe/crushing/compat/silentgems/kyanite_ore.json
 2ecff6ee7e9f5def9f6171bd578f58c32fec8d64 data/create/recipe/crushing/compat/byg/ametrine_ore.json
 6e46d45e1f79b9c861d9f469a4f5f20f5ba61767 data/create/recipe/milling/compat/regions_unexplored/glistering_bloom.json
-f0a79775ee0b7c10409bc44deb2d9d86be3eacfb data/create/recipe/emptying/compat/neapolitan/milk_bottle.json
+94fad78abbe4e35deed0b4a41ce5f94c036c492e data/create/recipe/emptying/compat/neapolitan/milk_bottle.json
 1bc9fdeccab71cca168b4b362e0be15720af4c20 data/create/recipe/crushing/compat/druidcraft/moonstone_ore.json
 f9ce22ed906e6852a0fd49ad4ec641bc1d1e5bc8 data/create/recipe/milling/compat/atmospheric/yucca_flower.json
 81afa82157b2ec37ff526ddc09b7dba281690b2f data/create/recipe/milling/compat/byg/hydrangea_bush.json
@@ -238,7 +238,7 @@ b4cfbf6bc981c6b409914c3c041b672cf03e7d47 data/create/recipe/splashing/endergetic
 f0af0c97e8b67c13f04342fda0677dd7c2a31e36 data/create/recipe/deploying/exposed_cut_copper_from_removing_wax.json
 ae783367aad1fa5f81849e27f314401d3fa7835e data/create/recipe/crushing/deepslate_copper_ore.json
 cc23431fe41932152d260c86b7d2a5ae2c5a0832 data/create/recipe/milling/compat/regions_unexplored/purple_coneflower.json
-65d10b3f99e1256d4953593b5739295da618b7a6 data/create/recipe/emptying/compat/alexsmobs/lava_bottle.json
+5d25721e4849abf5ab0b9c3f20554f00d2b1847f data/create/recipe/emptying/compat/alexsmobs/lava_bottle.json
 3e64078c4106c002f20e193811fca7a9cd21779b data/create/recipe/milling/blue_orchid.json
 11725252286488ea9469d5c6e4fb1a3cffde0f22 data/create/recipe/milling/compat/regions_unexplored/salmon_poppy_bush.json
 ff84cfbf66c08e939c2c6e11e9f5edefb2f2e20b data/create/recipe/deploying/waxed_exposed_copper_tile_stairs_from_adding_wax.json
@@ -277,7 +277,7 @@ c5feac4935f904c61dbfd83b31ae860a79c5660d data/create/recipe/haunting/soul_campfi
 72ee88ada13b62249fa714f8cbe66eea91163bf6 data/create/recipe/pressing/compat/betterend/crystal_moss_path.json
 7636f1d378586ff885705da6d9fcf2b013a992b2 data/create/recipe/crushing/gold_ore.json
 2c2f27b9211fed6f586aa699efb17dcd3de57918 data/create/recipe/compacting/granite_from_flint.json
-c80ed8b65b840855a30beddb4d432df53636a3b4 data/create/recipe/emptying/honey_bottle.json
+e7a37d283aa239ded07d10fde9c45a7253c7d635 data/create/recipe/emptying/honey_bottle.json
 ad4011d24afc4833373b8cf29eb380cee4d61a47 data/create/recipe/milling/compat/botania/gray_petal.json
 b6c55caaf8a83ddcfe9b68dee14fb5e16173b7bd data/create/recipe/splashing/modern_industrialization/crushed_raw_nickel.json
 83d136d51ff31e279ee2201288a3dbfee0cc1664 data/create/recipe/milling/compat/byg/begonia.json
@@ -608,7 +608,7 @@ bdc08a80d9e2ce96eb03a7de8692a2e8c4b69536 data/create/recipe/milling/compat/suppl
 bc3063a8f3b0d4f9a0c387850ceb53aaafb5a9bb data/create/recipe/deploying/weathered_copper_grate_from_removing_wax.json
 d98cb8303f23906b736b88bb108d0a91673bbb7a data/create/recipe/milling/cornflower.json
 52538d2a35057fc3c3a18df56506db1e5a25f0ea data/create/recipe/milling/compat/biomesoplenty/blue_hydrangea.json
-dd2fb921e019a64ee8fc9d47717e12723b88f79d data/create/recipe/emptying/builders_tea.json
+0de743fc6f46594278dafebd4c0d3cf4bac89720 data/create/recipe/emptying/builders_tea.json
 01202274a8a32dd7ad932b238095c5dae52cd651 data/create/recipe/crushing/compat/exnihilosequentia/crushed_diorite.json
 5498b3c78b719f623c6542c8cfc3faf41262aa93 data/create/recipe/deploying/exposed_cut_copper_slab_from_deoxidising.json
 82ecd8c60240ac5bf2fcead7a10f4f7cb77907ab data/create/recipe/splashing/endergetic/petrified_nether_corrock_crown.json
@@ -650,7 +650,7 @@ b7c8ea411b8c08416ba3afc72313c2c3afe35f4d data/create/recipe/cutting/compat/autum
 0b556ee184cde4630bee05e3b123c7bd455df151 data/create/recipe/pressing/path.json
 0790b25ff96b79371688bf75f2d0bfd992c2e072 data/create/recipe/deploying/waxed_exposed_copper_trapdoor_from_adding_wax.json
 0206dfea8bd49e1cf170ef9fdce9911af3415eea data/create/recipe/milling/compat/regions_unexplored/tsubaki.json
-bfd9acebee81fb91ddf711935b060348eec869b9 data/create/recipe/emptying/compat/farmersdelight/milk_bottle.json
+224eb7b547ff0e1779a8956db38a587aef14ebdd data/create/recipe/emptying/compat/farmersdelight/milk_bottle.json
 720c02f894f8a7b9b5c2bbacb430b43a31e8f859 data/create/recipe/milling/compat/byg/pink_allium.json
 773ac17981a665aac8106eb2ab7b35a2d5427959 data/create/recipe/crushing/compat/silentgems/rose_quartz_ore.json
 4b8e881605b4c1bdf912b3a1126e56d6715ef507 data/create/recipe/crushing/raw_nickel_block.json

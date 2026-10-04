@@ -9,6 +9,7 @@ import net.minecraft.world.phys.EntityHitResult;
 
 import java.util.function.Function;
 
+// TODO: 1.21.7 - Move into api package
 public interface PotatoProjectileEntityHitAction {
     Codec<PotatoProjectileEntityHitAction> CODEC =
             CreateBuiltInRegistries.POTATO_PROJECTILE_ENTITY_HIT_ACTION

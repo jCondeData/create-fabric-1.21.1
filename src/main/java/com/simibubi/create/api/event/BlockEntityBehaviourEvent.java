@@ -53,6 +53,7 @@ public class BlockEntityBehaviourEvent {
 
     public <T extends SmartBlockEntity> void forType(BlockEntityType<T> type, Consumer<T> action) {
         if (smartBlockEntity.getType() == type) {
+            //noinspection unchecked
             action.accept((T) smartBlockEntity);
         }
     }

@@ -22,8 +22,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 
 import net.createmod.catnip.platform.CatnipServices;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.createmod.catnip.registry.RegisteredObjectsHelper;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -106,17 +105,14 @@ public class AllCreativeModeTabs {
         static {
             MutableObject<Predicate<Item>> isItem3d = new MutableObject<>(item -> false);
             if (CatnipServices.PLATFORM.getEnv().isClient())
-                isItem3d.setValue(makeClient3dItemPredicate());
+                isItem3d.setValue(
+                        item -> {
+                            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+                            BakedModel model =
+                                    itemRenderer.getModel(new ItemStack(item), null, null, 0);
+                            return model.isGui3d();
+                        });
             IS_ITEM_3D_PREDICATE = isItem3d.getValue();
-        }
-
-        @Environment(EnvType.CLIENT)
-        private static Predicate<Item> makeClient3dItemPredicate() {
-            return item -> {
-                ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-                BakedModel model = itemRenderer.getModel(new ItemStack(item), null, null, 0);
-                return model.isGui3d();
-            };
         }
 
         private final boolean addItems;
@@ -207,7 +203,10 @@ public class AllCreativeModeTabs {
 
             PackageStyles.STANDARD_BOXES.forEach(
                     item -> {
-                        orderings.add(ItemOrdering.after(item, AllBlocks.PACKAGER.asItem()));
+                        if (RegisteredObjectsHelper.getKeyOrThrow(item)
+                                .getNamespace()
+                                .equals(Create.ID))
+                            orderings.add(ItemOrdering.after(item, AllBlocks.PACKAGER.asItem()));
                     });
 
             return orderings;

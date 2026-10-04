@@ -1,7 +1,7 @@
 package com.simibubi.create.foundation.data.recipe;
 
+import com.simibubi.create.content.kinetics.deployer.ItemApplicationRecipe;
 import com.simibubi.create.content.kinetics.deployer.ManualApplicationRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
@@ -63,7 +63,7 @@ public class LogStrippingFakeRecipes {
                 ResourceLocation.fromNamespaceAndPath(
                         rn.getNamespace(), rn.getPath() + "_via_vanilla_stripping");
         ManualApplicationRecipe recipe =
-                new ProcessingRecipeBuilder<>(ManualApplicationRecipe::new, id)
+                new ItemApplicationRecipe.Builder<>(ManualApplicationRecipe::new, id)
                         .require(fromItem)
                         .require(Ingredient.of(axe))
                         .output(toItem)

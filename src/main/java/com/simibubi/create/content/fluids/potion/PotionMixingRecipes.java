@@ -4,7 +4,7 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.fluids.potion.PotionFluid.BottleType;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 import com.simibubi.create.content.processing.recipe.HeatCondition;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe.Builder;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.mixin.accessor.PotionBrewingAccessor;
 import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack;
@@ -174,7 +174,7 @@ public class PotionMixingRecipes {
             String id, Ingredient ingredient, FluidStack fromFluid, FluidStack toFluid) {
         ResourceLocation recipeId = Create.asResource(id);
         MixingRecipe recipe =
-                new ProcessingRecipeBuilder<>(MixingRecipe::new, recipeId)
+                new Builder<>(MixingRecipe::new, recipeId)
                         .require(ingredient)
                         .require(FluidIngredient.fromFluidStack(fromFluid))
                         .output(toFluid)

@@ -32,6 +32,7 @@ import com.simibubi.create.content.decoration.steamWhistle.WhistleExtenderBlock;
 import com.simibubi.create.content.fluids.tank.FluidTankBlock;
 import com.simibubi.create.content.kinetics.crank.HandCrankBlock;
 import com.simibubi.create.content.kinetics.fan.NozzleBlock;
+import com.simibubi.create.content.logistics.funnel.BeltFunnelBlock;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
 import com.simibubi.create.content.logistics.vault.ItemVaultBlock;
 import com.simibubi.create.content.redstone.link.RedstoneLinkBlock;
@@ -220,6 +221,7 @@ public class BlockMovementChecksImpl {
         if (block instanceof WoolCarpetBlock) return true;
         if (block instanceof WhistleBlock) return true;
         if (block instanceof WhistleExtenderBlock) return true;
+        if (block instanceof BeltFunnelBlock) return true;
         return AllBlockTags.BRITTLE.matches(state);
     }
 

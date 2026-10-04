@@ -1,6 +1,7 @@
 package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.press.PressingRecipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.HolderLookup;
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class PressingRecipeGen extends ProcessingRecipeGen {
+public abstract class PressingRecipeGen extends StandardProcessingRecipeGen<PressingRecipe> {
 
     public PressingRecipeGen(
             FabricDataOutput output,

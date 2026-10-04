@@ -6,6 +6,7 @@ import com.simibubi.create.AllKeys;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
+import com.simibubi.create.foundation.data.CreateDatamapProvider;
 import com.simibubi.create.foundation.data.DamageTypeTagGen;
 import com.simibubi.create.foundation.data.TagLangGen;
 import com.simibubi.create.foundation.data.recipe.CreateMechanicalCraftingRecipeGen;
@@ -72,8 +73,10 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
         CreateRecipeProvider.registerAllProcessing(pack);
         pack.addProvider(GeneratedEntriesProvider::new);
         pack.addProvider(VanillaHatOffsetGenerator::new);
+        // fabric: Porting Lib data maps; generates Create's blaze burner fuel maps only
+        pack.addProvider(CreateDatamapProvider::new);
 
-        // fabric: no equivalent to NeoForge data maps or Curios, both providers were dropped
+        // fabric: no equivalent to Curios, its provider was dropped
     }
 
     @Override

@@ -50,7 +50,7 @@ public record ContraptionSeatMappingPacket(
                         .put("ContraptionDismountLocation", VecHelper.writeNBT(transformedVector));
         }
 
-        contraptionEntity.getContraption().setSeatMapping(mapping);
+        contraptionEntity.getContraption().setSeatMapping(new HashMap<>(mapping));
     }
 
     @Override

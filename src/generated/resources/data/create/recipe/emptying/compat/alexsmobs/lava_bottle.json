@@ -16,13 +16,13 @@
   ],
   "results": [
     {
+      "id": "minecraft:glass_bottle"
+    },
+    {
       "amount": 27000,
       "fluid": {
         "fluid": "minecraft:lava"
       }
-    },
-    {
-      "id": "minecraft:glass_bottle"
     }
   ]
 }

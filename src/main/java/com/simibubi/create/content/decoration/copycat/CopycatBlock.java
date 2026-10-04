@@ -355,6 +355,8 @@ public abstract class CopycatBlock extends Block
                 material -> material.getBlock().getFriction());
     }
 
+    // fabric: no hasDynamicLightEmission / AuxiliaryLightManager (NeoForge-only); Porting Lib's
+    // LightEmissiveBlock queries the material through the block entity instead
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
         return maybeMaterialAs(

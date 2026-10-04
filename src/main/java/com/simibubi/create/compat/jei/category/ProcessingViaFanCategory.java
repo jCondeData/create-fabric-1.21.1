@@ -6,7 +6,7 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.utility.CreateLang;
 
@@ -101,7 +101,7 @@ public abstract class ProcessingViaFanCategory<T extends Recipe<?>>
 
     protected abstract void renderAttachedBlock(GuiGraphics graphics);
 
-    public abstract static class MultiOutput<T extends ProcessingRecipe<?>>
+    public abstract static class MultiOutput<T extends StandardProcessingRecipe<?>>
             extends ProcessingViaFanCategory<T> {
 
         public MultiOutput(Info<T> info) {

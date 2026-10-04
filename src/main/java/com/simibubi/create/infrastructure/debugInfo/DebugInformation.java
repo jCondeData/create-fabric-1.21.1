@@ -3,6 +3,7 @@ package com.simibubi.create.infrastructure.debugInfo;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.simibubi.create.Create;
+import com.simibubi.create.compat.pojav.PojavChecker;
 import com.simibubi.create.foundation.mixin.accessor.SystemReportAccessor;
 import com.simibubi.create.infrastructure.debugInfo.element.DebugInfoSection;
 import com.simibubi.create.infrastructure.debugInfo.element.InfoElement;
@@ -19,11 +20,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -107,12 +108,15 @@ public class DebugInformation {
                                     .put(
                                             "Graphics Mode",
                                             () ->
-                                                    I18n.get(
-                                                            Minecraft.getInstance()
-                                                                    .options
-                                                                    .graphicsMode()
-                                                                    .get()
-                                                                    .getKey()))
+                                                    Minecraft.getInstance()
+                                                            .options
+                                                            .graphicsMode()
+                                                            .get()
+                                                            .name()
+                                                            .toLowerCase(Locale.ROOT))
+                                    .put(
+                                            "PojavLauncher Detected",
+                                            () -> String.valueOf(PojavChecker.IS_PRESENT))
                                     .buildTo(DebugInformation::registerClientInfo);
                         });
 

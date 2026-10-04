@@ -6,7 +6,6 @@ import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -52,7 +51,7 @@ public class ChainPackageInteractionHandler {
                                                     ccbe.getBlockPos(),
                                                     null,
                                                     pckg.chainPosition,
-                                                    ItemStack.EMPTY));
+                                                    true));
                                     success.setTrue();
                                     return;
                                 }
@@ -69,7 +68,7 @@ public class ChainPackageInteractionHandler {
                                                         ccbe.getBlockPos(),
                                                         connection,
                                                         pckg.chainPosition,
-                                                        ItemStack.EMPTY));
+                                                        true));
                                         success.setTrue();
                                         return;
                                     }

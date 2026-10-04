@@ -17,4 +17,8 @@ public class CreateRegistrateRegistrationCallback {
             Consumer<T> callback) {
         CreateRegistrateRegistrationCallbackImpl.register(registry, id, callback);
     }
+
+    private CreateRegistrateRegistrationCallback() {
+        throw new AssertionError("This class should not be instantiated");
+    }
 }

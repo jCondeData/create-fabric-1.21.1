@@ -3,6 +3,7 @@ package com.simibubi.create;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.pojav.PojavChecker;
 import com.simibubi.create.compat.sodium.SodiumCompat;
 import com.simibubi.create.compat.trinkets.Trinkets;
 import com.simibubi.create.content.contraptions.glue.SuperGlueSelectionHandler;
@@ -86,6 +87,8 @@ public class CreateClient implements ClientModInitializer {
 
         ZAPPER_RENDER_HANDLER.registerListeners();
         POTATO_CANNON_RENDER_HANDLER.registerListeners();
+
+        PojavChecker.init();
 
         // clientInit start
 

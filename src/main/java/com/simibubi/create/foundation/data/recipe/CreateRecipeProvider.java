@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class CreateRecipeProvider extends FabricRecipeProvider {
 
-    static final List<ProcessingRecipeGen> GENERATORS = new ArrayList<>();
+    static final List<ProcessingRecipeGen<?, ?, ?>> GENERATORS = new ArrayList<>();
     // fabric: fluid amounts are in droplets
     static final long BUCKET = FluidConstants.BUCKET;
     static final long BOTTLE = FluidConstants.BOTTLE;

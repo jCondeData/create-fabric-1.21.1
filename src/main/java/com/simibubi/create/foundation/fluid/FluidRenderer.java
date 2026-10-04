@@ -23,7 +23,6 @@ import net.minecraft.world.level.material.Fluid;
 
 @Environment(EnvType.CLIENT)
 public class FluidRenderer {
-
     public static void renderFluidStream(
             FluidStack fluidStack,
             Direction direction,

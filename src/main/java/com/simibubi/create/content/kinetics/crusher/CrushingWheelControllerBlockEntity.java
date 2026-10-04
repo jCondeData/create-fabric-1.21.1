@@ -3,7 +3,7 @@ package com.simibubi.create.content.kinetics.crusher;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.processing.recipe.ProcessingInventory;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.damageTypes.CreateDamageSources;
@@ -318,7 +318,7 @@ public class CrushingWheelControllerBlockEntity extends SmartBlockEntity
     }
 
     private void applyRecipe() {
-        Optional<RecipeHolder<ProcessingRecipe<RecipeInput>>> recipe = findRecipe();
+        Optional<RecipeHolder<StandardProcessingRecipe<RecipeInput>>> recipe = findRecipe();
 
         List<ItemStack> list = new ArrayList<>();
         if (recipe.isPresent()) {
@@ -337,8 +337,8 @@ public class CrushingWheelControllerBlockEntity extends SmartBlockEntity
         }
     }
 
-    public Optional<RecipeHolder<ProcessingRecipe<RecipeInput>>> findRecipe() {
-        Optional<RecipeHolder<ProcessingRecipe<RecipeInput>>> crushingRecipe =
+    public Optional<RecipeHolder<StandardProcessingRecipe<RecipeInput>>> findRecipe() {
+        Optional<RecipeHolder<StandardProcessingRecipe<RecipeInput>>> crushingRecipe =
                 AllRecipeTypes.CRUSHING.find(inventory.asRecipeInput(), level);
         if (!crushingRecipe.isPresent())
             crushingRecipe = AllRecipeTypes.MILLING.find(inventory.asRecipeInput(), level);
@@ -372,7 +372,7 @@ public class CrushingWheelControllerBlockEntity extends SmartBlockEntity
     }
 
     private void itemInserted(ItemStack stack) {
-        Optional<RecipeHolder<ProcessingRecipe<RecipeInput>>> recipe = findRecipe();
+        Optional<RecipeHolder<StandardProcessingRecipe<RecipeInput>>> recipe = findRecipe();
         inventory.remainingTime =
                 recipe.isPresent() ? recipe.get().value().getProcessingDuration() : 100;
         inventory.appliedRecipe = false;

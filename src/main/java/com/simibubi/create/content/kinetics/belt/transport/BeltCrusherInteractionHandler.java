@@ -68,7 +68,7 @@ public class BeltCrusherInteractionHandler {
                 } else if (notFilled > 0) remainder = currentItem.stack.copyWithCount(notFilled);
 
                 currentItem.stack = remainder;
-                beltInventory.belt.sendData();
+                beltInventory.belt.notifyUpdate();
                 return true;
             }
         }

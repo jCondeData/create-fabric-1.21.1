@@ -11,6 +11,8 @@ import com.simibubi.create.content.schematics.requirement.ItemRequirement.ItemUs
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
+import io.github.fabricators_of_create.porting_lib.blocks.extensions.OnLoadBlockEntity;
+
 import net.createmod.catnip.data.Iterate;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -32,7 +34,8 @@ public class CopycatBlockEntity extends SmartBlockEntity
         implements SpecialBlockEntityItemRequirement,
                 TransformableBlockEntity,
                 PartialSafeNBT,
-                RenderDataBlockEntity {
+                RenderDataBlockEntity,
+                OnLoadBlockEntity {
 
     private BlockState material;
     private ItemStack consumedItem;
@@ -110,10 +113,22 @@ public class CopycatBlockEntity extends SmartBlockEntity
 
     private void redraw() {
         // fabric: no need for requestModelDataUpdate
-        if (hasLevel()) {
+        if (level != null) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 16);
-            level.getChunkSource().getLightEngine().checkBlock(worldPosition);
+            updateLight();
         }
+    }
+
+    // fabric: no AuxiliaryLightManager; CopycatBlock reports the material's emission through
+    // Porting Lib's LightEmissiveBlock, so just have the light engine re-check this position
+    private void updateLight() {
+        if (level != null) level.getChunkSource().getLightEngine().checkBlock(worldPosition);
+    }
+
+    @Override
+    public void onLoad() {
+        // only glowing materials need a relight once the block entity is back after a chunk load
+        if (material.getLightEmission() > 0) updateLight();
     }
 
     @Override

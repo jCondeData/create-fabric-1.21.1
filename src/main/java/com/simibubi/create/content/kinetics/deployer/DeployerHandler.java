@@ -13,14 +13,14 @@ import com.simibubi.create.content.trains.track.ITrackBlock;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.BlockHelper;
 
+import io.github.fabricators_of_create.porting_lib.item.extensions.SneakBypassUseItem;
 import io.github.fabricators_of_create.porting_lib.item.extensions.UseFirstBehaviorItem;
 import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.BucketItemAccessor;
 
-import net.createmod.catnip.levelWrappers.WrappedLevel;
+import net.createmod.catnip.levelWrappers.WrappedServerLevel;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -28,7 +28,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -55,7 +54,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoublePlantBlock;
@@ -72,19 +70,25 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 public class DeployerHandler {
+    private static final Map<BlockPos, List<ItemEntity>> CAPTURED_BLOCK_DROPS = new HashMap<>();
+    public static final Map<BlockPos, List<ItemEntity>> CAPTURED_BLOCK_DROPS_VIEW =
+            Collections.unmodifiableMap(CAPTURED_BLOCK_DROPS);
 
-    private static final class ItemUseWorld extends WrappedLevel {
+    private static final class ItemUseWorld extends WrappedServerLevel {
         private final Direction face;
         private final BlockPos pos;
         boolean rayMode = false;
 
-        private ItemUseWorld(Level world, Direction face, BlockPos pos) {
-            super(world);
+        private ItemUseWorld(ServerLevel level, Direction face, BlockPos pos) {
+            super(level);
             this.face = face;
             this.pos = pos;
         }
@@ -157,14 +161,14 @@ public class DeployerHandler {
         Item item = stack.getItem();
 
         // Check for entities
-        final Level world = player.level();
+        final ServerLevel level = player.serverLevel();
         List<Entity> entities =
-                world.getEntitiesOfClass(Entity.class, new AABB(clickedPos)).stream()
+                level.getEntitiesOfClass(Entity.class, new AABB(clickedPos)).stream()
                         .filter(e -> !(e instanceof AbstractContraptionEntity))
                         .toList();
         InteractionHand hand = InteractionHand.MAIN_HAND;
         if (!entities.isEmpty()) {
-            Entity entity = entities.get(world.random.nextInt(entities.size()));
+            Entity entity = entities.get(level.random.nextInt(entities.size()));
             List<ItemEntity> capturedDrops = new ArrayList<>();
             boolean success = false;
             entity.captureDrops(capturedDrops);
@@ -174,7 +178,7 @@ public class DeployerHandler {
                 InteractionResult cancelResult =
                         UseEntityCallback.EVENT
                                 .invoker()
-                                .interact(player, world, hand, entity, new EntityHitResult(entity));
+                                .interact(player, level, hand, entity, new EntityHitResult(entity));
                 if (cancelResult == InteractionResult.FAIL) {
                     entity.captureDrops(null);
                     return;
@@ -196,14 +200,14 @@ public class DeployerHandler {
                         if (foodProperties != null
                                 && playerEntity.canEat(foodProperties.canAlwaysEat())) {
                             ItemStack copy = stack.copy();
-                            player.setItemInHand(hand, stack.finishUsingItem(world, playerEntity));
+                            player.setItemInHand(hand, stack.finishUsingItem(level, playerEntity));
                             player.spawnedItemEffects = copy;
                             success = true;
                         }
                     }
                     if (AllItemTags.DEPLOYABLE_DRINK.matches(stack)) {
                         player.spawnedItemEffects = stack.copy();
-                        player.setItemInHand(hand, stack.finishUsingItem(world, playerEntity));
+                        player.setItemInHand(hand, stack.finishUsingItem(level, playerEntity));
                         success = true;
                     }
                 }
@@ -229,7 +233,7 @@ public class DeployerHandler {
                         ClipContext.Block.OUTLINE,
                         ClipContext.Fluid.NONE,
                         player);
-        BlockHitResult result = world.clip(rayTraceContext);
+        BlockHitResult result = level.clip(rayTraceContext);
         if (result.getBlockPos() != clickedPos)
             result =
                     new BlockHitResult(
@@ -237,7 +241,7 @@ public class DeployerHandler {
                             result.getDirection(),
                             clickedPos,
                             result.isInside());
-        BlockState clickedState = world.getBlockState(clickedPos);
+        BlockState clickedState = level.getBlockState(clickedPos);
         Direction face = result.getDirection();
         if (face == null)
             face =
@@ -246,8 +250,8 @@ public class DeployerHandler {
 
         // Left click
         if (mode == Mode.PUNCH) {
-            if (!world.mayInteract(player, clickedPos)) return;
-            if (clickedState.getShape(world, clickedPos).isEmpty()) {
+            if (!level.mayInteract(player, clickedPos)) return;
+            if (clickedState.getShape(level, clickedPos).isEmpty()) {
                 player.blockBreakingProgress = null;
                 return;
             }
@@ -256,17 +260,17 @@ public class DeployerHandler {
                             .invoker()
                             .interact(player, player.level(), player.getUsedItemHand(), result);
             if (actionResult == InteractionResult.FAIL) return;
-            if (BlockHelper.extinguishFire(world, player, clickedPos, face)) return;
+            if (BlockHelper.extinguishFire(level, player, clickedPos, face)) return;
             //			if (actionResult != InteractionResult.FAIL) // fabric: checked above
-            clickedState.attack(world, clickedPos, player);
+            clickedState.attack(level, clickedPos, player);
             if (stack.isEmpty()) return;
 
-            float progress = clickedState.getDestroyProgress(player, world, clickedPos) * 16;
+            float progress = clickedState.getDestroyProgress(player, level, clickedPos) * 16;
             float before = 0;
             Pair<BlockPos, Float> blockBreakingProgress = player.blockBreakingProgress;
             if (blockBreakingProgress != null) before = blockBreakingProgress.getValue();
             progress += before;
-            world.playSound(
+            level.playSound(
                     null,
                     clickedPos,
                     clickedState.getSoundType().getHitSound(),
@@ -276,7 +280,7 @@ public class DeployerHandler {
 
             if (progress >= 1) {
                 tryHarvestBlock(player, player.gameMode, clickedPos);
-                world.destroyBlockProgress(player.getId(), clickedPos, -1);
+                level.destroyBlockProgress(player.getId(), clickedPos, -1);
                 player.blockBreakingProgress = null;
                 return;
             }
@@ -286,7 +290,7 @@ public class DeployerHandler {
             }
 
             if ((int) (before * 10) != (int) (progress * 10))
-                world.destroyBlockProgress(player.getId(), clickedPos, (int) (progress * 10));
+                level.destroyBlockProgress(player.getId(), clickedPos, (int) (progress * 10));
             player.blockBreakingProgress = Pair.of(clickedPos, progress);
             return;
         }
@@ -295,7 +299,7 @@ public class DeployerHandler {
         UseOnContext itemusecontext = new UseOnContext(player, hand, result);
         InteractionResult useBlock = InteractionResult.PASS;
         InteractionResult useItem = InteractionResult.PASS;
-        if (!clickedState.getShape(world, clickedPos).isEmpty()) {
+        if (!clickedState.getShape(level, clickedPos).isEmpty()) {
             useBlock =
                     UseBlockCallback.EVENT.invoker().interact(player, player.level(), hand, result);
             useItem = useBlock;
@@ -310,13 +314,15 @@ public class DeployerHandler {
 
         boolean holdingSomething = !player.getMainHandItem().isEmpty();
         boolean flag1 =
-                !(player.isShiftKeyDown()
-                        && holdingSomething) /* || (stack.doesSneakBypassUse(world, clickedPos, player))*/;
+                !(player.isShiftKeyDown() && holdingSomething)
+                        || (stack.getItem() instanceof SneakBypassUseItem sneakBypass
+                                && sneakBypass.doesSneakBypassUse(
+                                        stack, level, clickedPos, player));
 
         // Use on block
         if (useBlock != InteractionResult.FAIL
                 && flag1
-                && safeOnUse(clickedState, world, clickedPos, player, hand, result)
+                && safeOnUse(clickedState, level, clickedPos, player, hand, result)
                         .consumesAction()) return;
         if (stack.isEmpty()) return;
         if (useItem == InteractionResult.FAIL) return;
@@ -327,7 +333,7 @@ public class DeployerHandler {
         if (item == Items.FLINT_AND_STEEL) {
             Direction newFace = result.getDirection();
             BlockPos newPos = result.getBlockPos();
-            if (!BaseFireBlock.canBePlacedAt(world, clickedPos, newFace)) newFace = Direction.UP;
+            if (!BaseFireBlock.canBePlacedAt(level, clickedPos, newFace)) newFace = Direction.UP;
             if (clickedState.isAir()) newPos = newPos.relative(face.getOpposite());
             result = new BlockHitResult(result.getLocation(), newFace, newPos, result.isInside());
             itemusecontext = new UseOnContext(player, hand, result);
@@ -336,7 +342,7 @@ public class DeployerHandler {
         // 'Inert' item use behaviour & block placement
         InteractionResult onItemUse = stack.useOn(itemusecontext);
         if (onItemUse.consumesAction()) {
-            if (stack.getItem() instanceof BlockItem bi
+            if (item instanceof BlockItem bi
                     && (bi.getBlock() instanceof BaseRailBlock
                             || bi.getBlock() instanceof ITrackBlock)) player.placedTracks = true;
             return;
@@ -346,15 +352,15 @@ public class DeployerHandler {
         if (AllItemTags.DEPLOYABLE_DRINK.matches(item)) return;
 
         // buckets create their own ray, We use a fake wall to contain the active area
-        Level itemUseWorld = world;
+        Level itemUseWorld = level;
         if (item instanceof BucketItem || item instanceof SandPaperItem)
-            itemUseWorld = new ItemUseWorld(world, face, pos);
+            itemUseWorld = new ItemUseWorld(level, face, pos);
 
         InteractionResultHolder<ItemStack> onItemRightClick = item.use(itemUseWorld, player, hand);
 
         if (onItemRightClick.getResult().consumesAction()
                 && item instanceof MobBucketItem bucketItem)
-            bucketItem.checkExtraContent(player, world, stack, clickedPos);
+            bucketItem.checkExtraContent(player, level, stack, clickedPos);
 
         ItemStack resultStack = onItemRightClick.getObject();
         if (resultStack != stack
@@ -367,11 +373,11 @@ public class DeployerHandler {
         if (stack.getItem() instanceof SandPaperItem
                 && stack.has(AllDataComponents.SAND_PAPER_POLISHING)) {
             player.spawnedItemEffects = stack.get(AllDataComponents.SAND_PAPER_POLISHING).item();
-            AllSoundEvents.SANDING_SHORT.playOnServer(world, pos, .25f, 1f);
+            AllSoundEvents.SANDING_SHORT.playOnServer(level, pos, .25f, 1f);
         }
 
         if (!player.getUseItem().isEmpty())
-            player.setItemInHand(hand, stack.finishUsingItem(world, player));
+            player.setItemInHand(hand, stack.finishUsingItem(level, player));
 
         player.stopUsingItem();
     }
@@ -435,57 +441,15 @@ public class DeployerHandler {
             Player player,
             InteractionHand hand,
             BlockHitResult ray) {
-        if (state.getBlock() instanceof BeehiveBlock)
-            return safeOnBeehiveUse(state, world, pos, player, hand);
-        return BlockHelper.invokeUse(state, world, player, hand, ray);
-    }
-
-    protected static InteractionResult safeOnBeehiveUse(
-            BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand) {
-        // <> BeehiveBlock#onUse
-
-        BeehiveBlock block = (BeehiveBlock) state.getBlock();
-        ItemStack prevHeldItem = player.getItemInHand(hand);
-        int honeyLevel = state.getValue(BeehiveBlock.HONEY_LEVEL);
-        boolean success = false;
-        if (honeyLevel < 5) return InteractionResult.PASS;
-
-        if (prevHeldItem.is(ConventionalItemTags.SHEARS)) {
-            world.playSound(
-                    player,
-                    player.getX(),
-                    player.getY(),
-                    player.getZ(),
-                    SoundEvents.BEEHIVE_SHEAR,
-                    SoundSource.NEUTRAL,
-                    1.0F,
-                    1.0F);
-            // <> BeehiveBlock#dropHoneycomb
-            player.getInventory().placeItemBackInInventory(new ItemStack(Items.HONEYCOMB, 3));
-            prevHeldItem.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
-            success = true;
+        List<ItemEntity> drops = new ArrayList<>(4);
+        CAPTURED_BLOCK_DROPS.put(pos, drops);
+        try {
+            InteractionResult result = BlockHelper.invokeUse(state, world, player, hand, ray);
+            for (ItemEntity itemEntity : drops)
+                player.getInventory().placeItemBackInInventory(itemEntity.getItem());
+            return result;
+        } finally {
+            CAPTURED_BLOCK_DROPS.remove(pos);
         }
-
-        if (prevHeldItem.getItem() == Items.GLASS_BOTTLE) {
-            prevHeldItem.shrink(1);
-            world.playSound(
-                    player,
-                    player.getX(),
-                    player.getY(),
-                    player.getZ(),
-                    SoundEvents.BOTTLE_FILL,
-                    SoundSource.NEUTRAL,
-                    1.0F,
-                    1.0F);
-            ItemStack honeyBottle = new ItemStack(Items.HONEY_BOTTLE);
-            if (prevHeldItem.isEmpty()) player.setItemInHand(hand, honeyBottle);
-            else player.getInventory().placeItemBackInInventory(honeyBottle);
-            success = true;
-        }
-
-        if (!success) return InteractionResult.PASS;
-
-        block.resetHoneyLevel(world, state, pos);
-        return InteractionResult.SUCCESS;
     }
 }

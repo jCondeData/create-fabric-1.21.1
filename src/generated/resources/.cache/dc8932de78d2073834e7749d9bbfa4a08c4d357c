@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-03T23:19:45.122249534	Create/Registrate Provider for create [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2026-10-03T23:44:17.743065579	Create/Registrate Provider for create [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 986800d441e95553464d1869d39baf456f5d70dc assets/create/models/block/fluid_pipe/lu_y.json
 bf1feb1194fff279a32e3f4673f70de2fe26e650 assets/create/models/block/polished_cut_scorchia_wall_side.json
 f32a18c76cfaca2153f6321880a8da1347be37ce assets/create/models/block/waxed_weathered_copper_shingle_stairs_inner.json
@@ -204,7 +204,7 @@ d16c6bd3c7a8f4b345ed55e0b99fb32a68bc344a data/create/advancement/recipes/buildin
 489ad4daeaed702d231a3f175f7b66846f5789a6 assets/create/blockstates/experience_block.json
 6e5b70b7a3d78c001aa40ab8a6588450b7a99954 data/create/advancement/recipes/building_blocks/crafting/logistics/white_postbox_from_other_postbox.json
 de2e918058e9dd7eafd085a8dec634f6a2832c21 assets/create/blockstates/cut_scorchia_stairs.json
-5e1be200869220f9e7345fcd25185e9a16ab8778 assets/create/lang/en_us.json
+1c4fba5f5d88fad31a2aeadade49aac59c4a6be9 assets/create/lang/en_us.json
 a013d00470f2a75bfc11baaac4d1788376e1c431 data/create/advancement/recipes/building_blocks/small_ochrum_brick_wall_from_stone_types_ochrum_stonecutting.json
 3872170096adc44a166b26812ddbd026384bf9a8 data/create/recipe/polished_cut_limestone_slab.json
 8e471b811a517e2f80080a0f981254886838f0ca data/create/advancement/recipes/building_blocks/cut_granite_bricks_from_stone_types_granite_stonecutting.json
@@ -1002,7 +1002,7 @@ f8ae631cacbf4fd5aa3e6c8ca233b4ea28f310fc assets/create/blockstates/polished_cut_
 8cf5b122c024ff7c398ad9a185b5d0267fee401a assets/create/models/item/polished_cut_asurine_wall.json
 6d210298b9d80ae69aa03b09aa73b92e14b9ab1b assets/create/blockstates/brass_scaffolding.json
 7d3ddad087b4d2c6a32f97092533cbfb5de0cb3b assets/create/models/item/green_valve_handle.json
-ff3ea284632bca1bf597d9a81f2465ff2874cf6a assets/create/lang/en_ud.json
+9f76e4e6ead8887bf7b970529c6f58e5fb6487b8 assets/create/lang/en_ud.json
 6935d6d9dbdb99fe7258d9347419d65571711263 assets/create/models/item/small_veridium_bricks.json
 4094bf00cad8dea2dd234866b482c07175802c4c assets/create/blockstates/small_crimsite_brick_slab.json
 df2a3c76b7dbe1f5f6556436e7db3b72288b2232 assets/create/models/item/light_blue_table_cloth.json
@@ -2594,7 +2594,7 @@ b7065e7871c3c7f1a0656c2f92f82544e606f2fb assets/create/blockstates/light_blue_to
 f99ca9b4a25aba1ad42f5a704e70a698eb6503e8 assets/create/models/item/crushed_raw_lead.json
 68890c027cd6a094b484a237d3ff5daeb09622af assets/create/models/item/copper_diving_boots.json
 e0fae231a7f421622d9e0974244677a970ec3509 data/create/recipe/cut_scorchia_brick_wall.json
-12c3455bbb7edcea84d47ad6ccde9c209a25d811 data/c/tags/item/plates.json
+0b718fa5d4db0c2f2d34db1096f33a88f12f0ede data/c/tags/item/plates.json
 a1211498c1ac9fb18f4375fbfb0cadef6bfdbb46 data/create/advancement/recipes/building_blocks/cut_scorchia_stairs_from_stone_types_scorchia_stonecutting.json
 0f88de164439640cc175ceef2017f7416b5a7018 assets/create/models/item/sticky_mechanical_piston.json
 63d74987f8461b4e94c00030d380d4891707d2ae assets/create/models/block/threshold_switch/block_ceiling_0.json
@@ -4054,7 +4054,7 @@ ddcf0b336256ba8f2daa1c4d9a0929d82c08a491 assets/create/models/block/polished_cut
 8855eb44a68277668c77858715652d6851fa507f assets/create/models/item/cut_crimsite_slab.json
 a45df6e2c63ca9f56dc3841ea5a7ec41602270bc assets/create/models/block/polished_cut_limestone_stairs.json
 236457bb16bc7e949c16f3f091ee74dc3f3e6973 assets/create/models/item/small_crimsite_brick_wall.json
-8ba98bf390a326abeebfd5d84be5f740c935a8b6 data/create/tags/item/blaze_burner_fuel/special.json
+35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/create/tags/item/blaze_burner_fuel/special.json
 febd2b2f94194441fb73020b667d0398853add4a assets/create/models/block/cyan_valve_handle.json
 0bb1fa8fb9698dae61096483a01b41bf829666b0 assets/create/models/block/cut_dripstone_bricks_wall_post.json
 e038bb0c02dba680ea959693107d4858f9a75922 assets/create/blockstates/creative_fluid_tank.json

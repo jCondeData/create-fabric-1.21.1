@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
-import com.simibubi.create.foundation.fluid.FluidRenderer;
 import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack;
 import com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidTank;
 
@@ -12,6 +11,7 @@ import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.platform.FabricCatnipServices;
 import net.createmod.catnip.render.CachedBuffers;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -73,9 +73,8 @@ public class FluidTankRenderer extends SafeBlockEntityRenderer<FluidTankBlockEnt
 
         ms.pushPose();
         ms.translate(0, clampedLevel - totalHeight, 0);
-        FluidRenderer.renderFluidBox(
-                fluidStack.getFluid(),
-                fluidStack.getAmount(),
+        FabricCatnipServices.FLUID_RENDERER.renderFluidBox(
+                fluidStack.getVariant(),
                 xMin,
                 yMin,
                 zMin,
@@ -86,8 +85,7 @@ public class FluidTankRenderer extends SafeBlockEntityRenderer<FluidTankBlockEnt
                 ms,
                 light,
                 false,
-                true,
-                fluidStack.getComponentsPatch());
+                true);
         ms.popPose();
     }
 

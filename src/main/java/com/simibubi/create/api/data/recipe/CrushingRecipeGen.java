@@ -4,8 +4,8 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
+import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.foundation.data.recipe.CompatMetals;
 
 import net.createmod.catnip.lang.Lang;
@@ -30,7 +30,7 @@ import java.util.function.UnaryOperator;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class CrushingRecipeGen extends ProcessingRecipeGen {
+public abstract class CrushingRecipeGen extends StandardProcessingRecipeGen<CrushingRecipe> {
 
     protected GeneratedRecipe mineralRecycling(
             AllPaletteStoneTypes type,
@@ -47,7 +47,7 @@ public abstract class CrushingRecipeGen extends ProcessingRecipeGen {
 
     protected GeneratedRecipe mineralRecycling(
             AllPaletteStoneTypes type,
-            UnaryOperator<ProcessingRecipeBuilder<ProcessingRecipe<?>>> transform) {
+            UnaryOperator<StandardProcessingRecipe.Builder<CrushingRecipe>> transform) {
         create(
                 Lang.asId(type.name()) + "_recycling",
                 b -> transform.apply(b.require(type.materialTag)));

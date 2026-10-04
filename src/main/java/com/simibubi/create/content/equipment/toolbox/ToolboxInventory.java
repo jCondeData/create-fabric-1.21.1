@@ -23,6 +23,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 
+import org.jetbrains.annotations.ApiStatus.ScheduledForRemoval;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -55,8 +56,8 @@ public class ToolboxInventory extends ItemStackHandler {
                     toolbox -> toolbox.filters,
                     ToolboxInventory::deserialize);
 
-    // TODO - Remove in 1.22
-    @Deprecated(forRemoval = true)
+    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @Deprecated(since = "6.0.6", forRemoval = true)
     public static final Codec<ToolboxInventory> BACKWARDS_COMPAT_CODEC =
             Codec.withAlternative(
                     CODEC,

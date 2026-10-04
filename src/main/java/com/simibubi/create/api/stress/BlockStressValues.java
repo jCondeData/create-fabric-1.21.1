@@ -44,4 +44,8 @@ public class BlockStressValues {
     }
 
     public record GeneratedRpm(int value, boolean mayGenerateLess) {}
+
+    private BlockStressValues() {
+        throw new AssertionError("This class should not be instantiated");
+    }
 }

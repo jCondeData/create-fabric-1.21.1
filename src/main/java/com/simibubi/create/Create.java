@@ -37,6 +37,7 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.simibubi.create.foundation.ponder.FabricStructureProcessing;
 import com.simibubi.create.foundation.recipe.AllIngredients;
+import com.simibubi.create.impl.registry.CreateDataMapsImpl;
 import com.simibubi.create.impl.registry.CreateRegistriesImpl;
 import com.simibubi.create.infrastructure.command.ServerLagger;
 import com.simibubi.create.infrastructure.config.AllConfigs;
@@ -160,6 +161,7 @@ public class Create implements ModInitializer {
         FabricStructureProcessing.init();
         AllBiomeModifiers.bootstrap(); // moved out of datagen
         CreateRegistriesImpl.registerDatapackRegistries();
+        CreateDataMapsImpl.registerDataMaps(); // Porting Lib data maps (blaze burner fuels)
     }
 
     public static void init() {

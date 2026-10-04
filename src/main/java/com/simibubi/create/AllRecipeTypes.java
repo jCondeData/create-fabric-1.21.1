@@ -1,7 +1,6 @@
 package com.simibubi.create;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.simibubi.create.compat.jei.ConversionRecipe;
 import com.simibubi.create.content.equipment.sandPaper.SandPaperPolishingRecipe;
 import com.simibubi.create.content.equipment.toolbox.ToolboxDyeingRecipe;
@@ -11,6 +10,7 @@ import com.simibubi.create.content.kinetics.crafter.MechanicalCraftingRecipe;
 import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
 import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
 import com.simibubi.create.content.kinetics.deployer.ItemApplicationRecipe;
+import com.simibubi.create.content.kinetics.deployer.ItemApplicationRecipeParams;
 import com.simibubi.create.content.kinetics.deployer.ManualApplicationRecipe;
 import com.simibubi.create.content.kinetics.fan.processing.HauntingRecipe;
 import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
@@ -21,8 +21,8 @@ import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.kinetics.saw.CuttingRecipe;
 import com.simibubi.create.content.processing.basin.BasinRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeFactory;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeSerializer;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe.Serializer;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipeSerializer;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import com.simibubi.create.foundation.recipe.ItemCopyingRecipe;
@@ -114,19 +114,24 @@ public enum AllRecipeTypes implements IRecipeTypeInfo, StringRepresentable {
         isProcessingRecipe = false;
     }
 
-    AllRecipeTypes(ProcessingRecipeFactory<?> processingFactory) {
-        this(() -> new ProcessingRecipeSerializer<>(processingFactory));
+    AllRecipeTypes(StandardProcessingRecipe.Factory<?> processingFactory) {
+        this(() -> new Serializer<>(processingFactory));
+        isProcessingRecipe = true;
+    }
+
+    AllRecipeTypes(
+            ProcessingRecipe.Factory<ItemApplicationRecipeParams, ? extends ItemApplicationRecipe>
+                    itemApplicationFactory) {
+        this(() -> new ItemApplicationRecipe.Serializer<>(itemApplicationFactory));
         isProcessingRecipe = true;
     }
 
     @Internal
     public static void register() {
-        // Сериализаторы создаются здесь, а не в конструкторе enum: ProcessingRecipeSerializer
-        // читает CODEC,
-        // который инициализируется после констант. Porting Lib's ShapedRecipePattern$DataMixin
-        // already lifts
-        // vanilla's 3x3 pattern cap, so mechanical crafting recipes larger than 3x3 parse without
-        // extra work here.
+        // Serializers are created here rather than in the enum constructor, so their codecs never
+        // run while the enum constants are still being initialized. Porting Lib's
+        // ShapedRecipePattern$DataMixin already lifts vanilla's 3x3 pattern cap, so mechanical
+        // crafting recipes larger than 3x3 parse without extra work here.
         for (AllRecipeTypes type : values()) {
             if (type.serializerObject == null)
                 type.serializerObject =
@@ -180,15 +185,5 @@ public enum AllRecipeTypes implements IRecipeTypeInfo, StringRepresentable {
                 return string;
             }
         };
-    }
-
-    public <T extends ProcessingRecipe<?>> MapCodec<T> processingCodec() {
-        if (!isProcessingRecipe)
-            throw new AssertionError(
-                    "AllRecipeTypes#processingCodec called on "
-                            + name()
-                            + ", which is not a processing recipe");
-        if (this == DEPLOYING || this == ITEM_APPLICATION) return ItemApplicationRecipe.codec(this);
-        return ProcessingRecipeSerializer.codec(this);
     }
 }

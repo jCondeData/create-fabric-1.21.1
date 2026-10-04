@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A class containing some basic setup for other recipe generators to use. Addons should extend this
  * if they add a custom recipe type that is not a processing recipe type and want to use Create's
- * helpers. For processing recipes extend {@link ProcessingRecipeGen}.
+ * helpers. For processing recipes extend {@link StandardProcessingRecipeGen}.
  *
  * <p>fabric: built on {@link FabricRecipeProvider} so that Fabric resource conditions attached by
  * the recipe builders (e.g. {@code whenModLoaded}) are written into the generated json.

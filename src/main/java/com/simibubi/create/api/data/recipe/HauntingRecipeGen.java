@@ -1,6 +1,7 @@
 package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.fan.processing.HauntingRecipe;
 
 import net.createmod.catnip.registry.RegisteredObjectsHelper;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class HauntingRecipeGen extends ProcessingRecipeGen {
+public abstract class HauntingRecipeGen extends StandardProcessingRecipeGen<HauntingRecipe> {
 
     public GeneratedRecipe convert(ItemLike input, ItemLike result) {
         return convert(() -> Ingredient.of(input), () -> result);

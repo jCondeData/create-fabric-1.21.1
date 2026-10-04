@@ -18,6 +18,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.levelWrappers.SchematicLevel;
@@ -320,8 +321,9 @@ public class TrackTargetingBehaviour<T extends TrackEdgePoint> extends BlockEnti
         if (!(block instanceof ITrackBlock track)) return;
 
         ms.pushPose();
+        var msr = TransformStack.of(ms);
         PartialModel partial =
-                track.prepareTrackOverlay(level, pos, trackState, bezier, direction, ms, type);
+                track.prepareTrackOverlay(msr, level, pos, trackState, bezier, direction, type);
         if (partial != null)
             CachedBuffers.partial(partial, trackState)
                     .translate(.5, 0, .5)

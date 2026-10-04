@@ -15,7 +15,6 @@ import com.simibubi.create.content.kinetics.fan.processing.FanProcessingTypeRegi
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointType;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 import com.simibubi.create.content.logistics.packagePort.PackagePortTargetType;
-import com.simibubi.create.impl.registry.MappedRegistryWithFreezeCallback;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
@@ -24,6 +23,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -100,5 +100,29 @@ public class CreateBuiltInRegistries {
         // make sure the class is loaded.
         // this method is called at the tail of BuiltInRegistries, injected by
         // BuiltInRegistriesMixin.
+    }
+
+    private CreateBuiltInRegistries() {
+        throw new AssertionError("This class should not be instantiated");
+    }
+
+    // fabric: upstream deleted impl.registry.MappedRegistryWithFreezeCallback (unused on NeoForge,
+    // which uses RegistryBuilder#onBake); the port still needs it, so it lives here now.
+    private static class MappedRegistryWithFreezeCallback<T> extends MappedRegistry<T> {
+        private final Runnable freezeCallback;
+
+        private MappedRegistryWithFreezeCallback(
+                ResourceKey<? extends Registry<T>> key,
+                Lifecycle registryLifecycle,
+                Runnable freezeCallback) {
+            super(key, registryLifecycle);
+            this.freezeCallback = freezeCallback;
+        }
+
+        @Override
+        public @NotNull Registry<T> freeze() {
+            freezeCallback.run();
+            return super.freeze();
+        }
     }
 }

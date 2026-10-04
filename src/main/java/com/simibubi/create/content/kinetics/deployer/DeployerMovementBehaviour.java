@@ -16,6 +16,7 @@ import com.simibubi.create.content.schematics.SchematicInstances;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.content.trains.entity.CarriageContraption;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
+import com.simibubi.create.content.trains.track.ITrackBlock;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.BlockHelper;
@@ -43,6 +44,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -168,7 +170,8 @@ public class DeployerMovementBehaviour implements MovementBehaviour {
 
         //		if (ForgeEventFactory.onBlockPlace(player, blocksnapshot, Direction.UP))
         //			blocksnapshot.restore(true, false);
-        if (AllBlocks.TRACK.has(blockState)) player.placedTracks = true;
+        if (blockState.getBlock() instanceof BaseRailBlock
+                || blockState.getBlock() instanceof ITrackBlock) player.placedTracks = true;
     }
 
     @Override

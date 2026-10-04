@@ -53,4 +53,8 @@ public class CreateRegistries {
     private static <T> ResourceKey<Registry<T>> key(String name) {
         return ResourceKey.createRegistryKey(Create.asResource(name));
     }
+
+    private CreateRegistries() {
+        throw new AssertionError("This class should not be instantiated");
+    }
 }

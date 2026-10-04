@@ -1,7 +1,7 @@
 package com.simibubi.create.content.kinetics.crusher;
 
 import com.simibubi.create.AllRecipeTypes;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeParams;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
 
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.Level;

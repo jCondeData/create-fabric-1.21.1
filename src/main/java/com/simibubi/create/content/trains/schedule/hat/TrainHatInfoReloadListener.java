@@ -87,9 +87,6 @@ public class TrainHatInfoReloadListener {
             return new TrainHatInfo("", 0, new Vec3(0.0F, -3.0F, 0.0F), 1.18F);
         }
 
-        if (entity.getType().equals(EntityType.BREEZE))
-            return new TrainHatInfo("body/head", 0, new Vec3(0.0F, -5.0F, -0.1F), 0.8F);
-
         return ENTITY_INFO_MAP.getOrDefault(entity.getType(), DEFAULT);
     }
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// TODO: 1.21.7 - Move into api package
 public record PotatoCannonProjectileType(
         HolderSet<Item> items,
         int reloadTicks,

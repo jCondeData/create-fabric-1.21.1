@@ -338,7 +338,7 @@ dependencies {
     modImplementation(include("io.github.fabricators_of_create.Porting-Lib:transfer:3.1.0-beta.90+1.21.1")!!)
 
     modRuntimeOnly(include("io.github.fabricators_of_create.Porting-Lib:registry:3.1.0-beta.90+1.21.1")!!)
-    modRuntimeOnly(include("io.github.fabricators_of_create.Porting-Lib:resources:3.1.0-beta.90+1.21.1")!!)
+    modImplementation(include("io.github.fabricators_of_create.Porting-Lib:resources:3.1.0-beta.90+1.21.1")!!) // data maps
     modRuntimeOnly(include("io.github.fabricators_of_create.Porting-Lib:model_data:3.1.0-beta.90+1.21.1")!!)
 }
 

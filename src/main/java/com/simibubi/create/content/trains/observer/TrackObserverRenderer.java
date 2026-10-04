@@ -6,6 +6,7 @@ import com.simibubi.create.content.trains.track.TrackTargetingBehaviour;
 import com.simibubi.create.content.trains.track.TrackTargetingBehaviour.RenderedTrackOverlayType;
 import com.simibubi.create.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 
+import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -30,6 +31,9 @@ public class TrackObserverRenderer extends SmartBlockEntityRenderer<TrackObserve
             int light,
             int overlay) {
         super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
+
+        if (VisualizationManager.supportsVisualization(be.getLevel())) return;
+
         BlockPos pos = be.getBlockPos();
 
         TrackTargetingBehaviour<TrackObserver> target = be.edgePoint;

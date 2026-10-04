@@ -6,7 +6,7 @@ import com.simibubi.create.compat.jei.category.animations.AnimatedSpout;
 import com.simibubi.create.content.fluids.potion.PotionFluidHandler;
 import com.simibubi.create.content.fluids.transfer.FillingRecipe;
 import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.item.ItemHelper;
@@ -62,7 +62,7 @@ public class SpoutCategory extends CreateRecipeCategory<FillingRecipe> {
                 Ingredient bottle = Ingredient.of(Items.GLASS_BOTTLE);
                 ResourceLocation id = Create.asResource("potions");
                 FillingRecipe recipe =
-                        new ProcessingRecipeBuilder<>(FillingRecipe::new, id)
+                        new StandardProcessingRecipe.Builder<>(FillingRecipe::new, id)
                                 .withItemIngredients(bottle)
                                 .withFluidIngredients(
                                         FluidIngredient.fromFluidStack(fluidFromPotionItem))
@@ -121,7 +121,7 @@ public class SpoutCategory extends CreateRecipeCategory<FillingRecipe> {
                 consumer.accept(
                         new RecipeHolder<>(
                                 recipeId,
-                                new ProcessingRecipeBuilder<>(FillingRecipe::new, recipeId)
+                                new StandardProcessingRecipe.Builder<>(FillingRecipe::new, recipeId)
                                         .withItemIngredients(bucket)
                                         .withFluidIngredients(
                                                 FluidIngredient.fromFluidStack(fluidCopy))

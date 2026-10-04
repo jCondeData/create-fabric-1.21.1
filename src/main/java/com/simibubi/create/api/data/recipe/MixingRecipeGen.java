@@ -1,6 +1,7 @@
 package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.HolderLookup;
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class MixingRecipeGen extends ProcessingRecipeGen {
+public abstract class MixingRecipeGen extends StandardProcessingRecipeGen<MixingRecipe> {
 
     public MixingRecipeGen(
             FabricDataOutput output,

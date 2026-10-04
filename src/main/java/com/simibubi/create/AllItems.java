@@ -69,7 +69,6 @@ import com.simibubi.create.foundation.data.AssetLookup;
 import com.simibubi.create.foundation.data.BuilderTransformers;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.data.recipe.CompatMetals;
-import com.simibubi.create.foundation.item.CombustibleItem;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TagDependentIngredientItem;
 import com.tterrag.registrate.builders.ItemBuilder;
@@ -121,11 +120,12 @@ public class AllItems {
             TRANSMITTER = ingredient("transmitter"),
             PULP = ingredient("pulp");
 
-    public static final ItemEntry<CombustibleItem> CARDBOARD =
+    public static final ItemEntry<Item> CARDBOARD =
             REGISTRATE
-                    .item("cardboard", CombustibleItem::new)
-                    .tag(commonItemTag("plates/cardboard"))
-                    .onRegister(i -> i.setBurnTime(1000))
+                    .item("cardboard", Item::new)
+                    .tag(commonItemTag("plates/cardboard"), PLATES.tag)
+                    // fabric: Registrate-Fabric's burnTime() resolves the entry before it exists
+                    .onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
                     .register();
 
     public static final ItemEntry<SequencedAssemblyItem>
@@ -141,22 +141,22 @@ public class AllItems {
                     .tag(AllItemTags.UPRIGHT_ON_BELT.tag)
                     .register();
 
-    public static final ItemEntry<CombustibleItem> BLAZE_CAKE =
+    public static final ItemEntry<Item> BLAZE_CAKE =
             REGISTRATE
-                    .item("blaze_cake", CombustibleItem::new)
-                    .tag(AllItemTags.BLAZE_BURNER_FUEL_SPECIAL.tag, AllItemTags.UPRIGHT_ON_BELT.tag)
-                    .onRegister(i -> i.setBurnTime(6400))
+                    .item("blaze_cake", Item::new)
+                    .tag(AllItemTags.UPRIGHT_ON_BELT.tag)
+                    // fabric: the superheated blaze burner fuel data map entry (3200) is generated
+                    // by CreateDatamapProvider, Registrate-Fabric has no ItemBuilder#dataMap
+                    .onRegister(i -> FuelRegistry.INSTANCE.add(i, 6400))
                     .register();
 
-    public static final ItemEntry<CombustibleItem> CREATIVE_BLAZE_CAKE =
+    public static final ItemEntry<Item> CREATIVE_BLAZE_CAKE =
             REGISTRATE
-                    .item("creative_blaze_cake", CombustibleItem::new)
+                    .item("creative_blaze_cake", Item::new)
                     .properties(p -> p.rarity(Rarity.EPIC))
                     .tag(AllItemTags.UPRIGHT_ON_BELT.tag)
-                    .onRegister(
-                            i -> i.setBurnTime(Short.MAX_VALUE)) // fabric: furnaces are limited to
-                    // Short values without Forge
-                    // patches
+                    // fabric: furnaces are limited to Short values without Forge patches
+                    .onRegister(i -> FuelRegistry.INSTANCE.add(i, (int) Short.MAX_VALUE))
                     .register();
 
     public static final ItemEntry<Item> BAR_OF_CHOCOLATE =
