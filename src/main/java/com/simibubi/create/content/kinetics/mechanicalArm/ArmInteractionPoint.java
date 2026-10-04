@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ArmInteractionPoint {
 
@@ -176,8 +176,8 @@ public class ArmInteractionPoint {
     }
 
     public enum Mode {
-        DEPOSIT("create.mechanical_arm.deposit_to", 0xDDC166),
-        TAKE("create.mechanical_arm.extract_from", 0x7FCDE0);
+        DEPOSIT("mechanical_arm.deposit_to", 0xDDC166),
+        TAKE("mechanical_arm.extract_from", 0x7FCDE0);
 
         private final String translationKey;
         private final int color;

@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
@@ -26,13 +25,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 public class ItemHelper {
 
@@ -58,8 +56,8 @@ public class ItemHelper {
         ItemStack result = out.copy();
         result.setCount(in.getCount() * out.getCount());
 
-        while (result.getCount() > result.getOrDefault(DataComponents.MAX_STACK_SIZE, 64)) {
-            stacks.add(result.split(result.getOrDefault(DataComponents.MAX_STACK_SIZE, 64)));
+        while (result.getCount() > result.getMaxStackSize()) {
+            stacks.add(result.split(result.getMaxStackSize()));
         }
 
         stacks.add(result);
@@ -69,10 +67,7 @@ public class ItemHelper {
     public static void addToList(ItemStack stack, List<ItemStack> stacks) {
         for (ItemStack s : stacks) {
             if (!ItemStack.isSameItemSameComponents(stack, s)) continue;
-            int transferred =
-                    Math.min(
-                            s.getOrDefault(DataComponents.MAX_STACK_SIZE, 64) - s.getCount(),
-                            stack.getCount());
+            int transferred = Math.min(s.getMaxStackSize() - s.getCount(), stack.getCount());
             s.grow(transferred);
             stack.shrink(transferred);
         }
@@ -305,7 +300,7 @@ public class ItemHelper {
 
     public static boolean canItemStackAmountsStack(ItemStack a, ItemStack b) {
         return ItemStack.isSameItemSameComponents(a, b)
-                && a.getCount() + b.getCount() <= a.getOrDefault(DataComponents.MAX_STACK_SIZE, 64);
+                && a.getCount() + b.getCount() <= a.getMaxStackSize();
     }
 
     public static int truncateLong(long l) {
@@ -358,6 +353,10 @@ public class ItemHelper {
     public static void copyContents(SlottedStackStorage from, SlottedStackStorage to) {
         if (from.getSlotCount() != to.getSlotCount()) {
             throw new IllegalArgumentException("Slot count mismatch");
+        }
+
+        for (int slot = to.getSlotCount() - 1; slot >= 0; slot--) {
+            to.setStackInSlot(slot, ItemStack.EMPTY);
         }
 
         for (int i = 0; i < from.getSlotCount(); i++) {

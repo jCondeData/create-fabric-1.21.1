@@ -1,6 +1,7 @@
 package com.simibubi.create.content.equipment.clipboard;
 
 import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides.ClipboardType;
 import com.simibubi.create.foundation.recipe.ItemCopyingRecipe.SupportsItemCopying;
 
 import net.createmod.catnip.gui.ScreenOpener;
@@ -9,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,7 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class ClipboardBlockItem extends BlockItem implements SupportsItemCopying {
 
@@ -29,7 +31,7 @@ public class ClipboardBlockItem extends BlockItem implements SupportsItemCopying
         super(pBlock, pProperties);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Player player = context.getPlayer();
@@ -43,7 +45,6 @@ public class ClipboardBlockItem extends BlockItem implements SupportsItemCopying
             BlockPos pPos, Level pLevel, Player pPlayer, ItemStack pStack, BlockState pState) {
         if (pLevel.isClientSide()) return false;
         if (!(pLevel.getBlockEntity(pPos) instanceof ClipboardBlockEntity cbe)) return false;
-        cbe.dataContainer = pStack.copyWithCount(1);
         cbe.notifyUpdate();
         return true;
     }
@@ -56,16 +57,20 @@ public class ClipboardBlockItem extends BlockItem implements SupportsItemCopying
 
         player.getCooldowns().addCooldown(heldItem.getItem(), 10);
         if (world.isClientSide)
-            CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> openScreen(player, heldItem));
-        heldItem.set(AllDataComponents.CLIPBOARD_TYPE, ClipboardOverrides.ClipboardType.EDITING);
+            CatnipServices.PLATFORM.executeOnClientOnly(
+                    () -> () -> openScreen(player, heldItem.getComponents()));
+        ClipboardContent content =
+                heldItem.getOrDefault(AllDataComponents.CLIPBOARD_CONTENT, ClipboardContent.EMPTY);
+        heldItem.set(AllDataComponents.CLIPBOARD_CONTENT, content.setType(ClipboardType.EDITING));
 
         return InteractionResultHolder.success(heldItem);
     }
 
     @Environment(EnvType.CLIENT)
-    private void openScreen(Player player, ItemStack stack) {
+    private void openScreen(Player player, DataComponentMap components) {
         if (Minecraft.getInstance().player == player)
-            ScreenOpener.open(new ClipboardScreen(player.getInventory().selected, stack, null));
+            ScreenOpener.open(
+                    new ClipboardScreen(player.getInventory().selected, components, null));
     }
 
     public void registerModelOverrides() {
@@ -75,6 +80,6 @@ public class ClipboardBlockItem extends BlockItem implements SupportsItemCopying
 
     @Override
     public DataComponentType<?> getComponentType() {
-        return AllDataComponents.CLIPBOARD_PAGES;
+        return AllDataComponents.CLIPBOARD_CONTENT;
     }
 }

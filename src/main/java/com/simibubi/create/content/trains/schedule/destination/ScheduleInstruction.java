@@ -15,9 +15,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public abstract class ScheduleInstruction extends ScheduleDataEntry {
     public static final StreamCodec<RegistryFriendlyByteBuf, ScheduleInstruction> STREAM_CODEC =

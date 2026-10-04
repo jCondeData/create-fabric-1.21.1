@@ -48,10 +48,9 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class ElevatorContactBlock extends WrenchableDirectionalBlock
         implements IBE<ElevatorContactBlockEntity>,
@@ -126,7 +125,7 @@ public class ElevatorContactBlock extends WrenchableDirectionalBlock
         boolean isPowered = pState.getValue(POWERED);
         if (isPowered == pLevel.hasNeighborSignal(pPos)) return;
 
-        pLevel.setBlock(pPos, pState.cycle(POWERED), 2);
+        pLevel.setBlock(pPos, pState.cycle(POWERED), Block.UPDATE_CLIENTS);
 
         if (isPowered) return;
         if (pState.getValue(CALLING)) return;
@@ -142,7 +141,7 @@ public class ElevatorContactBlock extends WrenchableDirectionalBlock
             Level pLevel,
             BlockPos pPos,
             boolean powered) {
-        pLevel.setBlock(pPos, pState.cycle(CALLING), 2);
+        pLevel.setBlock(pPos, pState.cycle(CALLING), Block.UPDATE_CLIENTS);
 
         for (BlockPos otherPos : elevatorColumn.getContacts()) {
             if (otherPos.equals(pPos)) continue;
@@ -153,7 +152,7 @@ public class ElevatorContactBlock extends WrenchableDirectionalBlock
         }
 
         if (powered) pState = pState.setValue(POWERED, true);
-        pLevel.setBlock(pPos, pState.setValue(CALLING, true), 2);
+        pLevel.setBlock(pPos, pState.setValue(CALLING, true), Block.UPDATE_CLIENTS);
         pLevel.updateNeighborsAt(pPos, this);
 
         elevatorColumn.target(pPos.getY());

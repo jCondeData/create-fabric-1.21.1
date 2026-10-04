@@ -264,6 +264,7 @@ import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.data.MetalBarsGen;
 import com.simibubi.create.foundation.data.ModelGen;
 import com.simibubi.create.foundation.data.SharedProperties;
+import com.simibubi.create.foundation.data.recipe.CommonMetal;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.UncontainableBlockItem;
 import com.simibubi.create.foundation.mixin.accessor.BlockLootSubProviderAccessor;
@@ -280,7 +281,6 @@ import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import net.createmod.catnip.data.Couple;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
-import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.AxisDirection;
@@ -320,6 +320,8 @@ import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+
+import java.util.Map;
 
 @SuppressWarnings("removal")
 public class AllBlocks {
@@ -2808,8 +2810,7 @@ public class AllBlocks {
                     .recipe(
                             (c, p) ->
                                     p.stonecutting(
-                                            DataIngredient.tag(
-                                                    AllTags.commonItemTag("ingots/brass")),
+                                            DataIngredient.tag(CommonMetal.BRASS.ingots),
                                             RecipeCategory.DECORATIONS,
                                             c::get,
                                             2))
@@ -2827,7 +2828,7 @@ public class AllBlocks {
                     .recipe(
                             (c, p) ->
                                     p.stonecutting(
-                                            DataIngredient.tag(ConventionalItemTags.COPPER_INGOTS),
+                                            DataIngredient.tag(CommonMetal.COPPER.ingots),
                                             RecipeCategory.DECORATIONS,
                                             c::get,
                                             2))
@@ -2958,6 +2959,7 @@ public class AllBlocks {
                     .initialProperties(SharedProperties::copperMetal)
                     .properties(p -> p.forceSolidOn())
                     .transform(pickaxeOnly())
+                    .tag(AllBlockTags.SAFE_NBT.tag)
                     .blockstate(
                             (c, p) ->
                                     p.horizontalFaceBlock(c.get(), AssetLookup.standardModel(c, p)))
@@ -3206,7 +3208,7 @@ public class AllBlocks {
                     .transform(
                             BuilderTransformers.ladder(
                                     "brass",
-                                    () -> DataIngredient.tag(AllTags.commonItemTag("ingots/brass")),
+                                    () -> DataIngredient.tag(CommonMetal.BRASS.ingots),
                                     MapColor.TERRACOTTA_YELLOW))
                     .register();
 
@@ -3216,7 +3218,7 @@ public class AllBlocks {
                     .transform(
                             BuilderTransformers.ladder(
                                     "copper",
-                                    () -> DataIngredient.tag(ConventionalItemTags.COPPER_INGOTS),
+                                    () -> DataIngredient.tag(CommonMetal.COPPER.ingots),
                                     MapColor.COLOR_ORANGE))
                     .register();
 
@@ -3230,13 +3232,13 @@ public class AllBlocks {
             MetalBarsGen.createBars(
                     "brass",
                     true,
-                    () -> DataIngredient.tag(AllTags.commonItemTag("ingots/brass")),
+                    () -> DataIngredient.tag(CommonMetal.BRASS.ingots),
                     MapColor.TERRACOTTA_YELLOW);
     public static final BlockEntry<IronBarsBlock> COPPER_BARS =
             MetalBarsGen.createBars(
                     "copper",
                     true,
-                    () -> DataIngredient.tag(ConventionalItemTags.COPPER_INGOTS),
+                    () -> DataIngredient.tag(CommonMetal.COPPER.ingots),
                     MapColor.COLOR_ORANGE);
 
     public static final BlockEntry<MetalScaffoldingBlock> ANDESITE_SCAFFOLD =
@@ -3258,7 +3260,7 @@ public class AllBlocks {
                     .transform(
                             BuilderTransformers.scaffold(
                                     "brass",
-                                    () -> DataIngredient.tag(AllTags.commonItemTag("ingots/brass")),
+                                    () -> DataIngredient.tag(CommonMetal.BRASS.ingots),
                                     MapColor.TERRACOTTA_YELLOW,
                                     AllSpriteShifts.BRASS_SCAFFOLD,
                                     AllSpriteShifts.BRASS_SCAFFOLD_INSIDE,
@@ -3271,7 +3273,7 @@ public class AllBlocks {
                     .transform(
                             BuilderTransformers.scaffold(
                                     "copper",
-                                    () -> DataIngredient.tag(ConventionalItemTags.COPPER_INGOTS),
+                                    () -> DataIngredient.tag(CommonMetal.COPPER.ingots),
                                     MapColor.COLOR_ORANGE,
                                     AllSpriteShifts.COPPER_SCAFFOLD,
                                     AllSpriteShifts.COPPER_SCAFFOLD_INSIDE,
@@ -3342,8 +3344,7 @@ public class AllBlocks {
                     .recipe(
                             (c, p) ->
                                     p.stonecutting(
-                                            DataIngredient.tag(
-                                                    AllTags.commonItemTag("ingots/zinc")),
+                                            DataIngredient.tag(CommonMetal.ZINC.ingots),
                                             RecipeCategory.BUILDING_BLOCKS,
                                             c::get,
                                             4))
@@ -3359,8 +3360,7 @@ public class AllBlocks {
                     .recipe(
                             (c, p) ->
                                     p.stonecutting(
-                                            DataIngredient.tag(
-                                                    AllTags.commonItemTag("ingots/zinc")),
+                                            DataIngredient.tag(CommonMetal.ZINC.ingots),
                                             RecipeCategory.BUILDING_BLOCKS,
                                             c::get,
                                             4))
@@ -3450,53 +3450,37 @@ public class AllBlocks {
 
     public static final BlockEntry<SlidingDoorBlock> ANDESITE_DOOR =
             REGISTRATE
-                    .block("andesite_door", p -> SlidingDoorBlock.metal(p, true))
+                    .block("andesite_door", p -> SlidingDoorBlock.stone(p, true))
                     .transform(BuilderTransformers.slidingDoor("andesite"))
-                    .properties(
-                            p -> p.mapColor(MapColor.STONE).sound(SoundType.STONE).noOcclusion())
+                    .properties(p -> p.mapColor(MapColor.STONE).noOcclusion())
                     .register();
 
     public static final BlockEntry<SlidingDoorBlock> BRASS_DOOR =
             REGISTRATE
-                    .block("brass_door", p -> SlidingDoorBlock.metal(p, false))
+                    .block("brass_door", p -> SlidingDoorBlock.stone(p, false))
                     .transform(BuilderTransformers.slidingDoor("brass"))
-                    .properties(
-                            p ->
-                                    p.mapColor(MapColor.TERRACOTTA_YELLOW)
-                                            .sound(SoundType.STONE)
-                                            .noOcclusion())
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW).noOcclusion())
                     .register();
 
     public static final BlockEntry<SlidingDoorBlock> COPPER_DOOR =
             REGISTRATE
-                    .block("copper_door", p -> SlidingDoorBlock.metal(p, true))
+                    .block("copper_door", p -> SlidingDoorBlock.stone(p, true))
                     .transform(BuilderTransformers.slidingDoor("copper"))
-                    .properties(
-                            p ->
-                                    p.mapColor(MapColor.COLOR_ORANGE)
-                                            .sound(SoundType.STONE)
-                                            .noOcclusion())
+                    .properties(p -> p.mapColor(MapColor.COLOR_ORANGE).noOcclusion())
                     .register();
 
     public static final BlockEntry<SlidingDoorBlock> TRAIN_DOOR =
             REGISTRATE
                     .block("train_door", p -> SlidingDoorBlock.metal(p, false))
                     .transform(BuilderTransformers.slidingDoor("train"))
-                    .properties(
-                            p ->
-                                    p.mapColor(MapColor.TERRACOTTA_CYAN)
-                                            .sound(SoundType.NETHERITE_BLOCK)
-                                            .noOcclusion())
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_CYAN).noOcclusion())
                     .register();
 
     public static final BlockEntry<TrainTrapdoorBlock> TRAIN_TRAPDOOR =
             REGISTRATE
-                    .block("train_trapdoor", TrainTrapdoorBlock::new)
+                    .block("train_trapdoor", TrainTrapdoorBlock::metal)
                     .initialProperties(SharedProperties::softMetal)
-                    .properties(
-                            p ->
-                                    p.mapColor(MapColor.TERRACOTTA_CYAN)
-                                            .sound(SoundType.NETHERITE_BLOCK))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_CYAN))
                     .transform(BuilderTransformers.trapdoor(true))
                     .register();
 
@@ -3504,15 +3488,15 @@ public class AllBlocks {
             REGISTRATE
                     .block("framed_glass_door", p -> SlidingDoorBlock.glass(p, false))
                     .transform(BuilderTransformers.slidingDoor("glass"))
-                    .properties(p -> p.mapColor(MapColor.NONE).sound(SoundType.GLASS).noOcclusion())
+                    .properties(p -> p.mapColor(MapColor.NONE).noOcclusion())
                     .register();
 
     public static final BlockEntry<TrainTrapdoorBlock> FRAMED_GLASS_TRAPDOOR =
             REGISTRATE
-                    .block("framed_glass_trapdoor", TrainTrapdoorBlock::new)
+                    .block("framed_glass_trapdoor", TrainTrapdoorBlock::glass)
                     .initialProperties(SharedProperties::softMetal)
                     .transform(BuilderTransformers.trapdoor(false))
-                    .properties(p -> p.mapColor(MapColor.NONE).sound(SoundType.GLASS).noOcclusion())
+                    .properties(p -> p.mapColor(MapColor.NONE).noOcclusion())
                     .onRegister(connectedTextures(TrapdoorCTBehaviour::new))
                     .addLayer(() -> RenderType::cutoutMipped)
                     .register();
@@ -3550,7 +3534,16 @@ public class AllBlocks {
                             })
                     .tag(BlockTags.NEEDS_IRON_TOOL)
                     .tag(Tags.Blocks.ORES)
-                    .transform(tagBlockAndItem("ores/zinc", "zinc_ores", "ores_in_ground/stone"))
+                    // fabric: also keeps the legacy c:zinc_ores tags
+                    .transform(
+                            tagBlockAndItem(
+                                    Map.of(
+                                            CommonMetal.ZINC.ores.blocks(),
+                                            CommonMetal.ZINC.ores.items(),
+                                            Tags.Blocks.ORES_IN_GROUND_STONE,
+                                            Tags.Items.ORES_IN_GROUND_STONE,
+                                            AllTags.commonBlockTag("zinc_ores"),
+                                            AllTags.commonItemTag("zinc_ores"))))
                     .tag(Tags.Items.ORES)
                     .build()
                     .register();
@@ -3588,8 +3581,16 @@ public class AllBlocks {
                             })
                     .tag(BlockTags.NEEDS_IRON_TOOL)
                     .tag(Tags.Blocks.ORES)
+                    // fabric: also keeps the legacy c:zinc_ores tags
                     .transform(
-                            tagBlockAndItem("ores/zinc", "zinc_ores", "ores_in_ground/deepslate"))
+                            tagBlockAndItem(
+                                    Map.of(
+                                            CommonMetal.ZINC.ores.blocks(),
+                                            CommonMetal.ZINC.ores.items(),
+                                            Tags.Blocks.ORES_IN_GROUND_DEEPSLATE,
+                                            Tags.Items.ORES_IN_GROUND_DEEPSLATE,
+                                            AllTags.commonBlockTag("zinc_ores"),
+                                            AllTags.commonItemTag("zinc_ores"))))
                     .tag(Tags.Items.ORES)
                     .build()
                     .register();
@@ -3603,7 +3604,14 @@ public class AllBlocks {
                     .tag(Tags.Blocks.STORAGE_BLOCKS)
                     .tag(BlockTags.NEEDS_IRON_TOOL)
                     .lang("Block of Raw Zinc")
-                    .transform(tagBlockAndItem("storage_blocks/raw_zinc", "raw_zinc_blocks"))
+                    // fabric: also keeps the legacy c:raw_zinc_blocks tags
+                    .transform(
+                            tagBlockAndItem(
+                                    Map.of(
+                                            CommonMetal.ZINC.rawStorageBlocks.blocks(),
+                                            CommonMetal.ZINC.rawStorageBlocks.items(),
+                                            AllTags.commonBlockTag("raw_zinc_blocks"),
+                                            AllTags.commonItemTag("raw_zinc_blocks"))))
                     .tag(Tags.Items.STORAGE_BLOCKS)
                     .build()
                     .register();
@@ -3617,7 +3625,14 @@ public class AllBlocks {
                     .tag(BlockTags.NEEDS_IRON_TOOL)
                     .tag(Tags.Blocks.STORAGE_BLOCKS)
                     .tag(BlockTags.BEACON_BASE_BLOCKS)
-                    .transform(tagBlockAndItem("zinc_blocks"))
+                    // fabric: also keeps the legacy c:zinc_blocks tags
+                    .transform(
+                            tagBlockAndItem(
+                                    Map.of(
+                                            CommonMetal.ZINC.storageBlocks.blocks(),
+                                            CommonMetal.ZINC.storageBlocks.items(),
+                                            AllTags.commonBlockTag("zinc_blocks"),
+                                            AllTags.commonItemTag("zinc_blocks"))))
                     .tag(Tags.Items.STORAGE_BLOCKS)
                     .build()
                     .lang("Block of Zinc")
@@ -3631,7 +3646,14 @@ public class AllBlocks {
                     .transform(pickaxeOnly())
                     .blockstate(simpleCubeAll("andesite_block"))
                     .tag(Tags.Blocks.STORAGE_BLOCKS)
-                    .transform(tagBlockAndItem("andesite_alloy_blocks"))
+                    // fabric: also keeps the legacy c:andesite_alloy_blocks tags
+                    .transform(
+                            tagBlockAndItem(
+                                    Map.of(
+                                            AllBlockTags.ANDESITE_ALLOY_STORAGE_BLOCKS.tag,
+                                            AllItemTags.ANDESITE_ALLOY_STORAGE_BLOCKS.tag,
+                                            AllTags.commonBlockTag("andesite_alloy_blocks"),
+                                            AllTags.commonItemTag("andesite_alloy_blocks"))))
                     .tag(Tags.Items.STORAGE_BLOCKS)
                     .build()
                     .lang("Block of Andesite Alloy")
@@ -3664,7 +3686,14 @@ public class AllBlocks {
                     .tag(BlockTags.NEEDS_IRON_TOOL)
                     .tag(Tags.Blocks.STORAGE_BLOCKS)
                     .tag(BlockTags.BEACON_BASE_BLOCKS)
-                    .transform(tagBlockAndItem("brass_blocks"))
+                    // fabric: also keeps the legacy c:brass_blocks tags
+                    .transform(
+                            tagBlockAndItem(
+                                    Map.of(
+                                            CommonMetal.BRASS.storageBlocks.blocks(),
+                                            CommonMetal.BRASS.storageBlocks.items(),
+                                            AllTags.commonBlockTag("brass_blocks"),
+                                            AllTags.commonItemTag("brass_blocks"))))
                     .tag(Tags.Items.STORAGE_BLOCKS)
                     .build()
                     .lang("Block of Brass")
@@ -3685,11 +3714,11 @@ public class AllBlocks {
                     .transform(axeOnly())
                     .blockstate(BlockStateGen.horizontalAxisBlockProvider(false))
                     .tag(Tags.Blocks.STORAGE_BLOCKS)
-                    .tag(AllTags.commonBlockTag("storage_blocks/cardboard"))
+                    .tag(AllBlockTags.CARDBOARD_STORAGE_BLOCKS.tag)
                     .item()
                     // fabric: Registrate-Fabric's burnTime() resolves the entry before it exists
                     .onRegister(item -> FuelRegistry.INSTANCE.add(item, 4000))
-                    .tag(AllTags.commonItemTag("storage_blocks/cardboard"))
+                    .tag(AllItemTags.CARDBOARD_STORAGE_BLOCKS.tag)
                     .tag(Tags.Items.STORAGE_BLOCKS)
                     .build()
                     .lang("Block of Cardboard")
@@ -3861,7 +3890,7 @@ public class AllBlocks {
                     CopperBlockSet.DEFAULT_VARIANTS,
                     (c, p) -> {
                         p.stonecutting(
-                                DataIngredient.tag(ConventionalItemTags.COPPER_INGOTS),
+                                DataIngredient.tag(CommonMetal.COPPER.ingots),
                                 RecipeCategory.BUILDING_BLOCKS,
                                 c::get,
                                 2);
@@ -3882,7 +3911,7 @@ public class AllBlocks {
                     CopperBlockSet.DEFAULT_VARIANTS,
                     (c, p) -> {
                         p.stonecutting(
-                                DataIngredient.tag(ConventionalItemTags.COPPER_INGOTS),
+                                DataIngredient.tag(CommonMetal.COPPER.ingots),
                                 RecipeCategory.BUILDING_BLOCKS,
                                 c::get,
                                 2);

@@ -89,7 +89,7 @@ public class AllItemAttributeTypes {
             COMPOSTABLE =
                     singleton(
                             "compostable",
-                            s -> ComposterBlock.COMPOSTABLES.containsKey(s.getItem())),
+                            s -> ComposterBlock.COMPOSTABLES.getFloat(s.getItem()) > 0),
             IN_TAG = register("in_tag", new InTagAttribute.Type()),
             IN_ITEM_GROUP = register("in_item_group", new InItemGroupAttribute.Type()),
             ADDED_BY = register("added_by", new AddedByAttribute.Type()),

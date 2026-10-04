@@ -6,10 +6,10 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class DeployerRecipeSearchEvent {
     private boolean canceled = false;

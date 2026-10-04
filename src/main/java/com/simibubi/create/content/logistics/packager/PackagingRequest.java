@@ -6,8 +6,7 @@ import net.minecraft.world.item.ItemStack;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public record PackagingRequest(
         ItemStack item,

@@ -2,32 +2,23 @@ package com.simibubi.create.foundation;
 
 import com.simibubi.create.AllBlockEntityTypes;
 
-import net.createmod.catnip.nbt.NBTHelper;
 import net.createmod.catnip.nbt.NBTProcessors;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public class CreateNBTProcessors {
     public static void register() {
-
-        NBTProcessors.addProcessor(
-                BlockEntityType.SIGN,
-                data -> {
-                    for (int i = 0; i < 4; ++i) {
-                        if (hasClickEvent(data.getString("Text" + (i + 1)))) return null;
-                    }
-                    return data;
-                });
-
         NBTProcessors.addProcessor(
                 BlockEntityType.LECTERN,
                 data -> {
@@ -58,27 +49,41 @@ public class CreateNBTProcessors {
 
         NBTProcessors.addProcessor(
                 AllBlockEntityTypes.CREATIVE_CRATE.get(), NBTProcessors.itemProcessor("Filter"));
-        NBTProcessors.addProcessor(
-                AllBlockEntityTypes.PLACARD.get(), NBTProcessors.itemProcessor("Item"));
     }
 
     public static CompoundTag clipboardProcessor(CompoundTag data) {
         if (!data.contains("Item", Tag.TAG_COMPOUND)) return data;
-        CompoundTag book = data.getCompound("Item");
+        CompoundTag item = data.getCompound("Item");
 
-        if (!book.contains("tag", Tag.TAG_COMPOUND)) return data;
-        CompoundTag itemData = book.getCompound("tag");
+        if (!item.contains("components", Tag.TAG_COMPOUND)) return data;
+        CompoundTag itemComponents = item.getCompound("components");
 
-        for (List<String> entries :
-                NBTHelper.readCompoundList(
-                        itemData.getList("Pages", Tag.TAG_COMPOUND),
-                        pageTag ->
-                                NBTHelper.readCompoundList(
-                                        pageTag.getList("Entries", Tag.TAG_COMPOUND),
-                                        tag -> tag.getString("Text")))) {
-            for (String entry : entries) if (hasClickEvent(entry)) return null;
+        if (!itemComponents.contains("create:clipboard_pages", Tag.TAG_LIST)) return data;
+        ListTag pages = itemComponents.getList("create:clipboard_pages", Tag.TAG_LIST);
+
+        for (Tag page : pages) {
+            if (!(page instanceof ListTag entries)) return data;
+
+            for (int i = 0; i < entries.size(); i++) {
+                CompoundTag entry = entries.getCompound(i);
+
+                // fabric: Catnip checks a Component, so decode the entry's text tag directly
+                if (hasClickEvent(entry.get("text"))) return null;
+            }
         }
+
         return data;
+    }
+
+    private static boolean hasClickEvent(@Nullable Tag componentTag) {
+        if (componentTag == null) return false;
+        return ComponentSerialization.CODEC
+                .parse(
+                        RegistryAccess.EMPTY.createSerializationContext(NbtOps.INSTANCE),
+                        componentTag)
+                .result()
+                .map(NBTProcessors::textComponentHasClickEvent)
+                .orElse(false);
     }
 
     /**

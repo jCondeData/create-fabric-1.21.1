@@ -46,8 +46,6 @@ public class SuperGlueItem extends Item {
         return false;
     }
 
-    public static void onBroken(Player player) {}
-
     @Environment(EnvType.CLIENT)
     public static void spawnParticles(
             Level world, BlockPos pos, Direction direction, boolean fullBlock) {

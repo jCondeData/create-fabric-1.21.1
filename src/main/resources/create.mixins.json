@@ -14,15 +14,14 @@
     "CustomItemUseEffectsMixin",
     "EnchantedCountIncreaseFunctionMixin",
     "EntityMixin",
+    "ItemStackMixin",
     "LavaSwimmingMixin",
     "MapItemSavedDataMixin",
     "MobMixin",
     "PlayerMixin",
     "ProjectileUtilMixin",
-    "ShulkerBoxBlockMixin",
     "SmithingMenuMixin",
     "SmithingTrimRecipeMixin",
-    "TestCommandMixin",
     "WaterWheelFluidSpreadMixin",
     "accessor.BlockBehaviourAccessor",
     "accessor.BlockLootSubProviderAccessor",
@@ -32,6 +31,7 @@
     "accessor.FallingBlockEntityAccessor",
     "accessor.FlowingFluidAccessor",
     "accessor.GameTestHelperAccessor",
+    "accessor.ItemFrameAccessor",
     "accessor.ItemModelGeneratorsAccessor",
     "accessor.ItemStackLinkedSetAccessor",
     "accessor.LivingEntityAccessor",
@@ -87,7 +87,10 @@
     "fabric.infra.GuiGraphicsMixin",
     "fabric.infra.GuiMixin",
     "fabric.infra.MultiPlayerGameModeMixin",
-    "fabric.infra.block.ParticleEngineMixin"
+    "fabric.infra.block.ParticleEngineMixin",
+    "compat.xaeros.XaeroFullscreenMapAccessor",
+    "compat.xaeros.XaeroFullscreenMapMixin",
+    "compat.xaeros.XaeroPauseScreenOverrideMixin"
   ],
   "injectors": {
     "defaultRequire": 1

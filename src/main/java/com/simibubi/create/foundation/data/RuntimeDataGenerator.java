@@ -159,7 +159,11 @@ public class RuntimeDataGenerator {
             int planksCount = type.contains("block") ? 3 : 6;
 
             if (!noStrippedVariant) {
-                simpleWoodRecipe(nonStrippedId, itemId);
+                // Catch mods like JNE that have a non-stripped log prefixed but not the stripped
+                // log
+                if (BuiltInRegistries.ITEM.containsKey(nonStrippedId)) {
+                    simpleWoodRecipe(nonStrippedId, itemId);
+                }
                 simpleWoodRecipe(itemId, planksId, planksCount);
             } else if (BuiltInRegistries.ITEM.containsKey(planksId)) {
                 ResourceLocation tag =

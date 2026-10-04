@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -117,7 +118,9 @@ public class SequencedGearshiftBlockEntity extends SplitShaftBlockEntity {
         if (isPowered == isRunning) return;
         if (!level.hasNeighborSignal(worldPosition)) {
             level.setBlock(
-                    worldPosition, getBlockState().setValue(SequencedGearshiftBlock.STATE, 0), 3);
+                    worldPosition,
+                    getBlockState().setValue(SequencedGearshiftBlock.STATE, 0),
+                    Block.UPDATE_ALL);
             return;
         }
         if (getSpeed() == 0) return;
@@ -152,7 +155,7 @@ public class SequencedGearshiftBlockEntity extends SplitShaftBlockEntity {
                 level.setBlock(
                         worldPosition,
                         getBlockState().setValue(SequencedGearshiftBlock.STATE, 0),
-                        3);
+                        Block.UPDATE_ALL);
             else sendData();
             return;
         }
@@ -170,7 +173,7 @@ public class SequencedGearshiftBlockEntity extends SplitShaftBlockEntity {
         level.setBlock(
                 worldPosition,
                 getBlockState().setValue(SequencedGearshiftBlock.STATE, instructionIndex + 1),
-                3);
+                Block.UPDATE_ALL);
     }
 
     public Instruction getInstruction(int instructionIndex) {

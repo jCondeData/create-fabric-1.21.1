@@ -111,7 +111,7 @@ public class FlapDisplayBlockEntity extends KineticBlockEntity {
         boolean instant = Math.abs(getSpeed()) > 128;
         for (FlapDisplayLayout line : lines)
             for (FlapDisplaySection section : line.getSections())
-                activeFlaps += section.tick(instant);
+                activeFlaps += section.tick(instant, level.random);
         if (activeFlaps == 0) return;
 
         float volume = Mth.clamp(activeFlaps / 20f, 0.25f, 1.5f);
@@ -214,7 +214,8 @@ public class FlapDisplayBlockEntity extends KineticBlockEntity {
             if (colour[j] != null) NBTHelper.writeEnum(tag, "Dye" + j, colour[j]);
 
         List<FlapDisplayLayout> lines = getLines();
-        for (int i = 0; i < lines.size(); i++) tag.put("Display" + i, lines.get(i).write());
+        for (int i = 0; i < lines.size(); i++)
+            tag.put("Display" + i, lines.get(i).write(registries));
     }
 
     @Override

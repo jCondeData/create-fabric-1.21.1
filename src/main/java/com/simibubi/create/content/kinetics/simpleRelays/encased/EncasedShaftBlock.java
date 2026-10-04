@@ -20,6 +20,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,7 +47,11 @@ public class EncasedShaftBlock extends AbstractEncasedShaftBlock
     @Override
     public InteractionResult onSneakWrenched(BlockState state, UseOnContext context) {
         if (context.getLevel().isClientSide) return InteractionResult.SUCCESS;
-        context.getLevel().levelEvent(2001, context.getClickedPos(), Block.getId(state));
+        context.getLevel()
+                .levelEvent(
+                        LevelEvent.PARTICLES_DESTROY_BLOCK,
+                        context.getClickedPos(),
+                        Block.getId(state));
         KineticBlockEntity.switchToBlockState(
                 context.getLevel(),
                 context.getClickedPos(),

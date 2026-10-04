@@ -36,6 +36,7 @@ public enum Mods {
     MODERNUI,
     FTBCHUNKS,
     JOURNEYMAP,
+    XAEROWORLDMAP,
     FTBLIBRARY,
     SODIUM,
     INVENTORYSORTER,

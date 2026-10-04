@@ -4,7 +4,7 @@
   "category": "misc",
   "key": {
     "B": {
-      "tag": "c:brass_ingots"
+      "tag": "c:ingots/brass"
     },
     "E": {
       "tag": "c:ender_pearls"

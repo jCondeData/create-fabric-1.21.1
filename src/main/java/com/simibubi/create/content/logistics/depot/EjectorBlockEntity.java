@@ -69,11 +69,11 @@ import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class EjectorBlockEntity extends KineticBlockEntity implements SidedStorageBlockEntity {
 

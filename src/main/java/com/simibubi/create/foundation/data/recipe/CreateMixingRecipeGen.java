@@ -145,15 +145,4 @@ public final class CreateMixingRecipeGen extends MixingRecipeGen {
             FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries, Create.ID);
     }
-
-    public GeneratedRecipe moddedMud(Mods mod, String name) {
-        String mud = name + "_mud";
-        return create(
-                mod.recipeId(mud),
-                b ->
-                        b.require(Fluids.WATER, FluidConstants.BOTTLE)
-                                .require(mod, name + "_dirt")
-                                .output(mod, mud)
-                                .whenModLoaded(mod.getId()));
-    }
 }

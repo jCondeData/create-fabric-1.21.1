@@ -7,7 +7,9 @@ import com.simibubi.create.infrastructure.fabric.transfer.item.ItemStackHandler;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 public class SmartInventory extends ItemStackHandler {
@@ -22,6 +24,11 @@ public class SmartInventory extends ItemStackHandler {
     }
 
     public SmartInventory(
+            int slots, SyncedBlockEntity be, BiPredicate<Integer, ItemStack> isValid) {
+        this(slots, be, 64, false, isValid);
+    }
+
+    public SmartInventory(
             int slots, SyncedBlockEntity be, int stackSize, boolean stackNonStackables) {
         super(slots);
         this.stackNonStackables = stackNonStackables;
@@ -29,6 +36,16 @@ public class SmartInventory extends ItemStackHandler {
         extractionAllowed = true;
         this.stackSize = stackSize;
         this.blockEntity = be;
+    }
+
+    public SmartInventory(
+            int slots,
+            SyncedBlockEntity be,
+            int stackSize,
+            boolean stackNonStackables,
+            BiPredicate<Integer, ItemStack> isValid) {
+        this(slots, be, stackSize, stackNonStackables);
+        this.isValid = isValid;
     }
 
     public SmartInventory withMaxStackSize(int maxStackSize) {
@@ -85,6 +102,7 @@ public class SmartInventory extends ItemStackHandler {
     // avoiding extending RecipeWrapper
 
     private SyncedBlockEntity blockEntity;
+    private BiPredicate<Integer, ItemStack> isValid = super::isItemValid;
     private Consumer<Integer> updateCallback;
 
     @Override
@@ -97,5 +115,18 @@ public class SmartInventory extends ItemStackHandler {
     @Override
     public int getSlotLimit(int slot) {
         return Math.min(stackNonStackables ? 64 : super.getSlotLimit(slot), stackSize);
+    }
+
+    @Override
+    public boolean isItemValid(int slot, ItemStack stack) {
+        return isValid.test(slot, stack);
+    }
+
+    // fabric: inserting into the transfer-backed handler doesn't consult isItemValid, so an invalid
+    // item gets no room in the slot instead
+    @Override
+    protected int getStackLimit(int slot, ItemVariant variant) {
+        if (!variant.isBlank() && !isItemValid(slot, variant.toStack())) return 0;
+        return super.getStackLimit(slot, variant);
     }
 }

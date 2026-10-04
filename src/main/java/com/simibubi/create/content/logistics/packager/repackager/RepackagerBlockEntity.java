@@ -1,5 +1,7 @@
 package com.simibubi.create.content.logistics.packager.repackager;
 
+import com.simibubi.create.compat.computercraft.events.PackageEvent;
+import com.simibubi.create.compat.computercraft.events.RepackageEvent;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
@@ -11,7 +13,6 @@ import com.simibubi.create.infrastructure.fabric.transfer.TransferUtil;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -39,15 +40,22 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 
         boolean targetIsCreativeCrate = targetInv instanceof BottomlessItemHandler;
 
-        long insertable =
-                StorageUtil.simulateInsert(targetInv, ItemVariant.of(box), box.getCount(), null);
-        boolean anySpace = insertable > 0;
+        // fabric: insert the box as part of the caller's transaction (it is rolled back with it).
+        // Simulating with a null transaction would try to open an outer one, which throws while
+        // the caller's transaction is open.
+        boolean anySpace;
+        try (Transaction t = ctx.openNested()) {
+            anySpace = targetInv.insert(ItemVariant.of(box), box.getCount(), t) == box.getCount();
+            if (anySpace) t.commit();
+        }
 
         if (!targetIsCreativeCrate && !anySpace) return false;
 
         TransactionSuccessCallback.register(
                 ctx,
                 () -> {
+                    computerBehaviour.prepareComputerEvent(
+                            new PackageEvent(box, "package_received"));
                     previouslyUnwrapped = box;
                     animationInward = true;
                     animationTicks = CYCLE;
@@ -123,6 +131,11 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 
         if (boxesToExport.isEmpty()) return;
 
+        if (computerBehaviour.hasAttachedComputer()) {
+            for (BigItemStack box : boxesToExport) {
+                computerBehaviour.prepareComputerEvent(new RepackageEvent(box.stack, box.count));
+            }
+        }
         queuedExitingPackages.addAll(boxesToExport);
         notifyUpdate();
     }

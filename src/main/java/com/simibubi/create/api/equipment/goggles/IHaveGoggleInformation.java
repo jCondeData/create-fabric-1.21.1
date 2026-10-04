@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.List;
 
-// TODO: 1.21.7 - Move into api package
+// TODO: 1.21.1+ - Move into api package
 /**
  * Implement this interface on the {@link BlockEntity} that wants to add info to the goggle overlay
  */

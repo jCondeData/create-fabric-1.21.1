@@ -6,7 +6,7 @@
       "item": "create:brass_hand"
     },
     "L": {
-      "tag": "c:brass_ingots"
+      "tag": "c:ingots/brass"
     },
     "R": {
       "item": "create:precision_mechanism"

@@ -35,6 +35,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -110,7 +111,10 @@ public class TrackBlockEntity extends SmartBlockEntity
                     Vec3 bcEndAxis = bc.axes.getSecond();
                     if (v.distanceTo(bcEndAxis) < 1 / 1024f
                             || v.distanceTo(bcEndAxis.scale(-1)) < 1 / 1024f)
-                        level.setBlock(key, blockState.setValue(TrackBlock.HAS_BE, true), 3);
+                        level.setBlock(
+                                key,
+                                blockState.setValue(TrackBlock.HAS_BE, true),
+                                Block.UPDATE_ALL);
                 }
 
             BlockEntity blockEntity = level.getBlockEntity(key);
@@ -416,7 +420,7 @@ public class TrackBlockEntity extends SmartBlockEntity
                         targetPos,
                         ProperWaterloggedBlock.withWater(
                                 level, AllBlocks.FAKE_TRACK.getDefaultState(), targetPos),
-                        3);
+                        Block.UPDATE_ALL);
             FakeTrackBlock.keepAlive(level, targetPos);
         }
     }

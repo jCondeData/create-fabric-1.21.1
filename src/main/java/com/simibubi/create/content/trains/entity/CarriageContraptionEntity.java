@@ -19,7 +19,6 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import net.createmod.catnip.data.Couple;
-import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.platform.CatnipServices;
 import net.createmod.catnip.theme.Color;
@@ -736,16 +735,6 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
         dimensional.updateRenderedCutoff();
     }
 
-    // FIXME: entities should not reference their visual in any way
-    @Environment(EnvType.CLIENT)
-    private WeakReference<CarriageContraptionVisual> instanceHolder;
-
-    @Environment(EnvType.CLIENT)
-    public void bindInstance(CarriageContraptionVisual instance) {
-        this.instanceHolder = new WeakReference<>(instance);
-        updateRenderedPortalCutoff();
-    }
-
     @Environment(EnvType.CLIENT)
     public void updateRenderedPortalCutoff() {
         if (carriage == null) return;
@@ -770,31 +759,5 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
             }
         }
         if (particleSlice.size() > 0) particleAvgY /= particleSlice.size();
-
-        // update hidden bogeys (if instanced)
-        if (instanceHolder == null) return;
-        CarriageContraptionVisual instance = instanceHolder.get();
-        if (instance == null) return;
-
-        int bogeySpacing = carriage.bogeySpacing;
-
-        // fabric: do not pass instance to lambda, class loading issues
-        Couple<Boolean> bogeyVisibility =
-                carriage.bogeys.map(
-                        bogey -> {
-                            if (bogey == null) return null;
-
-                            BlockPos bogeyPos =
-                                    bogey.isLeading
-                                            ? BlockPos.ZERO
-                                            : BlockPos.ZERO.relative(
-                                                    getInitialOrientation().getCounterClockWise(),
-                                                    bogeySpacing);
-                            return !contraption.isHiddenInPortal(bogeyPos);
-                        });
-        for (boolean first : Iterate.trueAndFalse) {
-            Boolean visible = bogeyVisibility.get(first);
-            if (visible != null) instance.setBogeyVisibility(first, visible);
-        }
     }
 }

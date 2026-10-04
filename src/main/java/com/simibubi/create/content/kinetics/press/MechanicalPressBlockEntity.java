@@ -123,11 +123,12 @@ public class MechanicalPressBlockEntity extends BasinOperatingBlockEntity
         ItemStack itemCreated = ItemStack.EMPTY;
         pressingBehaviour.particleItems.add(item);
         if (canProcessInBulk() || item.getCount() == 1) {
-            RecipeApplier.applyRecipeOn(itemEntity, recipe.get().value());
+            RecipeApplier.applyRecipeOn(itemEntity, recipe.get().value(), true);
             itemCreated = itemEntity.getItem().copy();
         } else {
             for (ItemStack result :
-                    RecipeApplier.applyRecipeOn(level, item.copyWithCount(1), recipe.get())) {
+                    RecipeApplier.applyRecipeOn(
+                            level, item.copyWithCount(1), recipe.get().value(), true)) {
                 if (itemCreated.isEmpty()) itemCreated = result.copy();
                 ItemEntity created =
                         new ItemEntity(
@@ -158,7 +159,8 @@ public class MechanicalPressBlockEntity extends BasinOperatingBlockEntity
                 RecipeApplier.applyRecipeOn(
                         level,
                         canProcessInBulk() ? input.stack : input.stack.copyWithCount(1),
-                        recipe.get());
+                        recipe.get().value(),
+                        true);
 
         for (ItemStack created : outputs) {
             if (!created.isEmpty()) {

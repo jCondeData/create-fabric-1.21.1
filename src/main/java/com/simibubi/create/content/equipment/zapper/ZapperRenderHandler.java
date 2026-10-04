@@ -66,13 +66,13 @@ public class ZapperRenderHandler extends ShootableGadgetRenderHandler {
     }
 
     public void addBeam(LaserBeam beam) {
-        RandomSource r = RandomSource.create();
+        RandomSource random = Minecraft.getInstance().level.random;
         double x = beam.end.x;
         double y = beam.end.y;
         double z = beam.end.z;
         ClientLevel world = Minecraft.getInstance().level;
-        Supplier<Double> randomSpeed = () -> (r.nextDouble() - .5d) * .2f;
-        Supplier<Double> randomOffset = () -> (r.nextDouble() - .5d) * .2f;
+        Supplier<Double> randomSpeed = () -> (random.nextDouble() - .5d) * .2f;
+        Supplier<Double> randomOffset = () -> (random.nextDouble() - .5d) * .2f;
         for (int i = 0; i < 10; i++) {
             world.addParticle(
                     ParticleTypes.END_ROD,

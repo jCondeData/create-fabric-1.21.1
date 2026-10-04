@@ -29,12 +29,12 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.Level;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.annotation.Nonnull;
 
 public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
 
@@ -65,9 +65,7 @@ public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
 
         if (availableItems == null || availableFluids == null) return false;
 
-        HeatLevel heat =
-                BasinBlockEntity.getHeatLevelOf(
-                        basin.getLevel().getBlockState(basin.getBlockPos().below(1)));
+        HeatLevel heat = basin.getHeatLevel();
         if (isBasinRecipe && !((BasinRecipe) recipe).getRequiredHeat().testBlazeBurner(heat))
             return false;
 
@@ -135,7 +133,7 @@ public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
             CraftingInput remainderInput = new DummyCraftingContainer(consumedItems).asCraftInput();
 
             if (recipe instanceof BasinRecipe basinRecipe) {
-                recipeOutputItems.addAll(basinRecipe.rollResults());
+                recipeOutputItems.addAll(basinRecipe.rollResults(basin.getLevel().random));
 
                 for (FluidStack fluidStack : basinRecipe.getFluidResults())
                     if (!fluidStack.isEmpty()) recipeOutputFluids.add(fluidStack);
@@ -184,7 +182,7 @@ public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
 
     @Override
     protected int getMaxInputCount() {
-        return 9;
+        return 64;
     }
 
     @Override
@@ -213,7 +211,7 @@ public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
     }
 
     @Override
-    public boolean matches(RecipeInput input, @Nonnull Level worldIn) {
+    public boolean matches(RecipeInput input, @NotNull Level worldIn) {
         return false;
     }
 }

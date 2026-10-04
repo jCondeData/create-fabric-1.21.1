@@ -4,6 +4,8 @@ import static net.minecraft.world.item.Items.BUCKET;
 import static net.minecraft.world.item.Items.GLASS_BOTTLE;
 import static net.minecraft.world.item.Items.HONEY_BOTTLE;
 
+import com.simibubi.create.AllTags.AllFluidTags;
+import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
 import com.simibubi.create.content.fluids.VirtualFluid;
 import com.simibubi.create.content.fluids.potion.PotionFluid;
@@ -32,9 +34,15 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DispensibleContainerItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -42,14 +50,15 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MapColor;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AllFluids {
@@ -79,7 +88,7 @@ public class AllFluids {
             REGISTRATE
                     .virtualFluid("tea")
                     .lang("Builder's Tea")
-                    .tag(AllTags.commonFluidTag("teas"))
+                    .tag(AllFluidTags.TEA.tag)
                     .fluidAttributes(() -> new CreateAttributeHandler("fluid.create.tea"))
                     .onRegisterAfter(
                             Registries.ITEM,
@@ -130,7 +139,8 @@ public class AllFluids {
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW))
                     .build()
                     .bucket()
-                    .tag(AllTags.commonItemTag("buckets/honey"))
+                    .onRegister(AllFluids::registerFluidDispenseBehavior)
+                    .tag(Tags.Items.BUCKETS, AllItemTags.HONEY_BUCKETS.tag)
                     .build()
                     .onRegisterAfter(
                             Registries.ITEM,
@@ -182,7 +192,7 @@ public class AllFluids {
                     .standardFluid("chocolate")
                     .lang("Chocolate")
                     .tag(
-                            AllTags.commonFluidTag("chocolates"),
+                            AllFluidTags.CHOCOLATE.tag,
                             FluidTags.WATER) // fabric: water tag controls physics
                     .fluidProperties(
                             p ->
@@ -216,8 +226,13 @@ public class AllFluids {
                                                                 source,
                                                                 FluidConstants.BUCKET));
                             })
+                    .source(SimpleFlowableFluid.Source::new)
                     .block()
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .build()
+                    .bucket()
+                    .onRegister(AllFluids::registerFluidDispenseBehavior)
+                    .tag(Tags.Items.BUCKETS, AllItemTags.CHOCOLATE_BUCKETS.tag)
                     .build()
                     .register();
 
@@ -272,6 +287,28 @@ public class AllFluids {
         if (fluid.isSame(CHOCOLATE.get()))
             return AllPaletteStoneTypes.SCORIA.getBaseBlock().get().defaultBlockState();
         return null;
+    }
+
+    private static final DispenseItemBehavior DEFAULT = new DefaultDispenseItemBehavior();
+    private static final DispenseItemBehavior DISPENSE_FLUID =
+            new DefaultDispenseItemBehavior() {
+                @Override
+                protected ItemStack execute(BlockSource pSource, ItemStack pStack) {
+                    DispensibleContainerItem dispensibleContainerItem =
+                            (DispensibleContainerItem) pStack.getItem();
+                    BlockPos pos =
+                            pSource.pos().relative(pSource.state().getValue(DispenserBlock.FACING));
+                    Level level = pSource.level();
+                    // fabric: vanilla emptyContents has no container stack parameter
+                    if (dispensibleContainerItem.emptyContents(null, level, pos, null)) {
+                        return new ItemStack(BUCKET);
+                    }
+                    return DEFAULT.dispense(pSource, pStack);
+                }
+            };
+
+    private static void registerFluidDispenseBehavior(BucketItem bucket) {
+        DispenserBlock.registerBehavior(bucket, DISPENSE_FLUID);
     }
 
     //	/**

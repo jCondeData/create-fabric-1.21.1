@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "A": {
-      "tag": "c:brass_ingots"
+      "tag": "c:ingots/brass"
     },
     "E": {
       "item": "create:electron_tube"

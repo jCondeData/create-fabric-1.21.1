@@ -17,7 +17,6 @@ import com.simibubi.create.content.contraptions.minecart.CouplingHandlerClient;
 import com.simibubi.create.content.contraptions.minecart.CouplingPhysics;
 import com.simibubi.create.content.contraptions.minecart.CouplingRenderer;
 import com.simibubi.create.content.contraptions.minecart.capability.CapabilityMinecartController;
-import com.simibubi.create.content.contraptions.render.ContraptionRenderInfoManager;
 import com.simibubi.create.content.contraptions.wrench.RadialWrenchHandler;
 import com.simibubi.create.content.decoration.girder.GirderWrenchBehavior;
 import com.simibubi.create.content.equipment.armor.BacktankArmorLayer;
@@ -78,8 +77,6 @@ import com.simibubi.create.foundation.utility.TickBasedCache;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.fabric.RenderItemDecorationsCallback;
 import com.simibubi.create.infrastructure.gui.OpenCreateMenuButton;
-
-import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
 
 import io.github.fabricators_of_create.porting_lib.client_events.event.client.RenderArmEvent;
 import io.github.fabricators_of_create.porting_lib.client_events.event.client.RenderHandEvent;
@@ -197,7 +194,6 @@ public class ClientEvents {
         // fabric: fix #608, see above
         //		ArmInteractionPointHandler.tick();
         EjectorTargetHandler.tick();
-        ContraptionRenderInfoManager.tickFor(world);
         BlueprintOverlayRenderer.tick();
         ToolboxHandlerClient.clientTick();
         RadialWrenchHandler.clientTick();
@@ -514,9 +510,5 @@ public class ClientEvents {
                 latePhase, OpenCreateMenuButton.OpenConfigButtonHandler::onGuiInit);
 
         TrainMapEvents.init();
-
-        // Flywheel Events
-        ReloadLevelRendererCallback.EVENT.register(
-                ContraptionRenderInfoManager::onReloadLevelRenderer);
     }
 }

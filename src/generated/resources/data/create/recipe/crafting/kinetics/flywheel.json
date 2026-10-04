@@ -6,7 +6,7 @@
       "item": "create:shaft"
     },
     "C": {
-      "tag": "c:brass_ingots"
+      "tag": "c:ingots/brass"
     }
   },
   "pattern": [

@@ -13,19 +13,18 @@ import java.util.List;
 import java.util.Set;
 
 public interface IAssemblyRecipe {
-
     default boolean supportsAssembly() {
         return true;
     }
 
     @Environment(EnvType.CLIENT)
-    public Component getDescriptionForAssembly();
+    Component getDescriptionForAssembly();
 
-    public void addRequiredMachines(Set<ItemLike> list);
+    void addRequiredMachines(Set<ItemLike> list);
 
-    public void addAssemblyIngredients(List<Ingredient> list);
+    void addAssemblyIngredients(List<Ingredient> list);
 
     default void addAssemblyFluidIngredients(List<FluidIngredient> list) {}
 
-    public SequencedAssemblySubCategoryType getJEISubCategory();
+    SequencedAssemblySubCategoryType getJEISubCategory();
 }

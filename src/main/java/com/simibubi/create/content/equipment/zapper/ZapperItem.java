@@ -42,11 +42,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import javax.annotation.Nonnull;
 
 public abstract class ZapperItem extends Item
         implements CustomArmPoseItem, EntitySwingListenerItem, ReequipAnimationItem {
@@ -86,7 +85,7 @@ public abstract class ZapperItem extends Item
         return newStack.getItem() instanceof ZapperItem;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public InteractionResult useOn(UseOnContext context) {
         // Shift -> open GUI

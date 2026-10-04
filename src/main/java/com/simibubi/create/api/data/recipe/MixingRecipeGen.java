@@ -4,7 +4,9 @@ import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,6 +19,17 @@ import java.util.concurrent.CompletableFuture;
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
 public abstract class MixingRecipeGen extends StandardProcessingRecipeGen<MixingRecipe> {
+
+    protected GeneratedRecipe moddedMud(DatagenMod mod, String name) {
+        String mud = name + "_mud";
+        return create(
+                mod.recipeId(mud),
+                b ->
+                        b.require(Fluids.WATER, FluidConstants.BOTTLE)
+                                .require(mod, name + "_dirt")
+                                .output(mod, mud)
+                                .whenModLoaded(mod.getId()));
+    }
 
     public MixingRecipeGen(
             FabricDataOutput output,

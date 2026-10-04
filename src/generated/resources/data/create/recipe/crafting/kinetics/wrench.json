@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "G": {
-      "tag": "c:gold_plates"
+      "tag": "c:plates/gold"
     },
     "P": {
       "item": "create:cogwheel"

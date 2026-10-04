@@ -26,10 +26,10 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Map;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public abstract class PackagePortTarget {
     public static final Codec<PackagePortTarget> CODEC =

@@ -25,8 +25,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 
 public class MechanicalPistonBlockEntity extends LinearActuatorBlockEntity {
-
-    protected boolean hadCollisionWithOtherPiston;
     protected int extensionLength;
 
     public MechanicalPistonBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

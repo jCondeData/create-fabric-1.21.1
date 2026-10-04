@@ -109,7 +109,7 @@ public class ToolboxHandlerClient {
         Minecraft mc = Minecraft.getInstance();
         if (mc.gameMode == null || mc.gameMode.getPlayerMode() == GameType.SPECTATOR) return;
 
-        if (key != AllKeys.TOOLBELT.getBoundCode() || !pressed) return;
+        if (!AllKeys.TOOLBELT.doesModifierAndCodeMatch(key) || !pressed) return;
         if (COOLDOWN > 0) return;
         LocalPlayer player = mc.player;
         if (player == null) return;

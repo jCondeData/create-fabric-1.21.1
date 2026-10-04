@@ -1,12 +1,15 @@
 package com.simibubi.create.content.logistics.redstoneRequester;
 
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.stockTicker.StockCheckingBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.fabric.MenuUtil;
 
 import net.createmod.catnip.codecs.CatnipCodecUtils;
@@ -27,8 +30,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
+
 public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity implements MenuProvider {
 
+    public AbstractComputerBehaviour computerBehaviour;
     public boolean allowPartialRequests;
     public PackageOrderWithCrafts encodedRequest = PackageOrderWithCrafts.empty();
     public String encodedTargetAdress = "";
@@ -40,6 +46,18 @@ public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity imple
     public RedstoneRequesterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         allowPartialRequests = false;
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        super.addBehaviours(behaviours);
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
     }
 
     protected void onRedstonePowerChanged() {

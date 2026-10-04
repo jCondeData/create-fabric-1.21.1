@@ -76,6 +76,12 @@ public enum AllKeys {
         return KeyBindingHelper.getBoundKeyOf(keybind).getValue();
     }
 
+    // fabric: vanilla key mappings have no key modifiers (NeoForge KeyModifier), so only the
+    // bound code is compared
+    public boolean doesModifierAndCodeMatch(int code) {
+        return code == getBoundCode();
+    }
+
     public static boolean isKeyDown(int key) {
         return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), key);
     }

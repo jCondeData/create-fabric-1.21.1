@@ -46,6 +46,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,10 +54,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity
         implements IHaveGoggleInformation, SidedStorageBlockEntity {
@@ -224,7 +222,6 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity
                 });
     }
 
-    private static Random rand = new Random();
     private static Map<Pair<BrassTunnelBlockEntity, Direction>, ItemStack> distributed =
             new IdentityHashMap<>();
     private static Set<Pair<BrassTunnelBlockEntity, Direction>> full = new HashSet<>();
@@ -244,7 +241,7 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity
         boolean robin =
                 mode == SelectionMode.FORCED_ROUND_ROBIN || mode == SelectionMode.ROUND_ROBIN;
 
-        if (mode == SelectionMode.RANDOMIZE) indexStart = rand.nextInt(amountTargets);
+        if (mode == SelectionMode.RANDOMIZE) indexStart = level.random.nextInt(amountTargets);
         if (mode == SelectionMode.PREFER_NEAREST || mode == SelectionMode.SYNCHRONIZE)
             indexStart = 0;
 

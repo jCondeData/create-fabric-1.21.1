@@ -8,9 +8,9 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public final class ContraptionType {
     public final Supplier<? extends Contraption> factory;

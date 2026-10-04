@@ -355,7 +355,8 @@ public class SawBlockEntity extends BlockBreakingKineticBlockEntity
 
         for (int roll = 0; roll < rolls; roll++) {
             List<ItemStack> results = new LinkedList<>();
-            if (recipe instanceof CuttingRecipe) results = ((CuttingRecipe) recipe).rollResults();
+            if (recipe instanceof CuttingRecipe)
+                results = ((CuttingRecipe) recipe).rollResults(level.random);
             else if (recipe instanceof StonecutterRecipe
                     || recipe.getType() == woodcuttingRecipeType.get())
                 results.add(recipe.getResultItem(level.registryAccess()).copy());
@@ -363,6 +364,8 @@ public class SawBlockEntity extends BlockBreakingKineticBlockEntity
             for (ItemStack stack : results) {
                 ItemHelper.addToList(stack, list);
             }
+            if (!input.getRecipeRemainder().isEmpty()) // fabric: FabricItemStack remainder
+            ItemHelper.addToList(input.getRecipeRemainder(), list);
         }
 
         for (int slot = 0; slot < list.size() && slot + 1 < inventory.getSlotCount(); slot++)

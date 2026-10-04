@@ -24,7 +24,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public abstract class SyncedBlockEntity extends BlockEntity
         implements CustomDataPacketHandlingBlockEntity, CustomUpdateTagHandlingBlockEntity {
-
     public SyncedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }

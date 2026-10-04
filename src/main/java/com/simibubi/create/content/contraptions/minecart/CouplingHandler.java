@@ -17,11 +17,11 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 public class CouplingHandler {
 

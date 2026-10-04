@@ -64,7 +64,7 @@ public class WhistleExtenderBlock extends Block implements IWrenchable {
                 || state.getValue(SHAPE) == WhistleExtenderShape.SINGLE)
             return IWrenchable.super.onSneakWrenched(state, context);
         if (!(world instanceof ServerLevel)) return InteractionResult.SUCCESS;
-        world.setBlock(pos, state.setValue(SHAPE, WhistleExtenderShape.SINGLE), 3);
+        world.setBlock(pos, state.setValue(SHAPE, WhistleExtenderShape.SINGLE), Block.UPDATE_ALL);
         IWrenchable.playRemoveSound(world, pos);
         return InteractionResult.SUCCESS;
     }

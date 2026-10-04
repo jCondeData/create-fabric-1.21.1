@@ -3,8 +3,10 @@ package com.simibubi.create.content.kinetics.crafter;
 import static com.simibubi.create.content.kinetics.base.HorizontalKineticBlock.HORIZONTAL_FACING;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.AllTags.AllItemTags;
+import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
+import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.belt.behaviour.DirectBeltInputBehaviour;
 import com.simibubi.create.content.kinetics.crafter.ConnectedInputHandler.ConnectedInput;
@@ -36,6 +38,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -49,7 +52,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class MechanicalCrafterBlockEntity extends KineticBlockEntity
-        implements SidedStorageBlockEntity {
+        implements SidedStorageBlockEntity, TransformableBlockEntity {
 
     enum Phase {
         IDLE,
@@ -133,7 +136,7 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity
         connectivity =
                 new EdgeInteractionBehaviour(this, ConnectedInputHandler::toggleConnection)
                         .connectivity(ConnectedInputHandler::shouldConnect)
-                        .require(AllItems.WRENCH.get());
+                        .require(AllItemTags.WRENCH::matches);
         behaviours.add(inserting);
         behaviours.add(connectivity);
         registerAwardables(behaviours, AllAdvancements.CRAFTER, AllAdvancements.CRAFTER_LAZY);
@@ -550,5 +553,11 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity
 
     public ConnectedInput getInput() {
         return input;
+    }
+
+    @Override
+    public void transform(BlockEntity be, StructureTransform transform) {
+        input.data.replaceAll(transform::applyWithoutOffset);
+        notifyUpdate();
     }
 }

@@ -32,8 +32,11 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsBoard;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsFormatter;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.fabric.MenuUtil;
+import com.simibubi.create.foundation.mixin.accessor.ItemStackLinkedSetAccessor;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
@@ -65,10 +68,12 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Math;
 
 import java.lang.ref.WeakReference;
@@ -81,8 +86,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuProvider {
 
@@ -192,7 +195,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         boolean isAddedToOtherGauge = AllBlocks.FACTORY_GAUGE.has(existingState);
         if (!existingState.isAir() && !isAddedToOtherGauge) return;
         if (isAddedToOtherGauge && existingState != blockEntity.getBlockState()) return;
-        if (!isAddedToOtherGauge) level.setBlock(newPos.pos(), blockEntity.getBlockState(), 3);
+        if (!isAddedToOtherGauge)
+            level.setBlock(newPos.pos(), blockEntity.getBlockState(), Block.UPDATE_ALL);
 
         for (BlockPos blockPos : targetedByLinks.keySet())
             if (!blockPos.closerThan(newPos.pos(), 24)) return;
@@ -369,6 +373,15 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
         if (notifyOutputs) notifyRedstoneOutputs();
     }
 
+    public static class ItemStackConnections extends ArrayList<FactoryPanelConnection> {
+        public ItemStack item;
+        public int totalAmount;
+
+        public ItemStackConnections(ItemStack item) {
+            this.item = item;
+        }
+    }
+
     private void tickRequests() {
         FactoryPanelBlockEntity panelBE = panelBE();
         if (targetedBy.isEmpty() && !panelBE.restocker) return;
@@ -391,26 +404,48 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
 
         boolean failed = false;
 
-        Multimap<UUID, BigItemStack> toRequest = HashMultimap.create();
-        List<BigItemStack> toRequestAsList = new ArrayList<>();
+        Map<UUID, Map<ItemStack, ItemStackConnections>> consolidated = new HashMap<>();
 
         for (FactoryPanelConnection connection : targetedBy.values()) {
             FactoryPanelBehaviour source = at(getWorld(), connection);
             if (source == null) return;
 
             ItemStack item = source.getFilter();
-            int amount = connection.amount;
-            InventorySummary summary = LogisticsManager.getSummaryOfNetwork(source.network, true);
-            if (amount == 0 || item.isEmpty() || summary.getCountOf(item) < amount) {
-                sendEffect(connection.from, false);
-                failed = true;
-                continue;
-            }
 
-            BigItemStack stack = new BigItemStack(item, amount);
-            toRequest.put(source.network, stack);
-            toRequestAsList.add(stack);
-            sendEffect(connection.from, true);
+            // fabric: ItemStackLinkedSet.TYPE_AND_TAG is private here, read it via the accessor
+            Map<ItemStack, ItemStackConnections> networkItemCounts =
+                    consolidated.computeIfAbsent(
+                            source.network,
+                            $ ->
+                                    new Object2ObjectOpenCustomHashMap<>(
+                                            ItemStackLinkedSetAccessor.getTYPE_AND_TAG()));
+            networkItemCounts.computeIfAbsent(item, $ -> new ItemStackConnections(item));
+            ItemStackConnections existingConnections = networkItemCounts.get(item);
+            existingConnections.add(connection);
+            existingConnections.totalAmount += connection.amount;
+        }
+
+        Multimap<UUID, BigItemStack> toRequest = HashMultimap.create();
+
+        for (Entry<UUID, Map<ItemStack, ItemStackConnections>> entry : consolidated.entrySet()) {
+            UUID network = entry.getKey();
+            InventorySummary summary = LogisticsManager.getSummaryOfNetwork(network, true);
+
+            for (ItemStackConnections connections : entry.getValue().values()) {
+                if (connections.totalAmount == 0
+                        || connections.item.isEmpty()
+                        || summary.getCountOf(connections.item) < connections.totalAmount) {
+                    for (FactoryPanelConnection connection : connections)
+                        sendEffect(connection.from, false);
+                    failed = true;
+                    continue;
+                }
+
+                BigItemStack stack = new BigItemStack(connections.item, connections.totalAmount);
+                toRequest.put(network, stack);
+                for (FactoryPanelConnection connection : connections)
+                    sendEffect(connection.from, true);
+            }
         }
 
         if (failed) return;

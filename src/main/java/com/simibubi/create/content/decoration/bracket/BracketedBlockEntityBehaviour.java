@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +66,8 @@ public class BracketedBlockEntityBehaviour extends BlockEntityBehaviour {
 
         BlockState removed = this.bracket;
         Level world = getWorld();
-        if (!world.isClientSide) world.levelEvent(2001, getPos(), Block.getId(bracket));
+        if (!world.isClientSide)
+            world.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, getPos(), Block.getId(bracket));
         this.bracket = null;
         reRender = true;
         if (inOnReplacedContext) {

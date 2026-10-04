@@ -24,7 +24,7 @@ public class RadialWrenchHandler {
     public static void onKeyInput(int key, boolean pressed) {
         if (!pressed) return;
 
-        if (key != AllKeys.ROTATE_MENU.getBoundCode()) return;
+        if (!AllKeys.ROTATE_MENU.doesModifierAndCodeMatch(key)) return;
 
         if (COOLDOWN > 0) return;
 

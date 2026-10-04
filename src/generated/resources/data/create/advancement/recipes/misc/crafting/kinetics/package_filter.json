@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:zinc_ingots"
+            "items": "#c:ingots/zinc"
           }
         ]
       },

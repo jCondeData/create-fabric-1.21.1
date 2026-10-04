@@ -62,6 +62,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
@@ -519,8 +520,9 @@ public class BeltBlock extends HorizontalKineticBlock
                             world,
                             hasPulley ? shaftState : Blocks.AIR.defaultBlockState(),
                             currentPos),
-                    3);
-            world.levelEvent(2001, currentPos, Block.getId(currentState));
+                    Block.UPDATE_ALL);
+            world.levelEvent(
+                    LevelEvent.PARTICLES_DESTROY_BLOCK, currentPos, Block.getId(currentState));
         }
     }
 

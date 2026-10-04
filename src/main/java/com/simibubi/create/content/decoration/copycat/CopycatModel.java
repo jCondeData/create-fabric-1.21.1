@@ -27,10 +27,10 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public abstract class CopycatModel extends ForwardingBakedModel implements CustomParticleIconModel {
 

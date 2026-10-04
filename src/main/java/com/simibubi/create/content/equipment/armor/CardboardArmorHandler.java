@@ -1,6 +1,5 @@
 package com.simibubi.create.content.equipment.armor;
 
-import com.simibubi.create.AllItems;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 
 import io.github.fabricators_of_create.porting_lib.entity.events.EntityEvents;
@@ -17,6 +16,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
@@ -36,9 +36,26 @@ public class CardboardArmorHandler {
 
         event.setNewSize(
                 EntityDimensions.fixed(0.6F * scale, 0.8F * scale).withEyeHeight(0.6F * scale));
-
         if (!entity.level().isClientSide() && entity instanceof Player p)
             AllAdvancements.CARDBOARD_ARMOR.awardTo(p);
+    }
+
+    // fabric: registered to ServerEntityEvents.EQUIPMENT_CHANGE (server side only)
+    public static void playerChangesEquipment(
+            LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
+        if (entity instanceof Player player
+                && player.getPose() == Pose.CROUCHING
+                && (isCardboardArmor(player.getItemBySlot(EquipmentSlot.HEAD))
+                        || isCardboardArmor(player.getItemBySlot(EquipmentSlot.CHEST))
+                        || isCardboardArmor(player.getItemBySlot(EquipmentSlot.LEGS))
+                        || isCardboardArmor(player.getItemBySlot(EquipmentSlot.FEET)))) {
+            // assuming player is putting on last piece or took off first piece of cardboard armor
+            if (!player.level().isClientSide()) {
+                Pose pose = player.getPose();
+                player.setPose(pose == Pose.CROUCHING ? Pose.STANDING : Pose.CROUCHING);
+                player.setPose(pose);
+            }
+        }
     }
 
     public static void playersStealthWhenWearingCardboard(
@@ -75,12 +92,14 @@ public class CardboardArmorHandler {
         if (!(entityIn instanceof LivingEntity entity)) return false;
         if (entity.getPose() != Pose.CROUCHING) return false;
         if (entity instanceof Player player && player.getAbilities().flying) return false;
-        if (!AllItems.CARDBOARD_HELMET.isIn(entity.getItemBySlot(EquipmentSlot.HEAD))) return false;
-        if (!AllItems.CARDBOARD_CHESTPLATE.isIn(entity.getItemBySlot(EquipmentSlot.CHEST)))
-            return false;
-        if (!AllItems.CARDBOARD_LEGGINGS.isIn(entity.getItemBySlot(EquipmentSlot.LEGS)))
-            return false;
-        if (!AllItems.CARDBOARD_BOOTS.isIn(entity.getItemBySlot(EquipmentSlot.FEET))) return false;
+        if (!isCardboardArmor(entity.getItemBySlot(EquipmentSlot.HEAD))) return false;
+        if (!isCardboardArmor(entity.getItemBySlot(EquipmentSlot.CHEST))) return false;
+        if (!isCardboardArmor(entity.getItemBySlot(EquipmentSlot.LEGS))) return false;
+        if (!isCardboardArmor(entity.getItemBySlot(EquipmentSlot.FEET))) return false;
         return true;
+    }
+
+    public static boolean isCardboardArmor(ItemStack stack) {
+        return stack.getItem() instanceof CardboardArmorItem;
     }
 }

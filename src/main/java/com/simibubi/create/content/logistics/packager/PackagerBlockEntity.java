@@ -4,6 +4,9 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
 import com.simibubi.create.api.packager.unpacking.UnpackingHandler;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
+import com.simibubi.create.compat.computercraft.events.PackageEvent;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
@@ -85,6 +88,10 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
     public int animationTicks;
     public boolean animationInward;
 
+    public AbstractComputerBehaviour computerBehaviour;
+    public Boolean hasCustomComputerAddress;
+    public String customComputerAddress;
+
     private InventorySummary availableItems;
     private VersionedInventoryTrackerBehaviour invVersionTracker;
 
@@ -102,6 +109,8 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         animationInward = true;
         queuedExitingPackages = new LinkedList<>();
         signBasedAddress = "";
+        customComputerAddress = "";
+        hasCustomComputerAddress = false;
         buttonCooldown = 0;
     }
 
@@ -114,6 +123,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
                                 .withFilter(this::supportsBlockEntity));
         behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
         behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.PACKAGER));
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
     }
 
     private boolean supportsBlockEntity(
@@ -125,6 +135,12 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
     public void initialize() {
         super.initialize();
         recheckIfLinksPresent();
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
     }
 
     @Override
@@ -316,7 +332,9 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         attemptToSend(null);
 
         // dont send multiple packages when a button signal length is received
-        buttonCooldown = 40;
+        if (buttonCooldown <= 0) { // still on button cooldown, don't prolong it
+            buttonCooldown = 40;
+        }
     }
 
     public boolean unwrapBox(ItemStack box, TransactionContext ctx) {
@@ -337,24 +355,31 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         UnpackingHandler handler = UnpackingHandler.REGISTRY.get(targetState);
         UnpackingHandler toUse = handler != null ? handler : UnpackingHandler.DEFAULT;
 
-        // fabric: copy the items to actually unpack later
+        // fabric: copy the items for the real unpack below (the simulated run may modify them)
         List<ItemStack> copy = items.stream().map(ItemStack::copy).toList();
 
         // note: handler may modify the passed items
         boolean unpacked =
                 toUse.unpack(level, target, targetState, facing, items, orderContext, true);
+        if (!unpacked) return false;
 
-        if (unpacked) {
-            TransactionSuccessCallback.register(
-                    ctx,
-                    () -> {
-                        toUse.unpack(level, target, targetState, facing, copy, orderContext, false);
-                        previouslyUnwrapped = box;
-                        animationInward = true;
-                        animationTicks = CYCLE;
-                        notifyUpdate();
-                    });
-        }
+        // fabric: unpack for real inside the caller's transaction (handlers nest into it), so the
+        // items only arrive if that transaction commits and are rolled back with it otherwise.
+        // This cannot be done from the commit callback: no transfer operations are allowed while
+        // a transaction is closing.
+        if (!toUse.unpack(level, target, targetState, facing, copy, orderContext, false))
+            return false;
+
+        TransactionSuccessCallback.register(
+                ctx,
+                () -> {
+                    computerBehaviour.prepareComputerEvent(
+                            new PackageEvent(box, "package_received"));
+                    previouslyUnwrapped = box;
+                    animationInward = true;
+                    animationTicks = CYCLE;
+                    notifyUpdate();
+                });
 
         return true;
     }
@@ -462,6 +487,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
                 extractedPackageItem.isEmpty()
                         ? PackageItem.containing(extractedItems)
                         : extractedPackageItem.copy();
+        computerBehaviour.prepareComputerEvent(new PackageEvent(createdBox, "package_created"));
         PackageItem.clearAddress(createdBox);
 
         if (fixedAddress != null) PackageItem.addAddress(createdBox, fixedAddress);
@@ -497,12 +523,17 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         notifyUpdate();
     }
 
-    protected void updateSignAddress() {
+    public void updateSignAddress() {
         signBasedAddress = "";
         for (Direction side : Iterate.directions) {
             String address = getSign(side);
             if (address == null || address.isBlank()) continue;
             signBasedAddress = address;
+        }
+        if (computerBehaviour.hasAttachedComputer() && hasCustomComputerAddress) {
+            signBasedAddress = customComputerAddress;
+        } else {
+            hasCustomComputerAddress = false;
         }
     }
 
@@ -534,6 +565,8 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         animationInward = compound.getBoolean("AnimationInward");
         animationTicks = compound.getInt("AnimationTicks");
         signBasedAddress = compound.getString("SignAddress");
+        customComputerAddress = compound.getString("ComputerAddress");
+        hasCustomComputerAddress = compound.getBoolean("HasComputerAddress");
         heldBox = ItemStack.parseOptional(registries, compound.getCompound("HeldBox"));
         previouslyUnwrapped =
                 ItemStack.parseOptional(registries, compound.getCompound("InsertedBox"));
@@ -561,6 +594,8 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
         compound.putBoolean("AnimationInward", animationInward);
         compound.putInt("AnimationTicks", animationTicks);
         compound.putString("SignAddress", signBasedAddress);
+        compound.putString("ComputerAddress", customComputerAddress);
+        compound.putBoolean("HasComputerAddress", hasCustomComputerAddress);
         compound.put("HeldBox", heldBox.saveOptional(registries));
         compound.put("InsertedBox", previouslyUnwrapped.saveOptional(registries));
         if (clientPacket) return;

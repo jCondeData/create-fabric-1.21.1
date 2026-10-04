@@ -4,7 +4,6 @@ import com.simibubi.create.Create;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.utility.FilesHelper;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -15,18 +14,15 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import javax.annotation.Nullable;
-
 public class SchematicExport {
-    public static final Path SCHEMATICS =
-            FabricLoader.getInstance().getGameDir().resolve("schematics");
-
     /**
      * Save a schematic to a file from a world.
      *

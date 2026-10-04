@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BubbleColumnBlock;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -92,7 +93,7 @@ public class WaterWheelBlockEntity extends GeneratingKineticBlockEntity {
         if (level.isClientSide() && !isVirtual()) return ItemInteractionResult.SUCCESS;
         this.material = material;
         notifyUpdate();
-        level.levelEvent(2001, worldPosition, Block.getId(material));
+        level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, worldPosition, Block.getId(material));
         return ItemInteractionResult.SUCCESS;
     }
 

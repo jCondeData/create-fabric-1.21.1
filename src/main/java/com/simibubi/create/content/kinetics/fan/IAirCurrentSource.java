@@ -9,7 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 @MethodsReturnNonnullByDefault
 public interface IAirCurrentSource {

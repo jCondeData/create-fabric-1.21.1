@@ -14,12 +14,11 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nonnull;
 
 public class RemovedGuiUtils {
     // fabric: values of NeoForge's ScreenUtils constants, which porting lib no longer ships
@@ -27,9 +26,9 @@ public class RemovedGuiUtils {
     private static final int DEFAULT_BORDER_COLOR_START = 0x505000FF;
     private static final int DEFAULT_BORDER_COLOR_END = 0x5028007F;
 
-    @Nonnull private static ItemStack cachedTooltipStack = ItemStack.EMPTY;
+    @NotNull private static ItemStack cachedTooltipStack = ItemStack.EMPTY;
 
-    public static void preItemToolTip(@Nonnull ItemStack stack) {
+    public static void preItemToolTip(@NotNull ItemStack stack) {
         cachedTooltipStack = stack;
     }
 
@@ -88,7 +87,7 @@ public class RemovedGuiUtils {
     }
 
     public static void drawHoveringText(
-            @Nonnull final ItemStack stack,
+            @NotNull final ItemStack stack,
             GuiGraphics graphics,
             List<? extends FormattedText> textLines,
             int mouseX,
@@ -113,7 +112,7 @@ public class RemovedGuiUtils {
     }
 
     public static void drawHoveringText(
-            @Nonnull final ItemStack stack,
+            @NotNull final ItemStack stack,
             GuiGraphics graphics,
             List<? extends FormattedText> textLines,
             int mouseX,

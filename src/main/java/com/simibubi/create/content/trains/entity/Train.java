@@ -71,6 +71,7 @@ import net.minecraft.world.phys.Vec3;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,8 +87,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 public class Train {
     public static final StreamCodec<RegistryFriendlyByteBuf, Train> STREAM_CODEC =
@@ -667,7 +666,10 @@ public class Train {
         TravellingPoint trailingPoint = carriage.getTrailingPoint();
         TravellingPoint leadingPoint = carriage.getLeadingPoint();
 
-        if (leadingPoint.node1 == null || trailingPoint.node1 == null) return;
+        if (leadingPoint.node1 == null
+                || trailingPoint.node1 == null
+                || leadingPoint.edge == null
+                || trailingPoint.edge == null) return;
         ResourceKey<Level> dimension = leadingPoint.node1.getLocation().dimension;
         if (!dimension.equals(trailingPoint.node1.getLocation().dimension)) return;
 

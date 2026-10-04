@@ -2,10 +2,10 @@ package com.simibubi.create.foundation.block.connected;
 
 import net.minecraft.resources.ResourceLocation;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 public class CTTypeRegistry {
     private static final Map<ResourceLocation, CTType> TYPES = new HashMap<>();

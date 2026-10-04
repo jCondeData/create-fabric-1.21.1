@@ -8,10 +8,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 /**
  * Defines whether a block is movable by contraptions. This is used as a fallback check for {@link

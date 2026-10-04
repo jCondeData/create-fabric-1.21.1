@@ -142,7 +142,8 @@ public class SteamEngineBlock extends FaceAttachedHorizontalDirectionalBlock
         BlockPos shaftPos = getShaftPos(pState, pPos);
         BlockState shaftState = pLevel.getBlockState(shaftPos);
         if (isShaftValid(pState, shaftState))
-            pLevel.setBlock(shaftPos, PoweredShaftBlock.getEquivalent(shaftState), 3);
+            pLevel.setBlock(
+                    shaftPos, PoweredShaftBlock.getEquivalent(shaftState), Block.UPDATE_ALL);
     }
 
     @Override

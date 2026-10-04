@@ -37,10 +37,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 public class TableClothBlock extends Block
         implements IHaveBigOutline, IWrenchable, IBE<TableClothBlockEntity> {

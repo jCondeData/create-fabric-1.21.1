@@ -6,7 +6,7 @@
       "item": "minecraft:andesite"
     },
     "B": {
-      "tag": "c:zinc_nuggets"
+      "tag": "c:nuggets/zinc"
     }
   },
   "pattern": [

@@ -4,7 +4,9 @@ import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.fluids.transfer.FillingRecipe;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,6 +19,17 @@ import java.util.concurrent.CompletableFuture;
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
 public abstract class FillingRecipeGen extends StandardProcessingRecipeGen<FillingRecipe> {
+
+    protected GeneratedRecipe moddedGrass(DatagenMod mod, String name) {
+        String grass = name + "_grass_block";
+        return create(
+                mod.recipeId(grass),
+                b ->
+                        b.require(Fluids.WATER, FluidConstants.BUCKET / 2)
+                                .require(mod, name + "_dirt")
+                                .output(mod, grass)
+                                .whenModLoaded(mod.getId()));
+    }
 
     public FillingRecipeGen(
             FabricDataOutput output,

@@ -105,7 +105,8 @@ public class AllPotatoProjectileBlockHitActions {
             if (!levelAccessor.getBlockState(placePos).canBeReplaced()) return false;
 
             if (face == Direction.UP) {
-                levelAccessor.setBlock(placePos, block.value().defaultBlockState(), 3);
+                levelAccessor.setBlock(
+                        placePos, block.value().defaultBlockState(), Block.UPDATE_ALL);
             } else if (levelAccessor instanceof Level level) {
                 double y = ray.getLocation().y - 0.5;
                 if (!level.isEmptyBlock(placePos.above())) y = Math.min(y, placePos.getY());

@@ -2,9 +2,9 @@ package com.simibubi.create.infrastructure.debugInfo;
 
 import net.minecraft.world.entity.player.Player;
 
-import java.util.Objects;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.Objects;
 
 /** A supplier of debug information. May be queried on the client or server. */
 @FunctionalInterface

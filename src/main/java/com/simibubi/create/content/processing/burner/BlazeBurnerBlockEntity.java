@@ -44,9 +44,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 public class BlazeBurnerBlockEntity extends SmartBlockEntity {
 
@@ -248,7 +248,7 @@ public class BlazeBurnerBlockEntity extends SmartBlockEntity {
                 holder.getData(CreateDataMaps.SUPERHEATED_BLAZE_BURNER_FUELS);
         BlazeBurnerFuel normalFuel = holder.getData(CreateDataMaps.REGULAR_BLAZE_BURNER_FUELS);
 
-        // TODO: 1.21.7 - Remove fallback to tags
+        // TODO: 1.21.1+ - Remove fallback to tags
         if (superheatedFuel != null) {
             newBurnTime = superheatedFuel.burnTime();
             newFuel = FuelType.SPECIAL;

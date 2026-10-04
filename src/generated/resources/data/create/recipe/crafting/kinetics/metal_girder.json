@@ -6,7 +6,7 @@
       "item": "create:andesite_alloy"
     },
     "P": {
-      "tag": "c:iron_plates"
+      "tag": "c:plates/iron"
     }
   },
   "pattern": [

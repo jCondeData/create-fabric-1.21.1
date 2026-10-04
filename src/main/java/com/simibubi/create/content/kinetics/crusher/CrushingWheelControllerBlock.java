@@ -7,6 +7,7 @@ import com.simibubi.create.AllShapes;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.item.ItemHelper;
+import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import io.github.fabricators_of_create.porting_lib.blocks.extensions.CustomRunningEffectsBlock;
 
@@ -162,7 +163,9 @@ public class CrushingWheelControllerBlock extends DirectionalBlock
                         be.sendData();
 
                         cwbe.award(AllAdvancements.CRUSHING_WHEEL);
-                        if (cwbe.getSpeed() > 255) cwbe.award(AllAdvancements.CRUSHER_MAXED);
+                        if (Math.abs(cwbe.getSpeed())
+                                > AllConfigs.server().kinetics.maxRotationSpeed.get() - 1)
+                            cwbe.award(AllAdvancements.CRUSHER_MAXED);
                         break;
                     }
                 });

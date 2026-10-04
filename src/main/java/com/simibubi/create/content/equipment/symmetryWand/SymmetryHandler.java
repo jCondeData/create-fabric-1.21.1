@@ -14,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -153,12 +154,12 @@ public class SymmetryHandler {
                     SymmetryMirror mirror = SymmetryWandItem.getMirror(stackInSlot);
                     if (mirror instanceof EmptyMirror) continue;
 
-                    RandomSource r = RandomSource.create();
-                    double offsetX = (r.nextDouble() - 0.5) * 0.3;
-                    double offsetZ = (r.nextDouble() - 0.5) * 0.3;
+                    RandomSource random = mc.level.random;
+                    double offsetX = (random.nextDouble() - 0.5) * 0.3;
+                    double offsetZ = (random.nextDouble() - 0.5) * 0.3;
 
                     Vec3 pos = mirror.getPosition().add(0.5 + offsetX, 1 / 4d, 0.5 + offsetZ);
-                    Vec3 speed = new Vec3(0, r.nextDouble() * 1 / 8f, 0);
+                    Vec3 speed = new Vec3(0, random.nextDouble() * 1 / 8f, 0);
                     mc.level.addParticle(
                             ParticleTypes.END_ROD, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
                 }
@@ -168,6 +169,9 @@ public class SymmetryHandler {
 
     @Environment(EnvType.CLIENT)
     public static void drawEffect(BlockPos from, BlockPos to) {
+        ClientLevel level = Minecraft.getInstance().level;
+        RandomSource random = level.random;
+
         double density = 0.8f;
         Vec3 start = Vec3.atLowerCornerOf(from).add(0.5, 0.5, 0.5);
         Vec3 end = Vec3.atLowerCornerOf(to).add(0.5, 0.5, 0.5);
@@ -176,33 +180,26 @@ public class SymmetryHandler {
         Vec3 step = diff.normalize().scale(density);
         int steps = (int) (diff.length() / step.length());
 
-        RandomSource r = RandomSource.create();
         for (int i = 3; i < steps - 1; i++) {
             Vec3 pos = start.add(step.scale(i));
-            Vec3 speed = new Vec3(0, r.nextDouble() * -40f, 0);
+            Vec3 speed = new Vec3(0, random.nextDouble() * -40f, 0);
 
-            Minecraft.getInstance()
-                    .level
-                    .addParticle(
-                            new DustParticleOptions(new Vector3f(1, 1, 1), 1),
-                            pos.x,
-                            pos.y,
-                            pos.z,
-                            speed.x,
-                            speed.y,
-                            speed.z);
+            level.addParticle(
+                    new DustParticleOptions(new Vector3f(1, 1, 1), 1),
+                    pos.x,
+                    pos.y,
+                    pos.z,
+                    speed.x,
+                    speed.y,
+                    speed.z);
         }
 
-        Vec3 speed = new Vec3(0, r.nextDouble() * 1 / 32f, 0);
+        Vec3 speed = new Vec3(0, random.nextDouble() * 1 / 32f, 0);
         Vec3 pos = start.add(step.scale(2));
-        Minecraft.getInstance()
-                .level
-                .addParticle(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
+        level.addParticle(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
 
-        speed = new Vec3(0, r.nextDouble() * 1 / 32f, 0);
+        speed = new Vec3(0, random.nextDouble() * 1 / 32f, 0);
         pos = start.add(step.scale(steps));
-        Minecraft.getInstance()
-                .level
-                .addParticle(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
+        level.addParticle(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 }

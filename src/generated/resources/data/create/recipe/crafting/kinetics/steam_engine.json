@@ -9,7 +9,7 @@
       "tag": "c:storage_blocks/copper"
     },
     "P": {
-      "tag": "c:gold_plates"
+      "tag": "c:plates/gold"
     }
   },
   "pattern": [

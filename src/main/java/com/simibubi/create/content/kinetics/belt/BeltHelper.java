@@ -44,9 +44,15 @@ public class BeltHelper {
     public static boolean isItemUpright(ItemStack stack) {
         return uprightCache.computeIfAbsent(
                 stack.getItem(),
-                item ->
-                        ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM) != null
-                                || AllItemTags.UPRIGHT_ON_BELT.matches(stack));
+                item -> {
+                    boolean isFluidHandler =
+                            ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM)
+                                    != null;
+                    boolean useUpright = AllItemTags.UPRIGHT_ON_BELT.matches(stack);
+                    boolean forceDisableUpright = !AllItemTags.NOT_UPRIGHT_ON_BELT.matches(stack);
+
+                    return (isFluidHandler || useUpright) && forceDisableUpright;
+                });
     }
 
     public static BeltBlockEntity getSegmentBE(LevelAccessor world, BlockPos pos) {

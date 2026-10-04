@@ -6,6 +6,7 @@ import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity.Inventory;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
+import com.simibubi.create.infrastructure.fabric.transfer.TransactionSuccessCallback;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public enum CrafterUnpackingHandler implements UnpackingHandler {
@@ -45,7 +47,17 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
         List<Inventory> inventories = input.getInventories(level, pos);
         if (inventories.isEmpty()) return false;
 
-        try (Transaction t = Transaction.openOuter()) {
+        // fabric: same transaction rules as DefaultUnpackingHandler — packagers call this while
+        // the box insertion transaction is still open, so nest into it instead of openOuter().
+        Transaction.Lifecycle lifecycle = Transaction.getLifecycle();
+        if (lifecycle != Transaction.Lifecycle.NONE && lifecycle != Transaction.Lifecycle.OPEN)
+            return false;
+
+        // work on copies: the simulated pass must not consume the caller's stacks
+        List<ItemStack> remaining = new ArrayList<>(items.size());
+        for (ItemStack stack : items) remaining.add(stack.copy());
+
+        try (Transaction t = Transaction.openNested(Transaction.getCurrentUnsafe())) {
             // insert in the order's defined ordering
             int max = Math.min(inventories.size(), craftingContext.size());
             outer:
@@ -58,7 +70,7 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
                 if (!inventory.getStackInSlot(0).isEmpty()) continue;
 
                 // go through each item in the box and try insert if it matches the target
-                for (ItemStack stack : items) {
+                for (ItemStack stack : remaining) {
                     if (ItemStack.isSameItemSameComponents(stack, targetStack.stack)) {
                         ItemStack toInsert = stack.copyWithCount(1);
                         if (inventory.insert(ItemVariant.of(toInsert), 1, t) == 1) {
@@ -71,19 +83,18 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
             }
 
             // if anything is still non-empty insertion failed
-            for (ItemStack item : items) {
+            for (ItemStack item : remaining) {
                 if (!item.isEmpty()) {
                     return false;
                 }
             }
 
             if (!simulate) {
+                // start crafting only once the items are really in (the outer transaction may
+                // still be rolled back)
+                TransactionSuccessCallback.register(t, () -> crafter.checkCompletedRecipe(true));
                 t.commit();
             }
-        }
-
-        if (!simulate) {
-            crafter.checkCompletedRecipe(true);
         }
 
         return true;

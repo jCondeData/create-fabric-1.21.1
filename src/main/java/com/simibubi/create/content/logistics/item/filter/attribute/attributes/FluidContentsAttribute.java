@@ -20,11 +20,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public record FluidContentsAttribute(@Nullable Fluid fluid) implements ItemAttribute {
     public static final MapCodec<FluidContentsAttribute> CODEC =

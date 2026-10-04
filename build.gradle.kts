@@ -1,3 +1,5 @@
+import java.util.zip.ZipFile
+
 // versions
 // https://parchmentmc.org/docs/getting-started
 val parchmentVersion = "2024.11.17"
@@ -44,6 +46,8 @@ val ccaVersion = "6.1.2"
 val jmVersion = "1.21.1-6.0.0-beta.39+fabric"
 // check the jm jar, it's JiJ
 val jmApiVersion = "1.20-1.9-SNAPSHOT"
+// https://modrinth.com/mod/xaeros-world-map/versions - fabric-1.21.1-1.44.2 (Modrinth version id)
+val xaeroWorldMapVersion = "L2nO7ZYD"
 
 // dev stuff
 val ccRuntime = false
@@ -85,6 +89,31 @@ repositories {
 }
 
 val ponder = file("Ponder")
+
+// Xaero's World Map ships XaeroLib (home of GuiMap's superclasses) only jar-in-jar, and XaeroLib has
+// no standalone Fabric 1.21.1 release. Loom doesn't put nested jars on the classpath, but compiling
+// the train map compat (and its mixin refmap) and remapping the world map jar need it.
+val xaeroLibJar: File =
+    run {
+        val worldMapJar =
+            configurations
+                .detachedConfiguration(
+                    dependencies.create("maven.modrinth:xaeros-world-map:$xaeroWorldMapVersion"),
+                ).apply { isTransitive = false }
+                .singleFile
+        val target = file(".gradle/nested-jars/${worldMapJar.nameWithoutExtension}-xaerolib.jar")
+        if (!target.isFile) {
+            ZipFile(worldMapJar).use { zip ->
+                val entry =
+                    zip.entries().asSequence().first {
+                        it.name.startsWith("META-INF/jars/xaerolib-") && it.name.endsWith(".jar")
+                    }
+                target.parentFile.mkdirs()
+                zip.getInputStream(entry).use { input -> target.outputStream().use { input.copyTo(it) } }
+            }
+        }
+        target
+    }
 
 dependencies {
     // setup
@@ -152,6 +181,10 @@ dependencies {
 
     modCompileOnly("maven.modrinth:journeymap:$jmVersion")
     modCompileOnly("info.journeymap:journeymap-api:$jmApiVersion")
+
+    // Xaero's World Map train map overlay (compat.trainmap.XaeroTrainMap, mixin.compat.xaeros)
+    modCompileOnly("maven.modrinth:xaeros-world-map:$xaeroWorldMapVersion")
+    modCompileOnly(files(xaeroLibJar))
 
     // EMI
     modCompileOnly("dev.emi:emi-fabric:$emiVersion:api") { isTransitive = false }

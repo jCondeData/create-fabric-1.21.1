@@ -10,6 +10,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -39,7 +40,8 @@ public class PlacardBlockEntity extends SmartBlockEntity {
         if (poweredTicks > 0) return;
 
         BlockState blockState = getBlockState();
-        level.setBlock(worldPosition, blockState.setValue(PlacardBlock.POWERED, false), 3);
+        level.setBlock(
+                worldPosition, blockState.setValue(PlacardBlock.POWERED, false), Block.UPDATE_ALL);
         PlacardBlock.updateNeighbours(blockState, level, worldPosition);
     }
 

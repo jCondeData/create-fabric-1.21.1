@@ -3,6 +3,7 @@ package com.simibubi.create.foundation.data;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.Create;
+import com.simibubi.create.api.data.recipe.DatagenMod;
 import com.simibubi.create.foundation.data.recipe.Mods;
 
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
@@ -63,10 +64,10 @@ public class SimpleDatagenIngredient implements CustomIngredient {
                 }
             };
 
-    private final Mods mod;
+    private final DatagenMod mod;
     private final String id;
 
-    public SimpleDatagenIngredient(Mods mod, String id) {
+    public SimpleDatagenIngredient(DatagenMod mod, String id) {
         this.mod = mod;
         this.id = id;
     }

@@ -58,12 +58,10 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class CartAssemblerBlock extends BaseRailBlock
         implements IBE<CartAssemblerBlockEntity>,
@@ -126,15 +124,15 @@ public class CartAssemblerBlock extends BaseRailBlock
 
     @Override
     public boolean canMakeSlopes(
-            @Nonnull BlockState state, @Nonnull BlockGetter world, @Nonnull BlockPos pos) {
+            @NotNull BlockState state, @NotNull BlockGetter world, @NotNull BlockPos pos) {
         return false;
     }
 
     @Override
     public void onMinecartPass(
-            @Nonnull BlockState state,
-            @Nonnull Level world,
-            @Nonnull BlockPos pos,
+            @NotNull BlockState state,
+            @NotNull Level world,
+            @NotNull BlockPos pos,
             AbstractMinecart cart) {
         if (!canAssembleTo(cart)) return;
         if (world.isClientSide) return;
@@ -224,32 +222,32 @@ public class CartAssemblerBlock extends BaseRailBlock
 
     @Override
     public void neighborChanged(
-            @Nonnull BlockState state,
-            @Nonnull Level worldIn,
-            @Nonnull BlockPos pos,
-            @Nonnull Block blockIn,
-            @Nonnull BlockPos fromPos,
+            @NotNull BlockState state,
+            @NotNull Level worldIn,
+            @NotNull BlockPos pos,
+            @NotNull Block blockIn,
+            @NotNull BlockPos fromPos,
             boolean isMoving) {
         if (worldIn.isClientSide) return;
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered != worldIn.hasNeighborSignal(pos))
-            worldIn.setBlock(pos, state.cycle(POWERED), 2);
+            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public Property<RailShape> getShapeProperty() {
         return RAIL_SHAPE;
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public VoxelShape getShape(
             BlockState state,
-            @Nonnull BlockGetter worldIn,
-            @Nonnull BlockPos pos,
-            @Nonnull CollisionContext context) {
+            @NotNull BlockGetter worldIn,
+            @NotNull BlockPos pos,
+            @NotNull CollisionContext context) {
         return AllShapes.CART_ASSEMBLER.get(getRailAxis(state));
     }
 
@@ -260,11 +258,11 @@ public class CartAssemblerBlock extends BaseRailBlock
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public VoxelShape getCollisionShape(
-            @Nonnull BlockState state,
-            @Nonnull BlockGetter worldIn,
-            @Nonnull BlockPos pos,
+            @NotNull BlockState state,
+            @NotNull BlockGetter worldIn,
+            @NotNull BlockPos pos,
             CollisionContext context) {
         if (context instanceof EntityCollisionContext) {
             Entity entity = ((EntityCollisionContext) context).getEntity();
@@ -287,7 +285,7 @@ public class CartAssemblerBlock extends BaseRailBlock
 
     @Override
     public boolean canSurvive(
-            @Nonnull BlockState state, @Nonnull LevelReader world, @Nonnull BlockPos pos) {
+            @NotNull BlockState state, @NotNull LevelReader world, @NotNull BlockPos pos) {
         return false;
     }
 
@@ -301,7 +299,7 @@ public class CartAssemblerBlock extends BaseRailBlock
 
     @Override
     @SuppressWarnings("deprecation")
-    @Nonnull
+    @NotNull
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         List<ItemStack> drops = super.getDrops(state, builder);
         drops.addAll(getRailBlock(state).getDrops(builder));
@@ -360,12 +358,12 @@ public class CartAssemblerBlock extends BaseRailBlock
         }
 
         @Override
-        @Nonnull
+        @NotNull
         public VoxelShape getShape(
-                @Nonnull BlockState p_220053_1_,
-                @Nonnull BlockGetter p_220053_2_,
-                @Nonnull BlockPos p_220053_3_,
-                @Nonnull CollisionContext p_220053_4_) {
+                @NotNull BlockState p_220053_1_,
+                @NotNull BlockGetter p_220053_2_,
+                @NotNull BlockPos p_220053_3_,
+                @NotNull CollisionContext p_220053_4_) {
             return Shapes.empty();
         }
     }
@@ -380,7 +378,7 @@ public class CartAssemblerBlock extends BaseRailBlock
         Level world = context.getLevel();
         if (world.isClientSide) return InteractionResult.SUCCESS;
         BlockPos pos = context.getClickedPos();
-        world.setBlock(pos, rotate(state, Rotation.CLOCKWISE_90), 3);
+        world.setBlock(pos, rotate(state, Rotation.CLOCKWISE_90), Block.UPDATE_ALL);
         world.updateNeighborsAt(pos.below(), this);
         return InteractionResult.SUCCESS;
     }

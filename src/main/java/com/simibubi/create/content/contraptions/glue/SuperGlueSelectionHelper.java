@@ -6,8 +6,7 @@ import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -77,14 +76,7 @@ public class SuperGlueSelectionHelper {
 
             int charges = Math.min(requiredAmount, stack.getMaxDamage() - stack.getDamageValue());
 
-            if (!simulate
-                    && player.level() instanceof ServerLevel serverLevel
-                    && player instanceof ServerPlayer serverPlayer)
-                stack.hurtAndBreak(
-                        charges,
-                        serverLevel,
-                        serverPlayer,
-                        i == -1 ? $ -> SuperGlueItem.onBroken(player) : $ -> {});
+            if (!simulate) stack.hurtAndBreak(charges, player, EquipmentSlot.MAINHAND);
 
             requiredAmount -= charges;
             if (requiredAmount <= 0) return true;

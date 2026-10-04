@@ -53,6 +53,7 @@ import com.simibubi.create.foundation.fabric.BlockPlacedCallback;
 import com.simibubi.create.foundation.pack.DynamicPack;
 import com.simibubi.create.foundation.pack.DynamicPackSource;
 import com.simibubi.create.foundation.recipe.RecipeFinder;
+import com.simibubi.create.foundation.recipe.trie.RecipeTrieFinder;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
 import com.simibubi.create.foundation.utility.TickBasedCache;
 import com.simibubi.create.infrastructure.command.AllCommands;
@@ -88,14 +89,17 @@ import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -190,6 +194,20 @@ public class CommonEvents {
     public static void addReloadListeners() {
         ResourceManagerHelper.get(PackType.SERVER_DATA)
                 .registerReloadListener(RecipeFinder.LISTENER);
+        // fabric: Fabric only takes identifiable reload listeners
+        ResourceManagerHelper.get(PackType.SERVER_DATA)
+                .registerReloadListener(
+                        new SimpleSynchronousResourceReloadListener() {
+                            @Override
+                            public ResourceLocation getFabricId() {
+                                return Create.asResource("recipe_trie_finder");
+                            }
+
+                            @Override
+                            public void onResourceManagerReload(ResourceManager resourceManager) {
+                                RecipeTrieFinder.LISTENER.onResourceManagerReload(resourceManager);
+                            }
+                        });
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(BeltHelper.LISTENER);
     }
 
@@ -362,6 +380,7 @@ public class CommonEvents {
         PlayerBlockBreakEvents.AFTER.register(ExtendoGripItem::consumeDurabilityOnBlockBreak);
         BlockPlacedCallback.EVENT.register(ExtendoGripItem::consumeDurabilityOnPlace);
         EntityEvents.Size.EVENT.register(CardboardArmorHandler::playerHitboxChangesWhenHidingAsBox);
+        ServerEntityEvents.EQUIPMENT_CHANGE.register(CardboardArmorHandler::playerChangesEquipment);
         LivingEvents.LivingVisibilityEvent.EVENT.register(
                 CardboardArmorHandler::playersStealthWhenWearingCardboard);
         EntityTickEvent.Pre.EVENT.register(

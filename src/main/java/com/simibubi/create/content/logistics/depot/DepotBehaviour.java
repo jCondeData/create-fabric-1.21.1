@@ -97,7 +97,6 @@ public class DepotBehaviour extends BlockEntityBehaviour {
                     protected void onContentsChanged(int slot) {
                         be.notifyUpdate();
                     }
-                    ;
                 };
     }
 
@@ -159,7 +158,7 @@ public class DepotBehaviour extends BlockEntityBehaviour {
                 wasLocked
                         ? processingBehaviour.handleHeldItem(heldItem, transportedHandler)
                         : processingBehaviour.handleReceivedItem(heldItem, transportedHandler);
-        if (result == ProcessingResult.REMOVE) {
+        if (heldItem == null || result == ProcessingResult.REMOVE) {
             heldItem = null;
             blockEntity.sendData();
             return;

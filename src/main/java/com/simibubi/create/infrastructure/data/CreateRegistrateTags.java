@@ -134,8 +134,6 @@ public class CreateRegistrateTags {
                 .addTag(BlockTags.FENCE_GATES)
                 .addTag(BlockTags.BANNERS);
 
-        prov.tag(AllBlockTags.ORE_OVERRIDE_STONE.tag).addTag(BlockTags.STONE_ORE_REPLACEABLES);
-
         prov.tag(AllBlockTags.PASSIVE_BOILER_HEATERS.tag)
                 .add(Blocks.MAGMA_BLOCK, Blocks.LAVA)
                 .addTag(BlockTags.CAMPFIRES)
@@ -267,20 +265,13 @@ public class CreateRegistrateTags {
                 prov.tag(AllBlockTags.ROOTS.tag),
                 Mods.TF,
                 List.of("root", "liveroot_block", "mangrove_root"));
-
-        // VALIDATE
-
-        for (AllBlockTags tag : AllBlockTags.values()) {
-            if (tag.alwaysDatagen) {
-                prov.getOrCreateRawBuilder(tag.tag);
-            }
-        }
     }
 
     private static void genItemTags(RegistrateTagsProvider<Item> provIn) {
         CreateTagsProvider<Item> prov =
                 new CreateTagsProvider<>(provIn, Item::builtInRegistryHolder);
 
+        // fabric: no convention tag for wrenches, NeoForge's Tags.Items.TOOLS_WRENCH upstream
         prov.tag(AllItemTags.CHAIN_RIDEABLE.tag).addTag(AllItemTags.WRENCH.tag);
 
         prov.tag(AllItemTags.PULPIFIABLE.tag)
@@ -362,13 +353,14 @@ public class CreateRegistrateTags {
                         "chrome_coral",
                         "silk_coral"));
 
-        // VALIDATE
-
-        for (AllItemTags tag : AllItemTags.values()) {
-            if (tag.alwaysDatagen) {
-                prov.getOrCreateRawBuilder(tag.tag);
-            }
-        }
+        TagGen.addOptional(
+                prov.tag(AllItemTags.UPRIGHT_ON_BELT.tag),
+                Mods.ATM,
+                List.of(
+                        "orange_pudding",
+                        "orange_sorbet",
+                        "passion_fruit_sorbet",
+                        "aloe_gel_bottle"));
     }
 
     private static ArrayList<String> gsPalette(String material) {
@@ -401,14 +393,6 @@ public class CreateRegistrateTags {
         // fabric: this was requested by TelepathicGrunt for swimming in Bumblezone honey.
         // This is not needed on Forge as FluidType is sufficient.
         prov.tag(AllFluidTags.DIVING_FLUIDS.tag).addTag(FluidTags.WATER);
-
-        // VALIDATE
-
-        for (AllFluidTags tag : AllFluidTags.values()) {
-            if (tag.alwaysDatagen) {
-                prov.getOrCreateRawBuilder(tag.tag);
-            }
-        }
     }
 
     private static void genEntityTags(RegistrateTagsProvider<EntityType<?>> provIn) {
@@ -419,13 +403,5 @@ public class CreateRegistrateTags {
 
         prov.tag(AllEntityTags.IGNORE_SEAT.tag)
                 .addTag(ConventionalEntityTypeTags.CAPTURING_NOT_SUPPORTED);
-
-        // VALIDATE
-
-        for (AllEntityTags tag : AllEntityTags.values()) {
-            if (tag.alwaysDatagen) {
-                prov.getOrCreateRawBuilder(tag.tag);
-            }
-        }
     }
 }

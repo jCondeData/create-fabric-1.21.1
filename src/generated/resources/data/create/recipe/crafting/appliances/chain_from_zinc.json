@@ -3,10 +3,10 @@
   "category": "misc",
   "key": {
     "C": {
-      "tag": "c:zinc_ingots"
+      "tag": "c:ingots/zinc"
     },
     "S": {
-      "tag": "c:zinc_nuggets"
+      "tag": "c:nuggets/zinc"
     }
   },
   "pattern": [

@@ -25,6 +25,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,11 +34,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public class PulleyBlockEntity extends LinearActuatorBlockEntity
         implements ThresholdSwitchObservable {
@@ -171,7 +172,10 @@ public class PulleyBlockEntity extends LinearActuatorBlockEntity
         for (int i = ((int) offset); i > 0; i--) {
             BlockPos offset = worldPosition.below(i);
             BlockState oldState = level.getBlockState(offset);
-            level.setBlock(offset, oldState.getFluidState().createLegacyBlock(), 66);
+            level.setBlock(
+                    offset,
+                    oldState.getFluidState().createLegacyBlock(),
+                    Block.UPDATE_CLIENTS | Block.UPDATE_MOVE_BY_PISTON);
         }
     }
 
@@ -201,7 +205,7 @@ public class PulleyBlockEntity extends LinearActuatorBlockEntity
                                                 BlockStateProperties.WATERLOGGED,
                                                 Boolean.valueOf(
                                                         ifluidstate.getType() == Fluids.WATER)),
-                                66);
+                                Block.UPDATE_CLIENTS | Block.UPDATE_MOVE_BY_PISTON);
                     }
                 }
 
@@ -229,7 +233,7 @@ public class PulleyBlockEntity extends LinearActuatorBlockEntity
                                 AllBlocks.ROPE
                                         .getDefaultState()
                                         .setValue(BlockStateProperties.WATERLOGGED, waterlog[i]),
-                                66);
+                                Block.UPDATE_CLIENTS | Block.UPDATE_MOVE_BY_PISTON);
                     }
                 }
             }

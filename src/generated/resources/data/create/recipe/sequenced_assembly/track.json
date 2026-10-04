@@ -3,7 +3,6 @@
   "ingredient": {
     "tag": "create:sleepers"
   },
-  "loops": 1,
   "results": [
     {
       "id": "create:track"
@@ -21,7 +20,7 @@
             "tag": "c:nuggets/iron"
           },
           {
-            "tag": "c:zinc_nuggets"
+            "tag": "c:nuggets/zinc"
           }
         ]
       ],
@@ -42,7 +41,7 @@
             "tag": "c:nuggets/iron"
           },
           {
-            "tag": "c:zinc_nuggets"
+            "tag": "c:nuggets/zinc"
           }
         ]
       ],

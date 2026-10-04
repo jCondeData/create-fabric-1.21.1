@@ -19,9 +19,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.UUID;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 public abstract class TrainHUDUpdatePacket implements CustomPacketPayload {
     protected final UUID trainId;

@@ -5,6 +5,7 @@ import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllSpriteShifts;
 import com.simibubi.create.content.processing.burner.ScrollTransformedInstance;
 import com.simibubi.create.foundation.render.AllInstanceTypes;
+import com.simibubi.create.foundation.render.SpecialModels;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
@@ -88,12 +89,12 @@ public class StandardBogeyVisual implements BogeyVisual {
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.SMALL_BOGEY_WHEELS));
+                                    SpecialModels.smoothLit(AllPartialModels.SMALL_BOGEY_WHEELS));
             frame =
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.BOGEY_FRAME))
+                                    SpecialModels.smoothLit(AllPartialModels.BOGEY_FRAME))
                             .createInstance();
             wheel1 = wheelInstancer.createInstance();
             wheel2 = wheelInstancer.createInstance();
@@ -161,38 +162,38 @@ public class StandardBogeyVisual implements BogeyVisual {
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.SHAFT));
+                                    SpecialModels.smoothLit(AllPartialModels.SHAFT));
             secondaryShaft1 = secondaryShaftInstancer.createInstance();
             secondaryShaft2 = secondaryShaftInstancer.createInstance();
             drive =
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.BOGEY_DRIVE))
+                                    SpecialModels.smoothLit(AllPartialModels.BOGEY_DRIVE))
                             .createInstance();
             belt =
                     ctx.instancerProvider()
                             .instancer(
                                     AllInstanceTypes.SCROLLING_TRANSFORMED,
-                                    Models.partial(AllPartialModels.BOGEY_DRIVE_BELT))
+                                    SpecialModels.smoothLit(AllPartialModels.BOGEY_DRIVE_BELT))
                             .createInstance();
             piston =
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.BOGEY_PISTON))
+                                    SpecialModels.smoothLit(AllPartialModels.BOGEY_PISTON))
                             .createInstance();
             wheels =
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.LARGE_BOGEY_WHEELS))
+                                    SpecialModels.smoothLit(AllPartialModels.LARGE_BOGEY_WHEELS))
                             .createInstance();
             pin =
                     ctx.instancerProvider()
                             .instancer(
                                     InstanceTypes.TRANSFORMED,
-                                    Models.partial(AllPartialModels.BOGEY_PIN))
+                                    SpecialModels.smoothLit(AllPartialModels.BOGEY_PIN))
                             .createInstance();
 
             belt.setSpriteShift(AllSpriteShifts.BOGEY_BELT);

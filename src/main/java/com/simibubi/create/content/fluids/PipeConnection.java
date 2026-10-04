@@ -21,7 +21,6 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -357,7 +356,6 @@ public class PipeConnection {
     public static final int SPLASH_PARTICLE_AMOUNT = 1;
     public static final float IDLE_PARTICLE_SPAWN_CHANCE = 1 / 1000f;
     public static final float RIM_RADIUS = 1 / 4f + 1 / 64f;
-    public static final RandomSource r = RandomSource.create();
 
     public void spawnSplashOnRim(Level world, BlockPos pos, FluidStack fluid) {
         CatnipServices.PLATFORM.executeOnClientOnly(
@@ -370,11 +368,11 @@ public class PipeConnection {
     }
 
     @Environment(EnvType.CLIENT)
-    private void spawnParticlesInner(Level world, BlockPos pos, FluidStack fluid) {
-        if (world == Minecraft.getInstance().level) if (!isRenderEntityWithinDistance(pos)) return;
-        if (hasOpenEnd()) spawnPouringLiquid(world, pos, fluid, 1);
-        else if (r.nextFloat() < IDLE_PARTICLE_SPAWN_CHANCE)
-            spawnRimParticles(world, pos, fluid, 1);
+    private void spawnParticlesInner(Level level, BlockPos pos, FluidStack fluid) {
+        if (level == Minecraft.getInstance().level) if (!isRenderEntityWithinDistance(pos)) return;
+        if (hasOpenEnd()) spawnPouringLiquid(level, pos, fluid, 1);
+        else if (level.random.nextFloat() < IDLE_PARTICLE_SPAWN_CHANCE)
+            spawnRimParticles(level, pos, fluid, 1);
     }
 
     @Environment(EnvType.CLIENT)

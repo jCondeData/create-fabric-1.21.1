@@ -30,13 +30,13 @@ public class VanillaFluidTargets {
         if (state.hasProperty(BlockStateProperties.LEVEL_HONEY)
                 && state.getValue(LEVEL_HONEY) >= 5) {
             level.port_lib$updateSnapshots(ctx);
-            level.setBlock(pos, state.setValue(LEVEL_HONEY, 0), 3);
+            level.setBlock(pos, state.setValue(LEVEL_HONEY, 0), Block.UPDATE_ALL);
             return new FluidStack(AllFluids.HONEY.get().getSource(), FluidConstants.BOTTLE);
         }
 
         if (state.is(Blocks.LAVA_CAULDRON)) {
             level.port_lib$updateSnapshots(ctx);
-            level.setBlock(pos, Blocks.CAULDRON.defaultBlockState(), 3);
+            level.setBlock(pos, Blocks.CAULDRON.defaultBlockState(), Block.UPDATE_ALL);
             return new FluidStack(Fluids.LAVA, FluidConstants.BUCKET);
         }
 
@@ -45,7 +45,7 @@ public class VanillaFluidTargets {
         if (content != null && block instanceof LayeredCauldronBlock lcb) {
             if (!lcb.isFull(state)) return FluidStack.EMPTY;
             level.port_lib$updateSnapshots(ctx);
-            level.setBlock(pos, Blocks.CAULDRON.defaultBlockState(), 3);
+            level.setBlock(pos, Blocks.CAULDRON.defaultBlockState(), Block.UPDATE_ALL);
             return new FluidStack(content.fluid, FluidConstants.BUCKET);
         }
 

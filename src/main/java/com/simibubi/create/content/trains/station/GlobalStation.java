@@ -1,16 +1,18 @@
 package com.simibubi.create.content.trains.station;
 
 import com.simibubi.create.Create;
+import com.simibubi.create.compat.computercraft.events.PackageEvent;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.content.trains.entity.Carriage;
-import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.content.trains.graph.DimensionPalette;
 import com.simibubi.create.content.trains.graph.TrackNode;
 import com.simibubi.create.content.trains.signal.SingleBlockEntityEdgePoint;
 import com.simibubi.create.infrastructure.fabric.transfer.TransferUtil;
 import com.simibubi.create.infrastructure.fabric.transfer.item.ItemStackHandler;
+
+import io.github.fabricators_of_create.porting_lib.core.util.ServerLifecycleHooks;
 
 import net.createmod.catnip.nbt.NBTHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -24,18 +26,18 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.annotation.Nullable;
 
 public class GlobalStation extends SingleBlockEntityEdgePoint {
 
@@ -172,25 +174,14 @@ public class GlobalStation extends SingleBlockEntityEdgePoint {
         return this.nearestTrain.get();
     }
 
-    // Package Port integration
-    public static class GlobalPackagePort {
-        public String address = "";
-        public ItemStackHandler offlineBuffer = new ItemStackHandler(18);
-        public boolean primed = false;
-    }
-
     public void runMailTransfer() {
         Train train = getPresentTrain();
         if (train == null || connectedPorts.isEmpty()) return;
-        Level level = null;
+
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        Level level = server.getLevel(getBlockEntityDimension());
 
         for (Carriage carriage : train.carriages) {
-            if (level == null) {
-                CarriageContraptionEntity entity = carriage.anyAvailableEntity();
-                if (entity != null && entity.level() instanceof ServerLevel sl)
-                    level = sl.getServer().getLevel(getBlockEntityDimension());
-            }
-
             Storage<ItemVariant> carriageInventory = carriage.storage.getAllItems();
             if (carriageInventory == null) continue;
 
@@ -214,11 +205,20 @@ public class GlobalStation extends SingleBlockEntityEdgePoint {
                     if (PackageItem.matchAddress(stack, port.address)) continue;
 
                     long inserted = TransferUtil.insert(carriageInventory, stack);
+                    if (box != null)
+                        box.computerBehaviour.prepareComputerEvent(
+                                new PackageEvent(stack, "package_sent"));
                     if (inserted == 0) continue;
 
                     postboxInventory.setStackInSlot(slot, ItemStack.EMPTY);
+
+                    if (box == null) {
+                        port.primed = true;
+                    } else {
+                        box.spawnParticles();
+                    }
+
                     Create.RAILWAYS.markTracksDirty();
-                    if (box != null) box.spawnParticles();
                 }
             }
 
@@ -243,12 +243,28 @@ public class GlobalStation extends SingleBlockEntityEdgePoint {
                             box = ppbe;
                         }
 
-                        long inserted = postboxInventory.insert(resource, view.getAmount(), t);
-                        if (inserted != 0) continue;
+                        // fabric: move the package only once the postbox took all of it
+                        long amount = view.getAmount();
+                        try (Transaction nested = t.openNested()) {
+                            long inserted = postboxInventory.insert(resource, amount, nested);
+                            if (box != null)
+                                box.computerBehaviour.prepareComputerEvent(
+                                        new PackageEvent(
+                                                resource.toStack((int) amount),
+                                                "package_received"));
+                            if (inserted != amount) continue;
+                            if (view.extract(resource, amount, nested) != amount) continue;
+
+                            nested.commit();
+                        }
+
+                        if (box == null) {
+                            port.primed = true;
+                        } else {
+                            box.spawnParticles();
+                        }
 
                         Create.RAILWAYS.markTracksDirty();
-                        view.extract(resource, view.getAmount(), t);
-                        if (box != null) box.spawnParticles();
 
                         break;
                     }

@@ -101,4 +101,9 @@ public class FilterScreen extends AbstractFilterScreen<FilterMenu> {
         if (button == ignoreNBT) return menu.respectNBT;
         return true;
     }
+
+    @Override
+    protected int getTitleColor() {
+        return 0x303030;
+    }
 }

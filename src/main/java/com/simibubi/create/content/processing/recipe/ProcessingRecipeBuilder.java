@@ -2,9 +2,9 @@ package com.simibubi.create.content.processing.recipe;
 
 import com.google.common.base.Joiner;
 import com.simibubi.create.Create;
+import com.simibubi.create.api.data.recipe.DatagenMod;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe.Factory;
 import com.simibubi.create.foundation.data.SimpleDatagenIngredient;
-import com.simibubi.create.foundation.data.recipe.Mods;
 import com.simibubi.create.foundation.fluid.FluidHelper;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
@@ -158,7 +158,7 @@ public abstract class ProcessingRecipeBuilder<
         return self();
     }
 
-    public S require(Mods mod, String id) {
+    public S require(DatagenMod mod, String id) {
         params.ingredients.add(new SimpleDatagenIngredient(mod, id).toVanilla());
         return self();
     }
@@ -200,7 +200,7 @@ public abstract class ProcessingRecipeBuilder<
         return output(new ProcessingOutput(output, chance));
     }
 
-    public S output(float chance, Mods mod, String id, int amount) {
+    public S output(float chance, DatagenMod mod, String id, int amount) {
         return output(new ProcessingOutput(mod.asResource(id), amount, chance));
     }
 
@@ -208,7 +208,7 @@ public abstract class ProcessingRecipeBuilder<
         return output(1, id, 1);
     }
 
-    public S output(Mods mod, String id) {
+    public S output(DatagenMod mod, String id) {
         return output(1, mod.asResource(id), 1);
     }
 

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class GogglesItem extends Item implements Equipable {
-
     private static final List<Predicate<Player>> IS_WEARING_PREDICATES = new ArrayList<>();
 
     static {
@@ -59,7 +58,7 @@ public class GogglesItem extends Item implements Equipable {
      * Use this method to add custom entry points to the goggles overlay, e.g. custom armor,
      * handheld alternatives, etc.
      */
-    public static void addIsWearingPredicate(Predicate<Player> predicate) {
+    public static synchronized void addIsWearingPredicate(Predicate<Player> predicate) {
         IS_WEARING_PREDICATES.add(predicate);
     }
 }

@@ -6,7 +6,7 @@
       "tag": "c:ingots/copper"
     },
     "P": {
-      "tag": "c:gold_plates"
+      "tag": "c:plates/gold"
     }
   },
   "pattern": [

@@ -33,9 +33,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
-import java.util.function.Consumer;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 public class ItemVaultBlock extends Block
         implements IWrenchable, IBE<ItemVaultBlockEntity>, CustomSoundTypeBlock {

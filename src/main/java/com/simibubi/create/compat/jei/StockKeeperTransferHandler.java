@@ -13,6 +13,7 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IUniversalRecipeTransferHandler;
+import mezz.jei.common.transfer.RecipeTransferErrorInternal;
 import mezz.jei.common.transfer.RecipeTransferOperationsResult;
 import mezz.jei.common.transfer.RecipeTransferUtil;
 import mezz.jei.library.transfer.RecipeTransferErrorMissingSlots;
@@ -95,9 +96,12 @@ public class StockKeeperTransferHandler
             Player player,
             boolean maxTransfer,
             boolean doTransfer) {
-        if (!(container.screenReference instanceof StockKeeperRequestScreen screen)) return null;
+        if (!(container.screenReference instanceof StockKeeperRequestScreen screen))
+            return RecipeTransferErrorInternal.INSTANCE;
 
         Recipe<?> recipe = recipeHolder.value();
+
+        if (recipe.getIngredients().size() > 9) return RecipeTransferErrorInternal.INSTANCE;
 
         for (CraftableBigItemStack cbis : screen.recipesToOrder)
             if (cbis.recipe == recipe)
@@ -111,7 +115,7 @@ public class StockKeeperTransferHandler
 
         InventorySummary summary =
                 screen.getMenu().contentHolder.getLastClientsideStockSnapshotAsSummary();
-        if (summary == null) return null;
+        if (summary == null) return RecipeTransferErrorInternal.INSTANCE;
 
         Container outputDummy = new SimpleContainer(9);
         List<Slot> craftingSlots = new ArrayList<>();
@@ -143,8 +147,9 @@ public class StockKeeperTransferHandler
         if (!doTransfer) return null;
 
         ItemStack result = recipe.getResultItem(player.level().registryAccess());
-
-        if (result.isEmpty()) return null;
+        if (result.isEmpty())
+            return new RecipeTransferErrorTooltip(
+                    CreateLang.translate("gui.stock_keeper.recipe_result_empty").component());
 
         CraftableBigItemStack cbis = new CraftableBigItemStack(result, recipe);
 

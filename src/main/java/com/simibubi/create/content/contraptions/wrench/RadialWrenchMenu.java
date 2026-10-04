@@ -56,8 +56,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 public class RadialWrenchMenu extends AbstractSimiScreen {
 
     public static final Map<Property<?>, String> VALID_PROPERTIES = new HashMap<>();
@@ -95,7 +93,8 @@ public class RadialWrenchMenu extends AbstractSimiScreen {
     private final BlockState state;
     private final BlockPos pos;
     private final BlockEntity blockEntity;
-    @Nullable private final Level level;
+    private final Level level;
+    private final NonVisualizationLevel nonVisualizationLevel;
     private final List<Map.Entry<Property<?>, String>> propertiesForState;
     private final int innerRadius = 50;
     private final int outerRadius = 110;
@@ -111,7 +110,7 @@ public class RadialWrenchMenu extends AbstractSimiScreen {
     private final RenderElement iconDown = RenderElement.of(AllIcons.I_PRIORITY_LOW);
 
     public static Optional<RadialWrenchMenu> tryCreateFor(
-            BlockState state, BlockPos pos, @Nullable Level level) {
+            BlockState state, BlockPos pos, Level level) {
         if (BLOCK_BLACKLIST.contains(RegisteredObjectsHelper.getKeyOrThrow(state.getBlock())))
             return Optional.empty();
 
@@ -128,11 +127,12 @@ public class RadialWrenchMenu extends AbstractSimiScreen {
     private RadialWrenchMenu(
             BlockState state,
             BlockPos pos,
-            @Nullable Level level,
+            Level level,
             List<Map.Entry<Property<?>, String>> properties) {
         this.state = state;
         this.pos = pos;
         this.level = level;
+        this.nonVisualizationLevel = new NonVisualizationLevel(level);
         this.blockEntity = level.getBlockEntity(pos);
         this.propertiesForState = properties;
 
@@ -315,11 +315,14 @@ public class RadialWrenchMenu extends AbstractSimiScreen {
             poseStack.translate(0, 0, 100);
 
             try {
+                Level previousLevel = blockEntity.getLevel();
+                blockEntity.setLevel(nonVisualizationLevel);
                 GuiGameElement.of(blockState, blockEntity)
                         .rotateBlock(player.getXRot(), player.getYRot() + 180, 0f)
                         .scale(24)
                         .at(-12, 12)
                         .render(graphics);
+                blockEntity.setLevel(previousLevel);
             } catch (Exception e) {
                 Create.LOGGER.warn("Failed to render blockstate in RadialWrenchMenu", e);
                 allStates.remove(i);

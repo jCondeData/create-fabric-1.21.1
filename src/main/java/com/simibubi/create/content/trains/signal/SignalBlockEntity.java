@@ -1,6 +1,9 @@
 package com.simibubi.create.content.trains.signal;
 
 import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
+import com.simibubi.create.compat.computercraft.events.SignalStateChangeEvent;
 import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.trains.graph.EdgePointType;
 import com.simibubi.create.content.trains.signal.SignalBlock.SignalType;
@@ -12,15 +15,16 @@ import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 public class SignalBlockEntity extends SmartBlockEntity implements TransformableBlockEntity {
 
@@ -55,6 +59,7 @@ public class SignalBlockEntity extends SmartBlockEntity implements Transformable
     private OverlayState overlay;
     private int switchToRedAfterTrainEntered;
     private boolean lastReportedPower;
+    public AbstractComputerBehaviour computerBehaviour;
 
     public SignalBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -93,6 +98,7 @@ public class SignalBlockEntity extends SmartBlockEntity implements Transformable
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         edgePoint = new TrackTargetingBehaviour<>(this, EdgePointType.SIGNAL);
         behaviours.add(edgePoint);
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
     }
 
     @Override
@@ -128,7 +134,7 @@ public class SignalBlockEntity extends SmartBlockEntity implements Transformable
                                 level.setBlock(
                                         worldPosition,
                                         blockState.setValue(SignalBlock.TYPE, targetType),
-                                        3);
+                                        Block.UPDATE_ALL);
                                 refreshBlockState();
                             }
                         });
@@ -162,6 +168,8 @@ public class SignalBlockEntity extends SmartBlockEntity implements Transformable
         this.state = state;
         switchToRedAfterTrainEntered =
                 state == SignalState.GREEN || state == SignalState.YELLOW ? 15 : 0;
+        if (computerBehaviour.hasAttachedComputer())
+            computerBehaviour.prepareComputerEvent(new SignalStateChangeEvent(state));
         notifyUpdate();
     }
 

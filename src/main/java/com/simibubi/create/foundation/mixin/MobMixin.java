@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Mob.class)
 public class MobMixin {
-
     @ModifyExpressionValue(
             method = "getAttackBoundingBox",
             at =

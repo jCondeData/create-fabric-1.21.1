@@ -27,9 +27,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
-
-import javax.annotation.Nullable;
 
 public class StabilizedBearingMovementBehaviour implements MovementBehaviour {
 

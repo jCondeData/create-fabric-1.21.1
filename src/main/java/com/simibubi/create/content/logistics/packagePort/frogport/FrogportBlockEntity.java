@@ -3,6 +3,9 @@ package com.simibubi.create.content.logistics.packagePort.frogport;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
+import com.simibubi.create.compat.computercraft.events.PackageEvent;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.box.PackageStyles;
 import com.simibubi.create.content.logistics.packagePort.PackagePortBlockEntity;
@@ -65,6 +68,8 @@ public class FrogportBlockEntity extends PackagePortBlockEntity
 
     private AdvancementBehaviour advancements;
 
+    public AbstractComputerBehaviour computerBehaviour;
+
     public FrogportBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         sounds = new FrogportSounds();
@@ -78,6 +83,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.FROGPORT));
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
         super.addBehaviours(behaviours);
     }
 
@@ -157,6 +163,9 @@ public class FrogportBlockEntity extends PackagePortBlockEntity
                             || !target.depositImmediately()
                                     && !target.export(level, worldPosition, animatedPackage, false))
                         drop(animatedPackage);
+                    else
+                        computerBehaviour.prepareComputerEvent(
+                                new PackageEvent(animatedPackage, "package_sent"));
                     animatedPackage = null;
                 }
             } else {
@@ -189,6 +198,9 @@ public class FrogportBlockEntity extends PackagePortBlockEntity
         if (!currentlyDepositing) {
             long inserted = TransferUtil.insert(this.inventory, animatedPackage.copy());
             if (inserted <= 0) drop(animatedPackage);
+            else
+                computerBehaviour.prepareComputerEvent(
+                        new PackageEvent(animatedPackage, "package_received"));
         }
 
         animatedPackage = null;
@@ -384,5 +396,11 @@ public class FrogportBlockEntity extends PackagePortBlockEntity
         }
 
         return super.use(player);
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
     }
 }

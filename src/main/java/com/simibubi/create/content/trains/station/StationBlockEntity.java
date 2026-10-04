@@ -7,6 +7,7 @@ import com.simibubi.create.Create;
 import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
+import com.simibubi.create.compat.computercraft.events.StationTrainPresenceEvent;
 import com.simibubi.create.content.contraptions.AssemblyException;
 import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.decoration.slidingDoor.DoorControlBehaviour;
@@ -33,7 +34,6 @@ import com.simibubi.create.content.trains.graph.TrackNodeLocation;
 import com.simibubi.create.content.trains.graph.TrackNodeLocation.DiscoveredLocation;
 import com.simibubi.create.content.trains.schedule.Schedule;
 import com.simibubi.create.content.trains.schedule.ScheduleItem;
-import com.simibubi.create.content.trains.station.GlobalStation.GlobalPackagePort;
 import com.simibubi.create.content.trains.track.ITrackBlock;
 import com.simibubi.create.content.trains.track.TrackTargetingBehaviour;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
@@ -75,6 +75,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -82,6 +83,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -94,8 +97,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 public class StationBlockEntity extends SmartBlockEntity
         implements TransformableBlockEntity, SidedStorageBlockEntity {
@@ -240,15 +241,14 @@ public class StationBlockEntity extends SmartBlockEntity
                 if (target != currentTarget) {
                     flag.chase(target, 0.1f, Chaser.LINEAR);
                     if (target == 1)
-                        AllSoundEvents.CONTRAPTION_ASSEMBLE.playAt(
+                        AllSoundEvents.CONTRAPTION_DISASSEMBLE.playAt(
                                 level, worldPosition, 1, 2, true);
                 }
             }
             boolean settled = flag.getValue() > .15f;
             flag.tickChaser();
             if (currentTarget == 0 && settled != flag.getValue() > .15f)
-                AllSoundEvents.CONTRAPTION_DISASSEMBLE.playAt(
-                        level, worldPosition, 0.75f, 1.5f, true);
+                AllSoundEvents.CONTRAPTION_ASSEMBLE.playAt(level, worldPosition, 0.75f, 1.5f, true);
             return;
         }
 
@@ -267,6 +267,24 @@ public class StationBlockEntity extends SmartBlockEntity
         if (trainPresent && imminentTrain.runtime.displayLinkUpdateRequested) {
             DisplayLinkBlock.notifyGatherers(level, worldPosition);
             imminentTrain.runtime.displayLinkUpdateRequested = false;
+        }
+
+        if (!level.isClientSide && computerBehaviour.hasAttachedComputer()) {
+            if (this.imminentTrain == null && imminentTrain != null)
+                computerBehaviour.prepareComputerEvent(
+                        new StationTrainPresenceEvent(
+                                StationTrainPresenceEvent.Type.IMMINENT, imminentTrain));
+            if (newlyArrived) {
+                if (trainPresent)
+                    computerBehaviour.prepareComputerEvent(
+                            new StationTrainPresenceEvent(
+                                    StationTrainPresenceEvent.Type.ARRIVAL, imminentTrain));
+                else
+                    computerBehaviour.prepareComputerEvent(
+                            new StationTrainPresenceEvent(
+                                    StationTrainPresenceEvent.Type.DEPARTURE,
+                                    Create.RAILWAYS.trains.get(this.imminentTrain)));
+            }
         }
 
         if (newlyArrived) applyAutoSchedule();
@@ -318,7 +336,7 @@ public class StationBlockEntity extends SmartBlockEntity
                                 CreateLang.translateDirect("bogey.style.no_other_sizes")
                                         .withStyle(ChatFormatting.RED),
                                 true);
-                    level.setBlock(bogeyPos, newBlock, 3);
+                    level.setBlock(bogeyPos, newBlock, Block.UPDATE_ALL);
                     BlockEntity newEntity = level.getBlockEntity(bogeyPos);
                     if (!(newEntity instanceof AbstractBogeyBlockEntity newBE)) continue;
                     newBE.setBogeyData(oldData);
@@ -355,7 +373,7 @@ public class StationBlockEntity extends SmartBlockEntity
             bogeyAnchor = bogey.getVersion(bogeyAnchor, upsideDown);
         }
         bogeyAnchor = ProperWaterloggedBlock.withWater(level, bogeyAnchor, pos);
-        level.setBlock(targetPos, bogeyAnchor, 3);
+        level.setBlock(targetPos, bogeyAnchor, Block.UPDATE_ALL);
         player.displayClientMessage(
                 CreateLang.translateDirect("train_assembly.bogey_created"), true);
         SoundType soundtype = bogeyAnchor.getSoundType();
@@ -386,7 +404,7 @@ public class StationBlockEntity extends SmartBlockEntity
         if (!(level.getBlockState(worldPosition).getBlock() instanceof StationBlock)) return true;
 
         BlockState newState = getBlockState().setValue(StationBlock.ASSEMBLING, true);
-        level.setBlock(getBlockPos(), newState, 3);
+        level.setBlock(getBlockPos(), newState, Block.UPDATE_ALL);
         refreshBlockState();
         refreshAssemblyInfo();
 
@@ -412,7 +430,7 @@ public class StationBlockEntity extends SmartBlockEntity
 
         cancelAssembly();
         BlockState newState = getBlockState().setValue(StationBlock.ASSEMBLING, false);
-        level.setBlock(getBlockPos(), newState, 3);
+        level.setBlock(getBlockPos(), newState, Block.UPDATE_ALL);
         refreshBlockState();
 
         return updateStationState(station -> station.assembling = false);
@@ -983,22 +1001,15 @@ public class StationBlockEntity extends SmartBlockEntity
         if (ppbe instanceof PostboxBlockEntity pbe)
             pbe.trackedGlobalStation = new WeakReference<>(station);
 
-        if (station.connectedPorts.containsKey(ppbe.getBlockPos()))
-            restoreOfflineBuffer(ppbe, station.connectedPorts.get(ppbe.getBlockPos()));
+        GlobalPackagePort globalPackagePort = station.connectedPorts.get(ppbe.getBlockPos());
 
-        GlobalPackagePort globalPackagePort = new GlobalPackagePort();
-        globalPackagePort.address = ppbe.addressFilter;
-        station.connectedPorts.put(ppbe.getBlockPos(), globalPackagePort);
-    }
-
-    private void restoreOfflineBuffer(
-            PackagePortBlockEntity ppbe, GlobalPackagePort globalPackagePort) {
-        if (!globalPackagePort.primed) return;
-        for (int i = 0; i < globalPackagePort.offlineBuffer.getSlotCount(); i++) {
-            ppbe.inventory.setStackInSlot(i, globalPackagePort.offlineBuffer.getStackInSlot(i));
-            globalPackagePort.offlineBuffer.setStackInSlot(i, ItemStack.EMPTY);
+        if (globalPackagePort == null) {
+            globalPackagePort = new GlobalPackagePort();
+            globalPackagePort.address = ppbe.addressFilter;
+            station.connectedPorts.put(ppbe.getBlockPos(), globalPackagePort);
+        } else {
+            globalPackagePort.restoreOfflineBuffer(ppbe.inventory);
         }
-        globalPackagePort.primed = false;
     }
 
     public void removePackagePort(PackagePortBlockEntity ppbe) {

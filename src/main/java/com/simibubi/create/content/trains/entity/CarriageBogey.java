@@ -33,7 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class CarriageBogey {
     public static final StreamCodec<RegistryFriendlyByteBuf, CarriageBogey> STREAM_CODEC =

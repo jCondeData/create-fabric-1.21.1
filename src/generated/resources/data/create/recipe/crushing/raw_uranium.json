@@ -4,14 +4,14 @@
       "condition": "fabric:tags_populated",
       "registry": "minecraft:item",
       "values": [
-        "c:raw_uranium"
+        "c:raw_materials/uranium"
       ]
     }
   ],
   "type": "create:crushing",
   "ingredients": [
     {
-      "tag": "c:raw_uranium"
+      "tag": "c:raw_materials/uranium"
     }
   ],
   "processing_time": 400,

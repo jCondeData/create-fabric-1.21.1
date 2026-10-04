@@ -1,6 +1,6 @@
 package com.simibubi.create.content.trains.track;
 
-import com.simibubi.create.AllTags;
+import com.simibubi.create.foundation.data.recipe.CommonMetal;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
@@ -28,7 +28,7 @@ public class TrackMaterialFactory {
             Ingredient.fromValues(
                     Stream.of(
                                     Ingredient.of(ConventionalItemTags.IRON_NUGGETS),
-                                    Ingredient.of(AllTags.commonItemTag("nuggets/zinc")))
+                                    Ingredient.of(CommonMetal.ZINC.nuggets))
                             .flatMap(ingredient -> Arrays.stream(ingredient.values)));
     private ResourceLocation particle;
     private TrackMaterial.TrackType trackType = TrackMaterial.TrackType.STANDARD;

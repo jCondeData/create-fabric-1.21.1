@@ -3,6 +3,8 @@ package com.simibubi.create.content.logistics.stockTicker;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.filter.FilterItem;
@@ -11,6 +13,7 @@ import com.simibubi.create.content.logistics.packager.IdentifiedInventory;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
@@ -53,6 +56,8 @@ import java.util.stream.IntStream;
 public class StockTickerBlockEntity extends StockCheckingBlockEntity
         implements IHaveHoveringInformation, SidedStorageBlockEntity {
 
+    public AbstractComputerBehaviour computerBehaviour;
+
     // Player-interface Feature
     protected List<List<BigItemStack>> lastClientsideStockSnapshot;
     protected InventorySummary lastClientsideStockSnapshotAsSummary;
@@ -74,9 +79,25 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity
         hiddenCategoriesByPlayer = new HashMap<>();
     }
 
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        super.addBehaviours(behaviours);
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
+    }
+
     public void refreshClientStockSnapshot() {
         ticksSinceLastUpdate = 0;
         CatnipServices.NETWORK.sendToServer(new LogisticalStockRequestPacket(worldPosition));
+    }
+
+    public SmartInventory getReceivedPaymentsHandler() {
+        return receivedPayments;
     }
 
     public List<List<BigItemStack>> getClientStockSnapshot() {

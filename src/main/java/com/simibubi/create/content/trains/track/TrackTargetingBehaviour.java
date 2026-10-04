@@ -46,10 +46,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class TrackTargetingBehaviour<T extends TrackEdgePoint> extends BlockEntityBehaviour {
 

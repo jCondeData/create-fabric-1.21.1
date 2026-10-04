@@ -16,22 +16,28 @@ public class SpecialModels {
                     it ->
                             new BakedModelBuilder(it.partial.get())
                                     .materialFunc(
-                                            (renderType, aBoolean) -> {
+                                            (renderType, shaded) -> {
                                                 var material =
-                                                        ModelUtil.getMaterial(renderType, aBoolean);
+                                                        ModelUtil.getMaterial(renderType, shaded);
                                                 if (material == null) {
                                                     return null;
                                                 }
                                                 return SimpleMaterial.builderOf(material)
                                                         .light(it.light)
                                                         .cardinalLightingMode(
-                                                                it.cardinalLightingMode)
+                                                                shaded
+                                                                        ? it.cardinalLightingMode
+                                                                        : CardinalLightingMode.OFF)
                                                         .build();
                                             })
                                     .build());
 
     public static Model flatLit(PartialModel partial) {
         return FLAT.get(new Key(partial, LightShaders.FLAT, CardinalLightingMode.ENTITY));
+    }
+
+    public static Model smoothLit(PartialModel partial) {
+        return FLAT.get(new Key(partial, LightShaders.SMOOTH, CardinalLightingMode.ENTITY));
     }
 
     public static Model flatChunk(PartialModel partial) {

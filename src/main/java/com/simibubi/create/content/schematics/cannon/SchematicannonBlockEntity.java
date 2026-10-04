@@ -68,14 +68,14 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.annotation.Nullable;
 
 public class SchematicannonBlockEntity extends SmartBlockEntity
         implements MenuProvider, CustomRenderBoundingBoxBlockEntity {
@@ -802,7 +802,7 @@ public class SchematicannonBlockEntity extends SmartBlockEntity
             return;
         }
 
-        CompoundTag data = BlockHelper.prepareBlockEntityData(blockState, blockEntity);
+        CompoundTag data = BlockHelper.prepareBlockEntityData(level, blockState, blockEntity);
         launchBlock(target, icon, blockState, data);
     }
 

@@ -2,6 +2,8 @@ package com.simibubi.create.content.contraptions.chassis;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.contraptions.glue.SuperGlueEntity;
 import com.simibubi.create.content.contraptions.glue.SuperGlueItem;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -29,6 +31,8 @@ public class StickerBlockEntity extends SmartBlockEntity {
     LerpedFloat piston;
     boolean update;
 
+    public AbstractComputerBehaviour computerBehaviour;
+
     public StickerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         piston = LerpedFloat.linear();
@@ -36,7 +40,9 @@ public class StickerBlockEntity extends SmartBlockEntity {
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
+    }
 
     @Override
     public void initialize() {
@@ -101,5 +107,11 @@ public class StickerBlockEntity extends SmartBlockEntity {
     public void playSound(boolean attach) {
         AllSoundEvents.SLIME_ADDED.play(
                 level, Minecraft.getInstance().player, worldPosition, 0.35f, attach ? 0.75f : 0.2f);
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehaviour.removePeripheral();
     }
 }

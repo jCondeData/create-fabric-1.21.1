@@ -56,7 +56,7 @@ public class FunnelBlockEntity extends SmartBlockEntity implements IHaveHovering
 
     LerpedFloat flap;
 
-    static enum Mode {
+    enum Mode {
         INVALID,
         PAUSED,
         COLLECT,
@@ -71,7 +71,7 @@ public class FunnelBlockEntity extends SmartBlockEntity implements IHaveHovering
         flap = createChasingFlap();
     }
 
-    public Mode determineCurrentMode() {
+    Mode determineCurrentMode() {
         BlockState state = getBlockState();
         if (!FunnelBlock.isFunnel(state)) return Mode.INVALID;
         if (state.getOptionalValue(BlockStateProperties.POWERED).orElse(false)) return Mode.PAUSED;
@@ -324,23 +324,17 @@ public class FunnelBlockEntity extends SmartBlockEntity implements IHaveHovering
 
     public boolean hasFlap() {
         BlockState blockState = getBlockState();
-        if (!AbstractFunnelBlock.getFunnelFacing(blockState).getAxis().isHorizontal()) return false;
-        return true;
+        return AbstractFunnelBlock.getFunnelFacing(blockState).getAxis().isHorizontal();
     }
 
     public float getFlapOffset() {
         BlockState blockState = getBlockState();
         if (!(blockState.getBlock() instanceof BeltFunnelBlock)) return -1 / 16f;
-        switch (blockState.getValue(BeltFunnelBlock.SHAPE)) {
-            default:
-            case RETRACTED:
-                return 0;
-            case EXTENDED:
-                return 8 / 16f;
-            case PULLING:
-            case PUSHING:
-                return -2 / 16f;
-        }
+        return switch (blockState.getValue(BeltFunnelBlock.SHAPE)) {
+            case EXTENDED -> 8 / 16f;
+            case PULLING, PUSHING -> -2 / 16f;
+            default -> 0;
+        };
     }
 
     @Override

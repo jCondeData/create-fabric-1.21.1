@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractFunnelBlock extends Block
         implements IBE<FunnelBlockEntity>, IWrenchable, ProperWaterloggedBlock {
@@ -96,7 +96,7 @@ public abstract class AbstractFunnelBlock extends Block
     public void tick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource r) {
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered != worldIn.hasNeighborSignal(pos))
-            worldIn.setBlock(pos, state.cycle(POWERED), 2);
+            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
     }
 
     public static ItemStack tryInsert(

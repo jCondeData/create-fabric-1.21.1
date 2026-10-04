@@ -11,11 +11,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -33,7 +35,17 @@ public class RemainingAirOverlay implements LayeredDraw.Layer {
         if (!player.getCustomData().contains("VisualBacktankAir")) return;
         // fabric: no fluid types; the diving helmet supplies air in DIVING_FLUIDS, so show the
         // overlay whenever the player's eyes are in one of those
-        if (!player.isEyeInFluid(AllFluidTags.DIVING_FLUIDS.tag) && !player.isInLava()) return;
+        boolean isAir =
+                !player.isEyeInFluid(AllFluidTags.DIVING_FLUIDS.tag)
+                        || player.level()
+                                .getBlockState(
+                                        BlockPos.containing(
+                                                player.getX(), player.getEyeY(), player.getZ()))
+                                .is(Blocks.BUBBLE_COLUMN);
+        // fabric: water breathing is not checked, the diving helmet grants it itself while it
+        // supplies air (see DivingHelmetItem#breatheUnderwater)
+        boolean canBreathe = player.getAbilities().invulnerable;
+        if ((isAir || canBreathe) && !player.isInLava()) return;
 
         int timeLeft = player.getCustomData().getInt("VisualBacktankAir");
 

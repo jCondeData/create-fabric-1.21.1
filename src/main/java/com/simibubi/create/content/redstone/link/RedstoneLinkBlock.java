@@ -114,7 +114,8 @@ public class RedstoneLinkBlock extends WrenchableDirectionalBlock
         power = Math.max(power, powerFromPanels);
 
         boolean previouslyPowered = state.getValue(POWERED);
-        if (previouslyPowered != power > 0) worldIn.setBlock(pos, state.cycle(POWERED), 2);
+        if (previouslyPowered != power > 0)
+            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
 
         int transmit = power;
         withBlockEntityDo(worldIn, pos, be -> be.transmit(transmit));
@@ -176,7 +177,10 @@ public class RedstoneLinkBlock extends WrenchableDirectionalBlock
                 be -> {
                     Boolean wasReceiver = state.getValue(RECEIVER);
                     boolean blockPowered = worldIn.hasNeighborSignal(pos);
-                    worldIn.setBlock(pos, state.cycle(RECEIVER).setValue(POWERED, blockPowered), 3);
+                    worldIn.setBlock(
+                            pos,
+                            state.cycle(RECEIVER).setValue(POWERED, blockPowered),
+                            Block.UPDATE_ALL);
                     be.transmit(wasReceiver ? 0 : getPower(worldIn, pos));
                     return InteractionResult.SUCCESS;
                 });

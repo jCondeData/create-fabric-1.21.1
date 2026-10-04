@@ -61,8 +61,8 @@ public class ClipboardValueSettingsHandler {
         Level level = mc.level; // fabric: лямбды ниже не должны захватывать клиентские типы
         Player player = mc.player;
         if (!(smartBE instanceof ClipboardBlockEntity)
-                && !smartBE.getAllBehaviours().stream()
-                        .anyMatch(
+                && smartBE.getAllBehaviours().stream()
+                        .noneMatch(
                                 b ->
                                         b instanceof ClipboardCloneable cc
                                                 && cc.writeToClipboard(
@@ -105,8 +105,11 @@ public class ClipboardValueSettingsHandler {
             return;
         }
 
-        CompoundTag tagElement =
-                mc.player.getMainHandItem().get(AllDataComponents.CLIPBOARD_COPIED_VALUES);
+        ClipboardContent content =
+                mc.player.getMainHandItem().get(AllDataComponents.CLIPBOARD_CONTENT);
+        if (content == null) return;
+
+        CompoundTag tagElement = content.copiedValues().orElse(null);
 
         boolean canCopy =
                 smartBE.getAllBehaviours().stream()
@@ -190,10 +193,13 @@ public class ClipboardValueSettingsHandler {
         if (!(world.getBlockEntity(pos) instanceof SmartBlockEntity smartBE))
             return InteractionResult.PASS;
 
+        ClipboardContent clipboardContent =
+                itemStack.getOrDefault(AllDataComponents.CLIPBOARD_CONTENT, ClipboardContent.EMPTY);
+
         if (smartBE instanceof ClipboardBlockEntity cbe) {
             if (!world.isClientSide()) {
-                List<List<ClipboardEntry>> listTo = ClipboardEntry.readAll(itemStack);
-                List<List<ClipboardEntry>> listFrom = ClipboardEntry.readAll(cbe.dataContainer);
+                List<List<ClipboardEntry>> listTo = ClipboardEntry.readAll(clipboardContent);
+                List<List<ClipboardEntry>> listFrom = ClipboardEntry.readAll(cbe.components());
                 List<ClipboardEntry> toAdd = new ArrayList<>();
 
                 for (List<ClipboardEntry> page : listFrom) {
@@ -219,10 +225,13 @@ public class ClipboardValueSettingsHandler {
                         listTo.add(page);
                     }
                     page.add(entry);
-                    ClipboardOverrides.switchTo(ClipboardType.WRITTEN, itemStack);
+
+                    clipboardContent = clipboardContent.setType(ClipboardType.WRITTEN);
+                    itemStack.set(AllDataComponents.CLIPBOARD_CONTENT, clipboardContent);
                 }
 
-                ClipboardEntry.saveAll(listTo, itemStack);
+                clipboardContent = clipboardContent.setPages(listTo);
+                itemStack.set(AllDataComponents.CLIPBOARD_CONTENT, clipboardContent);
             }
 
             player.displayClientMessage(
@@ -238,7 +247,7 @@ public class ClipboardValueSettingsHandler {
             return InteractionResult.SUCCESS;
         }
 
-        CompoundTag tag = itemStack.get(AllDataComponents.CLIPBOARD_COPIED_VALUES);
+        CompoundTag tag = clipboardContent.copiedValues().orElse(null);
         if (paste && tag == null) return InteractionResult.PASS;
         if (!paste) tag = new CompoundTag();
 
@@ -300,8 +309,9 @@ public class ClipboardValueSettingsHandler {
                 true);
 
         if (!paste) {
-            ClipboardOverrides.switchTo(ClipboardType.WRITTEN, itemStack);
-            itemStack.set(AllDataComponents.CLIPBOARD_COPIED_VALUES, tag);
+            clipboardContent = clipboardContent.setType(ClipboardType.WRITTEN);
+            clipboardContent = clipboardContent.setCopiedValues(tag);
+            itemStack.set(AllDataComponents.CLIPBOARD_CONTENT, clipboardContent);
         }
         return InteractionResult.SUCCESS;
     }

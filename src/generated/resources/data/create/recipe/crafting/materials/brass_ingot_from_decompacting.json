@@ -3,7 +3,7 @@
   "category": "misc",
   "ingredients": [
     {
-      "tag": "c:brass_blocks"
+      "tag": "c:storage_blocks/brass"
     }
   ],
   "result": {

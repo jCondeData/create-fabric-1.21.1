@@ -38,7 +38,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
@@ -229,7 +230,7 @@ public class ControllerRailBlock extends BaseRailBlock
     }
 
     private void placeAndNotify(BlockState state, BlockPos pos, Level world) {
-        world.setBlock(pos, state, 3);
+        world.setBlock(pos, state, Block.UPDATE_ALL);
         world.updateNeighborsAt(pos.below(), this);
         if (state.getValue(SHAPE).isAscending()) world.updateNeighborsAt(pos.above(), this);
     }

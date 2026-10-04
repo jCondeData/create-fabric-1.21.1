@@ -19,13 +19,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 public abstract class FluidTransportBehaviour extends BlockEntityBehaviour {
 

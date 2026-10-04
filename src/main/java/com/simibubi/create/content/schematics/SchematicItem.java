@@ -5,6 +5,7 @@ import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.schematics.client.SchematicEditScreen;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.simibubi.create.foundation.utility.CreatePaths;
 
 import net.createmod.catnip.gui.ScreenOpener;
 import net.createmod.catnip.platform.CatnipServices;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
@@ -42,8 +44,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-
-import javax.annotation.Nonnull;
 
 public class SchematicItem extends Item {
 
@@ -112,10 +112,10 @@ public class SchematicItem extends Item {
         Path file;
 
         if (!level.isClientSide()) {
-            dir = Paths.get("schematics", "uploaded").toAbsolutePath();
+            dir = CreatePaths.UPLOADED_SCHEMATICS_DIR;
             file = Paths.get(owner, schematic);
         } else {
-            dir = Paths.get("schematics").toAbsolutePath();
+            dir = CreatePaths.SCHEMATICS_DIR;
             file = Paths.get(schematic);
         }
 
@@ -136,7 +136,7 @@ public class SchematicItem extends Item {
         return t;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public InteractionResult useOn(UseOnContext context) {
         if (context.getPlayer() != null && !onItemUse(context.getPlayer(), context.getHand()))

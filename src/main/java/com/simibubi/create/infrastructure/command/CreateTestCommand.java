@@ -13,8 +13,8 @@ import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.schematics.SchematicExport;
 import com.simibubi.create.content.schematics.SchematicExport.SchematicExportResult;
 import com.simibubi.create.content.schematics.client.SchematicAndQuillHandler;
+import com.simibubi.create.foundation.utility.CreatePaths;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -32,8 +32,7 @@ import java.util.stream.Stream;
  */
 public class CreateTestCommand {
     private static final Path gametests =
-            FabricLoader.getInstance()
-                    .getGameDir()
+            CreatePaths.GAME_DIR
                     .getParent()
                     .resolve("src/main/resources/data/create/structure/gametest")
                     .toAbsolutePath();

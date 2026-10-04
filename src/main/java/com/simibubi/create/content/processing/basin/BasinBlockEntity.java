@@ -69,6 +69,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -137,6 +138,8 @@ public class BasinBlockEntity extends SmartBlockEntity
             List<ItemStack> spoutputBuffer,
             List<com.simibubi.create.infrastructure.fabric.transfer.fluid.FluidStack>
                     spoutputFluidBuffer) {}
+
+    private @Nullable HeatLevel cachedHeatLevel;
 
     public BasinBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -411,6 +414,8 @@ public class BasinBlockEntity extends SmartBlockEntity
 
     @Override
     public void tick() {
+        cachedHeatLevel = null;
+
         super.tick();
         if (needsUpdate) {
             needsUpdate = false;
@@ -876,6 +881,16 @@ public class BasinBlockEntity extends SmartBlockEntity
     @Override
     public Storage<ItemVariant> getItemStorage(@Nullable Direction face) {
         return itemCapability;
+    }
+
+    @NotNull
+    HeatLevel getHeatLevel() {
+        if (cachedHeatLevel == null) {
+            if (level == null) return HeatLevel.NONE;
+
+            cachedHeatLevel = getHeatLevelOf(level.getBlockState(getBlockPos().below(1)));
+        }
+        return cachedHeatLevel;
     }
 
     static class BasinValueBox extends ValueBoxTransform.Sided {

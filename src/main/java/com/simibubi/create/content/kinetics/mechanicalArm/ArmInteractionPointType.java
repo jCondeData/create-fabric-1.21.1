@@ -9,12 +9,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public abstract class ArmInteractionPointType {
     private static final List<ArmInteractionPointType> SORTED_TYPES = new ReferenceArrayList<>();

@@ -37,6 +37,12 @@ public abstract class WashingRecipeGen extends StandardProcessingRecipeGen<Splas
                 b -> b.output(nugget.get(), 9).output(secondaryChance, secondary.get(), 1));
     }
 
+    protected GeneratedRecipe simpleModded(DatagenMod mod, String input, String output) {
+        return create(
+                mod.getId() + "/" + output,
+                b -> b.require(mod, input).output(mod, output).whenModLoaded(mod.getId()));
+    }
+
     public WashingRecipeGen(
             FabricDataOutput output,
             CompletableFuture<HolderLookup.Provider> registries,

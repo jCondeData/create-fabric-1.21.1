@@ -10,10 +10,10 @@ import net.createmod.catnip.math.VecHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public class TransportedItemStackHandlerBehaviour extends BlockEntityBehaviour {
 

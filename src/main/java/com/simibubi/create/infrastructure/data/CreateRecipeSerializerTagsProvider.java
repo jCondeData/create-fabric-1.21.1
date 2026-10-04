@@ -22,14 +22,6 @@ public class CreateRecipeSerializerTagsProvider extends TagsProvider<RecipeSeria
         tag(AllRecipeSerializerTags.AUTOMATION_IGNORE.tag)
                 .addOptional(Mods.OCCULTISM.rl("spirit_trade"))
                 .addOptional(Mods.OCCULTISM.rl("ritual"));
-
-        // VALIDATE
-
-        for (AllRecipeSerializerTags tag : AllRecipeSerializerTags.values()) {
-            if (tag.alwaysDatagen) {
-                getOrCreateRawBuilder(tag.tag);
-            }
-        }
     }
 
     @Override

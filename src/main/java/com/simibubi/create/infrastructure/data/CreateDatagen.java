@@ -23,6 +23,7 @@ import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.RegistrySetBuilder;
 
 import java.util.List;
@@ -73,6 +74,8 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
         CreateRecipeProvider.registerAllProcessing(pack);
         pack.addProvider(GeneratedEntriesProvider::new);
         pack.addProvider(VanillaHatOffsetGenerator::new);
+        // fabric: client-only upstream, Fabric datagen runs everything in a single pack
+        pack.addProvider((FabricDataOutput output) -> new CreateWikiBlockInfoProvider(output));
         // fabric: Porting Lib data maps; generates Create's blaze burner fuel maps only
         pack.addProvider(CreateDatamapProvider::new);
 
@@ -99,6 +102,7 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
                             AllSoundEvents.provideLang(langConsumer);
                             AllKeys.provideLang(langConsumer);
                             providePonderLang(langConsumer);
+                            new TagLangGenerator(langConsumer).generate();
                         });
     }
 

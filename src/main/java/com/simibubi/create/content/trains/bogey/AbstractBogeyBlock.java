@@ -49,6 +49,7 @@ import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,8 +57,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public abstract class AbstractBogeyBlock<T extends AbstractBogeyBlockEntity> extends Block
         implements IBE<T>, ProperWaterloggedBlock, SpecialBlockItemRequirement, IWrenchable {

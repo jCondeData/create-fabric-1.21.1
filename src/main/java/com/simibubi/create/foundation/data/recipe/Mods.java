@@ -1,6 +1,7 @@
 package com.simibubi.create.foundation.data.recipe;
 
-import net.minecraft.resources.ResourceLocation;
+import com.simibubi.create.Create;
+import com.simibubi.create.api.data.recipe.DatagenMod;
 
 import java.util.function.Consumer;
 
@@ -9,7 +10,9 @@ import java.util.function.Consumer;
  * Create's API, addons wishing to add to this should make their own instead, with their own helper
  * methods in the generation classes.
  */
-public enum Mods {
+public enum Mods implements DatagenMod {
+    VANILLA("minecraft"),
+    CREATE(Create.ID),
 
     // Fabric Mods. Put up here to avoid them conflicting every merge
     TR("techreborn"),
@@ -30,7 +33,7 @@ public enum Mods {
     FA("forbidden_arcanus"),
     HEX("hexcasting"),
     ID("integrateddynamics", b -> b.strippedWoodIsSuffix()),
-    BYG("byg"),
+    BWG("biomeswevegone"),
     SG("silentgear"),
     TIC("tconstruct"),
     AP("architects_palette"),
@@ -78,13 +81,14 @@ public enum Mods {
     UUE("unusualend"),
     UG("undergarden"),
     DD("deeperdarker"),
-    ARS_E("ars_elemental", b -> b.omitWoodSuffix());
+    ARS_E("ars_elemental", b -> b.omitWoodSuffix()),
+    JNE("netherexp");
 
     private final String id;
 
-    public boolean reversedMetalPrefix;
-    public boolean strippedIsSuffix;
-    public boolean omitWoodSuffix;
+    private boolean reversedMetalPrefix;
+    private boolean strippedIsSuffix;
+    private boolean omitWoodSuffix;
 
     private Mods(String id) {
         this(id, b -> {});
@@ -95,36 +99,24 @@ public enum Mods {
         this.id = id;
     }
 
-    public ResourceLocation ingotOf(String type) {
-        return ResourceLocation.fromNamespaceAndPath(
-                id, reversedMetalPrefix ? "ingot_" + type : type + "_ingot");
-    }
-
-    public ResourceLocation nuggetOf(String type) {
-        return ResourceLocation.fromNamespaceAndPath(
-                id, reversedMetalPrefix ? "nugget_" + type : type + "_nugget");
-    }
-
-    public ResourceLocation oreOf(String type) {
-        return ResourceLocation.fromNamespaceAndPath(
-                id, reversedMetalPrefix ? "ore_" + type : type + "_ore");
-    }
-
-    public ResourceLocation deepslateOreOf(String type) {
-        return ResourceLocation.fromNamespaceAndPath(
-                id, reversedMetalPrefix ? "deepslate_ore_" + type : "deepslate_" + type + "_ore");
-    }
-
-    public ResourceLocation asResource(String id) {
-        return ResourceLocation.fromNamespaceAndPath(this.id, id);
-    }
-
-    public String recipeId(String id) {
-        return "compat/" + this.id + "/" + id;
-    }
-
+    @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public boolean reversedMetalPrefix() {
+        return reversedMetalPrefix;
+    }
+
+    @Override
+    public boolean strippedIsSuffix() {
+        return strippedIsSuffix;
+    }
+
+    @Override
+    public boolean omitWoodSuffix() {
+        return omitWoodSuffix;
     }
 
     class Builder {

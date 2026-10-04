@@ -10,8 +10,8 @@ import com.simibubi.create.content.trains.graph.DiscoveredPath;
 import com.simibubi.create.content.trains.graph.EdgePointType;
 import com.simibubi.create.content.trains.schedule.ScheduleRuntime;
 import com.simibubi.create.content.trains.schedule.ScheduleRuntime.State;
+import com.simibubi.create.content.trains.station.GlobalPackagePort;
 import com.simibubi.create.content.trains.station.GlobalStation;
-import com.simibubi.create.content.trains.station.GlobalStation.GlobalPackagePort;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.fabric.transfer.item.ItemStackHandler;
 
@@ -97,7 +97,7 @@ public class FetchPackagesInstruction extends TextScheduleInstruction {
 
     @Override
     public boolean supportsConditions() {
-        return false;
+        return true;
     }
 
     @Override

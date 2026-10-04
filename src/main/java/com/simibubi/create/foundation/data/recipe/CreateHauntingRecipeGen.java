@@ -74,10 +74,4 @@ public final class CreateHauntingRecipeGen extends HauntingRecipeGen {
             FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries, Create.ID);
     }
-
-    public GeneratedRecipe moddedConversion(Mods mod, String input, String output) {
-        return create(
-                "compat/" + mod.getId() + "/" + output,
-                p -> p.require(mod, input).output(mod, output).whenModLoaded(mod.getId()));
-    }
 }

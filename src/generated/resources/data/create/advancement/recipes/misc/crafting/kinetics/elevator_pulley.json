@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:brass_ingots"
+            "items": "#c:ingots/brass"
           }
         ]
       },

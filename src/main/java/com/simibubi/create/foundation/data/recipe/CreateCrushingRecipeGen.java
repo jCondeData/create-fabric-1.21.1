@@ -1,18 +1,19 @@
 package com.simibubi.create.foundation.data.recipe;
 
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.ALUMINUM;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.LEAD;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.NICKEL;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.OSMIUM;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.PLATINUM;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.QUICKSILVER;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.SILVER;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.TIN;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.URANIUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.ALUMINUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.LEAD;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.NICKEL;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.OSMIUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.PLATINUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.QUICKSILVER;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.SILVER;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.TIN;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.URANIUM;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllTags;
+import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.Create;
 import com.simibubi.create.api.data.recipe.CrushingRecipeGen;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
@@ -24,8 +25,6 @@ import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import net.createmod.catnip.lang.Lang;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
@@ -271,11 +270,7 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
                             AllItems.CRUSHED_GOLD::get,
                             2),
             RAW_ZINC_ORE =
-                    rawOre(
-                            "zinc",
-                            () -> AllTags.commonItemTag("raw_materials/zinc"),
-                            AllItems.CRUSHED_ZINC::get,
-                            1),
+                    rawOre("zinc", () -> CommonMetal.ZINC.rawOres, AllItems.CRUSHED_ZINC::get, 1),
             OSMIUM_RAW_ORE = moddedRawOre(OSMIUM, AllItems.CRUSHED_OSMIUM::get),
             PLATINUM_RAW_ORE = moddedRawOre(PLATINUM, AllItems.CRUSHED_PLATINUM::get),
             SILVER_RAW_ORE = moddedRawOre(SILVER, AllItems.CRUSHED_SILVER::get),
@@ -306,7 +301,7 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
             RAW_ZINC_BLOCK =
                     rawOreBlock(
                             "zinc",
-                            () -> AllTags.commonItemTag("storage_blocks/raw_zinc"),
+                            CommonMetal.ZINC.rawStorageBlocks::items,
                             AllItems.CRUSHED_ZINC::get,
                             1),
             OSMIUM_RAW_BLOCK = moddedRawOreBlock(OSMIUM, AllItems.CRUSHED_OSMIUM::get),
@@ -321,130 +316,122 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
             NICKEL_RAW_BLOCK = moddedRawOreBlock(NICKEL, AllItems.CRUSHED_NICKEL::get),
 
             // Oh The Biomes You'll Go
-            BYG_AMETRINE_ORE =
+            BWG_AMETRINE_ORE =
                     create(
-                            Mods.BYG.recipeId("ametrine_ore"),
+                            Mods.BWG.recipeId("ametrine_ore"),
                             b ->
                                     b.duration(500)
-                                            .require(
-                                                    AllTags.optionalTag(
-                                                            BuiltInRegistries.ITEM,
-                                                            ResourceLocation.fromNamespaceAndPath(
-                                                                    "c", "ores/ametrine")))
-                                            .output(1f, Mods.BYG, "ametrine_gems", 2)
-                                            .output(.25f, Mods.BYG, "ametrine_gems", 1)
+                                            .require(AllItemTags.AMETRINE_ORES.tag)
+                                            .output(1f, Mods.BWG, "ametrine_gems", 2)
+                                            .output(.25f, Mods.BWG, "ametrine_gems", 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "cobbled_ether_stone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_ANTHRACITE_ORE =
+                                            .output(.125f, Mods.BWG, "cobbled_ether_stone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_ANTHRACITE_ORE =
                     create(
-                            Mods.BYG.recipeId("anthracite_ore"),
+                            Mods.BWG.recipeId("anthracite_ore"),
                             b ->
                                     b.duration(150)
-                                            .require(
-                                                    AllTags.optionalTag(
-                                                            BuiltInRegistries.ITEM,
-                                                            ResourceLocation.fromNamespaceAndPath(
-                                                                    "c", "ores/anthracite")))
-                                            .output(1f, Mods.BYG, "anthracite", 2)
-                                            .output(.5f, Mods.BYG, "anthracite", 1)
+                                            .require(AllItemTags.ANTHRACITE_ORES.tag)
+                                            .output(1f, Mods.BWG, "anthracite", 2)
+                                            .output(.5f, Mods.BWG, "anthracite", 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "brimstone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_BLUE_GOLD_ORE =
+                                            .output(.125f, Mods.BWG, "brimstone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_BLUE_GOLD_ORE =
                     create(
-                            Mods.BYG.recipeId("blue_nether_gold_ore"),
+                            Mods.BWG.recipeId("blue_nether_gold_ore"),
                             b ->
                                     b.duration(350)
-                                            .require(Mods.BYG, "blue_nether_gold_ore")
+                                            .require(Mods.BWG, "blue_nether_gold_ore")
                                             .output(1f, Items.GOLD_NUGGET, 18)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "blue_netherrack", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_BLUE_QUARTZ_ORE =
+                                            .output(.125f, Mods.BWG, "blue_netherrack", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_BLUE_QUARTZ_ORE =
                     create(
-                            Mods.BYG.recipeId("blue_nether_quartz_ore"),
+                            Mods.BWG.recipeId("blue_nether_quartz_ore"),
                             b ->
                                     b.duration(350)
-                                            .require(Mods.BYG, "blue_nether_quartz_ore")
+                                            .require(Mods.BWG, "blue_nether_quartz_ore")
                                             .output(1f, Items.QUARTZ, 2)
                                             .output(.25f, Items.QUARTZ, 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "blue_netherrack", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_BRIMSTONE_GOLD_ORE =
+                                            .output(.125f, Mods.BWG, "blue_netherrack", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_BRIMSTONE_GOLD_ORE =
                     create(
-                            Mods.BYG.recipeId("brimstone_nether_gold_ore"),
+                            Mods.BWG.recipeId("brimstone_nether_gold_ore"),
                             b ->
                                     b.duration(350)
-                                            .require(Mods.BYG, "brimstone_nether_gold_ore")
+                                            .require(Mods.BWG, "brimstone_nether_gold_ore")
                                             .output(1f, Items.GOLD_NUGGET, 18)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "brimstone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_BRIMSTONE_QUARTZ_ORE =
+                                            .output(.125f, Mods.BWG, "brimstone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_BRIMSTONE_QUARTZ_ORE =
                     create(
-                            Mods.BYG.recipeId("brimstone_nether_quartz_ore"),
+                            Mods.BWG.recipeId("brimstone_nether_quartz_ore"),
                             b ->
                                     b.duration(350)
-                                            .require(Mods.BYG, "brimstone_nether_quartz_ore")
+                                            .require(Mods.BWG, "brimstone_nether_quartz_ore")
                                             .output(1f, Items.QUARTZ, 2)
                                             .output(.25f, Items.QUARTZ, 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "brimstone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_REDSTONE_ORE =
+                                            .output(.125f, Mods.BWG, "brimstone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_REDSTONE_ORE =
                     create(
-                            Mods.BYG.recipeId("cryptic_redstone_ore"),
+                            Mods.BWG.recipeId("cryptic_redstone_ore"),
                             b ->
                                     b.duration(250)
-                                            .require(Mods.BYG, "cryptic_redstone_ore")
+                                            .require(Mods.BWG, "cryptic_redstone_ore")
                                             .output(1f, Items.REDSTONE, 6)
                                             .output(.5f, Items.REDSTONE, 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "cryptic_stone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_EMERALDITE_ORE =
+                                            .output(.125f, Mods.BWG, "cryptic_stone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_EMERALDITE_ORE =
                     create(
-                            Mods.BYG.recipeId("emeraldite_ore"),
+                            Mods.BWG.recipeId("emeraldite_ore"),
                             b ->
                                     b.duration(500)
-                                            .require(AllTags.commonItemTag("ores/emeraldite"))
-                                            .output(1f, Mods.BYG, "emeraldite_shards", 2)
-                                            .output(.25f, Mods.BYG, "emeraldite_shards", 1)
+                                            .require(AllItemTags.EMERALDITE_ORES.tag)
+                                            .output(1f, Mods.BWG, "emeraldite_shards", 2)
+                                            .output(.25f, Mods.BWG, "emeraldite_shards", 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "scoria_cobblestone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_LIGNITE_ORE =
+                                            .output(.125f, Mods.BWG, "scoria_cobblestone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_LIGNITE_ORE =
                     create(
-                            Mods.BYG.recipeId("lignite_ore"),
+                            Mods.BWG.recipeId("lignite_ore"),
                             b ->
                                     b.duration(300)
-                                            .require(AllTags.commonItemTag("ores/lignite"))
-                                            .output(1f, Mods.BYG, "lignite", 2)
-                                            .output(.5f, Mods.BYG, "lignite", 2)
+                                            .require(AllItemTags.LIGNITE_ORES.tag)
+                                            .output(1f, Mods.BWG, "lignite", 2)
+                                            .output(.5f, Mods.BWG, "lignite", 2)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
-                                            .output(.125f, Mods.BYG, "cobbled_ether_stone", 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_NETHERRACK_ORE =
+                                            .output(.125f, Mods.BWG, "cobbled_ether_stone", 1)
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_NETHERRACK_ORE =
                     create(
-                            Mods.BYG.recipeId("pervaded_netherrack"),
+                            Mods.BWG.recipeId("pervaded_netherrack"),
                             b ->
                                     b.duration(150)
-                                            .require(AllTags.commonItemTag("ores/emeraldite"))
+                                            .require(AllItemTags.EMERALDITE_ORES.tag)
                                             .output(1f, Items.GLOWSTONE, 2)
                                             .output(.5f, Items.GLOWSTONE, 1)
                                             .output(.75f, AllItems.EXP_NUGGET.get(), 1)
                                             .output(.125f, Items.NETHERRACK, 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
-            BYG_RED_ROCK_ORE =
+                                            .whenModLoaded(Mods.BWG.getId())),
+            BWG_RED_ROCK_ORE =
                     create(
-                            Mods.BYG.recipeId("red_rock"),
+                            Mods.BWG.recipeId("red_rock"),
                             b ->
                                     b.duration(150)
-                                            .require(Mods.BYG, "red_rock")
+                                            .require(Mods.BWG, "red_rock")
                                             .output(1f, Items.RED_SAND, 1)
-                                            .whenModLoaded(Mods.BYG.getId())),
+                                            .whenModLoaded(Mods.BWG.getId())),
 
             // Druidcraft
 
@@ -505,17 +492,24 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
 
             // Silent Gems
 
-            SG_STONE = sgStoneOres("peridot", "ruby", "sapphire", "topaz"),
-            SG_NETHER =
-                    sgNetherOres(
+            SG =
+                    sgOres(
+                            "peridot",
+                            "ruby",
+                            "sapphire",
+                            "topaz",
                             "alexandrite",
                             "black_diamond",
                             "carnelian",
                             "citrine",
                             "iolite",
                             "moldavite",
-                            "turquoise"),
-            SG_END = sgEndOres("ammolite", "kyanite", "rose_quartz"),
+                            "turquoise",
+                            "ammolite",
+                            "kyanite",
+                            "rose_quartz",
+                            "heliodor",
+                            "white_diamond"),
 
             // Simple Farming
 
@@ -647,9 +641,20 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
                                     b.duration(200)
                                             .require(Mods.IE, "slag")
                                             .output(Mods.IE, "slag_gravel")
-                                            .whenModLoaded(Mods.IE.getId()));
+                                            .whenModLoaded(Mods.IE.getId())),
 
-    GeneratedRecipe sgStoneOres(String... types) {
+            // Biomes O Plenty
+            BOP_ROSE_QUARTZ =
+                    create(
+                            Mods.BOP.recipeId("rose_quartz"),
+                            b ->
+                                    b.duration(150)
+                                            .require(Mods.BOP, "rose_quartz_cluster")
+                                            .output(1, Mods.BOP, "rose_quartz_chunk", 7)
+                                            .output(.5f, Mods.BOP, "rose_quartz_chunk", 1)
+                                            .whenModLoaded(Mods.BOP.getId()));
+
+    GeneratedRecipe sgOres(String... types) {
         for (String type : types) {
             create(
                     Mods.SILENT_GEMS.recipeId(type + "_ore"),
@@ -661,33 +666,31 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
                                     .output(.75f, AllItems.EXP_NUGGET.get())
                                     .output(.12f, Items.COBBLESTONE)
                                     .whenModLoaded(Mods.SILENT_GEMS.getId()));
-        }
-        return null;
-    }
-
-    GeneratedRecipe sgNetherOres(String... types) {
-        for (String type : types) {
             create(
-                    Mods.SILENT_GEMS.recipeId(type + "_ore"),
+                    Mods.SILENT_GEMS.recipeId("deepslate_" + type + "_ore"),
                     b ->
                             b.duration(350)
-                                    .require(Mods.SILENT_GEMS, type + "_ore")
+                                    .require(Mods.SILENT_GEMS, "deepslate_" + type + "_ore")
+                                    .output(1f, Mods.SILENT_GEMS, type, 2)
+                                    .output(.25f, Mods.SILENT_GEMS, type, 1)
+                                    .output(.75f, AllItems.EXP_NUGGET.get())
+                                    .output(.12f, Items.COBBLED_DEEPSLATE)
+                                    .whenModLoaded(Mods.SILENT_GEMS.getId()));
+            create(
+                    Mods.SILENT_GEMS.recipeId(type + "_nether_ore"),
+                    b ->
+                            b.duration(350)
+                                    .require(Mods.SILENT_GEMS, type + "_nether_ore")
                                     .output(1f, Mods.SILENT_GEMS, type, 2)
                                     .output(.25f, Mods.SILENT_GEMS, type, 1)
                                     .output(.75f, AllItems.EXP_NUGGET.get())
                                     .output(.12f, Items.NETHERRACK)
                                     .whenModLoaded(Mods.SILENT_GEMS.getId()));
-        }
-        return null;
-    }
-
-    GeneratedRecipe sgEndOres(String... types) {
-        for (String type : types) {
             create(
-                    Mods.SILENT_GEMS.recipeId(type + "_ore"),
+                    Mods.SILENT_GEMS.recipeId(type + "_end_ore"),
                     b ->
                             b.duration(350)
-                                    .require(Mods.SILENT_GEMS, type + "_ore")
+                                    .require(Mods.SILENT_GEMS, type + "_end_ore")
                                     .output(1f, Mods.SILENT_GEMS, type, 2)
                                     .output(.25f, Mods.SILENT_GEMS, type, 1)
                                     .output(.75f, AllItems.EXP_NUGGET.get())

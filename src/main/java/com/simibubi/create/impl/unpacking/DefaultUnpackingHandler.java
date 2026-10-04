@@ -35,7 +35,15 @@ public enum DefaultUnpackingHandler implements UnpackingHandler {
         Storage<ItemVariant> targetInv = ItemStorage.SIDED.find(level, pos, state, targetBE, side);
         if (targetInv == null) return false;
 
-        try (Transaction t = Transaction.openOuter()) {
+        // fabric: packagers unpack while the transaction that inserted the box is still open, where
+        // Transaction.openOuter() would throw. Nest into that transaction instead: a simulated run
+        // is always rolled back, a real run commits into the caller's transaction and is undone
+        // with it. No transfer operations are allowed from a close callback, so refuse there.
+        Transaction.Lifecycle lifecycle = Transaction.getLifecycle();
+        if (lifecycle != Transaction.Lifecycle.NONE && lifecycle != Transaction.Lifecycle.OPEN)
+            return false;
+
+        try (Transaction t = Transaction.openNested(Transaction.getCurrentUnsafe())) {
             for (ItemStack stack : items) {
                 long inserted = targetInv.insert(ItemVariant.of(stack), stack.getCount(), t);
                 if (inserted != stack.getCount()) {

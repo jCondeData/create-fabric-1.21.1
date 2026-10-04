@@ -75,7 +75,7 @@ public class Create implements ModInitializer {
 
     /**
      * <b>Other mods should not use this field!</b> If you are an addon developer, create your own
-     * instance of {@link CreateRegistrate}. </br If you were using this instance to render a
+     * instance of {@link CreateRegistrate}. </br If you were using this instance to register a
      * callback listener use {@link CreateRegistrateRegistrationCallback#register} instead.
      */
     private static final CreateRegistrate REGISTRATE =
@@ -102,7 +102,6 @@ public class Create implements ModInitializer {
         LOGGER.info("{} {} initializing!", NAME, CreateBuildInfo.VERSION);
 
         AllSoundEvents.prepare();
-        AllTags.init();
         AllCreativeModeTabs.register();
         AllArmorMaterials.register();
         AllDisplaySources.register();

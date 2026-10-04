@@ -220,7 +220,9 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
             if (currentLevel == -1) return;
 
             level.setBlock(
-                    worldPosition, getBlockState().setValue(ThresholdSwitchBlock.LEVEL, 0), 3);
+                    worldPosition,
+                    getBlockState().setValue(ThresholdSwitchBlock.LEVEL, 0),
+                    Block.UPDATE_ALL);
             currentLevel = -1;
             redstoneState = false;
             sendData();

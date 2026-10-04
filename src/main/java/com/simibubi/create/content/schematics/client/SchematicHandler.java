@@ -47,7 +47,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
-import java.util.Vector;
 
 public class SchematicHandler implements LayeredDraw.Layer {
 
@@ -64,14 +63,11 @@ public class SchematicHandler implements LayeredDraw.Layer {
     private ItemStack activeSchematicItem;
     private AABBOutline outline;
 
-    private Vector<SchematicRenderer> renderers;
-    private SchematicHotbarSlotOverlay overlay;
+    private final SchematicRenderer[] renderers = new SchematicRenderer[3];
+    private final SchematicHotbarSlotOverlay overlay;
     private ToolSelectionScreen selectionScreen;
 
     public SchematicHandler() {
-        renderers = new Vector<>(3);
-        for (int i = 0; i < renderers.capacity(); i++) renderers.add(new SchematicRenderer());
-
         overlay = new SchematicHotbarSlotOverlay();
         currentTool = ToolType.DEPLOY;
         selectionScreen = new ToolSelectionScreen(ImmutableList.of(ToolType.DEPLOY), this::equip);
@@ -86,7 +82,6 @@ public class SchematicHandler implements LayeredDraw.Layer {
                 syncCooldown = 0;
                 activeHotbarSlot = 0;
                 activeSchematicItem = null;
-                renderers.forEach(r -> r.setActive(false));
             }
             return;
         }
@@ -101,13 +96,11 @@ public class SchematicHandler implements LayeredDraw.Layer {
             if (activeSchematicItem != null && itemLost(player)) {
                 activeHotbarSlot = 0;
                 activeSchematicItem = null;
-                renderers.forEach(r -> r.setActive(false));
             }
             return;
         }
 
         if (!active || !stack.get(AllDataComponents.SCHEMATIC_FILE).equals(displayedSchematic)) {
-            renderers.forEach(r -> r.setActive(false));
             init(player, stack);
         }
         if (!active) return;
@@ -202,9 +195,9 @@ public class SchematicHandler implements LayeredDraw.Layer {
         for (BlockEntity be : wMirroredLR.getRenderedBlockEntities()) transform.apply(be);
         fixControllerBlockEntities(wMirroredLR);
 
-        renderers.get(0).display(w);
-        renderers.get(1).display(wMirroredFB);
-        renderers.get(2).display(wMirroredLR);
+        renderers[0] = new SchematicRenderer(w);
+        renderers[1] = new SchematicRenderer(wMirroredFB);
+        renderers[2] = new SchematicRenderer(wMirroredLR);
     }
 
     private void fixControllerBlockEntities(SchematicLevel level) {
@@ -224,34 +217,42 @@ public class SchematicHandler implements LayeredDraw.Layer {
     }
 
     public void render(PoseStack ms, SuperRenderTypeBuffer buffer, Vec3 camera) {
-        boolean present = activeSchematicItem != null;
-        if (!active && !present) return;
-
-        if (active) {
-            ms.pushPose();
-            currentTool.getTool().renderTool(ms, buffer, camera);
-            ms.popPose();
+        if (!active) {
+            return;
         }
+        boolean present = activeSchematicItem != null;
+        if (!present) {
+            return;
+        }
+
+        ms.pushPose();
+        currentTool.getTool().renderTool(ms, buffer, camera);
+        ms.popPose();
 
         ms.pushPose();
         transformation.applyTransformations(ms, camera);
 
-        if (!renderers.isEmpty()) {
-            float pt = AnimationTickHolder.getPartialTicks();
-            boolean lr = transformation.getScaleLR().getValue(pt) < 0;
-            boolean fb = transformation.getScaleFB().getValue(pt) < 0;
-            if (lr && !fb) renderers.get(2).render(ms, buffer);
-            else if (fb && !lr) renderers.get(1).render(ms, buffer);
-            else renderers.get(0).render(ms, buffer);
+        float pt = AnimationTickHolder.getPartialTicks();
+        boolean lr = transformation.getScaleLR().getValue(pt) < 0;
+        boolean fb = transformation.getScaleFB().getValue(pt) < 0;
+        if (lr && !fb && renderers[2] != null) {
+            renderers[2].render(ms, buffer);
+        } else if (fb && !lr && renderers[1] != null) {
+            renderers[1].render(ms, buffer);
+        } else if (renderers[0] != null) {
+            renderers[0].render(ms, buffer);
         }
 
-        if (active) currentTool.getTool().renderOnSchematic(ms, buffer);
+        currentTool.getTool().renderOnSchematic(ms, buffer);
+
         ms.popPose();
     }
 
     public void updateRenderers() {
         for (SchematicRenderer renderer : renderers) {
-            renderer.update();
+            if (renderer != null) {
+                renderer.update();
+            }
         }
     }
 
@@ -286,7 +287,7 @@ public class SchematicHandler implements LayeredDraw.Layer {
 
     public void onKeyInput(int key, boolean pressed) {
         if (!active) return;
-        if (key != AllKeys.TOOL_MENU.getBoundCode()) return;
+        if (!AllKeys.TOOL_MENU.doesModifierAndCodeMatch(key)) return;
 
         if (pressed && !selectionScreen.focused) selectionScreen.focused = true;
         if (!pressed && selectionScreen.focused) {
@@ -345,13 +346,13 @@ public class SchematicHandler implements LayeredDraw.Layer {
     }
 
     public void loadSettings(ItemStack blueprint) {
-        BlockPos anchor = BlockPos.ZERO;
         StructurePlaceSettings settings = SchematicItem.getSettings(blueprint);
         transformation = new SchematicTransformation();
 
         deployed = blueprint.getOrDefault(AllDataComponents.SCHEMATIC_DEPLOYED, false);
-        if (deployed) anchor = blueprint.get(AllDataComponents.SCHEMATIC_ANCHOR);
+        BlockPos anchor = blueprint.getOrDefault(AllDataComponents.SCHEMATIC_ANCHOR, BlockPos.ZERO);
         Vec3i size = blueprint.get(AllDataComponents.SCHEMATIC_BOUNDS);
+        if (size == null) return;
 
         bounds = new AABB(0, 0, 0, size.getX(), size.getY(), size.getZ());
         outline = new AABBOutline(bounds);
@@ -376,7 +377,6 @@ public class SchematicHandler implements LayeredDraw.Layer {
         CatnipServices.NETWORK.sendToServer(new SchematicPlacePacket(activeSchematicItem.copy()));
         activeSchematicItem.set(AllDataComponents.SCHEMATIC_DEPLOYED, false);
         SchematicInstances.clearHash(activeSchematicItem);
-        renderers.forEach(r -> r.setActive(false));
         active = false;
         markDirty();
     }

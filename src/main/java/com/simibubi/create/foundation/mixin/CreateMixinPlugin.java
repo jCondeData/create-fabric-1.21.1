@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 public class CreateMixinPlugin implements IMixinConfigPlugin {
-
     @Override
     public void onLoad(String mixinPackage) {}
 
@@ -38,8 +37,11 @@ public class CreateMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.contains("ftbchunks")) {
             return Mods.FTBCHUNKS.isLoaded();
         }
-
-        if (mixinClassName.equals("compat/journeymap") && !Mods.JOURNEYMAP.isLoaded()) return false;
+        // fabric: gate on the mixin's own package (upstream checks targetClassName, which is
+        // Xaero's/Minecraft's class and never matches), so nothing touches Xaero's classes when
+        // the world map isn't installed
+        if (mixinClassName.startsWith("com.simibubi.create.foundation.mixin.compat.xaeros."))
+            return Mods.XAEROWORLDMAP.isLoaded();
         return true;
     }
 

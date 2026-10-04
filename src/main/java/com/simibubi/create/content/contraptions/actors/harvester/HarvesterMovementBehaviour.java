@@ -36,8 +36,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class HarvesterMovementBehaviour implements MovementBehaviour {
 
@@ -145,6 +144,8 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
                 return false;
             }
 
+            // TODO: 1.21.5-rc1+ change to VegetationBlock
+            // (https://github.com/neoforged/NeoForge/commit/9f6edae1894ad249a8719c4e1f14beda0fdedc72)
             if (state.getBlock() instanceof BushBlock) return true;
         }
 

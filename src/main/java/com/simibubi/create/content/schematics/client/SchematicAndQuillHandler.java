@@ -8,6 +8,7 @@ import com.simibubi.create.content.schematics.SchematicExport;
 import com.simibubi.create.content.schematics.SchematicExport.SchematicExportResult;
 import com.simibubi.create.content.schematics.packet.InstantSchematicPacket;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.simibubi.create.foundation.utility.CreatePaths;
 import com.simibubi.create.foundation.utility.RaycastHelper;
 import com.simibubi.create.foundation.utility.RaycastHelper.PredicateTraceResult;
 
@@ -206,7 +207,7 @@ public class SchematicAndQuillHandler {
     public void saveSchematic(String string, boolean convertImmediately) {
         SchematicExportResult result =
                 SchematicExport.saveSchematic(
-                        SchematicExport.SCHEMATICS,
+                        CreatePaths.SCHEMATICS_DIR,
                         string,
                         false,
                         Minecraft.getInstance().level,

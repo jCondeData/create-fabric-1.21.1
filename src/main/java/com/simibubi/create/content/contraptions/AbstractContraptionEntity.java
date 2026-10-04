@@ -13,7 +13,6 @@ import com.simibubi.create.content.contraptions.data.ContraptionSyncLimiting;
 import com.simibubi.create.content.contraptions.elevator.ElevatorContraption;
 import com.simibubi.create.content.contraptions.glue.SuperGlueEntity;
 import com.simibubi.create.content.contraptions.mounted.MountedContraption;
-import com.simibubi.create.content.contraptions.render.ContraptionRenderInfo;
 import com.simibubi.create.content.contraptions.sync.ContraptionSeatMappingPacket;
 import com.simibubi.create.content.decoration.slidingDoor.SlidingDoorBlock;
 import com.simibubi.create.content.trains.entity.CarriageContraption;
@@ -23,8 +22,6 @@ import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.collision.Matrix3d;
 import com.simibubi.create.foundation.mixin.accessor.ServerLevelAccessor;
 import com.simibubi.create.foundation.utility.AdventureUtil;
-
-import dev.engine_room.flywheel.api.backend.BackendManager;
 
 import io.github.fabricators_of_create.porting_lib.entity.IEntityWithComplexSpawn;
 import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.EntityAccessor;
@@ -381,10 +378,6 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
         tickContraption();
         super.tick();
 
-        if (level().isClientSide()) {
-            AbstractContraptionEntityClient.invalidate(contraption);
-        }
-
         if (!(level() instanceof ServerLevelAccessor sl)) return;
 
         for (Entity entity : getPassengers()) {
@@ -596,11 +589,7 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
         CompoundTag compound = new CompoundTag();
         writeAdditional(compound, registryFriendlyByteBuf.registryAccess(), true);
 
-        if (!CatnipServices.PLATFORM.getLoader().isNeoForge()
-                && ContraptionSyncLimiting.isTooLargeForSync(compound))
-            compound = null; // don't sync contraption data
-
-        registryFriendlyByteBuf.writeNbt(compound);
+        ContraptionSyncLimiting.writeSafe(compound, registryFriendlyByteBuf);
     }
 
     @Override
@@ -754,7 +743,7 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
         StructureBlockInfo info = contraption.blocks.get(localPos);
         contraption.blocks.put(localPos, new StructureBlockInfo(info.pos(), newState, info.nbt()));
         if (info.state() != newState && !(newState.getBlock() instanceof SlidingDoorBlock))
-            contraption.deferInvalidate = true;
+            contraption.resetClientContraption();
         contraption.invalidateColliders();
     }
 
@@ -918,14 +907,5 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
 
     public boolean isPrevPosInvalid() {
         return prevPosInvalid;
-    }
-
-    private static class AbstractContraptionEntityClient {
-        private static void invalidate(Contraption contraption) {
-            // The visual will handle this with flywheel on.
-            if (!contraption.deferInvalidate || BackendManager.isBackendOn()) return;
-            contraption.deferInvalidate = false;
-            ContraptionRenderInfo.invalidate(contraption);
-        }
     }
 }

@@ -64,12 +64,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class BlueprintEntity extends HangingEntity
         implements IEntityWithComplexSpawn,

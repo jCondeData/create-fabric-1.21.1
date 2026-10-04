@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.Item;
 
+import org.jetbrains.annotations.ApiStatus.ScheduledForRemoval;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -22,6 +24,12 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class MillingRecipeGen extends StandardProcessingRecipeGen<MillingRecipe> {
 
+    /**
+     * @deprecated poor API. Requires an ItemEntry, and uses a string to create a tag. Unused by
+     *     Create.
+     */
+    @ScheduledForRemoval(inVersion = "1.21.1+ Port")
+    @Deprecated(since = "6.0.7", forRemoval = true)
     protected GeneratedRecipe metalOre(
             String name, ItemEntry<? extends Item> crushed, int duration) {
         return create(
@@ -33,6 +41,17 @@ public abstract class MillingRecipeGen extends StandardProcessingRecipeGen<Milli
                                                 AllTags.commonItemTag("ores/" + name)))
                                 .require(AllTags.commonItemTag("ores/" + name))
                                 .output(crushed.get()));
+    }
+
+    protected GeneratedRecipe moddedSandstone(DatagenMod mod, String name) {
+        String sandstone = name + "_sandstone";
+        return create(
+                mod.recipeId(sandstone),
+                b ->
+                        b.duration(150)
+                                .require(mod, sandstone)
+                                .output(mod, name + "_sand")
+                                .whenModLoaded(mod.getId()));
     }
 
     public MillingRecipeGen(

@@ -4,15 +4,15 @@ import static com.simibubi.create.AllTags.AllItemTags.CREATE_INGOTS;
 import static com.simibubi.create.AllTags.AllItemTags.CRUSHED_RAW_MATERIALS;
 import static com.simibubi.create.AllTags.AllItemTags.PLATES;
 import static com.simibubi.create.AllTags.commonItemTag;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.ALUMINUM;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.LEAD;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.NICKEL;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.OSMIUM;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.PLATINUM;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.QUICKSILVER;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.SILVER;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.TIN;
-import static com.simibubi.create.foundation.data.recipe.CompatMetals.URANIUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.ALUMINUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.LEAD;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.NICKEL;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.OSMIUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.PLATINUM;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.QUICKSILVER;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.SILVER;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.TIN;
+import static com.simibubi.create.foundation.data.recipe.CommonMetal.URANIUM;
 
 import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.content.contraptions.glue.SuperGlueItem;
@@ -55,7 +55,10 @@ import com.simibubi.create.content.legacy.ShadowSteelItem;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.box.PackageStyles;
 import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
+import com.simibubi.create.content.logistics.filter.AttributeFilterItem;
 import com.simibubi.create.content.logistics.filter.FilterItem;
+import com.simibubi.create.content.logistics.filter.ListFilterItem;
+import com.simibubi.create.content.logistics.filter.PackageFilterItem;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
 import com.simibubi.create.content.materials.ExperienceNuggetItem;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlockItem;
@@ -68,7 +71,7 @@ import com.simibubi.create.content.trains.schedule.ScheduleItem;
 import com.simibubi.create.foundation.data.AssetLookup;
 import com.simibubi.create.foundation.data.BuilderTransformers;
 import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.data.recipe.CompatMetals;
+import com.simibubi.create.foundation.data.recipe.CommonMetal;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TagDependentIngredientItem;
 import com.tterrag.registrate.builders.ItemBuilder;
@@ -79,6 +82,7 @@ import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
 
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -102,16 +106,18 @@ public class AllItems {
     public static final ItemEntry<Item>
             WHEAT_FLOUR =
                     taggedIngredient(
-                            "wheat_flour", commonItemTag("flours/wheat"), commonItemTag("flours")),
-            DOUGH =
-                    taggedIngredient(
-                            "dough", commonItemTag("doughs"), commonItemTag("doughs/wheat")),
+                            "wheat_flour", AllItemTags.WHEAT_FLOURS.tag, AllItemTags.FLOURS.tag),
+            DOUGH = taggedIngredient("dough", AllItemTags.DOUGHS.tag, AllItemTags.WHEAT_DOUGHS.tag),
             CINDER_FLOUR = ingredient("cinder_flour"),
             ROSE_QUARTZ = ingredient("rose_quartz"),
             POLISHED_ROSE_QUARTZ = ingredient("polished_rose_quartz"),
             POWDERED_OBSIDIAN = ingredient("powdered_obsidian"),
             STURDY_SHEET =
-                    taggedIngredient("sturdy_sheet", commonItemTag("obsidian_plates"), PLATES.tag),
+                    taggedIngredient(
+                            "sturdy_sheet",
+                            AllItemTags.OBSIDIAN_PLATES.tag,
+                            commonItemTag("obsidian_plates"),
+                            PLATES.tag),
             PROPELLER = ingredient("propeller"),
             WHISK = ingredient("whisk"),
             BRASS_HAND = ingredient("brass_hand"),
@@ -123,7 +129,7 @@ public class AllItems {
     public static final ItemEntry<Item> CARDBOARD =
             REGISTRATE
                     .item("cardboard", Item::new)
-                    .tag(commonItemTag("plates/cardboard"), PLATES.tag)
+                    .tag(AllItemTags.CARDBOARD_PLATES.tag, PLATES.tag)
                     // fabric: Registrate-Fabric's burnTime() resolves the entry before it exists
                     .onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
                     .register();
@@ -162,6 +168,7 @@ public class AllItems {
     public static final ItemEntry<Item> BAR_OF_CHOCOLATE =
             REGISTRATE
                     .item("bar_of_chocolate", Item::new)
+                    .tag(ConventionalItemTags.FOODS, AllItemTags.FOODS_CHOCOLATE.tag)
                     .properties(
                             p ->
                                     p.food(
@@ -175,6 +182,7 @@ public class AllItems {
     public static final ItemEntry<Item> SWEET_ROLL =
             REGISTRATE
                     .item("sweet_roll", Item::new)
+                    .tag(ConventionalItemTags.FOODS)
                     .properties(
                             p ->
                                     p.food(
@@ -187,6 +195,7 @@ public class AllItems {
     public static final ItemEntry<Item> CHOCOLATE_BERRIES =
             REGISTRATE
                     .item("chocolate_glazed_berries", Item::new)
+                    .tag(ConventionalItemTags.FOODS, ConventionalItemTags.BERRY_FOODS)
                     .properties(
                             p ->
                                     p.food(
@@ -199,6 +208,7 @@ public class AllItems {
     public static final ItemEntry<Item> HONEYED_APPLE =
             REGISTRATE
                     .item("honeyed_apple", Item::new)
+                    .tag(ConventionalItemTags.FOODS, ConventionalItemTags.FRUIT_FOODS)
                     .properties(
                             p ->
                                     p.food(
@@ -211,7 +221,12 @@ public class AllItems {
     public static final ItemEntry<BuildersTeaItem> BUILDERS_TEA =
             REGISTRATE
                     .item("builders_tea", BuildersTeaItem::new)
-                    .tag(AllItemTags.UPRIGHT_ON_BELT.tag)
+                    // fabric: c:drinks has no ConventionalItemTags constant in Fabric API 0.115
+                    .tag(
+                            AllItemTags.UPRIGHT_ON_BELT.tag,
+                            ConventionalItemTags.FOODS,
+                            commonItemTag("drinks"),
+                            AllItemTags.DRINKS_TEA.tag)
                     .properties(
                             p ->
                                     p.stacksTo(16)
@@ -251,22 +266,20 @@ public class AllItems {
 
     public static final ItemEntry<Item> RAW_ZINC =
             taggedIngredient(
-                    "raw_zinc",
-                    commonItemTag("raw_materials/zinc"),
-                    commonItemTag("raw_materials"));
+                    "raw_zinc", CommonMetal.ZINC.rawOres, ConventionalItemTags.RAW_MATERIALS);
 
     public static final ItemEntry<Item>
             ANDESITE_ALLOY = taggedIngredient("andesite_alloy", CREATE_INGOTS.tag),
             ZINC_INGOT =
                     taggedIngredient(
                             "zinc_ingot",
-                            commonItemTag("ingots/zinc"),
+                            CommonMetal.ZINC.ingots,
                             commonItemTag("zinc_ingots"),
                             CREATE_INGOTS.tag),
             BRASS_INGOT =
                     taggedIngredient(
                             "brass_ingot",
-                            commonItemTag("ingots/brass"),
+                            CommonMetal.BRASS.ingots,
                             commonItemTag("brass_ingots"),
                             CREATE_INGOTS.tag);
 
@@ -293,16 +306,22 @@ public class AllItems {
     public static final ItemEntry<Item>
             COPPER_NUGGET =
                     taggedIngredient(
-                            "copper_nugget", commonItemTag("copper_nuggets"), Tags.Items.NUGGETS),
+                            "copper_nugget",
+                            CommonMetal.COPPER.nuggets,
+                            commonItemTag("copper_nuggets"),
+                            Tags.Items.NUGGETS),
             ZINC_NUGGET =
                     taggedIngredient(
                             "zinc_nugget",
-                            commonItemTag("nuggets/zinc"),
+                            CommonMetal.ZINC.nuggets,
                             commonItemTag("zinc_nuggets"),
                             Tags.Items.NUGGETS),
             BRASS_NUGGET =
                     taggedIngredient(
-                            "brass_nugget", commonItemTag("brass_nuggets"), Tags.Items.NUGGETS);
+                            "brass_nugget",
+                            CommonMetal.BRASS.nuggets,
+                            commonItemTag("brass_nuggets"),
+                            Tags.Items.NUGGETS);
 
     public static final ItemEntry<ExperienceNuggetItem> EXP_NUGGET =
             REGISTRATE
@@ -314,13 +333,27 @@ public class AllItems {
 
     public static final ItemEntry<Item>
             COPPER_SHEET =
-                    taggedIngredient("copper_sheet", commonItemTag("copper_plates"), PLATES.tag),
+                    taggedIngredient(
+                            "copper_sheet",
+                            CommonMetal.COPPER.plates,
+                            commonItemTag("copper_plates"),
+                            PLATES.tag),
             BRASS_SHEET =
-                    taggedIngredient("brass_sheet", commonItemTag("brass_plates"), PLATES.tag),
-            IRON_SHEET = taggedIngredient("iron_sheet", commonItemTag("iron_plates"), PLATES.tag),
+                    taggedIngredient(
+                            "brass_sheet",
+                            CommonMetal.BRASS.plates,
+                            commonItemTag("brass_plates"),
+                            PLATES.tag),
+            IRON_SHEET =
+                    taggedIngredient(
+                            "iron_sheet",
+                            CommonMetal.IRON.plates,
+                            commonItemTag("iron_plates"),
+                            PLATES.tag),
             GOLDEN_SHEET =
                     taggedIngredient(
                             "golden_sheet",
+                            CommonMetal.GOLD.plates,
                             commonItemTag("gold_plates"),
                             PLATES.tag,
                             ItemTags.PIGLIN_LOVED),
@@ -677,11 +710,14 @@ public class AllItems {
         }
     }
 
-    public static final ItemEntry<FilterItem>
-            FILTER = REGISTRATE.item("filter", FilterItem::regular).lang("List Filter").register(),
-            ATTRIBUTE_FILTER =
-                    REGISTRATE.item("attribute_filter", FilterItem::attribute).register(),
-            PACKAGE_FILTER = REGISTRATE.item("package_filter", FilterItem::address).register();
+    public static final ItemEntry<ListFilterItem> FILTER =
+            REGISTRATE.item("filter", FilterItem::regular).lang("List Filter").register();
+
+    public static final ItemEntry<AttributeFilterItem> ATTRIBUTE_FILTER =
+            REGISTRATE.item("attribute_filter", FilterItem::attribute).register();
+
+    public static final ItemEntry<PackageFilterItem> PACKAGE_FILTER =
+            REGISTRATE.item("package_filter", FilterItem::address).register();
 
     public static final ItemEntry<ScheduleItem> SCHEDULE =
             REGISTRATE.item("schedule", ScheduleItem::new).lang("Train Schedule").register();
@@ -729,14 +765,11 @@ public class AllItems {
         return REGISTRATE.item(name, Item::new).tag(tags).register();
     }
 
-    private static ItemEntry<TagDependentIngredientItem> compatCrushedOre(CompatMetals metal) {
-        String metalName = metal.getName();
+    private static ItemEntry<TagDependentIngredientItem> compatCrushedOre(CommonMetal metal) {
         return REGISTRATE
                 .item(
-                        "crushed_raw_" + metalName,
-                        props ->
-                                new TagDependentIngredientItem(
-                                        props, AllTags.commonItemTag(metalName + "_ores")))
+                        "crushed_raw_" + metal,
+                        props -> new TagDependentIngredientItem(props, metal.ores.items()))
                 .tag(CRUSHED_RAW_MATERIALS.tag)
                 .register();
     }

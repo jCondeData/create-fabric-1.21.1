@@ -142,7 +142,7 @@ public class DisplayLinkBlock extends WrenchableDirectionalBlock
         boolean powered = shouldBePowered(state, worldIn, pos);
         boolean previouslyPowered = state.getValue(POWERED);
         if (previouslyPowered != powered) {
-            worldIn.setBlock(pos, state.cycle(POWERED), 2);
+            worldIn.setBlock(pos, state.cycle(POWERED), Block.UPDATE_CLIENTS);
             if (!powered)
                 withBlockEntityDo(worldIn, pos, DisplayLinkBlockEntity::onNoLongerPowered);
         }

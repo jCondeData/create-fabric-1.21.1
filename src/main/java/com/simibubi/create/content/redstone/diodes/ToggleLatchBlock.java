@@ -88,14 +88,14 @@ public class ToggleLatchBlock extends AbstractDiodeBlock implements ConnectableR
         super.tick(state, worldIn, pos, random);
         BlockState newState = worldIn.getBlockState(pos);
         if (newState.getValue(POWERED) && !poweredPreviously)
-            worldIn.setBlock(pos, newState.cycle(POWERING), 2);
+            worldIn.setBlock(pos, newState.cycle(POWERING), Block.UPDATE_CLIENTS);
     }
 
     protected ItemInteractionResult activated(Level worldIn, BlockPos pos, BlockState state) {
         if (!worldIn.isClientSide) {
             float f = !state.getValue(POWERING) ? 0.6F : 0.5F;
             worldIn.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, f);
-            worldIn.setBlock(pos, state.cycle(POWERING), 2);
+            worldIn.setBlock(pos, state.cycle(POWERING), Block.UPDATE_CLIENTS);
         }
         return ItemInteractionResult.SUCCESS;
     }

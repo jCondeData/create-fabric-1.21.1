@@ -164,7 +164,7 @@ public class PlacardBlock extends FaceAttachedHorizontalDirectionalBlock
                         }
 
                         AllSoundEvents.CONFIRM.play(level, null, pos, 1, 1);
-                        level.setBlock(pos, state.setValue(POWERED, true), 3);
+                        level.setBlock(pos, state.setValue(POWERED, true), Block.UPDATE_ALL);
                         updateNeighbours(state, level, pos);
                         pte.poweredTicks = 19;
                         pte.notifyUpdate();

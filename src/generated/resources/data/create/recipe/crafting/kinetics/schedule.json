@@ -3,7 +3,7 @@
   "category": "misc",
   "ingredients": [
     {
-      "tag": "c:obsidian_plates"
+      "tag": "c:plates/obsidian"
     },
     {
       "item": "minecraft:paper"

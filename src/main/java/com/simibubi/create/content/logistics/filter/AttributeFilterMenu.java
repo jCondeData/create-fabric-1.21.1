@@ -130,7 +130,7 @@ public class AttributeFilterMenu extends AbstractFilterMenu {
                         AttributeFilterWhitelistMode.WHITELIST_DISJ);
         List<ItemAttribute.ItemAttributeEntry> attributes =
                 filterItem.getOrDefault(
-                        AllDataComponents.ATTRIBUTE_FILTER_MATCHED_ATTRIBUTES, new ArrayList<>());
+                        AllDataComponents.ATTRIBUTE_FILTER_MATCHED_ATTRIBUTES, List.of());
         selectedAttributes.addAll(attributes);
     }
 

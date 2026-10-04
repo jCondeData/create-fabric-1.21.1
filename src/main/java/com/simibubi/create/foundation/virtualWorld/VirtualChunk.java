@@ -26,14 +26,14 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.TickContainerAccess;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 public class VirtualChunk extends ChunkAccess {
     public final VirtualRenderWorld world;

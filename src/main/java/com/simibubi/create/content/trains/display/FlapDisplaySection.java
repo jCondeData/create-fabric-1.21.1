@@ -4,20 +4,19 @@ import com.google.common.base.Strings;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.nbt.NBTHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 public class FlapDisplaySection {
-
     static final Map<String, String[]> LOADED_FLAP_CYCLES = new HashMap<>();
-    static Random r = new Random();
 
     public static final float MONOSPACE = 7;
     public static final float WIDE_MONOSPACE = 9;
@@ -86,7 +85,7 @@ public class FlapDisplaySection {
         spinningTicks = 0;
     }
 
-    public int tick(boolean instant) {
+    public int tick(boolean instant, RandomSource randomSource) {
         if (cyclingOptions == null) return 0;
         int max = Math.max(4, (int) (cyclingOptions.length * 1.75f));
         if (spinningTicks > max) return 0;
@@ -98,12 +97,14 @@ public class FlapDisplaySection {
         int spinningFlaps = 0;
         for (int i = 0; i < spinning.length; i++) {
             int increasingChance = Mth.clamp(8 - spinningTicks, 1, 10);
-            boolean continueSpin = !instant && r.nextInt(increasingChance * max / 4) != 0;
+            boolean continueSpin =
+                    !instant && randomSource.nextInt(increasingChance * max / 4) != 0;
             continueSpin &= max > 5 || spinningTicks < 2;
             spinning[i] &= continueSpin;
 
-            if (i > 0 && r.nextInt(3) > 0) spinning[i - 1] &= continueSpin;
-            if (i < spinning.length - 1 && r.nextInt(3) > 0) spinning[i + 1] &= continueSpin;
+            if (i > 0 && randomSource.nextInt(3) > 0) spinning[i - 1] &= continueSpin;
+            if (i < spinning.length - 1 && randomSource.nextInt(3) > 0)
+                spinning[i + 1] &= continueSpin;
             if (spinningTicks > max) spinning[i] = false;
 
             if (spinning[i]) spinningFlaps++;
@@ -116,7 +117,7 @@ public class FlapDisplaySection {
         return size;
     }
 
-    public CompoundTag write() {
+    public CompoundTag write(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putFloat("Width", size);
         tag.putString("Cycle", cycle);
@@ -125,7 +126,7 @@ public class FlapDisplaySection {
         if (hasGap) NBTHelper.putMarker(tag, "Gap");
         if (wideFlaps) NBTHelper.putMarker(tag, "Wide");
         if (component != null)
-            tag.putString("Text", Component.Serializer.toJson(component, RegistryAccess.EMPTY));
+            tag.putString("Text", Component.Serializer.toJson(component, registries));
         if (sendTransition) NBTHelper.putMarker(tag, "Transition");
         sendTransition = false;
         return tag;

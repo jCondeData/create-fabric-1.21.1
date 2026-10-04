@@ -48,6 +48,7 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,8 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class VirtualRenderWorld extends Level implements VisualizationLevel {
     protected final Level level;
@@ -76,17 +75,16 @@ public class VirtualRenderWorld extends Level implements VisualizationLevel {
 
     protected final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
 
+    protected final Runnable onBlockUpdated;
+
     private int externalPackedLight = 0;
 
-    public VirtualRenderWorld(Level level) {
-        this(level, Vec3i.ZERO);
-    }
-
-    public VirtualRenderWorld(Level level, Vec3i biomeOffset) {
-        this(level, level.getMinBuildHeight(), level.getHeight(), biomeOffset);
-    }
-
-    public VirtualRenderWorld(Level level, int minBuildHeight, int height, Vec3i biomeOffset) {
+    public VirtualRenderWorld(
+            Level level,
+            int minBuildHeight,
+            int height,
+            Vec3i biomeOffset,
+            Runnable onBlockUpdated) {
         super(
                 (WritableLevelData) level.getLevelData(),
                 level.dimension(),
@@ -104,6 +102,7 @@ public class VirtualRenderWorld extends Level implements VisualizationLevel {
 
         this.chunkSource = new VirtualChunkSource(this);
         this.lightEngine = new LevelLightEngine(chunkSource, true, false);
+        this.onBlockUpdated = onBlockUpdated;
     }
 
     /**
@@ -129,6 +128,12 @@ public class VirtualRenderWorld extends Level implements VisualizationLevel {
     }
 
     @Override
+    public void sendBlockUpdated(
+            BlockPos pos, BlockState oldState, BlockState newState, int flags) {
+        onBlockUpdated.run();
+    }
+
+    @Override
     public int getBrightness(LightLayer lightType, BlockPos blockPos) {
         var selfBrightness = super.getBrightness(lightType, blockPos);
 
@@ -151,8 +156,6 @@ public class VirtualRenderWorld extends Level implements VisualizationLevel {
                 });
 
         nonEmptyBlockCounts.clear();
-
-        runLightEngine();
     }
 
     public void setBlockEntities(Collection<BlockEntity> blockEntities) {
@@ -393,10 +396,6 @@ public class VirtualRenderWorld extends Level implements VisualizationLevel {
     }
 
     // UNIMPORTANT IMPLEMENTATIONS
-
-    @Override
-    public void sendBlockUpdated(
-            BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
 
     @Override
     public void playSeededSound(

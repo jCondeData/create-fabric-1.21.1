@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -97,7 +98,7 @@ public class ChuteBlock extends AbstractChuteBlock implements ProperWaterloggedB
         if (shape == Shape.ENCASED) {
             level.setBlockAndUpdate(context.getClickedPos(), state.setValue(SHAPE, Shape.NORMAL));
             level.levelEvent(
-                    2001,
+                    LevelEvent.PARTICLES_DESTROY_BLOCK,
                     context.getClickedPos(),
                     Block.getId(AllBlocks.INDUSTRIAL_IRON_BLOCK.getDefaultState()));
             return InteractionResult.SUCCESS;

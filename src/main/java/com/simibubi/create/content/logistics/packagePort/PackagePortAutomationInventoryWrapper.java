@@ -8,8 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 public class PackagePortAutomationInventoryWrapper extends ItemHandlerWrapper {
-
-    private PackagePortBlockEntity ppbe;
+    private final PackagePortBlockEntity ppbe;
 
     public PackagePortAutomationInventoryWrapper(
             Storage<ItemVariant> wrapped, PackagePortBlockEntity ppbe) {
@@ -21,7 +20,9 @@ public class PackagePortAutomationInventoryWrapper extends ItemHandlerWrapper {
     public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         if (!PackageItem.isPackage(resource)) return 0;
         String filterString = ppbe.getFilterString();
-        if (filterString == null || PackageItem.matchAddress(resource, filterString)) return 0;
+        // only packages addressed to this port may be pulled out (upstream semantics; the earlier
+        // fabric port had this check inverted)
+        if (filterString == null || !PackageItem.matchAddress(resource, filterString)) return 0;
 
         return super.extract(resource, maxAmount, transaction);
     }

@@ -31,11 +31,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-
-import javax.annotation.Nullable;
 
 public class ContraptionHandlerClient {
 
@@ -135,7 +134,7 @@ public class ContraptionHandlerClient {
     @Environment(EnvType.CLIENT)
     public static Couple<Vec3> getRayInputs(LocalPlayer player) {
         Minecraft mc = Minecraft.getInstance();
-        Vec3 origin = RaycastHelper.getTraceOrigin(player);
+        Vec3 origin = player.getEyePosition();
         double reach = player.blockInteractionRange();
         if (mc.hitResult != null && mc.hitResult.getLocation() != null)
             reach = Math.min(mc.hitResult.getLocation().distanceTo(origin), reach);

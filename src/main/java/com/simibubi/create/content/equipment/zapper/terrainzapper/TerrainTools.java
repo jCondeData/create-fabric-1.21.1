@@ -19,10 +19,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public enum TerrainTools implements StringRepresentable {
     Fill(AllIcons.I_FILL),

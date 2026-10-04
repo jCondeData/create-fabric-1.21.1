@@ -17,8 +17,7 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class DirectedDirectionalBlock extends HorizontalDirectionalBlock
         implements IWrenchable, TransformableBlock {
