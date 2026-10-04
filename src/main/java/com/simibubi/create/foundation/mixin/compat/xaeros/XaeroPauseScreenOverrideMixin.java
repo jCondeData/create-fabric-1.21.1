@@ -12,9 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Screen.class)
 public class XaeroPauseScreenOverrideMixin {
-
     @Inject(method = "isPauseScreen", at = @At("HEAD"), cancellable = true)
-    public void create$xaeroPauseScreenOverride(CallbackInfoReturnable<Boolean> cir) {
+    private void create$xaeroPauseScreenOverride(CallbackInfoReturnable<Boolean> cir) {
         if (Mods.XAEROWORLDMAP.isLoaded()) {
             if (XaeroTrainMap.isMapOpen((Screen) (Object) this)) cir.setReturnValue(false);
         }

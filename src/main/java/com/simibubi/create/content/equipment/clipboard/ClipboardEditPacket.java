@@ -42,7 +42,7 @@ public record ClipboardEditPacket(
         if (targetedBlock != null) {
             Level world = sender.level();
             if (!world.isLoaded(targetedBlock)) return;
-            if (!targetedBlock.closerThan(sender.blockPosition(), 20)) return;
+            if (!sender.canInteractWithBlock(targetedBlock, 20)) return;
             if (world.getBlockEntity(targetedBlock) instanceof ClipboardBlockEntity cbe) {
                 PatchedDataComponentMap map = new PatchedDataComponentMap(cbe.components());
                 if (processedContent == null) {

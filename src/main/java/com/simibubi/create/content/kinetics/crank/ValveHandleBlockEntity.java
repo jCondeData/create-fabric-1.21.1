@@ -14,6 +14,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsFormatt
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollValueBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
 
+import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
@@ -91,8 +92,11 @@ public class ValveHandleBlockEntity extends HandCrankBlockEntity {
     @Override
     public float getIndependentAngle(float partialTicks) {
         if (inUse == 0 && source != null && getSpeed() != 0)
-            return KineticBlockEntityRenderer.getAngleForBe(
-                    this, worldPosition, KineticBlockEntityRenderer.getRotationAxisOf(this));
+            return AngleHelper.deg(
+                    KineticBlockEntityRenderer.getAngleForBe(
+                            this,
+                            worldPosition,
+                            KineticBlockEntityRenderer.getRotationAxisOf(this)));
 
         int step =
                 getBlockState()
@@ -108,7 +112,6 @@ public class ValveHandleBlockEntity extends HandCrankBlockEntity {
                                 startAngle,
                                 targetAngle)
                         : targetAngle)
-                * Mth.DEG_TO_RAD
                 * (backwards ? -1 : 1)
                 * step;
     }

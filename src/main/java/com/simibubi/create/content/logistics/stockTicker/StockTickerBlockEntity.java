@@ -32,6 +32,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -57,8 +58,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class StockTickerBlockEntity extends StockCheckingBlockEntity
-        implements IHaveHoveringInformation {
-
+        implements IHaveHoveringInformation, Clearable {
     public AbstractComputerBehaviour computerBehaviour;
 
     // Player-interface Feature
@@ -276,6 +276,12 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity
     }
 
     @Override
+    public void clearContent() {
+        categories.clear();
+        receivedPayments.clearContent();
+    }
+
+    @Override
     public void destroy() {
         ItemHelper.dropContents(level, worldPosition, receivedPayments);
         for (ItemStack filter : categories)
@@ -296,7 +302,6 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity
     }
 
     public class CategoryMenuProvider implements MenuProvider {
-
         @Override
         public AbstractContainerMenu createMenu(
                 int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
@@ -311,7 +316,6 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity
     }
 
     public class RequestMenuProvider implements MenuProvider {
-
         @Override
         public AbstractContainerMenu createMenu(
                 int pContainerId, Inventory pPlayerInventory, Player pPlayer) {

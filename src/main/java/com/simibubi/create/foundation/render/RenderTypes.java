@@ -201,7 +201,7 @@ public class RenderTypes extends RenderStateShard {
         super(null, null, null);
     }
 
-    @EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(Dist.CLIENT)
     private static class Shaders {
         private static ShaderInstance glowingShader;
 

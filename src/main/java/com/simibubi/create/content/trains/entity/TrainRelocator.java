@@ -57,7 +57,7 @@ public class TrainRelocator {
 
     static WeakReference<CarriageContraptionEntity> hoveredEntity = new WeakReference<>(null);
     static UUID relocatingTrain;
-    static Vec3 relocatingOrigin;
+    static BlockPos relocatingOrigin;
     static int relocatingEntityId;
 
     static BlockPos lastHoveredPos;
@@ -78,7 +78,7 @@ public class TrainRelocator {
         if (player == null) return;
         if (player.isSpectator()) return;
 
-        if (!player.position().closerThan(relocatingOrigin, 24) || player.isShiftKeyDown()) {
+        if (!player.canInteractWithBlock(relocatingOrigin, 24) || player.isShiftKeyDown()) {
             relocatingTrain = null;
             player.displayClientMessage(
                     CreateLang.translateDirect("train.relocate.abort")
@@ -334,7 +334,7 @@ public class TrainRelocator {
                 return;
             }
 
-            if (!player.position().closerThan(relocatingOrigin, 24)) {
+            if (!player.canInteractWithBlock(relocatingOrigin, 24)) {
                 player.displayClientMessage(
                         CreateLang.translateDirect("train.relocate.too_far")
                                 .withStyle(ChatFormatting.RED),
@@ -343,19 +343,20 @@ public class TrainRelocator {
             }
 
             Boolean success = relocateClient(relocating, true);
-            if (success == null)
+            if (success == null) {
                 player.displayClientMessage(
                         CreateLang.translateDirect("train.relocate", relocating.name), true);
-            else if (success.booleanValue())
+            } else if (success) {
                 player.displayClientMessage(
                         CreateLang.translateDirect("train.relocate.valid")
                                 .withStyle(ChatFormatting.GREEN),
                         true);
-            else
+            } else {
                 player.displayClientMessage(
                         CreateLang.translateDirect("train.relocate.invalid")
                                 .withStyle(ChatFormatting.RED),
                         true);
+            }
             return;
         }
 
@@ -385,7 +386,7 @@ public class TrainRelocator {
     public static boolean carriageWrenched(Vec3 vec3, CarriageContraptionEntity entity) {
         Train train = getTrainFromEntity(entity);
         if (train == null) return false;
-        relocatingOrigin = vec3;
+        relocatingOrigin = BlockPos.containing(vec3);
         relocatingTrain = train.id;
         relocatingEntityId = entity.getId();
         return true;

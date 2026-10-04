@@ -46,7 +46,7 @@ public class LogisticallyLinkedClientHandler {
             SmartBlockEntity be = behaviour.blockEntity;
             VoxelShape shape = be.getBlockState().getShape(player.level(), be.getBlockPos());
             if (shape.isEmpty()) continue;
-            if (!player.blockPosition().closerThan(be.getBlockPos(), 64)) continue;
+            if (!player.canInteractWithBlock(be.getBlockPos(), 64)) continue;
             for (int i = 0; i < shape.toAabbs().size(); i++) {
                 AABB aabb = shape.toAabbs().get(i);
                 Outliner.getInstance()

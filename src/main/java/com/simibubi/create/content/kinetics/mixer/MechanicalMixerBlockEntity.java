@@ -138,6 +138,11 @@ public class MechanicalMixerBlockEntity extends BasinOperatingBlockEntity {
         if (running && level != null) {
             if (level.isClientSide && runningTicks == 20) renderParticles();
 
+            if (getSpeed() == 0 || !isSpeedRequirementFulfilled()) {
+                if (runningTicks < 20) runningTicks = 40 - runningTicks;
+                else if (runningTicks == 20) runningTicks++;
+            }
+
             if ((!level.isClientSide || isVirtual()) && runningTicks == 20) {
                 if (processingTicks < 0) {
                     float recipeSpeed = 1;
@@ -149,11 +154,10 @@ public class MechanicalMixerBlockEntity extends BasinOperatingBlockEntity {
                     }
 
                     processingTicks =
-                            Mth.clamp(
+                            Math.max(
                                     (Mth.log2((int) (512 / speed))) * Mth.ceil(recipeSpeed * 15)
                                             + 1,
-                                    1,
-                                    512);
+                                    1);
 
                     Optional<BasinBlockEntity> basin = getBasin();
                     if (basin.isPresent()) {

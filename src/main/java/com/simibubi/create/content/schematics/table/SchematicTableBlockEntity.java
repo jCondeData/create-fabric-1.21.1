@@ -2,6 +2,7 @@ package com.simibubi.create.content.schematics.table;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.mixin.accessor.ItemStackHandlerAccessor;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.utility.IInteractionChecker;
 
@@ -9,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,8 +23,7 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import java.util.List;
 
 public class SchematicTableBlockEntity extends SmartBlockEntity
-        implements MenuProvider, IInteractionChecker {
-
+        implements MenuProvider, IInteractionChecker, Clearable {
     public SchematicTableInventory inventory;
     public boolean isUploading;
     public String uploadingSchematic;
@@ -75,6 +76,11 @@ public class SchematicTableBlockEntity extends SmartBlockEntity
             compound.putString("Schematic", uploadingSchematic);
             compound.putFloat("Progress", uploadingProgress);
         }
+    }
+
+    @Override
+    public void clearContent() {
+        ((ItemStackHandlerAccessor) inventory).create$getStacks().clear();
     }
 
     @Override

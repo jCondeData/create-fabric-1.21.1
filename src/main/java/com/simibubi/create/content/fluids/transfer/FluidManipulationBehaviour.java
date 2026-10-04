@@ -1,5 +1,6 @@
 package com.simibubi.create.content.fluids.transfer;
 
+import com.google.common.base.Predicates;
 import com.simibubi.create.AllTags.AllFluidTags;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.fluids.FluidStack;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,12 +36,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 public abstract class FluidManipulationBehaviour extends BlockEntityBehaviour {
-
-    public static record BlockPosEntry(BlockPos pos, int distance) {}
-    ;
+    public record BlockPosEntry(BlockPos pos, int distance) {}
 
     public static class ChunkNotLoadedException extends Exception {
-        private static final long serialVersionUID = 1L;
+        @Serial private static final long serialVersionUID = 1L;
     }
 
     BoundingBox affectedArea;
@@ -258,10 +258,10 @@ public abstract class FluidManipulationBehaviour extends BlockEntityBehaviour {
     }
 
     public enum BottomlessFluidMode implements Predicate<Fluid> {
-        ALLOW_ALL(fluid -> true),
-        DENY_ALL(fluid -> false),
-        ALLOW_BY_TAG(fluid -> AllFluidTags.BOTTOMLESS_ALLOW.matches(fluid)),
-        DENY_BY_TAG(fluid -> !AllFluidTags.BOTTOMLESS_DENY.matches(fluid));
+        ALLOW_ALL(Predicates.alwaysTrue()),
+        DENY_ALL(Predicates.alwaysFalse()),
+        ALLOW_BY_TAG(AllFluidTags.BOTTOMLESS_ALLOW::matches),
+        DENY_BY_TAG(Predicates.not(AllFluidTags.BOTTOMLESS_DENY::matches));
 
         private final Predicate<Fluid> predicate;
 

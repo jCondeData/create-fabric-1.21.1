@@ -24,7 +24,6 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Collection;
 
 public class HighlightCommand {
-
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("highlight")
                 .then(
@@ -69,11 +68,10 @@ public class HighlightCommand {
 
     private static void sendMissMessage(CommandSourceStack source) {
         source.sendSuccess(
-                () -> {
-                    return Component.literal(
-                            "Try looking at a Block that has failed to assemble a Contraption and"
-                                + " try again.");
-                },
+                () ->
+                        Component.literal(
+                                "Try looking at a Block that has failed to assemble a Contraption"
+                                    + " and try again."),
                 true);
     }
 
@@ -113,10 +111,7 @@ public class HighlightCommand {
 
         if (!exception.hasPosition()) {
             source.sendSuccess(
-                    () -> {
-                        return Component.literal(
-                                "Can't highlight a specific position for this issue");
-                    },
+                    () -> Component.literal("Can't highlight a specific position for this issue"),
                     true);
             return Command.SINGLE_SUCCESS;
         }

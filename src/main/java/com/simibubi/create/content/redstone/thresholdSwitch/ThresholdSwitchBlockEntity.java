@@ -21,9 +21,11 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import net.createmod.catnip.math.BlockFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -37,8 +39,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.List;
 
-public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
-
+public class ThresholdSwitchBlockEntity extends SmartBlockEntity implements Clearable {
     public int onWhenAbove;
     public int offWhenBelow;
 
@@ -172,8 +173,10 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
                                                 () ->
                                                         (long)
                                                                 Math.min(
-                                                                        stackInSlot
-                                                                                .getMaxStackSize(),
+                                                                        stackInSlot.getOrDefault(
+                                                                                DataComponents
+                                                                                        .MAX_STACK_SIZE,
+                                                                                64),
                                                                         inv.getSlotLimit(
                                                                                 finalSlot)));
 
@@ -304,6 +307,11 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
         super.lazyTick();
         if (level.isClientSide) return;
         updateCurrentLevel();
+    }
+
+    @Override
+    public void clearContent() {
+        filtering.setFilter(ItemStack.EMPTY);
     }
 
     @Override

@@ -148,8 +148,7 @@ public class TagLangGenerator {
         translate(AllItemTags.HONEY_BUCKETS, "Honey Buckets");
         translate(AllItemTags.FLOURS, "Flours");
         translate(AllItemTags.WHEAT_FLOURS, "Wheat Flours");
-        translate(AllItemTags.DOUGHS, "Doughs");
-        translate(AllItemTags.WHEAT_DOUGHS, "Wheat Doughs");
+        translate(AllItemTags.FOODS_DOUGH_WHEAT, "Wheat Doughs");
         translate(AllItemTags.UA_CORAL, "Upgrade Aquatic Coral");
 
         // fluids
@@ -170,7 +169,7 @@ public class TagLangGenerator {
 
         // palletes
         translate(AllItemTags.ALLURITE, "Allurite");
-        translate(AllItemTags.AMETHYST, "Amethust");
+        translate(AllItemTags.AMETHYST, "Amethyst");
         translate(AllItemTags.LUMIERE, "Lumiere");
 
         for (AllPaletteStoneTypes type : AllPaletteStoneTypes.values()) {

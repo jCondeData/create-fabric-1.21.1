@@ -77,7 +77,7 @@ public class ContraptionEntityRenderer<C extends AbstractContraptionEntity>
             BlockState state = blocks.lookup().apply(pos);
             if (state.getRenderShape() == RenderShape.MODEL) {
                 BakedModel model = dispatcher.getBlockModel(state);
-                ModelData modelData = clientContraption.getModelData(pos);
+                ModelData modelData = renderWorld.getModelData(pos);
                 modelData = model.getModelData(renderWorld, pos, state, modelData);
                 long randomSeed = state.getSeed(pos);
                 random.setSeed(randomSeed);

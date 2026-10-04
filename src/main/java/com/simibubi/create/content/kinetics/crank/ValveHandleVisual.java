@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 
+import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,7 +54,7 @@ public class ValveHandleVisual extends KineticBlockEntityVisual<HandCrankBlockEn
 
     private void rotateCrank(float pt) {
         var facing = blockState.getValue(BlockStateProperties.FACING);
-        float angle = blockEntity.getIndependentAngle(pt);
+        float angle = AngleHelper.rad(blockEntity.getIndependentAngle(pt));
 
         crank.setIdentityTransform()
                 .translate(getVisualPosition())

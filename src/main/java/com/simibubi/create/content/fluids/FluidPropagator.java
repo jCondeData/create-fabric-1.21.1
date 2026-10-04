@@ -1,9 +1,9 @@
 package com.simibubi.create.content.fluids;
 
-import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllTags.AllBlockTags;
 import com.simibubi.create.content.fluids.PipeConnection.Flow;
 import com.simibubi.create.content.fluids.pipes.AxisPipeBlock;
+import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.VanillaFluidTargets;
 import com.simibubi.create.content.fluids.pump.PumpBlock;
@@ -73,7 +73,7 @@ public class FluidPropagator {
                 BlockEntity blockEntity = world.getBlockEntity(target);
                 BlockState targetState = world.getBlockState(target);
                 if (blockEntity instanceof PumpBlockEntity) {
-                    if (!AllBlocks.MECHANICAL_PUMP.has(targetState)
+                    if (!(targetState.getBlock() instanceof PumpBlock)
                             || targetState.getValue(PumpBlock.FACING).getAxis()
                                     != direction.getAxis()) continue;
                     discoveredPumps.add(
@@ -138,7 +138,7 @@ public class FluidPropagator {
         if (otherBlock instanceof AxisPipeBlock) return null;
         if (otherBlock instanceof PumpBlock) return null;
         if (otherBlock instanceof LiquidBlock) return null;
-        if (getStraightPipeAxis(state) == null && !AllBlocks.ENCASED_FLUID_PIPE.has(state))
+        if (getStraightPipeAxis(state) == null && !(state.getBlock() instanceof EncasedPipeBlock))
             return null;
         for (Direction d : Iterate.directions) {
             if (!pos.relative(d).equals(neighborPos)) continue;

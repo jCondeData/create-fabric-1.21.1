@@ -13,7 +13,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +25,6 @@ public record ControlsInputPacket(
         BlockPos controlsPos,
         boolean stopControlling)
         implements ServerboundPacketPayload {
-
     public static final StreamCodec<ByteBuf, ControlsInputPacket> STREAM_CODEC =
             StreamCodec.composite(
                     CatnipStreamCodecBuilders.list(ByteBufCodecs.VAR_INT),
@@ -70,7 +68,7 @@ public record ControlsInputPacket(
             return;
         }
 
-        if (ace.toGlobalVector(Vec3.atCenterOf(controlsPos), 0).closerThan(player.position(), 16))
+        if (ace.canInteractWithBlock(player, controlsPos, 16))
             ControlsServerHandler.receivePressed(
                     world, ace, controlsPos, uniqueID, activatedButtons, press);
     }

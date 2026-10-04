@@ -510,8 +510,7 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
         if (carriage.train.derailed) return false;
         if (level().isClientSide) return true;
         if (player.isSpectator()) return false;
-        if (!toGlobalVector(VecHelper.getCenterOf(controlsLocalPos), 1)
-                .closerThan(player.position(), 8)) return false;
+        if (!canInteractWithBlock(player, VecHelper.getCenterOf(controlsLocalPos), 8)) return false;
         if (heldControls.contains(5)) return false;
 
         StructureBlockInfo info = contraption.getBlocks().get(controlsLocalPos);

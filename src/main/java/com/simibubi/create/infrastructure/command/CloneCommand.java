@@ -29,7 +29,6 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class CloneCommand {
-
     private static final Dynamic2CommandExceptionType CLONE_TOO_BIG_EXCEPTION =
             new Dynamic2CommandExceptionType(
                     (arg1, arg2) -> Component.translatable("commands.clone.toobig", arg1, arg2));
@@ -88,12 +87,11 @@ public class CloneCommand {
                         ctx -> {
                             ctx.getSource()
                                     .sendSuccess(
-                                            () -> {
-                                                return Component.literal(
-                                                        "Clones all blocks as well as super glue"
-                                                            + " from the specified area to the"
-                                                            + " target destination");
-                                            },
+                                            () ->
+                                                    Component.literal(
+                                                            "Clones all blocks as well as super"
+                                                                + " glue from the specified area to"
+                                                                + " the target destination"),
                                             true);
 
                             return Command.SINGLE_SUCCESS;

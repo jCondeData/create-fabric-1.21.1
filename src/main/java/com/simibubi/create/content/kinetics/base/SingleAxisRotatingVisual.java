@@ -12,7 +12,6 @@ import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import dev.engine_room.flywheel.lib.visualization.SimpleBlockEntityVisualizer;
 
-import net.createmod.catnip.theme.Color;
 import net.minecraft.core.Direction;
 
 import java.util.function.Consumer;
@@ -86,18 +85,7 @@ public class SingleAxisRotatingVisual<T extends KineticBlockEntity>
 
     @Override
     public void tick(Context context) {
-        float overStressedEffect = blockEntity.effects.overStressedEffect;
-        if (overStressedEffect != 0) {
-            boolean overstressed = overStressedEffect > 0;
-            Color color = overstressed ? Color.RED : Color.SPRING_GREEN;
-            float weight = overstressed ? overStressedEffect : -overStressedEffect;
-
-            rotatingModel.setColor(Color.WHITE.mixWith(color, weight));
-        } else {
-            rotatingModel.setColor(Color.WHITE);
-        }
-
-        rotatingModel.setChanged();
+        applyOverstressEffect(blockEntity, rotatingModel);
     }
 
     @Override

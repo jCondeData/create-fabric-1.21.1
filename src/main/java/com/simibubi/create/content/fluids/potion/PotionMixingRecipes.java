@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.DataComponentFluidIngredient;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import java.util.ArrayList;
@@ -175,7 +176,10 @@ public class PotionMixingRecipes {
         MixingRecipe recipe =
                 new Builder<>(MixingRecipe::new, recipeId)
                         .require(ingredient)
-                        .require(SizedFluidIngredient.of(fromFluid))
+                        .require(
+                                new SizedFluidIngredient(
+                                        DataComponentFluidIngredient.of(false, fromFluid),
+                                        fromFluid.getAmount()))
                         .output(toFluid)
                         .requiresHeat(HeatCondition.HEATED)
                         .build();

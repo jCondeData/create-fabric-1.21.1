@@ -1,19 +1,16 @@
-import dev.ithundxr.silk.ChangelogText
-import org.slf4j.event.Level
-
 plugins {
     id("idea")
     id("eclipse")
     id("maven-publish")
     id("net.kyori.blossom") version "2.1.0" // https://github.com/KyoriPowered/blossom
-    id("dev.ithundxr.silk") version "0.11.15" // https://github.com/ithundxr/silk
+    id("dev.ithundxr.silk") version "1.0.1" // https://github.com/ithundxr/silk
     id("net.neoforged.moddev") version "2.0.107" // https://projects.neoforged.net/neoforged/ModDevGradle
     id("me.modmuss50.mod-publish-plugin") version "0.8.4" // https://github.com/modmuss50/mod-publish-plugin
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.8" // https://github.com/JetBrains/gradle-idea-ext-plugin
 }
 
 apply(from: "./gradle/java.gradle")
-apply(from: "gradle/property_loader.gradle")
+apply(from: "./gradle/property_loader.gradle")
 
 boolean dev = System.getenv("RELEASE") == null || System.getenv("RELEASE") == "false"
 String buildNumber = System.getenv("BUILD_NUMBER")
@@ -24,16 +21,6 @@ base {
     group = "com.simibubi.create"
     version = mod_version + (dev && buildNumber != null ? "-${buildNumber}" : "")
 }
-
-boolean inMultiModWorkspace = rootProject.hasProperty("multiModWorkspace.enabled")
-boolean ponderInWorkspace = rootProject.hasProperty("multiModWorkspace.ponder")
-
-if (ponderInWorkspace) {
-    evaluationDependsOn(":ponder:NeoForge")
-}
-
-project.logger.lifecycle("MultiModWorkspace ${inMultiModWorkspace ? "enabled" : "disabled"} for project ${project.name}.")
-project.logger.lifecycle("Dependencies included in Workspace: [Ponder: ${ponderInWorkspace}]")
 
 println("Java: ${System.getProperty("java.version")}, JVM: ${System.getProperty("java.vm.version")} (${System.getProperty("java.vendor")}), Arch: ${System.getProperty("os.arch")}")
 
@@ -60,13 +47,6 @@ neoForge {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
-
-        if (ponderInWorkspace) {
-            ponder {
-                sourceSet(project(":ponder:Common").sourceSets.main)
-                sourceSet(project(":ponder:NeoForge").sourceSets.main)
-            }
-        }
     }
 
 
@@ -83,7 +63,7 @@ neoForge {
 
             systemProperty("neoforge.enabledGameTestNamespaces", mod_id as String)
 
-            logLevel = Level.DEBUG
+            loggingConfigFile = project.file("log4j.xml")
         }
 
         client {
@@ -102,7 +82,7 @@ neoForge {
             data()
 
             programArguments.addAll(
-                    "--mod", mod_id as String,
+                "--mod", mod_id as String,
                 "--all",
                 "--output", file("src/generated/resources/").getAbsolutePath(),
                 "--existing", file("src/main/resources/").getAbsolutePath()
@@ -123,7 +103,6 @@ repositories {
     maven { url = "https://maven.createmod.net" } // Ponder, Flywheel
     maven { url = "https://maven.ithundxr.dev/snapshots" } // Registrate
     maven { url = "https://maven.blamejared.com" } // JEI, Vazkii's Mods
-    maven { url = "https://harleyoconnor.com/maven" } // Dynamic Trees
     maven { url = "https://maven.theillusivec4.top/" } // Curios API
     maven { url = "https://maven.squiddev.cc" } // CC: Tweaked
     maven { url = "https://www.cursemaven.com" }
@@ -139,6 +118,7 @@ repositories {
             includeGroup "mysticdrew"
         }
     }
+    maven { url "https://chocolateminecraft.com/maven" } // Xaero
 }
 
 dependencies {
@@ -147,21 +127,21 @@ dependencies {
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-$minecraft_version:$flywheel_version")
     runtimeOnly(jarJar("dev.engine-room.flywheel:flywheel-neoforge-$minecraft_version:$flywheel_version") {
         version {
-            strictly "[1.0,2.0)"
+            strictly "[${flywheel_version},2.0)"
             prefer flywheel_version
         }
     })
     runtimeOnly("dev.engine-room.vanillin:vanillin-neoforge-$minecraft_version:$vanillin_version")
 
-    if (ponderInWorkspace) {
-        jarJar(implementation(project(":ponder:Common")))
-        jarJar(implementation(project(":ponder:NeoForge")))
-    } else {
-        jarJar(implementation("net.createmod.ponder:Ponder-NeoForge-$minecraft_version:$ponder_version"))
-    }
+    implementation(jarJar("net.createmod.ponder:ponder-neoforge:$ponder_version+mc$minecraft_version") {
+        version {
+            strictly "[$ponder_version+mc$minecraft_version,)"
+            prefer "$ponder_version+mc$minecraft_version"
+        }
+    })
 
-    //compileOnly("mezz.jei:jei-minecraft_version-common-api:$jei_version")
-    //compileOnly("mezz.jei:jei-minecraft_version-neoforge-api:$jei_version")
+    //compileOnly("mezz.jei:jei-$minecraft_version-common-api:$jei_version")
+    //compileOnly("mezz.jei:jei-$minecraft_version-neoforge-api:$jei_version")
     implementation("mezz.jei:jei-$minecraft_version-neoforge:$jei_version")
 
     compileOnly("top.theillusivec4.curios:curios-neoforge:$curios_version+$minecraft_version:api")
@@ -175,17 +155,23 @@ dependencies {
         runtimeOnly("cc.tweaked:cc-tweaked-$minecraft_version-forge:$cc_tweaked_version")
     }
 
-    runtimeOnly("dev.architectury:architectury-neoforge:13.0.8")
+    compileOnly("maven.modrinth:farmers-delight:${farmers_delight_version}")
+    if (farmers_delight_enable.toBoolean()) {
+        implementation("maven.modrinth:farmers-delight:${farmers_delight_version}")
+    }
+
+    runtimeOnly("dev.architectury:architectury-neoforge:13d.0.8")
     implementation("dev.ftb.mods:ftb-chunks-neoforge:2101.1.1")
     implementation("dev.ftb.mods:ftb-teams-neoforge:2101.1.0")
     implementation("dev.ftb.mods:ftb-library-neoforge:2101.1.3")
 
-    implementation("maven.modrinth:journeymap:1.21.1-6.0.0-beta.46+neoforge")
-    implementation("info.journeymap:journeymap-api-neoforge:2.0.0-1.21.1-SNAPSHOT") {
+    implementation("maven.modrinth:journeymap:1.21.1-6.0.0-beta.54+neoforge")
+    implementation("info.journeymap:journeymap-api-neoforge:2.0.0-1.21.1-20260205.200232-15") {
         exclude(group: "curse.maven") // Pulls in a old version of journey map which is for forge
     }
 
-    compileOnly("curse.maven:xaeros-world-map-317780:6778114")
+    compileOnly("xaero.lib:xaerolib-neoforge-1.21:1.0.42")
+    compileOnly("curse.maven:xaeros-world-map-317780:7401095")
 }
 
 sourceSets.main {
@@ -210,7 +196,7 @@ sourceSets.main {
 jar {
     String name = base.archivesName.get()
 
-    from("LICENSE") {
+    from("LICENSE.md") {
         rename { "${it}_$name" }
     }
 
@@ -271,34 +257,32 @@ publishing {
             }
         }
     }
+
+
     repositories {
-        String mavenUsername = providers.gradleProperty("mavenUsername").getOrNull()
-        String mavenPassword = providers.gradleProperty("mavenPassword").getOrNull()
-        String mavenURL = providers.gradleProperty("mavenURL").getOrNull()
-        if (mavenUsername != null && mavenPassword != null && mavenURL != null) {
+        if (project.hasProperty("mavenUsername") && project.hasProperty("mavenPassword") && project.hasProperty("mavenURL")) {
             project.logger.lifecycle("Adding maven from secrets")
 
             maven {
                 credentials {
-                    username = mavenUsername
-                    password = mavenPassword
+                    username = project.property("mavenUsername") as String
+                    password = project.property("mavenPassword") as String
                 }
-                url = URI.create(mavenURL)
+                url = URI.create(project.property("mavenURL") as String)
             }
         }
 
-        String mavendir = providers.gradleProperty("mavendir").getOrNull()
-        if (mavendir != null) {
-            maven { url = mavendir }
+        if (project.hasProperty("mavendir")) {
+            maven { url mavendir }
         }
     }
 }
 
 publishMods {
     file = jar.archiveFile
-    changelog = ChangelogText.getChangelogText(project).toString()
+    changelog = silk.changelog
     type = STABLE
-    version = "mc$minecraft_version-$mod_version"
+    version = "$mod_version+mc$minecraft_version"
     displayName = "$mod_name $mod_version for mc$minecraft_version"
     modLoaders.add("neoforge")
 

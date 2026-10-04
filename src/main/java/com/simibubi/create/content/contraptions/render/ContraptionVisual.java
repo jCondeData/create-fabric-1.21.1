@@ -103,11 +103,10 @@ public class ContraptionVisual<E extends AbstractContraptionEntity> extends Abst
 
         var model =
                 new BlockModelBuilder(modelWorld, blocks.positions())
-                        // .modelDataLookup(clientContraption::getModelData) TODO - Is this needed?
-                        // Is there a replacement?
                         .materialFunc(
-                                (renderType, shaded) -> {
-                                    Material material = ModelUtil.getMaterial(renderType, shaded);
+                                (renderType, shaded, ao) -> {
+                                    Material material =
+                                            ModelUtil.getMaterial(renderType, shaded, ao);
                                     if (material != null
                                             && material.cardinalLightingMode()
                                                     == CardinalLightingMode.ENTITY) {

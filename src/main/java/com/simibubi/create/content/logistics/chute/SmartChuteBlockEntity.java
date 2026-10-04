@@ -7,6 +7,7 @@ import com.simibubi.create.foundation.item.ItemHelper.ExtractionCountMode;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,8 +16,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 import java.util.List;
 
-public class SmartChuteBlockEntity extends ChuteBlockEntity {
-
+public class SmartChuteBlockEntity extends ChuteBlockEntity implements Clearable {
     FilteringBehaviour filtering;
 
     public SmartChuteBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -62,6 +62,12 @@ public class SmartChuteBlockEntity extends ChuteBlockEntity {
                                 .showCountWhen(this::isExtracting)
                                 .withCallback($ -> invVersionTracker.reset()));
         super.addBehaviours(behaviours);
+    }
+
+    @Override
+    public void clearContent() {
+        super.clearContent();
+        filtering.setFilter(ItemStack.EMPTY);
     }
 
     private boolean isExtracting() {

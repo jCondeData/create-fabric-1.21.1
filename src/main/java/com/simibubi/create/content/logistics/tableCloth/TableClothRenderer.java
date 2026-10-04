@@ -71,7 +71,6 @@ public class TableClothRenderer extends SmartBlockEntityRenderer<TableClothBlock
             if (!blockItem) TransformStack.of(ms).rotate(-rotationInRadians + Mth.PI, Direction.UP);
 
             DepotRenderer.renderItem(
-                    blockEntity.getLevel(),
                     ms,
                     buffer,
                     light,

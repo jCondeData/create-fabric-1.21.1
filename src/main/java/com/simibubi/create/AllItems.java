@@ -98,8 +98,10 @@ public class AllItems {
     public static final ItemEntry<Item>
             WHEAT_FLOUR =
                     taggedIngredient(
-                            "wheat_flour", AllItemTags.WHEAT_FLOURS.tag, AllItemTags.FLOURS.tag),
-            DOUGH = taggedIngredient("dough", AllItemTags.DOUGHS.tag, AllItemTags.WHEAT_DOUGHS.tag),
+                            "wheat_flour", AllItemTags.FLOURS.tag, AllItemTags.WHEAT_FLOURS.tag),
+            DOUGH =
+                    taggedIngredient(
+                            "dough", Tags.Items.FOODS_DOUGH, AllItemTags.FOODS_DOUGH_WHEAT.tag),
             CINDER_FLOUR = ingredient("cinder_flour"),
             ROSE_QUARTZ = ingredient("rose_quartz"),
             POLISHED_ROSE_QUARTZ = ingredient("polished_rose_quartz"),

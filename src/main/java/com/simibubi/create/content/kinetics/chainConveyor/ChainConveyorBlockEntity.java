@@ -32,6 +32,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -59,7 +60,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class ChainConveyorBlockEntity extends KineticBlockEntity
-        implements TransformableBlockEntity {
+        implements TransformableBlockEntity, Clearable {
 
     public record ConnectionStats(float tangentAngle, float chainLength, Vec3 start, Vec3 end) {}
 
@@ -576,6 +577,13 @@ public class ChainConveyorBlockEntity extends KineticBlockEntity
                                 0,
                                 0,
                                 0));
+    }
+
+    @Override
+    public void clearContent() {
+        connections.clear();
+        travellingPackages.clear();
+        loopingPackages.clear();
     }
 
     @Override

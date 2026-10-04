@@ -63,6 +63,7 @@ public class TreeFertilizerItem extends Item {
                                 .getCollisionShape(context.getLevel(), actualPos)
                                 .isEmpty()) continue;
 
+                context.getLevel().destroyBlock(actualPos, true);
                 context.getLevel().setBlockAndUpdate(actualPos, newState);
             }
 

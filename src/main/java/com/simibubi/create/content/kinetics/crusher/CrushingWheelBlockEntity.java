@@ -60,7 +60,7 @@ public class CrushingWheelBlockEntity extends KineticBlockEntity {
     @SubscribeEvent
     public static void handleCrushedMobDrops(LivingDropsEvent event) {
         DamageSource damageSource = event.getSource();
-        if (damageSource == null || !damageSource.is(AllDamageTypes.CRUSH)) return;
+        if (!damageSource.is(AllDamageTypes.CRUSH)) return;
         Vec3 outSpeed = Vec3.ZERO;
         for (ItemEntity outputItem : event.getDrops()) {
             outputItem.setDeltaMovement(outSpeed);

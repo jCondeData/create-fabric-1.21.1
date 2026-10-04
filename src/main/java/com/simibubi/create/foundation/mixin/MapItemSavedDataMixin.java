@@ -62,7 +62,7 @@ public class MapItemSavedDataMixin implements StationMapData {
     }
 
     @Inject(method = "save", at = @At("RETURN"))
-    public void create$onSave(
+    private void create$onSave(
             CompoundTag tag,
             HolderLookup.Provider registries,
             CallbackInfoReturnable<CompoundTag> cir) {

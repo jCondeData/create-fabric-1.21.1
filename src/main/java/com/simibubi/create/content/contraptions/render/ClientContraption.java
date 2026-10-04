@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -193,21 +192,6 @@ public class ClientContraption {
                     return info.state();
                 },
                 contraption.getBlocks().keySet());
-    }
-
-    /**
-     * Get the model data for a block in the contraption's render world.
-     *
-     * @param pos The local position of the block.
-     * @return The model data for the block, or {@link ModelData#EMPTY} if there is no block entity
-     *     at the position.
-     */
-    public ModelData getModelData(BlockPos pos) {
-        var blockEntity = renderLevel.getBlockEntity(pos);
-        if (blockEntity != null) {
-            return blockEntity.getModelData();
-        }
-        return ModelData.EMPTY;
     }
 
     @Nullable

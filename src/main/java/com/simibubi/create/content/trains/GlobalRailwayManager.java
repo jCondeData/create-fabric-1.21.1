@@ -10,6 +10,7 @@ import com.simibubi.create.content.trains.graph.TrackGraph;
 import com.simibubi.create.content.trains.graph.TrackGraphSync;
 import com.simibubi.create.content.trains.graph.TrackGraphVisualizer;
 import com.simibubi.create.content.trains.graph.TrackNodeLocation;
+import com.simibubi.create.content.trains.signal.EdgeGroupColor;
 import com.simibubi.create.content.trains.signal.SignalEdgeGroup;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
@@ -56,14 +57,21 @@ public class GlobalRailwayManager {
     public void playerLogin(Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
             loadTrackData(serverPlayer.getServer());
-            trackNetworks.values().forEach(g -> sync.sendFullGraphTo(g, serverPlayer));
-            ArrayList<SignalEdgeGroup> asList = new ArrayList<>(signalEdgeGroups.values());
-            sync.sendEdgeGroups(
-                    asList.stream().map(g -> g.id).toList(),
-                    asList.stream().map(g -> g.color).toList(),
-                    serverPlayer);
-            for (Train train : trains.values())
+            for (TrackGraph g : trackNetworks.values()) {
+                sync.sendFullGraphTo(g, serverPlayer);
+            }
+
+            List<UUID> ids = new ArrayList<>(signalEdgeGroups.size());
+            List<EdgeGroupColor> colors = new ArrayList<>(signalEdgeGroups.size());
+            for (SignalEdgeGroup group : signalEdgeGroups.values()) {
+                ids.add(group.id);
+                colors.add(group.color);
+            }
+            sync.sendEdgeGroups(ids, colors, serverPlayer);
+
+            for (Train train : trains.values()) {
                 CatnipServices.NETWORK.sendToClient(serverPlayer, new AddTrainPacket(train));
+            }
         }
     }
 
@@ -83,7 +91,7 @@ public class GlobalRailwayManager {
         trains = savedData.getTrains();
         trackNetworks = savedData.getTrackNetworks();
         signalEdgeGroups = savedData.getSignalBlocks();
-        trains.values().forEach(movingTrains::add);
+        movingTrains.addAll(trains.values());
     }
 
     public void cleanUp() {
@@ -149,7 +157,9 @@ public class GlobalRailwayManager {
 
     public void updateSplitGraph(LevelAccessor level, TrackGraph graph) {
         Set<TrackGraph> disconnected = graph.findDisconnectedGraphs(level, null);
-        disconnected.forEach(this::putGraphWithDefaultGroup);
+        for (TrackGraph d : disconnected) {
+            putGraphWithDefaultGroup(d);
+        }
         if (!disconnected.isEmpty()) {
             sync.graphSplit(graph, disconnected);
             markTracksDirty();
@@ -175,21 +185,21 @@ public class GlobalRailwayManager {
     public void tick(Level level) {
         if (level.dimension() != Level.OVERWORLD) return;
 
-        signalEdgeGroups.forEach(
-                (id, group) -> {
-                    group.trains.clear();
-                    group.reserved = null;
-                });
+        for (SignalEdgeGroup group : signalEdgeGroups.values()) {
+            group.trains.clear();
+            group.reserved = null;
+        }
 
-        trackNetworks.forEach(
-                (id, graph) -> {
-                    graph.tickPoints(true);
-                    graph.resolveIntersectingEdgeGroups(level);
-                });
+        for (TrackGraph graph : trackNetworks.values()) {
+            graph.tickPoints(true);
+            graph.resolveIntersectingEdgeGroups(level);
+        }
 
         tickTrains(level);
 
-        trackNetworks.forEach((id, graph) -> graph.tickPoints(false));
+        for (TrackGraph graph : trackNetworks.values()) {
+            graph.tickPoints(false);
+        }
 
         GlobalTrainDisplayData.updateTick = level.getGameTime() % 100 == 0;
         if (GlobalTrainDisplayData.updateTick) GlobalTrainDisplayData.refresh();

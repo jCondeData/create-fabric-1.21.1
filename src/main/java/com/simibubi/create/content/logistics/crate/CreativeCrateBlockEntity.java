@@ -10,6 +10,8 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.Clearable;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +21,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 import java.util.List;
 
-public class CreativeCrateBlockEntity extends CrateBlockEntity {
+public class CreativeCrateBlockEntity extends CrateBlockEntity implements Clearable {
     FilteringBehaviour filtering;
     BottomlessItemHandler inv;
 
@@ -47,11 +49,15 @@ public class CreativeCrateBlockEntity extends CrateBlockEntity {
         if (inv != null) invalidateCapabilities();
     }
 
+    @Override
+    public void clearContent() {
+        filtering.setFilter(ItemStack.EMPTY);
+    }
+
     public FilteringBehaviour createFilter() {
         return new FilteringBehaviour(
                 this,
                 new ValueBoxTransform() {
-
                     @Override
                     public void rotate(
                             LevelAccessor level, BlockPos pos, BlockState state, PoseStack ms) {

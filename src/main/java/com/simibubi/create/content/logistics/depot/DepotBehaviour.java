@@ -13,6 +13,7 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
+import com.simibubi.create.foundation.mixin.accessor.ItemStackHandlerAccessor;
 
 import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.nbt.NBTHelper;
@@ -22,6 +23,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -39,8 +41,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class DepotBehaviour extends BlockEntityBehaviour {
-
+public class DepotBehaviour extends BlockEntityBehaviour implements Clearable {
     public static final BehaviourType<DepotBehaviour> TYPE = new BehaviourType<>();
 
     TransportedItemStack heldItem;
@@ -187,6 +188,13 @@ public class DepotBehaviour extends BlockEntityBehaviour {
         }
 
         return false;
+    }
+
+    @Override
+    public void clearContent() {
+        ((ItemStackHandlerAccessor) processingOutputBuffer).create$getStacks().clear();
+        incoming.clear();
+        heldItem = null;
     }
 
     @Override

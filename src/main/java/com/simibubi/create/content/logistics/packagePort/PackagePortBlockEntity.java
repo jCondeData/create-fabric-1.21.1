@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,8 +34,8 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class PackagePortBlockEntity extends SmartBlockEntity implements MenuProvider {
-
+public abstract class PackagePortBlockEntity extends SmartBlockEntity
+        implements MenuProvider, Clearable {
     public boolean acceptsPackages;
     public String addressFilter;
     public PackagePortTarget target;
@@ -94,9 +95,8 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         PackagePortTarget prevTarget = target;
         target =
-                CatnipCodecUtils.decode(
-                                PackagePortTarget.CODEC, registries, tag.getCompound("Target"))
-                        .orElse(null);
+                CatnipCodecUtils.decodeOrNull(
+                        PackagePortTarget.CODEC, registries, tag.getCompound("Target"));
         addressFilter = tag.getString("AddressFilter");
         acceptsPackages = tag.getBoolean("AcceptsPackages");
         if (clientPacket && prevTarget != target) invalidateRenderBoundingBox();
@@ -105,6 +105,11 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
     @Override
     public void invalidate() {
         super.invalidate();
+    }
+
+    @Override
+    public void clearContent() {
+        inventory.clearContent();
     }
 
     @Override

@@ -72,9 +72,9 @@ public class TurntableBlock extends KineticBlock implements IBE<TurntableBlockEn
                     if ((e instanceof Player)) return;
                     if (world.isClientSide) return;
 
-                    if ((e instanceof LivingEntity)) {
+                    if (e instanceof LivingEntity livingEntity) {
                         float diff = e.getYHeadRot() - speed;
-                        ((LivingEntity) e).setNoActionTime(20);
+                        livingEntity.setNoActionTime(20);
                         e.setYBodyRot(diff);
                         e.setYHeadRot(diff);
                         e.setOnGround(false);

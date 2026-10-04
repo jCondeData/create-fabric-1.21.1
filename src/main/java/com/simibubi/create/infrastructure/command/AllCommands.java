@@ -8,28 +8,48 @@ import net.createmod.catnip.command.CatnipCommands;
 import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.world.entity.player.Player;
-
-import java.util.function.Predicate;
 
 public class AllCommands {
+    // Client Commands
 
-    public static final Predicate<CommandSourceStack> SOURCE_IS_PLAYER =
-            cs -> cs.getEntity() instanceof Player;
+    public static void registerClient(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralCommandNode<CommandSourceStack> util = buildClientUtilityCommands();
+
+        LiteralArgumentBuilder<CommandSourceStack> root =
+                Commands.literal("create")
+                        .requires(cs -> cs.hasPermission(0))
+                        // general purpose
+                        .then(ToggleDebugCommand.register())
+                        .then(FabulousWarningCommand.register())
+                        .then(OverlayConfigCommand.register())
+                        .then(FixLightingCommand.register())
+
+                        // utility
+                        .then(util);
+
+        LiteralCommandNode<CommandSourceStack> createRoot = dispatcher.register(root);
+        createRoot.addChild(CatnipCommands.buildRedirect("u", util));
+        CatnipCommands.createOrAddToShortcut(dispatcher, "c", createRoot);
+    }
+
+    private static LiteralCommandNode<CommandSourceStack> buildClientUtilityCommands() {
+        return Commands.literal("util")
+                .then(ClearBufferCacheCommand.register())
+                .then(CameraDistanceCommand.register())
+                .then(CameraAngleCommand.register())
+                .build();
+    }
+
+    // Server Commands
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-
         LiteralCommandNode<CommandSourceStack> util = buildUtilityCommands();
 
         LiteralArgumentBuilder<CommandSourceStack> root =
                 Commands.literal("create")
                         .requires(cs -> cs.hasPermission(0))
                         // general purpose
-                        .then(new ToggleDebugCommand().register())
-                        .then(FabulousWarningCommand.register())
-                        .then(OverlayConfigCommand.register())
                         .then(DumpRailwaysCommand.register())
-                        .then(FixLightingCommand.register())
                         .then(DebugInfoCommand.register())
                         .then(HighlightCommand.register())
                         .then(PassengerCommand.register())
@@ -46,20 +66,13 @@ public class AllCommands {
             root.then(CreateTestCommand.register());
 
         LiteralCommandNode<CommandSourceStack> createRoot = dispatcher.register(root);
-
         createRoot.addChild(CatnipCommands.buildRedirect("u", util));
-
-        // add all of Create's commands to /c if it already exists, otherwise create the shortcut
         CatnipCommands.createOrAddToShortcut(dispatcher, "c", createRoot);
     }
 
     private static LiteralCommandNode<CommandSourceStack> buildUtilityCommands() {
-
         return Commands.literal("util")
                 .then(ReplaceInCommandBlocksCommand.register())
-                .then(ClearBufferCacheCommand.register())
-                .then(CameraDistanceCommand.register())
-                .then(CameraAngleCommand.register())
                 // .then(DebugValueCommand.register())
                 // .then(KillTPSCommand.register())
                 // .then(DebugHatsCommand.register())
