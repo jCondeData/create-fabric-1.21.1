@@ -46,6 +46,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -330,8 +331,16 @@ public abstract class CopycatBlock extends Block implements IBE<CopycatBlockEnti
     }
 
     @Override
+    public boolean hasDynamicLightEmission(BlockState state) {
+        return true;
+    }
+
+    @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        return getMaterial(level, pos).getLightEmission(level, pos);
+        AuxiliaryLightManager lightManager = level.getAuxLightManager(pos);
+        if (lightManager != null) return lightManager.getLightAt(pos);
+
+        return super.getLightEmission(state, level, pos);
     }
 
     @Override

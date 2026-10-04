@@ -1,4 +1,4 @@
-// 1.21.1	2025-05-18T13:03:22.264045042	Registrate Provider for create [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (enchantments), Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2025-07-12T13:45:05.314462774	Registrate Provider for create [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (enchantments), Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 60bbdf92d2ac9824ea6144955c74043a6005f79d assets/create/blockstates/acacia_window.json
 6a67703c2697d81b7dc83e9d72a66f9c9ff08383 assets/create/blockstates/acacia_window_pane.json
 c3ae87b62e81d8e9476eccd793bb1548d74c66a1 assets/create/blockstates/adjustable_chain_gearshift.json
@@ -642,8 +642,8 @@ b0d8f08968763a5f74e5cd5644377a76a9f39753 assets/create/blockstates/yellow_toolbo
 fe8c497aacc641c2f01cec90bba9f19e59cc2ed2 assets/create/blockstates/yellow_valve_handle.json
 e819e93fdcbe9fd9c050a052d2718ff3b3539365 assets/create/blockstates/zinc_block.json
 64121dcb216381c83b4fe28aa361ea07c24c9ad0 assets/create/blockstates/zinc_ore.json
-474cf1316a62de21d48116ab471717b54b8e5438 assets/create/lang/en_ud.json
-785c865cda29da3a52e8e58de1bf4955e66a4a93 assets/create/lang/en_us.json
+53a6843019a9a8f78863687d81dea37cb8ecd24a assets/create/lang/en_ud.json
+4793ab3e91a6ad78ee9415ae817751f7d388583b assets/create/lang/en_us.json
 a97e1060e00ae701a02e39cd4ef8054cf345fac4 assets/create/models/block/acacia_window.json
 103e032c0b1a0a6a27c67da8c91179a564bd281c assets/create/models/block/acacia_window_pane_noside.json
 fb00b627abda76ad4fea867ca57dbfadd24fffa3 assets/create/models/block/acacia_window_pane_noside_alt.json
@@ -2604,7 +2604,7 @@ ccf5b08295f6362a3f6b3b595f1de1bba4b224ec data/c/tags/item/ingots/zinc.json
 81b107ada9c6ac5679a21f8c6a006bf230f69c39 data/c/tags/item/ores/zinc.json
 e475ad1c52bffedfc544e5331a87c1f5c45149fd data/c/tags/item/ores_in_ground/deepslate.json
 2f6068972e364599b6849dc46fcb0724d4219d53 data/c/tags/item/ores_in_ground/stone.json
-12c3455bbb7edcea84d47ad6ccde9c209a25d811 data/c/tags/item/plates.json
+0b718fa5d4db0c2f2d34db1096f33a88f12f0ede data/c/tags/item/plates.json
 23f4874238f7d06e80c699b672d4e9fab6eb464f data/c/tags/item/plates/brass.json
 7f3f85d0978bc274e4689fbf41f7b80b023b7a05 data/c/tags/item/plates/cardboard.json
 ef5256892a9d4167bf7371c7138a933a107a123a data/c/tags/item/plates/copper.json
@@ -3358,6 +3358,7 @@ f1851907409adcfed3f1eb801c730667964603b2 data/create/advancement/recipes/misc/cr
 06e230f8bf3fce7a3934a4021cd3757fe0ca0855 data/create/advancement/recipes/misc/crafting/logistics/red_table_cloth_clear.json
 1be58611d10486912c0746b76014105e5bbe8705 data/create/advancement/recipes/misc/crafting/logistics/white_table_cloth_clear.json
 b8e0b1d3a9205e35bd52e452b4a4d5b2118b9533 data/create/advancement/recipes/misc/crafting/logistics/yellow_table_cloth_clear.json
+6a3fb4880b11fcfd8e90bead3fd1d74078b94838 data/create/data_maps/item/superheated_blaze_burner_fuels.json
 a52ad72afa1447df01c0305f6580b9e60836c76f data/create/loot_table/blocks/acacia_window.json
 4029a3a69234261a3a64bf2280ff7ee15dfbfdbf data/create/loot_table/blocks/acacia_window_pane.json
 5eee4b2702e432e03b1f46c6f1573ceee67b131f data/create/loot_table/blocks/adjustable_chain_gearshift.json
@@ -4778,7 +4779,7 @@ e191d5f912e05091b3a0b1df17f4c4181e04d96f data/create/tags/fluid/fan_processing_c
 35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/create/tags/fluid/fan_processing_catalysts/smoking.json
 c9ae54a7510073b17edf82f7591e14bdb2c51837 data/create/tags/fluid/fan_processing_catalysts/splashing.json
 35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/create/tags/item/blaze_burner_fuel/regular.json
-8ba98bf390a326abeebfd5d84be5f740c935a8b6 data/create/tags/item/blaze_burner_fuel/special.json
+35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/create/tags/item/blaze_burner_fuel/special.json
 8b6c0b444b15f7fb2d55b9cbcb68537c1269f877 data/create/tags/item/casing.json
 85434dfa942bd02b48f061627d567bca91caf436 data/create/tags/item/chain_rideable.json
 f43cac8216e2a9347e48cf93a43de95dd810ca20 data/create/tags/item/contraption_controlled.json
@@ -4853,4 +4854,5 @@ dafa3bdb72fef5e6c0201c05846db3f2b214e587 data/minecraft/tags/item/stairs.json
 11427a72e181857e22ec37a22462bc652e127cc5 data/minecraft/tags/item/trapdoors.json
 4d07dc9a0f77c799b54a0a36e48b8d1e93cd518a data/minecraft/tags/item/trimmable_armor.json
 2bcba05954ff7bc4cf9cc520478083da9973ec76 data/minecraft/tags/item/walls.json
+3ef6bb2f46919301d1d679a81a1fb60974cf6068 data/neoforge/data_maps/item/furnace_fuels.json
 71aef080a900d9e86818cf579438c3d826d6567e data/quark/tags/block/non_double_door.json

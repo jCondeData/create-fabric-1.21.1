@@ -52,8 +52,7 @@ public class BeltTunnelInteractionHandler {
                 if (onServer) {
                     brassTunnel.setStackToDistribute(current.stack, movementFacing.getOpposite());
                     current.stack = ItemStack.EMPTY;
-                    beltInventory.belt.sendData();
-                    beltInventory.belt.setChanged();
+                    beltInventory.belt.notifyUpdate();
                 }
                 removed = true;
             }
@@ -81,7 +80,7 @@ public class BeltTunnelInteractionHandler {
                     if (onServer) flapTunnel(beltInventory, upcomingSegment, d, false);
 
                     current.stack.shrink(1);
-                    beltInventory.belt.sendData();
+                    beltInventory.belt.notifyUpdate();
                     if (current.stack.getCount() <= 1) break;
                 }
             }

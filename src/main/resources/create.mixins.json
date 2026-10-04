@@ -7,7 +7,9 @@
   "refmap": "create.refmap.json",
   "mixins": [
     "ArmorTrimMixin",
+    "BeehiveBlockMixin",
     "BlockItemMixin",
+    "BlockMixin",
     "BuiltInRegistriesMixin",
     "CustomItemUseEffectsMixin",
     "EnchantedCountIncreaseFunctionMixin",
@@ -24,6 +26,7 @@
     "accessor.BlockBehaviourAccessor",
     "accessor.BlockLootSubProviderAccessor",
     "accessor.ConcretePowderBlockAccessor",
+    "accessor.CropBlockAccessor",
     "accessor.DispenserBlockAccessor",
     "accessor.FallingBlockEntityAccessor",
     "accessor.FlowingFluidAccessor",

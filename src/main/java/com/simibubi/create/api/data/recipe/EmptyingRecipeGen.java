@@ -1,6 +1,7 @@
 package com.simibubi.create.api.data.recipe;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.fluids.transfer.EmptyingRecipe;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  * registered recipe provider to do anything, see {@link
  * com.simibubi.create.foundation.data.recipe.CreateRecipeProvider}
  */
-public abstract class EmptyingRecipeGen extends ProcessingRecipeGen {
+public abstract class EmptyingRecipeGen extends StandardProcessingRecipeGen<EmptyingRecipe> {
 
     public EmptyingRecipeGen(
             PackOutput output,

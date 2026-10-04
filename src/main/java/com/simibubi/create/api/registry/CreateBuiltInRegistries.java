@@ -1,6 +1,5 @@
 package com.simibubi.create.api.registry;
 
-
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.api.behaviour.display.DisplaySource;
 import com.simibubi.create.api.behaviour.display.DisplayTarget;
@@ -93,5 +92,9 @@ public class CreateBuiltInRegistries {
         // make sure the class is loaded.
         // this method is called at the tail of BuiltInRegistries, injected by
         // BuiltInRegistriesMixin.
+    }
+
+    private CreateBuiltInRegistries() {
+        throw new AssertionError("This class should not be instantiated");
     }
 }

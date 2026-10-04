@@ -18,6 +18,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import org.jetbrains.annotations.ApiStatus.ScheduledForRemoval;
+
 import java.util.Random;
 
 public class ProcessingOutput {
@@ -99,8 +101,8 @@ public class ProcessingOutput {
         }
     }
 
-    // Remove in 1.22
-    @Deprecated(forRemoval = true)
+    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @Deprecated(since = "6.0.3", forRemoval = true)
     private static final Codec<Either<ItemStack, Pair<ResourceLocation, Integer>>> ITEM_CODEC_OLD =
             Codec.either(
                     ItemStack.SINGLE_ITEM_CODEC,
@@ -108,8 +110,8 @@ public class ProcessingOutput {
                             loc -> DataResult.error(() -> "Compat cannot be deserialized"),
                             Pair::getFirst));
 
-    // Remove in 1.22
-    @Deprecated(forRemoval = true)
+    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @Deprecated(since = "6.0.3", forRemoval = true)
     public static final Codec<ProcessingOutput> CODEC_OLD =
             RecordCodecBuilder.create(
                     i ->
@@ -190,6 +192,7 @@ public class ProcessingOutput {
                                                                             compat, count,
                                                                             chance))));
 
-    // TODO - Remove fallback in 1.22
+    @ScheduledForRemoval(inVersion = "1.21.7 Port")
+    @Deprecated(since = "6.0.3", forRemoval = true)
     public static final Codec<ProcessingOutput> CODEC = Codec.withAlternative(CODEC_NEW, CODEC_OLD);
 }

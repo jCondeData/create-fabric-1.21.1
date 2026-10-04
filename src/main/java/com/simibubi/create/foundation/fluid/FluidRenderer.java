@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 
 import net.createmod.catnip.math.AngleHelper;
-import net.createmod.catnip.render.BasicFluidRenderer;
+import net.createmod.catnip.render.FluidRenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -24,8 +24,7 @@ import net.neoforged.neoforge.fluids.FluidType;
 import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
-public class FluidRenderer extends BasicFluidRenderer {
-
+public class FluidRenderer {
     public static void renderFluidStream(
             FluidStack fluidStack,
             Direction direction,
@@ -41,7 +40,7 @@ public class FluidRenderer extends BasicFluidRenderer {
                 radius,
                 progress,
                 inbound,
-                getFluidBuilder(buffer),
+                FluidRenderHelper.getFluidBuilder(buffer),
                 ms,
                 light);
     }
@@ -107,7 +106,7 @@ public class FluidRenderer extends BasicFluidRenderer {
         }
 
         if (progress != 1)
-            renderStillTiledFace(
+            FluidRenderHelper.renderStillTiledFace(
                     Direction.DOWN,
                     hMin,
                     hMin,
@@ -135,7 +134,7 @@ public class FluidRenderer extends BasicFluidRenderer {
             int light,
             int color,
             TextureAtlasSprite texture) {
-        renderTiledFace(
+        FluidRenderHelper.renderTiledFace(
                 dir, left, down, right, up, depth, builder, ms, light, color, texture, 0.5f);
     }
 }

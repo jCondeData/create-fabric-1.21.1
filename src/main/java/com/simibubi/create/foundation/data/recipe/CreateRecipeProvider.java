@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class CreateRecipeProvider extends RecipeProvider {
 
-    static final List<ProcessingRecipeGen> GENERATORS = new ArrayList<>();
+    static final List<ProcessingRecipeGen<?, ?, ?>> GENERATORS = new ArrayList<>();
     static final int BUCKET = FluidType.BUCKET_VOLUME;
     static final int BOTTLE = 250;
 

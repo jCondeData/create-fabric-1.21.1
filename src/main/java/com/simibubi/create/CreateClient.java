@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.ftb.FTBIntegration;
+import com.simibubi.create.compat.pojav.PojavChecker;
 import com.simibubi.create.compat.sodium.SodiumCompat;
 import com.simibubi.create.content.contraptions.glue.SuperGlueSelectionHandler;
 import com.simibubi.create.content.contraptions.render.ContraptionRenderInfo;
@@ -42,6 +43,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -69,12 +71,12 @@ public class CreateClient {
     public static final ClientResourceReloadListener RESOURCE_RELOAD_LISTENER =
             new ClientResourceReloadListener();
 
-    public CreateClient(net.neoforged.bus.api.IEventBus modEventBus) {
+    public CreateClient(IEventBus modEventBus) {
         onCtorClient(modEventBus);
     }
 
-    public static void onCtorClient(net.neoforged.bus.api.IEventBus modEventBus) {
-        net.neoforged.bus.api.IEventBus neoEventBus = NeoForge.EVENT_BUS;
+    public static void onCtorClient(IEventBus modEventBus) {
+        IEventBus neoEventBus = NeoForge.EVENT_BUS;
 
         modEventBus.addListener(CreateClient::clientInit);
         modEventBus.addListener(AllParticleTypes::registerFactories);
@@ -89,6 +91,7 @@ public class CreateClient {
         Mods.FTBLIBRARY.executeIfInstalled(
                 () -> () -> FTBIntegration.init(modEventBus, neoEventBus));
         Mods.SODIUM.executeIfInstalled(() -> () -> SodiumCompat.init(modEventBus, neoEventBus));
+        PojavChecker.init();
     }
 
     public static void clientInit(final FMLClientSetupEvent event) {

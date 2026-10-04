@@ -6,9 +6,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.items.IItemHandler;
 
-import org.jetbrains.annotations.ApiStatus;
-
-@ApiStatus.Internal
 public class FallbackMountedStorageType extends SimpleMountedStorageType<FallbackMountedStorage> {
     public FallbackMountedStorageType() {
         super(FallbackMountedStorage.CODEC);

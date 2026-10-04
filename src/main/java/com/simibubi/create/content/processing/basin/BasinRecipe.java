@@ -2,9 +2,8 @@ package com.simibubi.create.content.processing.basin;
 
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeParams;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour.TankSegment;
@@ -34,7 +33,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-public class BasinRecipe extends ProcessingRecipe<RecipeInput> {
+public class BasinRecipe extends StandardProcessingRecipe<RecipeInput> {
 
     public static boolean match(BasinBlockEntity basin, Recipe<?> recipe) {
         FilteringBehaviour filter = basin.getFilter();
@@ -169,7 +168,7 @@ public class BasinRecipe extends ProcessingRecipe<RecipeInput> {
 
     public static RecipeHolder<BasinRecipe> convertShapeless(RecipeHolder<?> recipe) {
         BasinRecipe basinRecipe =
-                new ProcessingRecipeBuilder<>(BasinRecipe::new, recipe.id())
+                new Builder<>(BasinRecipe::new, recipe.id())
                         .withItemIngredients(recipe.value().getIngredients())
                         .withSingleItemOutput(
                                 recipe.value()

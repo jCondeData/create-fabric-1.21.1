@@ -153,4 +153,8 @@ public class BlockMovementChecks {
             return b == null ? PASS : (b ? SUCCESS : FAIL);
         }
     }
+
+    private BlockMovementChecks() {
+        throw new AssertionError("This class should not be instantiated");
+    }
 }

@@ -386,7 +386,7 @@ public class ScheduleRuntime {
         paused = tag.getBoolean("Paused");
         completed = tag.getBoolean("Completed");
         isAutoSchedule = tag.getBoolean("AutoSchedule");
-        currentEntry = tag.getInt("CurrentEntry");
+        currentEntry = Math.max(0, tag.getInt("CurrentEntry"));
         if (tag.contains("Schedule"))
             schedule = Schedule.fromTag(registries, tag.getCompound("Schedule"));
         state = NBTHelper.readEnum(tag, "State", State.class);

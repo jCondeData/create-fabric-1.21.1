@@ -16,8 +16,8 @@ import com.simibubi.create.AllTags;
 import com.simibubi.create.Create;
 import com.simibubi.create.api.data.recipe.CrushingRecipeGen;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
+import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 
 import net.createmod.catnip.lang.Lang;
 import net.minecraft.core.HolderLookup;
@@ -776,7 +776,7 @@ public final class CreateCrushingRecipeGen extends CrushingRecipeGen {
 
     GeneratedRecipe ensMineralRecycling(
             AllPaletteStoneTypes type,
-            UnaryOperator<ProcessingRecipeBuilder<ProcessingRecipe<?>>> transform) {
+            UnaryOperator<StandardProcessingRecipe.Builder<CrushingRecipe>> transform) {
         create(
                 Lang.asId(type.name()) + "_recycling",
                 b -> transform.apply(b.require(type.materialTag)));

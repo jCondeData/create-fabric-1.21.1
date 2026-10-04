@@ -16,6 +16,7 @@ import com.simibubi.create.content.schematics.SchematicInstances;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.content.trains.entity.CarriageContraption;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
+import com.simibubi.create.content.trains.track.ITrackBlock;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.ItemHelper.ExtractionCountMode;
@@ -43,6 +44,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.extensions.IBaseRailBlockExtension;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -176,7 +178,8 @@ public class DeployerMovementBehaviour implements MovementBehaviour {
 
         if (EventHooks.onBlockPlace(player, blocksnapshot, Direction.UP))
             blocksnapshot.restore(Block.UPDATE_CLIENTS);
-        else if (AllBlocks.TRACK.has(blockState)) player.placedTracks = true;
+        else if (blockState.getBlock() instanceof IBaseRailBlockExtension
+                || blockState.getBlock() instanceof ITrackBlock) player.placedTracks = true;
     }
 
     @Override

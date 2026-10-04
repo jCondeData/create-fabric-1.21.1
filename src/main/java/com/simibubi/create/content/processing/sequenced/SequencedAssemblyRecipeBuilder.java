@@ -1,10 +1,11 @@
 package com.simibubi.create.content.processing.sequenced;
 
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.deployer.ItemApplicationRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeFactory;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe.Builder;
 
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class SequencedAssemblyRecipeBuilder {
@@ -33,11 +35,24 @@ public class SequencedAssemblyRecipeBuilder {
                 new SequencedAssemblyRecipe(AllRecipeTypes.SEQUENCED_ASSEMBLY.getSerializer());
     }
 
-    public <T extends ProcessingRecipe<?>> SequencedAssemblyRecipeBuilder addStep(
-            ProcessingRecipeFactory<T> factory, UnaryOperator<ProcessingRecipeBuilder<T>> builder) {
-        ProcessingRecipeBuilder<T> recipeBuilder =
-                new ProcessingRecipeBuilder<>(
-                        factory, ResourceLocation.withDefaultNamespace("dummy"));
+    public <R extends StandardProcessingRecipe<?>> SequencedAssemblyRecipeBuilder addStep(
+            StandardProcessingRecipe.Factory<R> factory, UnaryOperator<Builder<R>> builder) {
+        return addStep(
+                (Function<ResourceLocation, Builder<R>>) id -> new Builder<>(factory, id), builder);
+    }
+
+    public <R extends ItemApplicationRecipe> SequencedAssemblyRecipeBuilder addStep(
+            ItemApplicationRecipe.Factory<R> factory,
+            UnaryOperator<ItemApplicationRecipe.Builder<R>> builder) {
+        return addStep(
+                (Function<ResourceLocation, ItemApplicationRecipe.Builder<R>>)
+                        id -> new ItemApplicationRecipe.Builder<>(factory, id),
+                builder);
+    }
+
+    public <B extends ProcessingRecipeBuilder<?, ?, B>> SequencedAssemblyRecipeBuilder addStep(
+            Function<ResourceLocation, B> factory, UnaryOperator<B> builder) {
+        B recipeBuilder = factory.apply(ResourceLocation.withDefaultNamespace("dummy"));
         Item placeHolder = recipe.getTransitionalItem().getItem();
         recipe.getSequence()
                 .add(

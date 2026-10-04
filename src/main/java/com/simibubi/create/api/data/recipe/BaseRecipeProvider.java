@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A class containing some basic setup for other recipe generators to use. Addons should extend this
  * if they add a custom recipe type that is not a processing recipe type and want to use Create's
- * helpers. For processing recipes extend {@link ProcessingRecipeGen}.
+ * helpers. For processing recipes extend {@link StandardProcessingRecipeGen}.
  */
 public abstract class BaseRecipeProvider extends RecipeProvider {
     protected final String modid;
@@ -39,7 +39,7 @@ public abstract class BaseRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput) {
+    public void buildRecipes(RecipeOutput recipeOutput) {
         all.forEach(c -> c.register(recipeOutput));
         Create.LOGGER.info(
                 "{} registered {} recipe{}", getName(), all.size(), all.size() == 1 ? "" : "s");

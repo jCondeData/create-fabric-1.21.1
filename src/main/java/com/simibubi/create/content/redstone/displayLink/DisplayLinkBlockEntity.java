@@ -3,10 +3,12 @@ package com.simibubi.create.content.redstone.displayLink;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.api.behaviour.display.DisplaySource;
 import com.simibubi.create.api.behaviour.display.DisplayTarget;
+import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
 import com.simibubi.create.api.registry.CreateBuiltInRegistries;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
+import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelPosition;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelSupportBehaviour;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
@@ -22,6 +24,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -29,7 +32,8 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
 import java.util.List;
 
-public class DisplayLinkBlockEntity extends LinkWithBulbBlockEntity {
+public class DisplayLinkBlockEntity extends LinkWithBulbBlockEntity
+        implements TransformableBlockEntity {
 
     protected BlockPos targetOffset;
 
@@ -227,5 +231,11 @@ public class DisplayLinkBlockEntity extends LinkWithBulbBlockEntity {
                 .getAxis()
                 .isVertical()) return bulbOffsetVertical;
         return bulbOffset;
+    }
+
+    @Override
+    public void transform(BlockEntity be, StructureTransform transform) {
+        targetOffset = transform.applyWithoutOffset(targetOffset);
+        notifyUpdate();
     }
 }

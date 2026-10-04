@@ -10,6 +10,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.function.Function;
 
+// TODO: 1.21.7 - Move into api package
 public interface PotatoProjectileBlockHitAction {
     Codec<PotatoProjectileBlockHitAction> CODEC =
             CreateBuiltInRegistries.POTATO_PROJECTILE_BLOCK_HIT_ACTION

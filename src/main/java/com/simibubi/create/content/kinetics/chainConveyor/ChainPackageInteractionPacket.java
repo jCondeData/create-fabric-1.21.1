@@ -7,7 +7,7 @@ import com.simibubi.create.infrastructure.config.AllConfigs;
 import net.createmod.catnip.codecs.stream.CatnipStreamCodecBuilders;
 import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,32 +18,31 @@ import java.util.List;
 
 public class ChainPackageInteractionPacket
         extends BlockEntityConfigurationPacket<ChainConveyorBlockEntity> {
-    public static final StreamCodec<RegistryFriendlyByteBuf, ChainPackageInteractionPacket>
-            STREAM_CODEC =
-                    StreamCodec.composite(
-                            BlockPos.STREAM_CODEC,
-                            packet -> packet.pos,
-                            CatnipStreamCodecBuilders.nullable(BlockPos.STREAM_CODEC),
-                            packet -> packet.selectedConnection,
-                            ByteBufCodecs.FLOAT,
-                            packet -> packet.chainPosition,
-                            ItemStack.OPTIONAL_STREAM_CODEC,
-                            packet -> packet.insertedPackage,
-                            ChainPackageInteractionPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, ChainPackageInteractionPacket> STREAM_CODEC =
+            StreamCodec.composite(
+                    BlockPos.STREAM_CODEC,
+                    packet -> packet.pos,
+                    CatnipStreamCodecBuilders.nullable(BlockPos.STREAM_CODEC),
+                    packet -> packet.selectedConnection,
+                    ByteBufCodecs.FLOAT,
+                    packet -> packet.chainPosition,
+                    ByteBufCodecs.BOOL,
+                    packet -> packet.removingPackage,
+                    ChainPackageInteractionPacket::new);
 
     private final BlockPos selectedConnection;
     private final float chainPosition;
-    private final ItemStack insertedPackage;
+    private final boolean removingPackage;
 
     public ChainPackageInteractionPacket(
             BlockPos pos,
             BlockPos selectedConnection,
             float chainPosition,
-            ItemStack insertedPackage) {
+            boolean removingPackage) {
         super(pos);
         this.selectedConnection = selectedConnection == null ? BlockPos.ZERO : selectedConnection;
         this.chainPosition = chainPosition;
-        this.insertedPackage = insertedPackage == null ? ItemStack.EMPTY : insertedPackage;
+        this.removingPackage = removingPackage;
     }
 
     @Override
@@ -58,8 +57,7 @@ public class ChainPackageInteractionPacket
 
     @Override
     protected void applySettings(ServerPlayer player, ChainConveyorBlockEntity be) {
-        if (insertedPackage.isEmpty()) {
-
+        if (removingPackage) {
             float bestDiff = Float.POSITIVE_INFINITY;
             ChainConveyorPackage best = null;
             List<ChainConveyorPackage> list =
@@ -81,29 +79,33 @@ public class ChainPackageInteractionPacket
                 best = liftPackage;
             }
 
-            if (best == null) return;
-
-            if (player.getMainHandItem().isEmpty())
+            if (player.getMainHandItem().isEmpty()) {
                 player.setItemInHand(InteractionHand.MAIN_HAND, best.item.copy());
-            else player.getInventory().placeItemBackInInventory(best.item.copy());
+            } else {
+                player.getInventory().placeItemBackInInventory(best.item.copy());
+            }
 
             list.remove(best);
             be.sendData();
+        } else {
+            ChainConveyorPackage chainConveyorPackage =
+                    new ChainConveyorPackage(chainPosition, player.getMainHandItem().copy());
+            if (!be.canAcceptPackagesFor(selectedConnection)) {
+                return;
+            }
 
-            return;
+            if (!player.isCreative()) {
+                player.getMainHandItem().shrink(1);
+                if (player.getMainHandItem().isEmpty()) {
+                    player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                }
+            }
+
+            if (selectedConnection.equals(BlockPos.ZERO)) {
+                be.addLoopingPackage(chainConveyorPackage);
+            } else {
+                be.addTravellingPackage(chainConveyorPackage, selectedConnection);
+            }
         }
-
-        ChainConveyorPackage chainConveyorPackage =
-                new ChainConveyorPackage(chainPosition, insertedPackage);
-        if (!be.canAcceptPackagesFor(selectedConnection)) return;
-
-        if (!player.isCreative()) {
-            player.getMainHandItem().shrink(1);
-            if (player.getMainHandItem().isEmpty())
-                player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        }
-
-        if (selectedConnection.equals(BlockPos.ZERO)) be.addLoopingPackage(chainConveyorPackage);
-        else be.addTravellingPackage(chainConveyorPackage, selectedConnection);
     }
 }

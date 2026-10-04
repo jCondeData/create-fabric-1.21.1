@@ -3,8 +3,8 @@ package com.simibubi.create.content.fluids.transfer;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeParams;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.utility.CreateLang;
@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class FillingRecipe extends ProcessingRecipe<SingleRecipeInput> implements IAssemblyRecipe {
+public class FillingRecipe extends StandardProcessingRecipe<SingleRecipeInput>
+        implements IAssemblyRecipe {
 
     public FillingRecipe(ProcessingRecipeParams params) {
         super(AllRecipeTypes.FILLING, params);
@@ -50,8 +51,7 @@ public class FillingRecipe extends ProcessingRecipe<SingleRecipeInput> implement
 
     public FluidIngredient getRequiredFluid() {
         if (fluidIngredients.isEmpty())
-            throw new IllegalStateException(
-                    "Filling Recipe: " + id.toString() + " has no fluid ingredient!");
+            throw new IllegalStateException("Filling Recipe has no fluid ingredient!");
         return fluidIngredients.get(0);
     }
 

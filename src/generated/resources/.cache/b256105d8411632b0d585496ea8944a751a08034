@@ -1,4 +1,4 @@
-// 1.21.1	2025-05-18T13:11:23.803131704	Create's Processing Recipes
+// 1.21.1	2025-06-10T18:31:54.295049709	Create's Processing Recipes
 202c419d3093cc50ef6730a409b8855ba758fee9 data/create/recipe/compacting/andesite_from_flint.json
 d97f4e06363879d033b2151995a5d4f19ad7ef3a data/create/recipe/compacting/blaze_cake.json
 b76c988d1e4493d8e69791d3144d514501d355d0 data/create/recipe/compacting/chocolate.json
@@ -353,11 +353,11 @@ e6858f2544f5419b2bcd1c1ea3adb7276a8520f6 data/create/recipe/deploying/weathered_
 7d8c72a593a6a1b295e7cdc5892d13c39f98fad6 data/create/recipe/deploying/weathered_cut_copper_slab_from_removing_wax.json
 78ff5aa43f23bdf184d7e40c9d1b09c093196f25 data/create/recipe/deploying/weathered_cut_copper_stairs_from_deoxidising.json
 7bf411ccdf292c0bb367061d0befa296765791db data/create/recipe/deploying/weathered_cut_copper_stairs_from_removing_wax.json
-e6f917b4f276d55be03d0f3ac53c4f4eaec2edc6 data/create/recipe/emptying/builders_tea.json
-589862238fb9995bfd07e64853e3a4eef0b14341 data/create/recipe/emptying/compat/alexsmobs/lava_bottle.json
-eba96605e33601f0c28e16c6ef1c90fe66ff9efb data/create/recipe/emptying/compat/farmersdelight/milk_bottle.json
-91ce24b5b4fdbd935e23ed43bb09b9b14b24de60 data/create/recipe/emptying/compat/neapolitan/milk_bottle.json
-067c34a6fa066d01f8118b5c17bd0246c5e13988 data/create/recipe/emptying/honey_bottle.json
+c7f7d1b135507fe1365bce9cbee200cf00b5786c data/create/recipe/emptying/builders_tea.json
+b81dc47c4b875c2602ff4c52906754de0a8135fc data/create/recipe/emptying/compat/alexsmobs/lava_bottle.json
+5ba4a699215b41e606a429a09f207b92cd3dea13 data/create/recipe/emptying/compat/farmersdelight/milk_bottle.json
+a74b7b67a0b60419b28a3a8fa5ebcf86c0d5a9e2 data/create/recipe/emptying/compat/neapolitan/milk_bottle.json
+7aa973ac3c046d9eece53d723c72dc123feec522 data/create/recipe/emptying/honey_bottle.json
 f4c1f8e9ffbc66595fa0914a9ec91b16a9974d67 data/create/recipe/filling/blaze_cake.json
 1adec52e02372a896ef2bd4f8247f50138e1125f data/create/recipe/filling/builders_tea.json
 b5ebd4312cb103f866acf34454ac3ec4bd91fa99 data/create/recipe/filling/chocolate_glazed_berries.json

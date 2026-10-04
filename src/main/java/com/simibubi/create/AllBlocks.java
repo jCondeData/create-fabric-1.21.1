@@ -59,7 +59,6 @@ import com.simibubi.create.content.contraptions.piston.MechanicalPistonHeadBlock
 import com.simibubi.create.content.contraptions.piston.PistonExtensionPoleBlock;
 import com.simibubi.create.content.contraptions.pulley.PulleyBlock;
 import com.simibubi.create.content.decoration.CardboardBlock;
-import com.simibubi.create.content.decoration.CardboardBlockItem;
 import com.simibubi.create.content.decoration.MetalLadderBlock;
 import com.simibubi.create.content.decoration.MetalScaffoldingBlock;
 import com.simibubi.create.content.decoration.RoofBlockCTBehaviour;
@@ -3602,7 +3601,8 @@ public class AllBlocks {
                     .blockstate(BlockStateGen.horizontalAxisBlockProvider(false))
                     .tag(Tags.Blocks.STORAGE_BLOCKS)
                     .tag(AllTags.commonBlockTag("storage_blocks/cardboard"))
-                    .item(CardboardBlockItem::new)
+                    .item()
+                    .burnTime(4000)
                     .tag(AllTags.commonItemTag("storage_blocks/cardboard"))
                     .tag(Tags.Items.STORAGE_BLOCKS)
                     .build()
@@ -3664,7 +3664,8 @@ public class AllBlocks {
                                                                                                     r)
                                                                                             .create$hasSilkTouch()
                                                                                             .invert())))))
-                    .item(CardboardBlockItem::new)
+                    .item()
+                    .burnTime(4000)
                     .build()
                     .lang("Bound Block of Cardboard")
                     .register();

@@ -22,6 +22,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 
 import net.createmod.catnip.platform.CatnipServices;
+import net.createmod.catnip.registry.RegisteredObjectsHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
@@ -39,8 +40,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -97,17 +96,14 @@ public class AllCreativeModeTabs {
         static {
             MutableObject<Predicate<Item>> isItem3d = new MutableObject<>(item -> false);
             if (CatnipServices.PLATFORM.getEnv().isClient())
-                isItem3d.setValue(makeClient3dItemPredicate());
+                isItem3d.setValue(
+                        item -> {
+                            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+                            BakedModel model =
+                                    itemRenderer.getModel(new ItemStack(item), null, null, 0);
+                            return model.isGui3d();
+                        });
             IS_ITEM_3D_PREDICATE = isItem3d.getValue();
-        }
-
-        @OnlyIn(Dist.CLIENT)
-        private static Predicate<Item> makeClient3dItemPredicate() {
-            return item -> {
-                ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-                BakedModel model = itemRenderer.getModel(new ItemStack(item), null, null, 0);
-                return model.isGui3d();
-            };
         }
 
         private final boolean addItems;
@@ -199,7 +195,10 @@ public class AllCreativeModeTabs {
 
             PackageStyles.STANDARD_BOXES.forEach(
                     item -> {
-                        orderings.add(ItemOrdering.after(item, AllBlocks.PACKAGER.asItem()));
+                        if (RegisteredObjectsHelper.getKeyOrThrow(item)
+                                .getNamespace()
+                                .equals(Create.ID))
+                            orderings.add(ItemOrdering.after(item, AllBlocks.PACKAGER.asItem()));
                     });
 
             return orderings;

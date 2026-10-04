@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
 import java.util.List;
 
@@ -107,10 +108,25 @@ public class CopycatBlockEntity extends SmartBlockEntity
 
     private void redraw() {
         if (!isVirtual()) requestModelDataUpdate();
-        if (hasLevel()) {
+        if (level != null) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 16);
-            level.getChunkSource().getLightEngine().checkBlock(worldPosition);
+            updateLight();
         }
+    }
+
+    private void updateLight() {
+        if (level != null) {
+            AuxiliaryLightManager lightManager = level.getAuxLightManager(getBlockPos());
+            if (lightManager != null)
+                lightManager.setLightAt(
+                        getBlockPos(), material.getLightEmission(level, getBlockPos()));
+        }
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        updateLight();
     }
 
     @Override

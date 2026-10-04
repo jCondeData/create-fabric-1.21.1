@@ -6,6 +6,7 @@ import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import com.simibubi.create.content.contraptions.render.ActorVisual;
 import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
 import com.simibubi.create.foundation.item.ItemHelper;
+import com.simibubi.create.foundation.mixin.accessor.CropBlockAccessor;
 import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 import com.simibubi.create.infrastructure.config.AllConfigs;
@@ -157,7 +158,10 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
 
         Block block = state.getBlock();
         if (block instanceof CropBlock crop) {
-            return crop.getStateForAge(0);
+            BlockState newState = crop.getStateForAge(0);
+            if (!newState.is(block)) return newState;
+            IntegerProperty ageProperty = ((CropBlockAccessor) crop).create$callGetAgeProperty();
+            return state.setValue(ageProperty, 0);
         }
         if (block == Blocks.SWEET_BERRY_BUSH) {
             return state.setValue(BlockStateProperties.AGE_3, Integer.valueOf(1));

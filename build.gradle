@@ -194,7 +194,7 @@ sourceSets.main {
     }
 
     blossom.javaSources {
-        property("version", build_info_mod_version)
+        property("version", mod_version)
         property("gitCommit", gitHash.toString())
     }
 }
