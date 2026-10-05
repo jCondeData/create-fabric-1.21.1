@@ -83,10 +83,14 @@ Never delete, skip or weaken a test to get a green build.
 
 ## Known open items
 - Last tester verdict (b8dfa78bb3, round 3 Check): PASS WITH RISKS.
-- Needs a real GPU / human playtest: rendering with Sodium 0.8 / Iris, REI animated scenes (black under
-  Sodium on software GL), wide gauge curves (parts vanish from some angles with Flywheel's default backend
-  on software GL; fine with `/flywheel backend flywheel:instancing`), wide trains on curves and slopes,
-  REI "+" transfer, copycat emissive/light after reload (no `AuxiliaryLightManager` on Fabric), sounds.
+- Owner's first in-game check (2026-10-04, real GPU, his pack with shaders): Create items show in REI,
+  normal and wide track straights/curves/junctions and water wheels render correctly (the software-GL
+  curve gaps did not appear).
+- Wide gauge tracks are decorative: no recipe (creative/REI only) and no wide bogeys, so standard
+  bogeys count them as incompatible track (`AbstractBogeyBlock.isOnIncompatibleTrack`) and trains stop.
+- Still needs a human playtest: REI animated scenes (black under Sodium on software GL), REI "+" transfer,
+  trains/stations, contraptions, copycat emissive/light after reload (no `AuxiliaryLightManager` on
+  Fabric), sounds.
 - Not covered by tests: belts feeding packagers, threshold switches on packagers, pistons disassembling
   while obstructed, a client with the full pack, upgrading older Create saves.
 - Ponder (1.0.69) and Flywheel (1.0.6) are older than upstream 6.0.10 bundles (1.0.82 / 1.0.6);
